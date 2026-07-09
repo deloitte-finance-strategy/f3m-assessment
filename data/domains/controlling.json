@@ -1,0 +1,851 @@
+{
+  "meta": {
+    "domainId": "controlling",
+    "domainLabel": "Controlling",
+    "domainTitle": "Controlling",
+    "sourceFile": "F3M_Controlling_assessment_ready_AI_v0.xlsx",
+    "targetMaturity": 4
+  },
+  "subcapacities": [
+    {
+      "id": "controlling-1-1",
+      "capacidad": "Cierre",
+      "subcapacidad": "1.1 Gobierno y calendario de cierre",
+      "objetivo": "Evaluar si el cierre financiero está formalmente gobernado, calendarizado y coordinado entre áreas.",
+      "maturity": {
+        "1": "Cierre ad hoc, dependiente de personas clave, con calendario informal y poca trazabilidad.",
+        "2": "Calendario básico de cierre y responsables identificados, aunque con variabilidad entre sociedades/áreas.",
+        "3": "Calendario de cierre corporativo, roles, hitos, entregables y controles documentados.",
+        "4": "Cierre integrado, medido por KPIs, con dependencias controladas y mejora continua de plazos/calidad.",
+        "5": "Modelo de fast/continuous close con checklist inteligente, alertas de dependencias y automatización del seguimiento de tareas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe un calendario formal de cierre?",
+        "¿Se controlan dependencias entre áreas?",
+        "¿Hay owners por hito?",
+        "¿Se monitorizan KPIs de cierre?"
+      ],
+      "evidencias": "Calendario de cierre; RACI; checklist; actas de cierre; KPIs de días de cierre; evidencias de aprobaciones.",
+      "iniciativaSugerida": "Implantar gobierno de cierre con calendario, RACI, checklist digital, KPIs y tracking de dependencias.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automated closing checklists; touchless close; proactive defect resolution recommendations",
+        "advanced": "Modelo de fast/continuous close con checklist inteligente, alertas de dependencias y automatización del seguimiento de tareas.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "1.1 Gobierno y calendario de cierre"
+      }
+    },
+    {
+      "id": "controlling-1-2",
+      "capacidad": "Cierre",
+      "subcapacidad": "1.2 Automatización de asientos, accruals y ajustes",
+      "objetivo": "Evaluar el grado de automatización, control y trazabilidad de asientos, accruals y ajustes de cierre.",
+      "maturity": {
+        "1": "Asientos y ajustes manuales, con criterios variables y alta dependencia de Excel.",
+        "2": "Plantillas y controles básicos para ciertos asientos recurrentes, con revisión manual.",
+        "3": "Asientos recurrentes y accruals definidos, documentados y parcialmente automatizados.",
+        "4": "Automatización integrada de asientos recurrentes, accruals y validaciones, con trazabilidad y control de excepciones.",
+        "5": "Identificación predictiva de accruals esperados, detección de omisiones y propuestas de asiento/ajuste con workflow de aprobación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Qué asientos son manuales vs automáticos?",
+        "¿Se detectan accruals faltantes?",
+        "¿Hay trazabilidad de ajustes?",
+        "¿Se revisan excepciones?"
+      ],
+      "evidencias": "Listado de asientos recurrentes; plantillas de accruals; logs de automatización; conciliación de ajustes; workflow de aprobación.",
+      "iniciativaSugerida": "Crear modelo de automatización de asientos y accruals con reglas, históricos, validaciones y alertas de omisión.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Identify missing monthly accruals; Journal Entry Automation & Close Value prediction; suspect journal entry monitoring",
+        "advanced": "Identificación predictiva de accruals esperados, detección de omisiones y propuestas de asiento/ajuste con workflow de aprobación.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "1.2 Automatización de asientos, accruals y ajustes"
+      }
+    },
+    {
+      "id": "controlling-1-3",
+      "capacidad": "Cierre",
+      "subcapacidad": "1.3 Control de calidad y anomalías del cierre",
+      "objetivo": "Evaluar si el cierre incorpora controles preventivos, detección de anomalías y revisiones basadas en riesgo.",
+      "maturity": {
+        "1": "Controles manuales, ex post y con cobertura limitada.",
+        "2": "Controles definidos para áreas críticas, pero con ejecución manual y baja priorización por riesgo.",
+        "3": "Controles de cierre estandarizados, documentados y ejecutados recurrentemente.",
+        "4": "Controles automatizados, con alertas, umbrales y priorización de revisiones por materialidad/riesgo.",
+        "5": "Detección AI de asientos inusuales o sospechosos durante el cierre, con scoring de anomalía, explicación y workflow de investigación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen controles preventivos?",
+        "¿Se detectan anomalías durante el cierre?",
+        "¿Se priorizan revisiones por riesgo?",
+        "¿Hay evidencia de control?"
+      ],
+      "evidencias": "Matriz de controles; logs de excepción; evidencias de revisión; reportes de anomalías; auditoría de cambios.",
+      "iniciativaSugerida": "Implantar monitor de anomalías de cierre con reglas, modelos de detección, scoring y workflow de revisión.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Identify unusual entries during close period; monitor suspect journal entries in real time",
+        "advanced": "Detección AI de asientos inusuales o sospechosos durante el cierre, con scoring de anomalía, explicación y workflow de investigación.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "1.3 Control de calidad y anomalías del cierre"
+      }
+    },
+    {
+      "id": "controlling-1-4",
+      "capacidad": "Cierre",
+      "subcapacidad": "1.4 Eficiencia, coordinación y mejora continua del cierre",
+      "objetivo": "Evaluar la eficiencia del proceso de cierre y su capacidad de mejora continua.",
+      "maturity": {
+        "1": "Proceso largo, con reprocesos frecuentes y baja visibilidad del avance.",
+        "2": "Seguimiento básico del avance, con coordinación manual entre equipos.",
+        "3": "KPIs de cierre definidos y reporting periódico de avance, incidencias y retrasos.",
+        "4": "Análisis causa-raíz de retrasos, acciones de mejora, reducción de reprocesos y automatización progresiva.",
+        "5": "Cierre basado en process mining y AI para detectar cuellos de botella, excepciones recurrentes y oportunidades de touchless close."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se mide la duración del cierre?",
+        "¿Se identifican cuellos de botella?",
+        "¿Se analizan causas raíz?",
+        "¿Se ejecutan planes de mejora?"
+      ],
+      "evidencias": "KPIs de cierre; backlog de incidencias; planes de mejora; análisis causa-raíz; métricas de retrabajo.",
+      "iniciativaSugerida": "Crear programa de mejora continua del cierre con KPIs, process mining, análisis de excepciones y roadmap de automatización.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Capture variations and exceptions in P2P/O2C enabling touchless close; AI-enabled process mining",
+        "advanced": "Cierre basado en process mining y AI para detectar cuellos de botella, excepciones recurrentes y oportunidades de touchless close.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "1.4 Eficiencia, coordinación y mejora continua del cierre"
+      }
+    },
+    {
+      "id": "controlling-2-1",
+      "capacidad": "Consolidación",
+      "subcapacidad": "2.1 Modelo de consolidación y perímetro",
+      "objetivo": "Evaluar si el perímetro, estructura y modelo de consolidación están definidos, gobernados y trazables.",
+      "maturity": {
+        "1": "Perímetro y estructuras gestionados manualmente, con criterios no homogéneos.",
+        "2": "Perímetro definido, pero con actualizaciones manuales y dependencias locales.",
+        "3": "Modelo de consolidación documentado, con jerarquías, perímetro, moneda y ownership definidos.",
+        "4": "Modelo integrado con gobierno de cambios, trazabilidad de perímetro y reglas homogéneas por entidad/grupo.",
+        "5": "Modelo de consolidación inteligente capaz de detectar inconsistencias de estructura, cambios de perímetro y riesgos de calidad de dato."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe perímetro formal?",
+        "¿Las jerarquías están gobernadas?",
+        "¿Se trazan cambios?",
+        "¿Hay owners por entidad?"
+      ],
+      "evidencias": "Perímetro; jerarquías; manual de consolidación; logs de cambios; matriz de ownership.",
+      "iniciativaSugerida": "Formalizar gobierno de perímetro y jerarquías con workflow de cambios, validaciones y trazabilidad.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Identify inconsistencies in master data records; guided workflows for master data record changes",
+        "advanced": "Modelo de consolidación inteligente capaz de detectar inconsistencias de estructura, cambios de perímetro y riesgos de calidad de dato.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "2.1 Modelo de consolidación y perímetro"
+      }
+    },
+    {
+      "id": "controlling-2-2",
+      "capacidad": "Consolidación",
+      "subcapacidad": "2.2 Eliminaciones, ajustes y reglas de consolidación",
+      "objetivo": "Evaluar la definición, automatización y control de eliminaciones, ajustes y reglas de consolidación.",
+      "maturity": {
+        "1": "Eliminaciones y ajustes manuales, con documentación limitada.",
+        "2": "Reglas básicas definidas, con ejecución parcialmente manual y revisiones ex post.",
+        "3": "Reglas de consolidación documentadas y aplicadas de forma consistente.",
+        "4": "Reglas automatizadas, trazables y controladas, con validaciones y gestión de excepciones.",
+        "5": "Automatización avanzada de consolidación multiestándar/multimoneda, con recomendaciones sobre ajustes, validación AI y alertas de inconsistencia."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Las reglas están documentadas?",
+        "¿Qué ajustes son manuales?",
+        "¿Se trazan eliminaciones?",
+        "¿Se validan excepciones?"
+      ],
+      "evidencias": "Manual de consolidación; reglas en herramienta; logs de ajustes; reportes de eliminaciones; conciliaciones.",
+      "iniciativaSugerida": "Automatizar reglas de eliminación y ajustes con trazabilidad, validaciones y controles de excepción.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Consolidate accounting records under different standards and currencies",
+        "advanced": "Automatización avanzada de consolidación multiestándar/multimoneda, con recomendaciones sobre ajustes, validación AI y alertas de inconsistencia.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "2.2 Eliminaciones, ajustes y reglas de consolidación"
+      }
+    },
+    {
+      "id": "controlling-2-3",
+      "capacidad": "Consolidación",
+      "subcapacidad": "2.3 Integración multifuente y calidad del dato consolidado",
+      "objetivo": "Evaluar si los datos de consolidación se integran desde fuentes fiables y con controles de calidad.",
+      "maturity": {
+        "1": "Carga manual de datos y alta dependencia de ficheros locales.",
+        "2": "Integraciones parciales con validaciones básicas.",
+        "3": "Modelo de datos consolidado con fuentes definidas, controles y reglas de carga documentadas.",
+        "4": "Integración automatizada con validaciones, reconciliaciones y gestión estructurada de incidencias.",
+        "5": "Automatización de datos financieros multifuente y detección AI de inconsistencias en datos maestros/financieros antes de consolidar."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Las cargas son automáticas?",
+        "¿Hay controles de calidad?",
+        "¿Se gestionan incidencias?",
+        "¿Existe single source of truth?"
+      ],
+      "evidencias": "Modelo de datos; logs de carga; reportes de errores; controles de calidad; reconciliaciones.",
+      "iniciativaSugerida": "Implantar capa de integración y calidad de dato para consolidación con validaciones automáticas y gestión de incidencias.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automate financial data across diverse sources; identify inconsistencies in master data records",
+        "advanced": "Automatización de datos financieros multifuente y detección AI de inconsistencias en datos maestros/financieros antes de consolidar.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "2.3 Integración multifuente y calidad del dato consolidado"
+      }
+    },
+    {
+      "id": "controlling-2-4",
+      "capacidad": "Consolidación",
+      "subcapacidad": "2.4 Reporting consolidado y revisión ejecutiva",
+      "objetivo": "Evaluar si la consolidación produce información fiable, oportuna y explicable para reporting y dirección.",
+      "maturity": {
+        "1": "Reporting consolidado tardío, manual y orientado solo a cumplimiento.",
+        "2": "Reporting recurrente con revisión manual y explicaciones limitadas.",
+        "3": "Reporting consolidado estructurado, conciliado y con comentarios básicos.",
+        "4": "Reporting automatizado con análisis de variaciones, explicaciones, revisiones y controles de consistencia.",
+        "5": "Generación automática de informes consolidados, narratives y explicaciones de variaciones con GenAI, con revisión humana y controles de compliance."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿El reporting consolidado llega a tiempo?",
+        "¿Incluye análisis de variaciones?",
+        "¿Se revisa con dirección?",
+        "¿Está automatizado?"
+      ],
+      "evidencias": "Pack de reporting; estados consolidados; análisis de variaciones; actas de revisión; evidencias de control.",
+      "iniciativaSugerida": "Desarrollar reporting consolidado automatizado con narrative commentary, explicación de variaciones y control de consistencia.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Consolidate written financial reports; generate account variance analysis and intelligent explanations",
+        "advanced": "Generación automática de informes consolidados, narratives y explicaciones de variaciones con GenAI, con revisión humana y controles de compliance.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "2.4 Reporting consolidado y revisión ejecutiva"
+      }
+    },
+    {
+      "id": "controlling-3-1",
+      "capacidad": "Informes externos",
+      "subcapacidad": "3.1 Preparación de estados financieros",
+      "objetivo": "Evaluar si la preparación de estados financieros externos está estandarizada, controlada y automatizada.",
+      "maturity": {
+        "1": "Preparación manual, con múltiples fuentes y alto esfuerzo de revisión.",
+        "2": "Plantillas recurrentes y controles básicos, pero con manipulación manual significativa.",
+        "3": "Proceso documentado con fuentes, responsables, calendario, revisiones y controles definidos.",
+        "4": "Preparación integrada y automatizada con trazabilidad desde dato origen y controles de consistencia.",
+        "5": "Automated financial statement preparation con generación asistida de notas/secciones y validaciones de consistencia antes de revisión."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se preparan estados desde fuente única?",
+        "¿Hay trazabilidad?",
+        "¿Qué partes son manuales?",
+        "¿Existen controles de consistencia?"
+      ],
+      "evidencias": "Estados financieros; plantillas; calendario; evidencias de revisión; trazabilidad fuente-dato; controles.",
+      "iniciativaSugerida": "Automatizar preparación de estados financieros y notas con trazabilidad, reglas de validación y revisión formal.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automated financial statement preparation",
+        "advanced": "Automated financial statement preparation con generación asistida de notas/secciones y validaciones de consistencia antes de revisión.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "3.1 Preparación de estados financieros"
+      }
+    },
+    {
+      "id": "controlling-3-2",
+      "capacidad": "Informes externos",
+      "subcapacidad": "3.2 Reporting regulatorio y filings",
+      "objetivo": "Evaluar el grado de control, cumplimiento y automatización del reporting regulatorio y filings externos.",
+      "maturity": {
+        "1": "Reporting regulatorio manual, reactivo y con alta dependencia de expertos.",
+        "2": "Proceso definido para filings clave, con revisiones manuales y documentación parcial.",
+        "3": "Calendario regulatorio, owners, controles y evidencias definidos para filings recurrentes.",
+        "4": "Proceso integrado con datos financieros y regulatorios, controles automáticos y gestión de cambios normativos.",
+        "5": "Generación GenAI de borradores de regulatory filings con interpretación normativa, trazabilidad y human review."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe calendario regulatorio?",
+        "¿Quién revisa y aprueba?",
+        "¿Se trazan fuentes?",
+        "¿Se monitorizan cambios regulatorios?"
+      ],
+      "evidencias": "Calendario regulatorio; filings; matriz de requisitos; evidencias de revisión; control de fuentes.",
+      "iniciativaSugerida": "Implantar workflow de filings regulatorios con generación asistida, validaciones, trazabilidad y tracking de cambios normativos.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate draft regulatory filings; draft sections of 10Q/10K; financial rules and regulations interpretations",
+        "advanced": "Generación GenAI de borradores de regulatory filings / secciones 10Q-10K con interpretación normativa, trazabilidad y human review.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "3.2 Reporting regulatorio y filings"
+      }
+    },
+    {
+      "id": "controlling-3-3",
+      "capacidad": "Informes externos",
+      "subcapacidad": "3.3 Narrative reporting y envío ESEF",
+      "objetivo": "Evaluar si la narrativa financiera externa es consistente, trazable y conectada con los resultados.",
+      "maturity": {
+        "1": "Narrativa manual, poco estructurada y dependiente de iteraciones entre equipos.",
+        "2": "Narrativa recurrente con plantillas, pero con variabilidad y bajo soporte analítico.",
+        "3": "Proceso estructurado de narrativa con mensajes clave, drivers, variaciones y revisión formal.",
+        "4": "Narrativa integrada con datos, análisis de variaciones, riesgos y workflow de revisión.",
+        "5": "Generación de borrador de informes financieros por medio de GenAI, manteniendo evidencia, controles de consistencia de la información, habilitando al mismo tiempo la revisión humana y el control de cambios."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿La narrativa está soportada por datos?",
+        "¿Se explican drivers?",
+        "¿Hay control de versiones?",
+        "¿Se revisa compliance?"
+      ],
+      "evidencias": "MD&A; informes externos; versiones; comentarios de revisión; análisis de variaciones; evidencias de soporte.",
+      "iniciativaSugerida": "Crear generador asistido de narrativa financiera con drivers, variaciones, riesgos, versiones y controles.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automated financial statement preparation",
+        "advanced": "Automated financial statement preparation con generación asistida de notas/secciones y validaciones de consistencia antes de revisión.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "3.1 Preparación de estados financieros"
+      }
+    },
+    {
+      "id": "controlling-3-4",
+      "capacidad": "Informes externos",
+      "subcapacidad": "3.4 Gobierno, control y auditoría del reporting externo",
+      "objetivo": "Evaluar el gobierno, evidencias, controles y trazabilidad del reporting externo.",
+      "maturity": {
+        "1": "Controles dispersos, baja trazabilidad y evidencia manual.",
+        "2": "Controles clave definidos, pero con ejecución y documentación manual.",
+        "3": "Modelo de control documentado con owners, evidencias y revisiones recurrentes.",
+        "4": "Controles integrados con workflow, trazabilidad de cambios, revisión y gestión de incidencias.",
+        "5": "Modelo AI-enabled de revisión de consistencia, detección de anomalías en cifras/narrativas y alertas de compliance en reporting externo."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe matriz de control?",
+        "¿Se guardan evidencias?",
+        "¿Se trazan cambios?",
+        "¿Se detectan inconsistencias?"
+      ],
+      "evidencias": "Matriz de control; evidencias; auditoría de cambios; checklists; incidencias; aprobaciones.",
+      "iniciativaSugerida": "Implantar governance digital de reporting externo con evidencias, workflow de revisión y detección de inconsistencias.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Financial rules interpretations; automated report consolidation; anomaly detection during close",
+        "advanced": "Modelo AI-enabled de revisión de consistencia, detección de anomalías en cifras/narrativas y alertas de compliance en reporting externo.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "3.4 Gobierno, control y auditoría del reporting externo"
+      }
+    },
+    {
+      "id": "controlling-4-1",
+      "capacidad": "Análisis financiero",
+      "subcapacidad": "4.1 Modelo de análisis de variaciones",
+      "objetivo": "Evaluar si el análisis financiero explica variaciones de forma estructurada, por drivers y dimensions.",
+      "maturity": {
+        "1": "Análisis descriptivo y manual, centrado en variaciones agregadas.",
+        "2": "Explicaciones recurrentes para partidas relevantes, con criterios no homogéneos.",
+        "3": "Metodología común de variance analysis por cuenta, entidad, negocio, driver y periodo.",
+        "4": "Análisis integrado con datos, drivers, acciones y conexión con reporting/forecast.",
+        "5": "Generación automática de account variance analysis e intelligent explanations con GenAI, incluyendo drivers, causas y narrativa ejecutiva."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe metodología de variance analysis?",
+        "¿Se analizan drivers?",
+        "¿Se documentan causas?",
+        "¿Se conectan acciones?"
+      ],
+      "evidencias": "Reportes de variaciones; árboles de drivers; comentarios; actas; acciones; dashboards.",
+      "iniciativaSugerida": "Crear modelo estándar de variance analysis con drivers, explicaciones, owners y acciones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate account variance analysis and intelligent explanations",
+        "advanced": "Generación automática de account variance analysis e intelligent explanations con GenAI, incluyendo drivers, causas y narrativa ejecutiva.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "4.1 Modelo de análisis de variaciones"
+      }
+    },
+    {
+      "id": "controlling-4-2",
+      "capacidad": "Análisis financiero",
+      "subcapacidad": "4.2 Calidad, clasificación y consistencia de datos financieros",
+      "objetivo": "Evaluar la calidad del dato financiero utilizado en análisis, reporting y cierre.",
+      "maturity": {
+        "1": "Datos inconsistentes, correcciones manuales y bajo gobierno de maestros.",
+        "2": "Validaciones básicas y correcciones recurrentes, pero baja trazabilidad.",
+        "3": "Reglas de calidad y clasificación documentadas para datos financieros clave.",
+        "4": "Validaciones automatizadas, gobierno de datos maestros y gestión estructurada de incidencias.",
+        "5": "Detección AI de inconsistencias en master data, errores de clasificación de gastos y documentación automática de metadata."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Hay reglas de calidad de dato?",
+        "¿Se detectan errores de clasificación?",
+        "¿Se gobiernan maestros?",
+        "¿Existe metadata?"
+      ],
+      "evidencias": "Catálogo de datos; reglas de calidad; incidencias; maestros; documentación de metadata; logs de corrección.",
+      "iniciativaSugerida": "Implementar control de calidad y clasificación financiera con detección de anomalías, metadata y workflows de remediación.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Identify inconsistencies in master data; identify expense classification errors; generate metadata documentation",
+        "advanced": "Detección AI de inconsistencias en master data, errores de clasificación de gastos y documentación automática de metadata.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "4.2 Calidad, clasificación y consistencia de datos financieros"
+      }
+    },
+    {
+      "id": "controlling-4-3",
+      "capacidad": "Análisis financiero",
+      "subcapacidad": "4.3 Insight financiero y explicación de performance",
+      "objetivo": "Evaluar si el análisis financiero genera insights ejecutivos, accionables y conectados con performance.",
+      "maturity": {
+        "1": "Análisis limitado a explicar el pasado, sin recomendaciones claras.",
+        "2": "Insights puntuales, dependientes de analistas y no siempre accionables.",
+        "3": "Análisis estructurado con mensajes clave, drivers, riesgos y oportunidades.",
+        "4": "Insights recurrentes, priorizados y conectados con decisiones, acciones y forecast.",
+        "5": "Digital analyst / FinanceAI Insights Platform con análisis bajo demanda, investigación y primeras conclusiones desde múltiples fuentes."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿El análisis genera insights?",
+        "¿Se priorizan mensajes?",
+        "¿Se incluyen riesgos/oportunidades?",
+        "¿Se usa para decidir?"
+      ],
+      "evidencias": "Packs ejecutivos; dashboards; one-pagers; recomendaciones; comités de performance; decisiones documentadas.",
+      "iniciativaSugerida": "Desarrollar capa de insights financieros con narrativa, drivers, recomendaciones y conexión con decisiones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "FinanceAI Insights Platform; Digital Analyst on demand analytics",
+        "advanced": "Digital analyst / FinanceAI Insights Platform con análisis bajo demanda, investigación y primeras conclusiones desde múltiples fuentes.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "4.3 Insight financiero y explicación de performance"
+      }
+    },
+    {
+      "id": "controlling-4-4",
+      "capacidad": "Análisis financiero",
+      "subcapacidad": "4.4 Análisis predictivo y detección temprana",
+      "objetivo": "Evaluar si el análisis financiero anticipa desviaciones, riesgos y oportunidades mediante modelos predictivos.",
+      "maturity": {
+        "1": "Análisis exclusivamente histórico y reactivo.",
+        "2": "Proyecciones manuales o análisis ad hoc en situaciones concretas.",
+        "3": "Modelos de tendencia básicos con supuestos documentados.",
+        "4": "Modelos predictivos recurrentes para anticipar desviaciones y oportunidades.",
+        "5": "AI identifica patrones históricos para predecir performance futura, detectar desviaciones tempranas y recomendar acciones."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se anticipan desviaciones?",
+        "¿Se usan modelos predictivos?",
+        "¿Hay alertas tempranas?",
+        "¿Se recomiendan acciones?"
+      ],
+      "evidencias": "Modelos predictivos; dashboards de alertas; backtesting; supuestos; acciones derivadas.",
+      "iniciativaSugerida": "Implantar modelos predictivos de performance, desviaciones y oportunidades con alertas y recomendaciones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Identify past data patterns to predict and improve future financial performance",
+        "advanced": "AI identifica patrones históricos para predecir performance futura, detectar desviaciones tempranas y recomendar acciones.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "4.4 Análisis predictivo y detección temprana"
+      }
+    },
+    {
+      "id": "controlling-5-1",
+      "capacidad": "Informes internos",
+      "subcapacidad": "5.1 Modelo de reporting interno",
+      "objetivo": "Evaluar si el reporting interno es homogéneo, útil y alineado con necesidades de gestión.",
+      "maturity": {
+        "1": "Informes dispersos, manuales y con formatos inconsistentes.",
+        "2": "Reporting recurrente para algunas áreas, con criterios y formatos variables.",
+        "3": "Modelo de reporting interno definido con KPIs, dimensiones, periodicidad y owners.",
+        "4": "Reporting integrado, automatizado y con drill-down, análisis de variaciones y acciones.",
+        "5": "Reporting interno con generación automática de commentary, insights y narrative reporting desde múltiples fuentes financieras."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe catálogo de informes?",
+        "¿Los KPIs están definidos?",
+        "¿Se automatiza?",
+        "¿Incluye análisis y comentarios?"
+      ],
+      "evidencias": "Catálogo de reporting; KPIs; dashboards; periodicidad; owners; evidencias de automatización.",
+      "iniciativaSugerida": "Rediseñar reporting interno con KPIs homologados, automatización, narrative commentary y drill-down.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Mgmt reporting actuals/plan/variance + commentary; automate financial data across diverse sources",
+        "advanced": "Reporting interno con generación automática de commentary, insights y narrative reporting desde múltiples fuentes financieras.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "5.1 Modelo de reporting interno"
+      }
+    },
+    {
+      "id": "controlling-5-2",
+      "capacidad": "Informes internos",
+      "subcapacidad": "5.2 Integración de datos y single source of truth",
+      "objetivo": "Evaluar si el reporting interno se alimenta de fuentes integradas, controladas y confiables.",
+      "maturity": {
+        "1": "Informes alimentados manualmente desde múltiples fuentes y ficheros.",
+        "2": "Integraciones parciales y conciliaciones manuales recurrentes.",
+        "3": "Fuentes oficiales definidas, modelo de datos documentado y controles de carga.",
+        "4": "Single source of truth con integración automática, modelo semántico y control de calidad.",
+        "5": "Capa AI/automation para integrar datos financieros de fuentes diversas, detectar inconsistencias y habilitar reporting autoservicio."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe fuente oficial?",
+        "¿Se integran datos automáticamente?",
+        "¿Hay modelo semántico?",
+        "¿Se detectan inconsistencias?"
+      ],
+      "evidencias": "Modelo de datos; fuentes oficiales; logs de carga; definición de KPIs; validaciones; controles de calidad.",
+      "iniciativaSugerida": "Implantar capa de datos financieros para reporting interno con integración, calidad y gobierno de definiciones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automate financial data across diverse sources; identify inconsistencies in master data",
+        "advanced": "Capa AI/automation para integrar datos financieros de fuentes diversas, detectar inconsistencias y habilitar reporting autoservicio.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "5.2 Integración de datos y single source of truth"
+      }
+    },
+    {
+      "id": "controlling-5-3",
+      "capacidad": "Informes internos",
+      "subcapacidad": "5.3 Narrativa de gestión y autoservicio",
+      "objetivo": "Evaluar si los usuarios pueden consumir información interna con narrativa clara y autoservicio gobernado.",
+      "maturity": {
+        "1": "Reportes estáticos distribuidos por Finanzas, con baja interacción del usuario.",
+        "2": "Dashboards parciales y consultas ad hoc gestionadas por analistas.",
+        "3": "Dashboards corporativos por rol, con KPIs comunes y acceso controlado.",
+        "4": "Autoservicio gobernado con drill-down, narrativa, flujos de aprobación y control de acceso.",
+        "5": "Chat-with-my-Finance-data / Digital Analyst para consultas en lenguaje natural, insights y explicación automática de resultados."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe autoservicio?",
+        "¿Está gobernado?",
+        "¿Los usuarios entienden la narrativa?",
+        "¿Se controlan accesos?"
+      ],
+      "evidencias": "Dashboards; permisos; modelo semántico; guías de uso; logs de consulta; feedback de usuarios.",
+      "iniciativaSugerida": "Habilitar self-service financiero gobernado con capa conversacional, narrativa y trazabilidad de definiciones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Chat with Finance data; FinanceAI Insights Platform",
+        "advanced": "Chat-with-my-Finance-data / Digital Analyst para consultas en lenguaje natural, insights y explicación automática de resultados.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "5.3 Narrativa de gestión y autoservicio"
+      }
+    },
+    {
+      "id": "controlling-5-4",
+      "capacidad": "Informes internos",
+      "subcapacidad": "5.4 Rutinas de revisión y acciones de gestión",
+      "objetivo": "Evaluar si el reporting interno se usa en rutinas de gestión con decisiones, acciones y seguimiento.",
+      "maturity": {
+        "1": "El reporting se distribuye, pero no genera rutinas o acciones formales.",
+        "2": "Existen reuniones de revisión con decisiones poco trazables.",
+        "3": "Rutinas de reporting con agenda, KPIs, responsables y actas.",
+        "4": "Reporting conectado con acciones, owners, beneficios esperados y seguimiento.",
+        "5": "AI genera recomendaciones de acciones, identifica riesgos/oportunidades y prepara packs ejecutivos con decisiones sugeridas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Hay comités de revisión?",
+        "¿Se documentan decisiones?",
+        "¿Se asignan acciones?",
+        "¿Se mide impacto?"
+      ],
+      "evidencias": "Actas; trackers de acciones; KPIs de impacto; packs de reporting; decisiones documentadas.",
+      "iniciativaSugerida": "Formalizar rutinas de reporting interno con decisiones, acciones, owners, seguimiento e insights automatizados.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Digital analyst; project-level recommendations; executive financial health overview",
+        "advanced": "AI genera recomendaciones de acciones, identifica riesgos/oportunidades y prepara packs ejecutivos con decisiones sugeridas.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "5.4 Rutinas de revisión y acciones de gestión"
+      }
+    },
+    {
+      "id": "controlling-6-1",
+      "capacidad": "Conciliación intercompany",
+      "subcapacidad": "6.1 Gobierno y calendario de conciliación",
+      "objetivo": "Evaluar si las conciliaciones intercompany están gobernadas, calendarizadas y coordinadas entre entidades.",
+      "maturity": {
+        "1": "Conciliaciones manuales, tardías y dependientes de comunicación informal.",
+        "2": "Calendario básico y responsables por entidad, con variabilidad y retrasos.",
+        "3": "Calendario, ownership, materialidad, reglas y evidencias definidos.",
+        "4": "Proceso integrado en el cierre, con seguimiento de incidencias, escalados y KPIs.",
+        "5": "Conciliación intercompany integrada con alertas tempranas, workflow y priorización AI de partidas críticas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe calendario?",
+        "¿Hay owners por entidad?",
+        "¿Se definen umbrales?",
+        "¿Hay escalados?"
+      ],
+      "evidencias": "Calendario; RACI; reportes IC; KPIs; actas de escalado; evidencias.",
+      "iniciativaSugerida": "Diseñar gobierno de conciliación IC con calendario, umbrales, workflow y seguimiento de partidas abiertas.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-enabled reconciliation; automated closing checklists",
+        "advanced": "Conciliación intercompany integrada con alertas tempranas, workflow y priorización AI de partidas críticas.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "6.1 Gobierno y calendario de conciliación"
+      }
+    },
+    {
+      "id": "controlling-6-2",
+      "capacidad": "Conciliación intercompany",
+      "subcapacidad": "6.2 Matching, diferencias y resolución de partidas",
+      "objetivo": "Evaluar el grado de automatización y efectividad del matching y resolución de diferencias.",
+      "maturity": {
+        "1": "Matching manual y resolución caso a caso, con retrasos frecuentes.",
+        "2": "Reglas básicas de matching y conciliación manual de excepciones.",
+        "3": "Matching estandarizado con reglas y documentación de excepciones.",
+        "4": "Matching automatizado con reglas avanzadas, workflow de resolución y análisis causa-raíz.",
+        "5": "AI/NLP reconciliation a nivel transacción contra documentos soporte, con matching inteligente, explicación de diferencias y recomendaciones de resolución."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Qué porcentaje se matchea automáticamente?",
+        "¿Cómo se resuelven diferencias?",
+        "¿Se analiza causa-raíz?",
+        "¿Hay workflow?"
+      ],
+      "evidencias": "Reportes de matching; partidas abiertas; logs de excepción; workflow de resolución; análisis causa-raíz.",
+      "iniciativaSugerida": "Implantar matching inteligente y workflow de resolución IC con análisis causa-raíz y priorización por materialidad.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Reconcile account balances at transaction level to invoices, purchase orders and bank statements",
+        "advanced": "AI/NLP reconciliation a nivel transacción contra documentos soporte, con matching inteligente, explicación de diferencias y recomendaciones de resolución.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "6.2 Matching, diferencias y resolución de partidas"
+      }
+    },
+    {
+      "id": "controlling-6-3",
+      "capacidad": "Conciliación intercompany",
+      "subcapacidad": "6.3 Prevención y reducción de diferencias recurrentes",
+      "objetivo": "Evaluar si la organización previene diferencias intercompany recurrentes y mejora el proceso.",
+      "maturity": {
+        "1": "Diferencias recurrentes tratadas reactivamente, sin análisis sistemático.",
+        "2": "Se identifican diferencias frecuentes, pero con planes de mejora limitados.",
+        "3": "Análisis periódico de causas recurrentes y responsables por entidad/proceso.",
+        "4": "Acciones preventivas, reglas de eliminación, acuerdos intercompany y mejora continua.",
+        "5": "Modelos AI detectan patrones de diferencias recurrentes, predicen riesgos de desbalance y recomiendan cambios preventivos."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se identifican causas recurrentes?",
+        "¿Se ejecutan acciones preventivas?",
+        "¿Se actualizan reglas/acuerdos?",
+        "¿Se reducen partidas abiertas?"
+      ],
+      "evidencias": "Análisis de recurrencia; planes de acción; acuerdos IC; reglas de eliminación; KPIs de aging.",
+      "iniciativaSugerida": "Crear programa de reducción de diferencias IC con análisis de patrones, acciones preventivas y seguimiento de aging.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive compliance monitoring; identify unusual entries during close",
+        "advanced": "Modelos AI detectan patrones de diferencias recurrentes, predicen riesgos de desbalance y recomiendan cambios preventivos.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "6.3 Prevención y reducción de diferencias recurrentes"
+      }
+    },
+    {
+      "id": "controlling-6-4",
+      "capacidad": "Conciliación intercompany",
+      "subcapacidad": "6.4 Integración con consolidación y reporting",
+      "objetivo": "Evaluar si la conciliación intercompany está conectada con consolidación y reporting, evitando ajustes tardíos.",
+      "maturity": {
+        "1": "Conciliaciones desconectadas de consolidación, generando ajustes tardíos.",
+        "2": "Interacción parcial con consolidación, con reconciliaciones manuales finales.",
+        "3": "Proceso IC conectado al cierre y consolidación con reglas y responsables definidos.",
+        "4": "Integración automática con consolidación, eliminaciones, reporting y seguimiento de impactos.",
+        "5": "Conciliación IC automatizada conectada con consolidación multiestándar/multimoneda y detección AI de impactos en reporting."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿La conciliación alimenta consolidación?",
+        "¿Se evitan ajustes de última hora?",
+        "¿Hay reglas de eliminación conectadas?",
+        "¿Se mide impacto?"
+      ],
+      "evidencias": "Reportes IC; consolidación; eliminaciones; ajustes; logs de integración; KPIs de late adjustments.",
+      "iniciativaSugerida": "Integrar conciliación IC con consolidación, eliminaciones, reporting y alertas de impacto antes del cierre.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Consolidate accounting records under different standards and currencies; AI reconciliation",
+        "advanced": "Conciliación IC automatizada conectada con consolidación multiestándar/multimoneda y detección AI de impactos en reporting.",
+        "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
+        "subcapacidad": "6.4 Integración con consolidación y reporting"
+      }
+    }
+  ]
+}
