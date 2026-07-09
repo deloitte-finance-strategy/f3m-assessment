@@ -177,6 +177,17 @@ async function loadCoreDomains() {
   await Promise.all(Object.keys(DOMAINS).map((domainId) => loadDomainData(domainId)));
 }
 
+
+function syncActiveDomainState() {
+  if (!state.activeDomainId || !state.domains[state.activeDomainId]) {
+    return;
+  }
+
+  state.domains[state.activeDomainId].items = state.items;
+  state.domains[state.activeDomainId].meta = state.meta;
+}
+
+
 function setActiveDomain(domainId) {
   const domainData = state.domains[domainId];
 
@@ -191,9 +202,17 @@ function setActiveDomain(domainId) {
   updateActiveDomainUi();
 }
 
+
 async function switchDomain(domainId) {
+  if (domainId === state.activeDomainId) {
+    return;
+  }
+
+  syncActiveDomainState();
+
   await loadDomainData(domainId);
   setActiveDomain(domainId);
+
   populateCapacityFilter();
   renderAll();
 
@@ -202,6 +221,7 @@ async function switchDomain(domainId) {
     behavior: "smooth",
   });
 }
+
 
 function updateActiveDomainUi() {
   const domain = DOMAINS[state.activeDomainId];
@@ -312,6 +332,7 @@ function bindGlobalEvents() {
   setupActiveTabObserver(); // NUEVO: marca automáticamente la pestaña activa según la sección visible
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
+  setupDomainSwitcher();
 
     function setupDomainSwitcher() {
     document.querySelectorAll("[data-domain-id]").forEach((button) => {
@@ -501,7 +522,7 @@ function setupAiInitiativeModal() {
       return;
     }
 
-    openAiInitiativeModal(button.dataset.capability);
+    openAiInitiativeModal(button.dataset.id);
   });
 
   els.closeAiInitiativeModalButton?.addEventListener("click", closeAiInitiativeModal);
@@ -519,19 +540,80 @@ function setupAiInitiativeModal() {
   });
 }
 
-function openAiInitiativeModal(capability) {
-  const initiative = AI_INITIATIVES_BY_CAPABILITY[capability];
 
-  if (!initiative) {
-    showNotice("No hay iniciativa IA asociada a esta capacidad.", true);
+
+function setupDomainSwitcher() {
+  const switcher = document.querySelector(".domain-switcher");
+
+  if (!switcher) {
     return;
   }
 
-  els.aiModalCapability.textContent = capability;
-  els.aiModalSubcapability.textContent = `Subcapacidades relacionadas: ${initiative.subcapacidad}`;
-  els.aiModalCases.textContent = initiative.cases;
-  els.aiModalAdvanced.textContent = initiative.advanced;
-  els.aiModalSource.textContent = `Fuente: ${initiative.source}`;
+  switcher.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-domain-id]");
+
+    if (!button || button.disabled) {
+      return;
+    }
+
+    const domainId = button.dataset.domainId;
+
+    if (!domainId || domainId === state.activeDomainId) {
+      return;
+    }
+
+    try {
+      await switchDomain(domainId);
+    } catch (error) {
+      showNotice(`No se pudo cambiar al dominio ${domainId}.`, true);
+      console.error(error);
+    }
+  });
+}
+
+
+
+function getAiDataForItem(item) {
+  if (item?.ai?.cases || item?.ai?.advanced) {
+    return item.ai;
+  }
+
+  const capabilityFallback = typeof AI_INITIATIVES_BY_CAPABILITY !== "undefined"
+    ? AI_INITIATIVES_BY_CAPABILITY[item.capacidad]
+    : null;
+
+  if (capabilityFallback) {
+    return {
+      subcapacidad: capabilityFallback.subcapacidad || item.subcapacidad,
+      cases: capabilityFallback.cases || "",
+      advanced: capabilityFallback.advanced || "",
+      source: capabilityFallback.source || "",
+    };
+  }
+
+  return null;
+}
+
+function openAiInitiativeModal(itemId) {
+  const item = state.items.find((entry) => entry.id === itemId);
+
+  if (!item) {
+    showNotice("No se encontró la subcapacidad asociada a esta iniciativa IA.", true);
+    return;
+  }
+
+  const aiData = getAiDataForItem(item);
+
+  if (!aiData) {
+    showNotice("No hay iniciativa IA asociada a esta subcapacidad.", true);
+    return;
+  }
+
+  els.aiModalCapability.textContent = item.capacidad;
+  els.aiModalSubcapability.textContent = `Subcapacidad relacionada: ${item.subcapacidad}`;
+  els.aiModalCases.textContent = aiData.cases || "Sin casos AI asociados informados.";
+  els.aiModalAdvanced.textContent = aiData.advanced || "Sin aplicación avanzada informada.";
+  els.aiModalSource.textContent = aiData.source ? `Fuente: ${aiData.source}` : "";
 
   els.aiInitiativeModal.hidden = false;
   els.closeAiInitiativeModalButton?.focus();
@@ -1223,8 +1305,8 @@ function renderRoadmap() {
           <button
             class="roadmap-ai-button"
             type="button"
-            data-capability="${escapeAttr(item.capacidad)}"
-            aria-label="Ver iniciativa IA para ${escapeAttr(item.capacidad)}"
+            data-id="${escapeAttr(item.id)}"
+            aria-label="Ver iniciativa IA para ${escapeAttr(item.subcapacidad)}"
           >
             IA
           </button>
@@ -1436,23 +1518,22 @@ function updateSaveStatus(status, message) {
 function persistScenario() {
   const payload = buildScenarioPayload();
 
-  updateSaveStatus("saving", "Guardando…"); // NUEVO: feedback inmediato
+  updateSaveStatus("saving", "Guardando…");
 
-  // Modo local: guardado solo en este navegador
   if (!scenarioDatabaseRef) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    updateSaveStatus("saved", "Guardado ✓"); // NUEVO: confirmación en modo local
+    updateSaveStatus("saved", "Guardado ✓");
     return;
   }
 
-  // Modo compartido: guardado en Firebase
   if (!isApplyingRemoteScenario) {
     set(scenarioDatabaseRef, payload)
       .then(() => {
-        updateSaveStatus("saved", "Guardado ✓"); // NUEVO: confirmación tras guardar en Firebase
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        updateSaveStatus("saved", "Guardado ✓");
       })
       .catch((error) => {
-        updateSaveStatus("error", "Error al guardar"); // NUEVO: feedback si Firebase falla
+        updateSaveStatus("error", "Error al guardar");
         showNotice("No se pudo guardar el escenario compartido en Firebase.", true);
         console.error(error);
       });
@@ -1475,7 +1556,6 @@ function applyStoredScenario() {
   }
 }
 
-
 function normalizeMatchKey(value) {
   return String(value || "")
     .trim()
@@ -1484,26 +1564,48 @@ function normalizeMatchKey(value) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-function findMatchingScenarioItem(items, savedItem) {
-  if (!savedItem) {
-    return null;
+
+
+
+
+function getSavedField(savedItem, fieldNames) {
+  for (const fieldName of fieldNames) {
+    if (savedItem?.[fieldName] !== undefined && savedItem?.[fieldName] !== null) {
+      return savedItem[fieldName];
+    }
   }
 
-  const byId = items.find((item) => item.id === savedItem.id);
+  return undefined;
+}
 
-  if (byId) {
-    return byId;
+function getSavedScore(savedItem, leverKey) {
+  const scoreFieldMap = {
+    procesos: ["procesos", "Procesos", "Score Procesos", "ScoreProcesos"],
+    tecnologia: ["tecnologia", "Tecnologia", "Tecnología", "Score Tecnología", "Score Tecnologia", "ScoreTecnologia"],
+    organizacion: ["organizacion", "Organizacion", "Organización", "Score Organización", "Score Organizacion", "ScoreOrganizacion"],
+  };
+
+  if (savedItem?.scores?.[leverKey] !== undefined) {
+    return savedItem.scores[leverKey];
   }
 
-  const savedCapability = normalizeMatchKey(savedItem.capacidad || savedItem.Capacidad);
-  const savedSubcapability = normalizeMatchKey(savedItem.subcapacidad || savedItem.Subcapacidad);
+  return getSavedField(savedItem, scoreFieldMap[leverKey] || []);
+}
 
-  return items.find((item) => {
-    return (
-      normalizeMatchKey(item.capacidad) === savedCapability &&
-      normalizeMatchKey(item.subcapacidad) === savedSubcapability
-    );
-  });
+function toSavedItemsArray(value) {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value);
+  }
+
+  return [];
 }
 
 function getScenarioItemsFromPayload(payload, domainId) {
@@ -1516,26 +1618,69 @@ function getScenarioItemsFromPayload(payload, domainId) {
   }
 
   if (payload.domains?.[domainId]?.items) {
-    return payload.domains[domainId].items;
+    return toSavedItemsArray(payload.domains[domainId].items);
+  }
+
+  if (payload.domains?.[domainId]?.subcapacities) {
+    return toSavedItemsArray(payload.domains[domainId].subcapacities);
+  }
+
+  if (payload[domainId]?.items) {
+    return toSavedItemsArray(payload[domainId].items);
   }
 
   if (payload.items) {
-    return payload.items;
+    return toSavedItemsArray(payload.items);
   }
 
   if (payload.subcapacities) {
-    return payload.subcapacities;
+    return toSavedItemsArray(payload.subcapacities);
+  }
+
+  if (payload.state?.items) {
+    return toSavedItemsArray(payload.state.items);
   }
 
   return [];
+}
+
+function findMatchingScenarioItem(items, savedItem) {
+  if (!savedItem) {
+    return null;
+  }
+
+  const savedId = savedItem.id || savedItem.ID || savedItem.Id;
+  const byId = items.find((item) => item.id === savedId);
+
+  if (byId) {
+    return byId;
+  }
+
+  const savedCapability = normalizeMatchKey(
+    savedItem.capacidad || savedItem.Capacidad || savedItem.capacity || savedItem.Capability,
+  );
+
+  const savedSubcapability = normalizeMatchKey(
+    savedItem.subcapacidad || savedItem.Subcapacidad || savedItem.subcapacity || savedItem.Subcapability,
+  );
+
+  return items.find((item) => (
+    normalizeMatchKey(item.capacidad) === savedCapability &&
+    normalizeMatchKey(item.subcapacidad) === savedSubcapability
+  ));
 }
 
 function applyScenarioItemsToDomain(domainId, savedItems) {
   const domain = state.domains[domainId];
 
   if (!domain || !Array.isArray(savedItems)) {
-    return;
+    return {
+      matched: 0,
+      total: savedItems?.length || 0,
+    };
   }
+
+  let matched = 0;
 
   savedItems.forEach((savedItem) => {
     const item = findMatchingScenarioItem(domain.items, savedItem);
@@ -1544,24 +1689,45 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
       return;
     }
 
-    if (savedItem.scores) {
-      item.scores.procesos = toScore(savedItem.scores.procesos);
-      item.scores.tecnologia = toScore(savedItem.scores.tecnologia);
-      item.scores.organizacion = toScore(savedItem.scores.organizacion);
+    matched += 1;
+
+    const procesos = getSavedScore(savedItem, "procesos");
+    const tecnologia = getSavedScore(savedItem, "tecnologia");
+    const organizacion = getSavedScore(savedItem, "organizacion");
+
+    if (procesos !== undefined) {
+      item.scores.procesos = toScore(procesos);
     }
 
-    if (savedItem.owner !== undefined) {
-      item.owner = savedItem.owner;
+    if (tecnologia !== undefined) {
+      item.scores.tecnologia = toScore(tecnologia);
     }
 
-    if (savedItem.status !== undefined) {
-      item.status = savedItem.status;
+    if (organizacion !== undefined) {
+      item.scores.organizacion = toScore(organizacion);
     }
 
-    if (savedItem.comentario !== undefined) {
-      item.comentario = savedItem.comentario;
+    const owner = getSavedField(savedItem, ["owner", "Owner"]);
+    const status = getSavedField(savedItem, ["status", "Estado", "estado"]);
+    const comentario = getSavedField(savedItem, ["comentario", "Comentarios", "Comentarios / hallazgos", "comments"]);
+
+    if (owner !== undefined) {
+      item.owner = owner;
+    }
+
+    if (status !== undefined) {
+      item.status = status;
+    }
+
+    if (comentario !== undefined) {
+      item.comentario = comentario;
     }
   });
+
+  return {
+    matched,
+    total: savedItems.length,
+  };
 }
 
 function applyScenarioPayload(payload) {
@@ -1569,10 +1735,14 @@ function applyScenarioPayload(payload) {
     return;
   }
 
-  // Nuevo formato multidominio
   if (payload.domains) {
     Object.keys(payload.domains).forEach((domainId) => {
-      applyScenarioItemsToDomain(domainId, getScenarioItemsFromPayload(payload, domainId));
+      const result = applyScenarioItemsToDomain(
+        domainId,
+        getScenarioItemsFromPayload(payload, domainId),
+      );
+
+      console.log(`Escenario aplicado en ${domainId}: ${result.matched}/${result.total}`);
     });
 
     if (payload.activeDomainId && state.domains[payload.activeDomainId]) {
@@ -1582,8 +1752,10 @@ function applyScenarioPayload(payload) {
     return;
   }
 
-  // Formato antiguo monodominio: asumimos que pertenece a FP&A
-  applyScenarioItemsToDomain("fpa", getScenarioItemsFromPayload(payload, "fpa"));
+  const legacyItems = getScenarioItemsFromPayload(payload, "fpa");
+  const result = applyScenarioItemsToDomain("fpa", legacyItems);
+
+  console.log(`Escenario antiguo aplicado en FP&A: ${result.matched}/${result.total}`);
 
   if (state.activeDomainId === "fpa") {
     setActiveDomain("fpa");
@@ -1592,10 +1764,9 @@ function applyScenarioPayload(payload) {
 
 
 
+
 function buildScenarioPayload() {
-  if (state.activeDomainId && state.domains[state.activeDomainId]) {
-    state.domains[state.activeDomainId].items = state.items;
-  }
+  syncActiveDomainState();
 
   const domainsPayload = {};
 
