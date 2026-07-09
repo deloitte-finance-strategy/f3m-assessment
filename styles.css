@@ -1293,3 +1293,106 @@ height: 360px;
 height: 330px;
 }
 }
+
+
+
+.domain-switcher {
+position: sticky;
+top: 0;
+z-index: 20;
+margin: 18px 0;
+padding: 16px;
+border: 1px solid var(--line);
+border-radius: var(--radius);
+background: rgba(255, 255, 255, 0.94);
+backdrop-filter: blur(10px);
+box-shadow: var(--shadow);
+}
+
+.domain-switcher-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 16px;
+margin-bottom: 12px;
+}
+
+.domain-switcher-header h2 {
+margin: 0;
+font-size: 1.1rem;
+}
+
+.domain-active-chip {
+display: inline-flex;
+align-items: center;
+min-height: 28px;
+padding: 0 10px;
+border-radius: 999px;
+background: var(--green);
+color: #10140e;
+font-size: 0.78rem;
+font-weight: 900;
+white-space: nowrap;
+}
+
+.domain-groups {
+display: grid;
+grid-template-columns: repeat(3, minmax(0, 1fr));
+gap: 12px;
+}
+
+.domain-group {
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+gap: 8px;
+padding: 10px;
+border: 1px solid var(--line);
+border-radius: 14px;
+background: var(--surface-muted);
+}
+
+.domain-group > span {
+width: 100%;
+color: var(--muted);
+font-size: 0.72rem;
+font-weight: 850;
+text-transform: uppercase;
+}
+
+.domain-button {
+min-height: 32px;
+padding: 0 12px;
+border: 1px solid var(--line);
+border-radius: 999px;
+background: #ffffff;
+color: var(--ink);
+font-weight: 800;
+}
+
+.domain-button:hover {
+border-color: var(--green);
+background: #f3f8ea;
+}
+
+.domain-button.active {
+background: var(--green);
+border-color: var(--green);
+color: #10140e;
+}
+
+.domain-button.is-disabled {
+opacity: 0.45;
+cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+.domain-groups {
+grid-template-columns: 1fr;
+}
+
+.domain-switcher-header {
+align-items: flex-start;
+flex-direction: column;
+}
+}

@@ -37,6 +37,28 @@ console.log("Modo escenario compartido:", scenarioId || "modo local sin scenario
 
 
 const DATA_URL = "data/fpa_assessment.json";
+
+
+const DEFAULT_DOMAIN_ID = "fpa";
+
+const DOMAINS = {
+  fpa: {
+    id: "fpa",
+    label: "FP&A",
+    title: "Planificación y análisis financiero / FP&A",
+    group: "Estratégicos y de negocio",
+    dataUrl: "data/domains/fpa.json",
+  },
+  controlling: {
+    id: "controlling",
+    label: "Controlling",
+    title: "Controlling",
+    group: "Transaccionales y operativos",
+    dataUrl: "data/domains/controlling.json",
+  },
+};
+
+
 const STORAGE_KEY = "f3m-fpa-assessment-scenario";
 
 const LEVERS = [
@@ -99,9 +121,12 @@ const AI_INITIATIVES_BY_CAPABILITY = {
 
 
 const state = {
+  activeDomainId: DEFAULT_DOMAIN_ID,
+  domains: {},
   meta: null,
   items: [],
 };
+
 
 let capabilityRadarCharts = {
   procesos: null,
@@ -121,27 +146,99 @@ const els = {};
 document.addEventListener("DOMContentLoaded", init);
 
 
+async function loadDomainData(domainId) {
+  if (state.domains[domainId]) {
+    return state.domains[domainId];
+  }
+
+  const domain = DOMAINS[domainId];
+
+  if (!domain) {
+    throw new Error(`Dominio no configurado: ${domainId}`);
+  }
+
+  const response = await fetch(domain.dataUrl, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar ${domain.dataUrl}`);
+  }
+
+  const data = await response.json();
+
+  state.domains[domainId] = {
+    meta: data.meta,
+    items: data.subcapacities.map(normalizeItem),
+  };
+
+  return state.domains[domainId];
+}
+
+async function loadCoreDomains() {
+  await Promise.all(Object.keys(DOMAINS).map((domainId) => loadDomainData(domainId)));
+}
+
+function setActiveDomain(domainId) {
+  const domainData = state.domains[domainId];
+
+  if (!domainData) {
+    throw new Error(`Dominio no cargado: ${domainId}`);
+  }
+
+  state.activeDomainId = domainId;
+  state.meta = domainData.meta;
+  state.items = domainData.items;
+
+  updateActiveDomainUi();
+}
+
+async function switchDomain(domainId) {
+  await loadDomainData(domainId);
+  setActiveDomain(domainId);
+  populateCapacityFilter();
+  renderAll();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}
+
+function updateActiveDomainUi() {
+  const domain = DOMAINS[state.activeDomainId];
+
+  document.querySelectorAll("[data-domain-id]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.domainId === state.activeDomainId);
+  });
+
+  const title = document.getElementById("activeDomainTitle");
+
+  if (title && domain) {
+    title.textContent = domain.title;
+  }
+
+  const label = document.getElementById("activeDomainLabel");
+
+  if (label && domain) {
+    label.textContent = domain.label;
+  }
+}
+
+
 async function init() {
   cacheElements();
   bindGlobalEvents();
   setInitialLoading(true); // NUEVO: muestra estado de carga mientras se inicializa la app
   showScenarioModeNotice();
 
-  try {
-    const response = await fetch(DATA_URL, { cache: "no-store" });
 
-    if (!response.ok) {
-      throw new Error(`No se pudo cargar ${DATA_URL}`);
-    }
+    try {
+        await loadCoreDomains();
+        setActiveDomain(DEFAULT_DOMAIN_ID);
 
-    const data = await response.json();
+        if (!scenarioId) {
+          applyStoredScenario();
+        }
 
-    state.meta = data.meta;
-    state.items = data.subcapacities.map(normalizeItem);
-
-    if (!scenarioId) {
-      applyStoredScenario();
-    }
 
     await initializeSharedScenario();
 
@@ -215,6 +312,14 @@ function bindGlobalEvents() {
   setupActiveTabObserver(); // NUEVO: marca automáticamente la pestaña activa según la sección visible
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
+
+    function setupDomainSwitcher() {
+    document.querySelectorAll("[data-domain-id]").forEach((button) => {
+      button.addEventListener("click", () => {
+        switchDomain(button.dataset.domainId);
+      });
+    });
+  }
 }
 
 function normalizeItem(item) {
@@ -795,9 +900,37 @@ function wrapRadarLabel(label) {
   return lines;
 }
 
+function toList(value, separator = "\n") {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean);
+  }
+
+  if (value === null || value === undefined) {
+    return [];
+  }
+
+  return String(value)
+    .split(separator)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function getItemObjective(item) {
+  return item.objetivoEvaluacion || item.objetivo || "";
+}
+
+function getItemQuestions(item) {
+  return toList(item.preguntasClave || item.preguntas || item.questions);
+}
+
+function getItemEvidenceText(item) {
+  return item.evidencias || item.evidence || "";
+}
+
 
 function renderAssessments() {
   const items = getVisibleItems();
+
   if (!items.length) {
     els.assessmentList.innerHTML = `<div class="empty-state">No hay subcapacidades que coincidan con los filtros actuales.</div>`;
     return;
@@ -805,24 +938,34 @@ function renderAssessments() {
 
   const template = document.getElementById("assessmentCardTemplate");
   els.assessmentList.innerHTML = "";
+
   items.forEach((item) => {
     const metrics = calculate(item);
     const fragment = template.content.cloneNode(true);
     const card = fragment.querySelector(".assessment-card");
+
     card.dataset.id = item.id;
+
     fragment.querySelector(".capability-chip").textContent = item.capacidad;
     fragment.querySelector("h3").textContent = item.subcapacidad;
-    fragment.querySelector(".card-title-block p").textContent = item.objetivoEvaluacion;
-    fragment.querySelector(".score-controls").innerHTML = LEVERS.map((lever) => scoreControl(item, lever)).join("");
+    fragment.querySelector(".card-title-block p").textContent = getItemObjective(item);
+
+    fragment.querySelector(".score-controls").innerHTML = LEVERS.map((lever) =>
+      scoreControl(item, lever),
+    ).join("");
+
     fragment.querySelector(".score-result").innerHTML = scoreResult(metrics);
-    fragment.querySelector(".maturity-list").innerHTML = Object.entries(item.maturity)
-      .map(([, text]) => `<li>${escapeHtml(text)}</li>`) // MODIFICADO: el <ol> ya numera automáticamente los niveles
+
+    fragment.querySelector(".maturity-list").innerHTML = Object.entries(item.maturity || {})
+      .map(([, text]) => `<li>${escapeHtml(text)}</li>`)
       .join("");
-    fragment.querySelector(".question-list").innerHTML = item.preguntasClave
-      .split("\n")
+
+    fragment.querySelector(".question-list").innerHTML = getItemQuestions(item)
       .map((question) => `<li>${escapeHtml(question)}</li>`)
       .join("");
-    fragment.querySelector(".evidence-text").textContent = item.evidencias;
+
+    fragment.querySelector(".evidence-text").textContent = getItemEvidenceText(item);
+
     els.assessmentList.appendChild(fragment);
   });
 
@@ -1216,22 +1359,35 @@ async function initializeSharedScenario() {
     const snapshot = await get(scenarioDatabaseRef);
 
     if (snapshot.exists()) {
+      isApplyingRemoteScenario = true;
+
       applyScenarioPayload(snapshot.val());
+
+      isApplyingRemoteScenario = false;
+
       localStorage.setItem(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
+      populateCapacityFilter();
+      renderAll();
+
       showNotice(`Escenario compartido cargado: ${scenarioId}`);
-      updateSaveStatus("saved", "Sincronizado ✓"); // NUEVO: indica que el escenario remoto se cargó correctamente
+      updateSaveStatus("saved", "Sincronizado ✓");
     } else {
       await set(scenarioDatabaseRef, buildScenarioPayload());
+
       showNotice(`Escenario compartido creado: ${scenarioId}`);
+      updateSaveStatus("saved", "Guardado ✓");
     }
 
     subscribeToSharedScenario();
   } catch (error) {
+    isApplyingRemoteScenario = false;
+
     showNotice("No se pudo conectar con el escenario compartido. Se mantiene el modo local.", true);
-    updateSaveStatus("saved", "Guardado ✓"); // NUEVO: indica que el escenario se creó correctamente en Firebase
+    updateSaveStatus("saved", "Guardado ✓");
     console.error(error);
   }
 }
+
 
 function subscribeToSharedScenario() {
   if (!scenarioDatabaseRef) {
@@ -1239,20 +1395,28 @@ function subscribeToSharedScenario() {
   }
 
   onValue(scenarioDatabaseRef, (snapshot) => {
-    if (!snapshot.exists()) {
+    const remoteScenario = snapshot.val();
+
+    if (!remoteScenario) {
       return;
     }
 
     try {
       isApplyingRemoteScenario = true;
 
-      applyScenarioPayload(snapshot.val());
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
-      renderAll();
-    } catch (error) {
-      console.error("No se pudo aplicar el escenario remoto.", error);
-    } finally {
+      applyScenarioPayload(remoteScenario);
+
       isApplyingRemoteScenario = false;
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
+      populateCapacityFilter();
+      renderAll();
+      updateSaveStatus("saved", "Sincronizado ✓");
+    } catch (error) {
+      isApplyingRemoteScenario = false;
+
+      console.error("No se pudo aplicar el escenario remoto.", error);
+      showNotice("No se pudo aplicar el escenario remoto.", true);
     }
   });
 }
@@ -1297,83 +1461,206 @@ function persistScenario() {
 
 
 function applyStoredScenario() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
+  const stored = localStorage.getItem(STORAGE_KEY);
+
+  if (!stored) {
+    return;
+  }
+
   try {
-    applyScenarioPayload(JSON.parse(raw));
+    const payload = JSON.parse(stored);
+    applyScenarioPayload(payload);
   } catch (error) {
-    localStorage.removeItem(STORAGE_KEY);
-    console.warn("Stored scenario ignored", error);
+    console.warn("No se pudo aplicar el escenario local.", error);
   }
 }
 
-function buildScenarioPayload() {
-  return {
-    meta: {
-      app: "F3M FP&A Assessment MVP",
-      exportedAt: new Date().toISOString(),
-      sourceFile: state.meta.sourceFile,
-      targetMaturity: state.meta.targetMaturity,
-    },
-    scores: state.items.map((item) => ({
-      id: item.id,
-      subcapacidad: item.subcapacidad,
-      scores: { ...item.scores },
-      owner: item.owner,
-      status: item.status,
-      comentario: item.comentario,
-    })),
-  };
+
+function normalizeMatchKey(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
-function applyScenarioPayload(payload) {
-  const updates = Array.isArray(payload.scores)
-    ? payload.scores
-    : Array.isArray(payload.subcapacities)
-      ? payload.subcapacities
-      : null;
-  if (!updates) {
-    throw new Error("El JSON no tiene formato de escenario válido.");
+function findMatchingScenarioItem(items, savedItem) {
+  if (!savedItem) {
+    return null;
   }
 
-  const byId = new Map(updates.map((item) => [String(item.id), item]));
-  state.items = state.items.map((item) => {
-    const update = byId.get(item.id);
-    if (!update) return item;
-    const sourceScores = update.scores || {};
-    return {
-      ...item,
-      scores: {
-        procesos: toScore(sourceScores.procesos),
-        tecnologia: toScore(sourceScores.tecnologia),
-        organizacion: toScore(sourceScores.organizacion),
-      },
-      owner: update.owner ?? item.owner,
-      status: STATUS_OPTIONS.includes(update.status) ? update.status : item.status,
-      comentario: update.comentario ?? item.comentario,
-    };
+  const byId = items.find((item) => item.id === savedItem.id);
+
+  if (byId) {
+    return byId;
+  }
+
+  const savedCapability = normalizeMatchKey(savedItem.capacidad || savedItem.Capacidad);
+  const savedSubcapability = normalizeMatchKey(savedItem.subcapacidad || savedItem.Subcapacidad);
+
+  return items.find((item) => {
+    return (
+      normalizeMatchKey(item.capacidad) === savedCapability &&
+      normalizeMatchKey(item.subcapacidad) === savedSubcapability
+    );
   });
 }
 
+function getScenarioItemsFromPayload(payload, domainId) {
+  if (!payload) {
+    return [];
+  }
+
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (payload.domains?.[domainId]?.items) {
+    return payload.domains[domainId].items;
+  }
+
+  if (payload.items) {
+    return payload.items;
+  }
+
+  if (payload.subcapacities) {
+    return payload.subcapacities;
+  }
+
+  return [];
+}
+
+function applyScenarioItemsToDomain(domainId, savedItems) {
+  const domain = state.domains[domainId];
+
+  if (!domain || !Array.isArray(savedItems)) {
+    return;
+  }
+
+  savedItems.forEach((savedItem) => {
+    const item = findMatchingScenarioItem(domain.items, savedItem);
+
+    if (!item) {
+      return;
+    }
+
+    if (savedItem.scores) {
+      item.scores.procesos = toScore(savedItem.scores.procesos);
+      item.scores.tecnologia = toScore(savedItem.scores.tecnologia);
+      item.scores.organizacion = toScore(savedItem.scores.organizacion);
+    }
+
+    if (savedItem.owner !== undefined) {
+      item.owner = savedItem.owner;
+    }
+
+    if (savedItem.status !== undefined) {
+      item.status = savedItem.status;
+    }
+
+    if (savedItem.comentario !== undefined) {
+      item.comentario = savedItem.comentario;
+    }
+  });
+}
+
+function applyScenarioPayload(payload) {
+  if (!payload) {
+    return;
+  }
+
+  // Nuevo formato multidominio
+  if (payload.domains) {
+    Object.keys(payload.domains).forEach((domainId) => {
+      applyScenarioItemsToDomain(domainId, getScenarioItemsFromPayload(payload, domainId));
+    });
+
+    if (payload.activeDomainId && state.domains[payload.activeDomainId]) {
+      setActiveDomain(payload.activeDomainId);
+    }
+
+    return;
+  }
+
+  // Formato antiguo monodominio: asumimos que pertenece a FP&A
+  applyScenarioItemsToDomain("fpa", getScenarioItemsFromPayload(payload, "fpa"));
+
+  if (state.activeDomainId === "fpa") {
+    setActiveDomain("fpa");
+  }
+}
+
+
+
+function buildScenarioPayload() {
+  if (state.activeDomainId && state.domains[state.activeDomainId]) {
+    state.domains[state.activeDomainId].items = state.items;
+  }
+
+  const domainsPayload = {};
+
+  Object.entries(state.domains).forEach(([domainId, domain]) => {
+    domainsPayload[domainId] = {
+      meta: domain.meta,
+      items: domain.items.map((item) => ({
+        id: item.id,
+        capacidad: item.capacidad,
+        subcapacidad: item.subcapacidad,
+        scores: {
+          procesos: item.scores.procesos,
+          tecnologia: item.scores.tecnologia,
+          organizacion: item.scores.organizacion,
+        },
+        owner: item.owner,
+        status: item.status,
+        comentario: item.comentario,
+      })),
+    };
+  });
+
+  return {
+    version: 2,
+    activeDomainId: state.activeDomainId,
+    updatedAt: new Date().toISOString(),
+    domains: domainsPayload,
+  };
+}
+
+
+
 function importScenario(event) {
   const file = event.target.files?.[0];
-  if (!file) return;
+
+  if (!file) {
+    return;
+  }
+
   const reader = new FileReader();
+
   reader.onload = () => {
     try {
-      applyScenarioPayload(JSON.parse(reader.result));
-      persistScenario();
+      const payload = JSON.parse(reader.result);
+
+      applyScenarioPayload(payload);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
+
+      populateCapacityFilter();
       renderAll();
+      persistScenario();
+
       showNotice("Escenario importado correctamente.");
+      updateSaveStatus("saved", "Guardado ✓");
     } catch (error) {
-      showNotice("El archivo no parece un escenario válido para este MVP.");
+      showNotice("El archivo no parece un escenario válido para este MVP.", true);
       console.error(error);
     } finally {
       event.target.value = "";
     }
   };
+
   reader.readAsText(file);
 }
+
 
 function exportScenarioJson() {
   downloadFile(
