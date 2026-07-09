@@ -241,6 +241,11 @@ function updateActiveDomainUi() {
   if (label && domain) {
     label.textContent = domain.label;
   }
+
+  if (els.dashboardDomainTitle && domain) {
+  els.dashboardDomainTitle.textContent = `Lectura del dominio ${domain.label}`;
+  }
+
 }
 
 
@@ -313,6 +318,7 @@ function cacheElements() {
     "exportPdfButton", // NUEVO: botón de exportación PDF
     "resetButton",
     "scenarioFileInput",
+    "dashboardDomainTitle",
   ].forEach((id) => {
     els[id] = document.getElementById(id);
   });
@@ -333,14 +339,6 @@ function bindGlobalEvents() {
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
   setupDomainSwitcher();
-
-    function setupDomainSwitcher() {
-    document.querySelectorAll("[data-domain-id]").forEach((button) => {
-      button.addEventListener("click", () => {
-        switchDomain(button.dataset.domainId);
-      });
-    });
-  }
 }
 
 function normalizeItem(item) {
@@ -672,10 +670,12 @@ function getVisibleItems() {
     const haystack = [
       item.capacidad,
       item.subcapacidad,
-      item.objetivoEvaluacion,
-      item.preguntasClave,
-      item.evidencias,
+      getItemObjective(item),
+      getItemQuestions(item).join(" "),
+      getItemEvidenceText(item),
       item.iniciativaSugerida,
+      item.ai?.cases,
+      item.ai?.advanced,
     ]
       .join(" ")
       .toLowerCase();
