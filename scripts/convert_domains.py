@@ -29,6 +29,13 @@ FILES = [
         "source": ROOT / "F3M_Transaccional_assessment_ready_AI.xlsx",
         "output": OUT_DIR / "transacciones.json",
     },
+    {
+        "domain_id": "finanzas-negocio",
+        "domain_label": "Finanzas de negocio",
+        "domain_title": "Finanzas de negocio",
+        "source": ROOT / "F3M_Finanzas_Negocio_BU_assessment_ready_AI_v0.xlsx",
+        "output": OUT_DIR / "finanzas-negocio.json",
+    }
 ]
 
 

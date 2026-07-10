@@ -41,6 +41,7 @@ const DATA_URL = "data/fpa_assessment.json";
 
 const DEFAULT_DOMAIN_ID = "fpa";
 
+
 const DOMAINS = {
   fpa: {
     id: "fpa",
@@ -62,6 +63,13 @@ const DOMAINS = {
     title: "Transacciones",
     group: "Transaccionales y operativos",
     dataUrl: "data/domains/transacciones.json",
+  },
+  "finanzas-negocio": {
+    id: "finanzas-negocio",
+    label: "Finanzas de negocio",
+    title: "Finanzas de negocio",
+    group: "Estratégicos y de negocio",
+    dataUrl: "data/domains/finanzas-negocio.json",
   },
 };
 

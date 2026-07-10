@@ -1,0 +1,571 @@
+{
+  "meta": {
+    "domainId": "finanzas-negocio",
+    "domainLabel": "Finanzas de negocio",
+    "domainTitle": "Finanzas de negocio",
+    "sourceFile": "F3M_Finanzas_Negocio_BU_assessment_ready_AI_v0.xlsx",
+    "targetMaturity": 4
+  },
+  "subcapacities": [
+    {
+      "id": "finanzas-negocio-1-1",
+      "capacidad": "Financiación I+D",
+      "subcapacidad": "1.1 Gobierno y portfolio de iniciativas de I+D",
+      "objetivo": "Evaluar si existe un marco formal para identificar, aprobar, priorizar y gobernar iniciativas de I+D desde una perspectiva financiera y de creación de valor.",
+      "maturity": {
+        "1": "Iniciativas de I+D gestionadas de forma aislada, con baja visibilidad financiera, criterios de aprobación no homogéneos y dependencia elevada de sponsors individuales.",
+        "2": "Existe un inventario básico de iniciativas y criterios financieros parciales, aunque la priorización y el seguimiento son heterogéneos entre áreas o unidades.",
+        "3": "Portfolio de I+D definido, con ownership, criterios de aprobación, presupuestos, métricas económicas y proceso periódico de revisión.",
+        "4": "Gobierno integrado del portfolio de I+D con estrategia, presupuesto, riesgos, capacidad de ejecución, beneficios esperados y reasignación periódica de recursos.",
+        "5": "Portfolio de innovación dinámico y AI-enabled, con priorización basada en escenarios, señales de mercado, probabilidad de éxito, ROI esperado y recomendaciones de asignación de capital."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe portfolio formal de iniciativas de I+D?",
+        "¿Se priorizan iniciativas con criterios financieros y estratégicos?",
+        "¿Hay owners y governance de aprobación?",
+        "¿Se revisa periódicamente la continuidad de las iniciativas?"
+      ],
+      "evidencias": "Portfolio de I+D; criterios de priorización; actas de comité; business cases; presupuesto por iniciativa; matriz de ownership.",
+      "iniciativaSugerida": "Diseñar modelo de gobierno del portfolio de I+D con criterios de valor, riesgo, alineamiento estratégico, funding y seguimiento periódico.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-orchestrated product design; Smarter clinical trials; End-to-end autonomous drug discovery and development",
+        "advanced": "Portfolio de innovación dinámico y AI-enabled, con priorización basada en escenarios, señales de mercado, probabilidad de éxito, ROI esperado y recomendaciones de asignación de capital.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.1 Gobierno y portfolio de iniciativas de I+D"
+      }
+    },
+    {
+      "id": "finanzas-negocio-1-2",
+      "capacidad": "Financiación I+D",
+      "subcapacidad": "1.2 Planificación y control económico de proyectos de I+D",
+      "objetivo": "Evaluar la capacidad para planificar, presupuestar, forecastar y controlar costes, inversiones y desviaciones de proyectos de I+D.",
+      "maturity": {
+        "1": "Costes de I+D controlados de forma manual y retrospectiva, con baja conexión entre presupuesto, ejecución y avance de los proyectos.",
+        "2": "Presupuestos básicos por proyecto, con seguimiento periódico limitado y análisis manual de desviaciones relevantes.",
+        "3": "Planificación económica estructurada por proyecto, fase, hito y naturaleza de coste, con reporting recurrente y análisis de desviaciones.",
+        "4": "Control integrado de presupuesto, forecast, avance técnico, recursos, riesgos y beneficios esperados, con alertas y acciones correctivas.",
+        "5": "Planificación predictiva de costes y avance de I+D, con simulación de escenarios, detección temprana de desviaciones y recomendaciones sobre continuidad, aceleración o cancelación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se presupuestan proyectos por fase e hito?",
+        "¿Se actualiza forecast económico de I+D?",
+        "¿Se analiza desviación por driver?",
+        "¿Se conectan costes con avance y beneficios esperados?"
+      ],
+      "evidencias": "Presupuesto de I+D; forecast por proyecto; informes de desviaciones; hitos técnicos; costes reales; actas de seguimiento.",
+      "iniciativaSugerida": "Implantar modelo de control económico de proyectos de I+D con presupuesto, forecast, hitos, desviaciones, riesgos y acciones correctivas.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-orchestrated product design; Smarter clinical trials; End-to-end autonomous drug discovery and development",
+        "advanced": "Planificación predictiva de costes y avance de I+D, con simulación de escenarios, detección temprana de desviaciones y recomendaciones sobre continuidad, aceleración o cancelación.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.2 Planificación y control económico de proyectos de I+D"
+      }
+    },
+    {
+      "id": "finanzas-negocio-1-3",
+      "capacidad": "Financiación I+D",
+      "subcapacidad": "1.3 Financiación, subvenciones e incentivos de I+D",
+      "objetivo": "Evaluar si la organización identifica, captura y gestiona fuentes de financiación, subvenciones e incentivos aplicables a actividades de I+D.",
+      "maturity": {
+        "1": "Oportunidades de financiación o incentivos identificadas de forma reactiva, con documentación dispersa y baja trazabilidad.",
+        "2": "Se gestionan algunas ayudas o incentivos relevantes, aunque la identificación, justificación y seguimiento dependen de esfuerzos manuales.",
+        "3": "Proceso definido para identificar, evaluar, solicitar y justificar financiación e incentivos de I+D, con responsabilidades claras.",
+        "4": "Gestión integrada de funding con portfolio, presupuesto, contabilidad, fiscalidad, reporting y evidencias requeridas por organismos financiadores.",
+        "5": "Motor inteligente de identificación y optimización de incentivos, con screening normativo, elegibilidad predictiva, generación asistida de documentación y alertas de cumplimiento."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se monitorizan fuentes de financiación e incentivos?",
+        "¿Existe proceso de elegibilidad y solicitud?",
+        "¿Se documentan evidencias para justificación?",
+        "¿Se integran incentivos en forecast y reporting?"
+      ],
+      "evidencias": "Mapa de incentivos; expedientes de subvención; justificaciones; documentación técnica; registros contables; calendario de obligaciones.",
+      "iniciativaSugerida": "Crear proceso estructurado de funding e incentivos de I+D con screening de elegibilidad, evidencias, workflow de aprobación y tracking financiero.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automated regulatory compliance; Financial rules and regulations interpretations; AI-orchestrated product design",
+        "advanced": "Motor inteligente de identificación y optimización de incentivos, con screening normativo, elegibilidad predictiva, generación asistida de documentación y alertas de cumplimiento.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.3 Financiación, subvenciones e incentivos de I+D"
+      }
+    },
+    {
+      "id": "finanzas-negocio-1-4",
+      "capacidad": "Financiación I+D",
+      "subcapacidad": "1.4 Medición de valor y retorno de la innovación",
+      "objetivo": "Evaluar si la organización mide el retorno financiero, estratégico y operativo de las inversiones de I+D a lo largo del ciclo de vida.",
+      "maturity": {
+        "1": "No existe medición sistemática del retorno de I+D; el seguimiento se centra en gasto ejecutado o hitos técnicos.",
+        "2": "Se miden beneficios de algunas iniciativas, pero con criterios variables y baja conexión con decisiones de portfolio.",
+        "3": "KPIs de valor definidos para I+D, con seguimiento periódico de avance, coste, beneficios, riesgos y grado de consecución.",
+        "4": "Modelo integrado de value tracking conectado con portfolio, business cases, beneficios reales, aprendizaje y reasignación de recursos.",
+        "5": "Medición avanzada de valor con modelos predictivos, análisis de contribución, escenarios de monetización y recomendaciones de inversión/desinversión en innovación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se mide ROI de iniciativas de I+D?",
+        "¿Existen KPIs de valor financiero y estratégico?",
+        "¿Se comparan beneficios reales vs esperados?",
+        "¿Se usan aprendizajes para futuras decisiones?"
+      ],
+      "evidencias": "KPIs de innovación; benefit tracking; business cases; informes post-implementación; decisiones de portfolio; lecciones aprendidas.",
+      "iniciativaSugerida": "Definir modelo de medición de valor de I+D con KPIs, beneficios esperados/reales, owners, revisión de portfolio y aprendizaje recurrente.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "End-to-end autonomous drug discovery and development; AI-orchestrated product design; Project-level recommendations",
+        "advanced": "Medición avanzada de valor con modelos predictivos, análisis de contribución, escenarios de monetización y recomendaciones de inversión/desinversión en innovación.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.4 Medición de valor y retorno de la innovación"
+      }
+    },
+    {
+      "id": "finanzas-negocio-2-1",
+      "capacidad": "Financiación de ventas comerciales",
+      "subcapacidad": "2.1 Gobierno financiero de propuestas y condiciones comerciales",
+      "objetivo": "Evaluar si existe un marco financiero para gobernar propuestas, ofertas, condiciones comerciales, descuentos y excepciones.",
+      "maturity": {
+        "1": "Condiciones comerciales definidas caso a caso, con baja implicación financiera y controles limitados sobre descuentos, riesgos o márgenes.",
+        "2": "Políticas comerciales básicas y revisión financiera para operaciones relevantes, aunque con excepciones frecuentes y trazabilidad parcial.",
+        "3": "Modelo de gobierno comercial-financiero con políticas, umbrales, aprobaciones, criterios de margen y control de excepciones.",
+        "4": "Gobierno integrado con CRM, pricing, crédito, contratos, rentabilidad y forecast comercial, con workflow y reporting de cumplimiento.",
+        "5": "Asistente AI para propuestas comerciales que recomienda condiciones, identifica riesgos, estima rentabilidad y guía aprobaciones según margen, cliente y probabilidad de conversión."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen políticas financieras para ofertas y descuentos?",
+        "¿Se aprueban excepciones con workflow?",
+        "¿Se calcula margen esperado antes de ofertar?",
+        "¿Se conectan condiciones comerciales con contrato y forecast?"
+      ],
+      "evidencias": "Políticas comerciales; matriz de descuentos; aprobaciones; CRM; ofertas; contratos; análisis de margen por oportunidad.",
+      "iniciativaSugerida": "Diseñar gobierno financiero de propuestas comerciales con reglas de margen, descuentos, riesgos, aprobaciones y trazabilidad end-to-end.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-powered RFP and knowledge assistant; Intelligent commercial operations; AI assistant for vehicle buying and leasing",
+        "advanced": "Asistente AI para propuestas comerciales que recomienda condiciones, identifica riesgos, estima rentabilidad y guía aprobaciones según margen, cliente y probabilidad de conversión.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.1 Gobierno financiero de propuestas y condiciones comerciales"
+      }
+    },
+    {
+      "id": "finanzas-negocio-2-2",
+      "capacidad": "Financiación de ventas comerciales",
+      "subcapacidad": "2.2 Evaluación financiera de oportunidades, RFPs y ofertas",
+      "objetivo": "Evaluar la capacidad para analizar oportunidades comerciales, RFPs y ofertas desde una perspectiva de valor, rentabilidad, riesgo y capacidad de entrega.",
+      "maturity": {
+        "1": "Evaluación financiera limitada o tardía, con foco en ingresos esperados y baja consideración de costes, riesgos o capacidad.",
+        "2": "Análisis financiero básico en oportunidades relevantes, con plantillas parciales y dependencia de analistas o equipos comerciales.",
+        "3": "Modelo estándar de evaluación de oportunidades con ingresos, costes, margen, riesgos, condiciones, capacidad y probabilidad de éxito.",
+        "4": "Evaluación integrada con pipeline, pricing, capacidad operativa, riesgos contractuales, forecast y priorización comercial.",
+        "5": "AI/RFP assistant que resume requerimientos, estima economics, identifica riesgos, propone respuestas y prioriza oportunidades según valor ajustado por probabilidad y riesgo."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se evalúan oportunidades con criterios homogéneos?",
+        "¿Se cuantifica coste de servir y margen esperado?",
+        "¿Se incorpora riesgo contractual/comercial?",
+        "¿Se prioriza el pipeline por valor ajustado?"
+      ],
+      "evidencias": "RFPs; plantillas de análisis; pipeline comercial; modelos de margen; actas de bid/no-bid; aprobaciones de ofertas.",
+      "iniciativaSugerida": "Implantar modelo de evaluación financiera de oportunidades y RFPs con economics, riesgos, capacidad, probabilidad y priorización de pipeline.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-powered RFP and knowledge assistant; Intelligent commercial operations; Hyper-personalized sales and marketing assistant",
+        "advanced": "AI/RFP assistant que resume requerimientos, estima economics, identifica riesgos, propone respuestas y prioriza oportunidades según valor ajustado por probabilidad y riesgo.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.2 Evaluación financiera de oportunidades, RFPs y ofertas"
+      }
+    },
+    {
+      "id": "finanzas-negocio-2-3",
+      "capacidad": "Financiación de ventas comerciales",
+      "subcapacidad": "2.3 Gestión de riesgos comerciales y exposición financiera",
+      "objetivo": "Evaluar el control de riesgos financieros asociados a actividad comercial: crédito, concentración, condiciones, contratos, penalizaciones y exposición.",
+      "maturity": {
+        "1": "Riesgos comerciales gestionados reactivamente, con baja conexión entre ventas, finanzas, crédito y contratos.",
+        "2": "Se revisan riesgos en operaciones relevantes, aunque con criterios no homogéneos y análisis manual de exposición.",
+        "3": "Modelo de riesgo comercial definido con criterios de crédito, exposición, términos, concentración, rentabilidad y aprobación.",
+        "4": "Riesgo comercial integrado con CRM, contratos, O2C, pricing, margen, cash y límites de exposición, con alertas y seguimiento.",
+        "5": "Scoring predictivo de riesgo comercial y exposición, con recomendaciones de condiciones, garantías, límites, pricing y acciones preventivas por cliente u oportunidad."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se evalúa riesgo financiero de clientes y ofertas?",
+        "¿Existen límites y condiciones por perfil de riesgo?",
+        "¿Se monitoriza exposición comercial?",
+        "¿Se conectan riesgos con pricing y aprobación?"
+      ],
+      "evidencias": "Política de crédito; límites; exposición por cliente; contratos; términos comerciales; aging; aprobaciones de riesgo.",
+      "iniciativaSugerida": "Construir modelo de riesgo comercial financiero con scoring, límites, términos, exposición, alertas y workflow de aprobación.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI agents for credit underwriting; Recommend optimal payment terms to improve DSO; Intelligent commercial operations",
+        "advanced": "Scoring predictivo de riesgo comercial y exposición, con recomendaciones de condiciones, garantías, límites, pricing y acciones preventivas por cliente u oportunidad.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.3 Gestión de riesgos comerciales y exposición financiera"
+      }
+    },
+    {
+      "id": "finanzas-negocio-2-4",
+      "capacidad": "Financiación de ventas comerciales",
+      "subcapacidad": "2.4 Seguimiento de performance comercial y rentabilidad de ventas",
+      "objetivo": "Evaluar si la función financiera monitoriza la conversión, rentabilidad, margen, desviaciones y cumplimiento económico de la actividad comercial.",
+      "maturity": {
+        "1": "Seguimiento centrado en ventas o ingresos, con baja visibilidad de margen, coste de servir o desviaciones frente a oferta.",
+        "2": "Reporting comercial-financiero básico, con análisis de margen parcial y seguimiento manual de ofertas relevantes.",
+        "3": "Performance comercial monitorizada con KPIs de pipeline, conversión, margen, desviación oferta-real y rentabilidad por cliente/canal/producto.",
+        "4": "Reporting integrado de ventas, margen, cash, descuentos, forecast y acciones, con owners y revisión periódica de performance.",
+        "5": "AI genera insights de performance comercial, identifica oportunidades de mejora, riesgos de margen, leakage y acciones personalizadas por cliente, canal o producto."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se mide margen real vs ofertado?",
+        "¿Se analiza performance por cliente/canal/producto?",
+        "¿Se identifican fugas de margen?",
+        "¿Se generan acciones comerciales-financieras?"
+      ],
+      "evidencias": "Dashboard comercial-financiero; pipeline; márgenes; descuentos; revenue leakage; actas de performance; acciones comerciales.",
+      "iniciativaSugerida": "Rediseñar reporting comercial-financiero con KPIs de margen, conversión, leakage, forecast, owners y acciones de mejora.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Intelligent commercial operations; Hyper-personalized sales and marketing assistant; Identify & proactively correct revenue leakage",
+        "advanced": "AI genera insights de performance comercial, identifica oportunidades de mejora, riesgos de margen, leakage y acciones personalizadas por cliente, canal o producto.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.4 Seguimiento de performance comercial y rentabilidad de ventas"
+      }
+    },
+    {
+      "id": "finanzas-negocio-3-1",
+      "capacidad": "Financiación de la fabricación y la cadena de suministro",
+      "subcapacidad": "3.1 Planificación financiera de operaciones y supply chain",
+      "objetivo": "Evaluar si la planificación financiera de fabricación, logística, inventarios y cadena de suministro está integrada con demanda, capacidad y presupuesto.",
+      "maturity": {
+        "1": "Planificación financiera operativa manual, desconectada de demanda, capacidad, inventario o restricciones de supply chain.",
+        "2": "Forecast operativo-financiero básico, con inputs parciales de demanda, producción o logística y alta dependencia de Excel.",
+        "3": "Planificación estructurada con drivers de demanda, producción, logística, inventario, costes y responsables definidos.",
+        "4": "Planificación integrada con S&OP/IBP, presupuesto, forecast, capacidad, cash, riesgos y escenarios operativos.",
+        "5": "Integrated business planning AI-enabled, con simulación de demanda, capacidad, costes, inventario, restricciones y recomendaciones de decisiones operativas-financieras."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se conecta la planificación financiera con demanda y capacidad?",
+        "¿Existe integración S&OP/IBP?",
+        "¿Se modelizan escenarios de supply chain?",
+        "¿Se conecta con presupuesto y forecast?"
+      ],
+      "evidencias": "Plan operativo-financiero; S&OP/IBP; forecast de demanda; capacidad; costes logísticos; inventarios; escenarios.",
+      "iniciativaSugerida": "Implantar planificación financiera integrada de operaciones y supply chain con drivers, escenarios, capacidad, inventario y forecast.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Autonomous supply chain operations; Integrated business planning; Dynamic inventory management",
+        "advanced": "Integrated business planning AI-enabled, con simulación de demanda, capacidad, costes, inventario, restricciones y recomendaciones de decisiones operativas-financieras.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.1 Planificación financiera de operaciones y supply chain"
+      }
+    },
+    {
+      "id": "finanzas-negocio-3-2",
+      "capacidad": "Financiación de la fabricación y la cadena de suministro",
+      "subcapacidad": "3.2 Control de costes de fabricación, logística y servicio",
+      "objetivo": "Evaluar la capacidad para medir, controlar y explicar costes de producción, logística, mantenimiento, calidad y servicio.",
+      "maturity": {
+        "1": "Costes operativos controlados de forma agregada y retrospectiva, con baja trazabilidad por driver, centro, línea o producto.",
+        "2": "Reporting básico de costes con análisis manual de desviaciones y criterios variables por planta, operación o unidad.",
+        "3": "Modelo de coste definido por driver, centro, línea, producto y actividad, con análisis recurrente de desviaciones.",
+        "4": "Control integrado de costes con productividad, calidad, mantenimiento, logística, inventarios, acciones correctivas y forecast.",
+        "5": "AI identifica patrones de coste, anomalías operativas, mantenimiento predictivo y oportunidades de eficiencia con recomendaciones cuantificadas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se conocen drivers de coste operativo?",
+        "¿Se analiza desviación por planta/línea/producto?",
+        "¿Se conectan costes con calidad y productividad?",
+        "¿Se generan acciones de eficiencia?"
+      ],
+      "evidencias": "Modelo de costes; costes estándar/reales; desviaciones; KPIs de productividad; mantenimiento; calidad; logística; planes de eficiencia.",
+      "iniciativaSugerida": "Crear modelo de control de costes operativos con drivers, desviaciones, productividad, calidad, mantenimiento y acciones de mejora.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-driven predictive maintenance; Autonomous field operations management; Recommend demand planning, product costing, and pricing setting",
+        "advanced": "AI identifica patrones de coste, anomalías operativas, mantenimiento predictivo y oportunidades de eficiencia con recomendaciones cuantificadas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.2 Control de costes de fabricación, logística y servicio"
+      }
+    },
+    {
+      "id": "finanzas-negocio-3-3",
+      "capacidad": "Financiación de la fabricación y la cadena de suministro",
+      "subcapacidad": "3.3 Gestión financiera de inventarios y capital circulante operativo",
+      "objetivo": "Evaluar si Finanzas monitoriza y optimiza inventarios, obsolescencia, rotación, working capital y necesidades de liquidez operativa.",
+      "maturity": {
+        "1": "Inventarios y working capital operativos gestionados con visibilidad limitada, análisis retrospectivo y baja conexión con decisiones de producción o compra.",
+        "2": "Seguimiento básico de inventario, rotación y obsolescencia, con acciones puntuales y análisis manual.",
+        "3": "KPIs de inventario y capital circulante definidos, con owners, reporting periódico y análisis por driver, material, producto o ubicación.",
+        "4": "Gestión integrada de inventario, demanda, producción, compras, servicio, cash y riesgo de obsolescencia, con acciones y seguimiento.",
+        "5": "Optimización predictiva de inventario y working capital con AI, anticipando demanda, obsolescencia, rupturas, exceso de stock y necesidades de caja."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se mide rotación, obsolescencia y cobertura?",
+        "¿Inventario se conecta con cash y forecast?",
+        "¿Se anticipan rupturas/excesos?",
+        "¿Hay acciones sobre working capital?"
+      ],
+      "evidencias": "KPIs de inventario; DIO; obsolescencia; stock-outs; slow movers; forecast de inventario; reporting de working capital.",
+      "iniciativaSugerida": "Implantar modelo financiero de inventarios y working capital con KPIs, escenarios, alertas de obsolescencia y acciones de optimización.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Dynamic inventory management; Autonomous supply chain operations; Predictive cash flow forecasting tool",
+        "advanced": "Optimización predictiva de inventario y working capital con AI, anticipando demanda, obsolescencia, rupturas, exceso de stock y necesidades de caja.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.3 Gestión financiera de inventarios y capital circulante operativo"
+      }
+    },
+    {
+      "id": "finanzas-negocio-3-4",
+      "capacidad": "Financiación de la fabricación y la cadena de suministro",
+      "subcapacidad": "3.4 Resiliencia, riesgo y eficiencia de la cadena de suministro",
+      "objetivo": "Evaluar si se cuantifican riesgos, disrupciones, dependencias, resiliencia y eficiencia financiera de la cadena de suministro.",
+      "maturity": {
+        "1": "Riesgos de supply chain evaluados de forma cualitativa o reactiva, sin cuantificación financiera sistemática.",
+        "2": "Análisis puntuales de riesgos relevantes, con estimaciones manuales de impacto y planes de mitigación limitados.",
+        "3": "Modelo de riesgos operativos-financieros definido, con escenarios de impacto, criticidad, proveedores/materiales clave y responsables.",
+        "4": "Gestión integrada de resiliencia con coste, servicio, inventario, proveedores, logística, continuidad y planes de contingencia cuantificados.",
+        "5": "AI monitoriza señales internas/externas de riesgo, simula impactos financieros y recomienda acciones de mitigación, sourcing, inventario o red logística."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se cuantifican riesgos de supply chain?",
+        "¿Existen escenarios de disrupción?",
+        "¿Se valoran trade-offs coste/servicio/riesgo?",
+        "¿Hay planes de contingencia financieros?"
+      ],
+      "evidencias": "Mapa de riesgos; escenarios; proveedores críticos; planes de contingencia; KPIs de servicio; costes logísticos; análisis de impacto.",
+      "iniciativaSugerida": "Desarrollar modelo financiero de resiliencia supply chain con riesgos, escenarios, impacto económico, planes de mitigación y seguimiento.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Resilient logistics and planning; Autonomous supply chain operations; Autonomous drone-based infrastructure inspection",
+        "advanced": "AI monitoriza señales internas/externas de riesgo, simula impactos financieros y recomienda acciones de mitigación, sourcing, inventario o red logística.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.4 Resiliencia, riesgo y eficiencia de la cadena de suministro"
+      }
+    },
+    {
+      "id": "finanzas-negocio-4-1",
+      "capacidad": "Precios y rentabilidad",
+      "subcapacidad": "4.1 Estrategia y gobierno de pricing",
+      "objetivo": "Evaluar si existe una estrategia de precios gobernada, alineada con objetivos de margen, posicionamiento, valor cliente y dinámica competitiva.",
+      "maturity": {
+        "1": "Precios definidos de forma local o reactiva, con baja conexión con margen, estrategia, valor percibido o competencia.",
+        "2": "Políticas de pricing básicas, con criterios parciales por producto, cliente o canal y revisión manual de excepciones.",
+        "3": "Modelo de gobierno de pricing definido, con roles, criterios, niveles de aprobación, catálogo de precios y control de descuentos.",
+        "4": "Pricing integrado con estrategia comercial, costes, competencia, elasticidad, margen, promociones y performance, con rutinas de revisión.",
+        "5": "Pricing dinámico AI-enabled que recomienda precios y condiciones según demanda, elasticidad, inventario, cliente, competencia, costes y objetivos de margen."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe estrategia de pricing documentada?",
+        "¿Hay governance de descuentos y excepciones?",
+        "¿Se conecta precio con margen y posicionamiento?",
+        "¿Se revisan precios de forma recurrente?"
+      ],
+      "evidencias": "Política de pricing; catálogo de precios; matriz de descuentos; aprobaciones; análisis competitivo; reporting de margen.",
+      "iniciativaSugerida": "Definir modelo de gobierno de pricing con estrategia, roles, reglas, descuentos, excepciones, KPIs y ciclo de revisión.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Dynamic pricing and inventory optimization; Examine market trends, supplier behavior, and other factors to determine optimal prices; Recommend demand planning, product costing, and pricing setting",
+        "advanced": "Pricing dinámico AI-enabled que recomienda precios y condiciones según demanda, elasticidad, inventario, cliente, competencia, costes y objetivos de margen.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.1 Estrategia y gobierno de pricing"
+      }
+    },
+    {
+      "id": "finanzas-negocio-4-2",
+      "capacidad": "Precios y rentabilidad",
+      "subcapacidad": "4.2 Modelos de rentabilidad por cliente, producto y canal",
+      "objetivo": "Evaluar si la organización mide y gestiona rentabilidad de forma granular por cliente, producto, canal, segmento y servicio.",
+      "maturity": {
+        "1": "Rentabilidad analizada de forma agregada, con baja asignación de costes y limitada visibilidad por cliente, producto o canal.",
+        "2": "Análisis de margen recurrente para algunos segmentos, con asignaciones parciales y criterios no homogéneos.",
+        "3": "Modelo de rentabilidad definido con ingresos, descuentos, coste de producto, coste de servir, asignaciones y dimensiones comunes.",
+        "4": "Rentabilidad integrada con pricing, mix, descuentos, promociones, servicio, canal, forecast y acciones comerciales.",
+        "5": "Modelos AI identifican patrones de rentabilidad, leakage, cross-sell/upsell y recomendaciones de mix, cliente, canal y nivel de servicio."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se mide rentabilidad por cliente/producto/canal?",
+        "¿Se incluye coste de servir?",
+        "¿Se identifican bolsas de margen negativo?",
+        "¿Se generan acciones comerciales o de servicio?"
+      ],
+      "evidencias": "Modelo de rentabilidad; P&L por dimensión; coste de servir; márgenes; descuentos; análisis de leakage; acciones comerciales.",
+      "iniciativaSugerida": "Construir modelo granular de rentabilidad con coste de servir, margen neto, leakage, segmentación y acciones por cliente/producto/canal.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Identify & proactively correct revenue leakage; AI agents for customer success; Hyper-personalized sales and marketing assistant",
+        "advanced": "Modelos AI identifican patrones de rentabilidad, leakage, cross-sell/upsell y recomendaciones de mix, cliente, canal y nivel de servicio.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.2 Modelos de rentabilidad por cliente, producto y canal"
+      }
+    },
+    {
+      "id": "finanzas-negocio-4-3",
+      "capacidad": "Precios y rentabilidad",
+      "subcapacidad": "4.3 Optimización de promociones, descuentos y condiciones",
+      "objetivo": "Evaluar si promociones, descuentos y condiciones comerciales se diseñan y evalúan con criterios de ROI, margen, volumen y valor cliente.",
+      "maturity": {
+        "1": "Promociones y descuentos gestionados con criterios comerciales de corto plazo, con medición limitada de ROI o impacto en margen.",
+        "2": "Se analizan promociones relevantes, pero con reporting manual, atribución parcial y baja sistematización de aprendizajes.",
+        "3": "Metodología de evaluación de promociones y descuentos con baseline, uplift, margen, coste, ROI y owners definidos.",
+        "4": "Optimización integrada de promociones con demanda, pricing, inventario, margen, canal y aprendizaje post-campaña.",
+        "5": "AI recomienda promociones, descuentos y condiciones óptimas, simulando elasticidad, canibalización, inventario, margen incremental y probabilidad de conversión."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se calcula ROI de promociones?",
+        "¿Se mide uplift incremental?",
+        "¿Se controla impacto en margen?",
+        "¿Se usan aprendizajes para nuevas campañas?"
+      ],
+      "evidencias": "Calendario promocional; análisis ROI; baseline/uplift; descuentos; margen incremental; post-mortems; decisiones de pricing.",
+      "iniciativaSugerida": "Implantar modelo de optimización promocional con ROI, uplift, margen, elasticidad, canibalización y recomendaciones de descuento.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Planning for promotions; Dynamic pricing and inventory optimization; Recommend demand planning, product costing, and pricing setting",
+        "advanced": "AI recomienda promociones, descuentos y condiciones óptimas, simulando elasticidad, canibalización, inventario, margen incremental y probabilidad de conversión.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.3 Optimización de promociones, descuentos y condiciones"
+      }
+    },
+    {
+      "id": "finanzas-negocio-4-4",
+      "capacidad": "Precios y rentabilidad",
+      "subcapacidad": "4.4 Seguimiento de margen, leakage y creación de valor",
+      "objetivo": "Evaluar si se monitorizan desviaciones de margen, revenue leakage, cumplimiento de precio y palancas de creación de valor.",
+      "maturity": {
+        "1": "Seguimiento de margen tardío y agregado, con baja capacidad para identificar causas, fugas o acciones correctivas.",
+        "2": "Análisis periódico de margen y descuentos, con identificación manual de desviaciones relevantes.",
+        "3": "Modelo de performance de margen con drivers, owners, desviaciones, leakage, acciones y seguimiento por dimensión.",
+        "4": "Margin management integrado con pricing, ventas, costes, mix, contratos, forecast y rutinas de gestión orientadas a acción.",
+        "5": "AI detecta leakage y desviaciones tempranas, explica drivers de margen, recomienda acciones de precio/mix/coste y cuantifica impacto esperado en valor."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se monitoriza margen por driver?",
+        "¿Se detecta revenue leakage?",
+        "¿Hay owners de acciones de margen?",
+        "¿Se cuantifica impacto de acciones?"
+      ],
+      "evidencias": "Dashboard de margen; análisis de leakage; variaciones de precio/mix/coste; contratos; acciones; seguimiento de beneficios.",
+      "iniciativaSugerida": "Crear modelo de margin performance management con drivers, leakage, owners, acciones, forecast e impacto económico cuantificado.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Identify & proactively correct revenue leakage; FinanceAI Insights Platform; Generate account variance analysis and intelligent explanations",
+        "advanced": "AI detecta leakage y desviaciones tempranas, explica drivers de margen, recomienda acciones de precio/mix/coste y cuantifica impacto esperado en valor.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.4 Seguimiento de margen, leakage y creación de valor"
+      }
+    }
+  ]
+}
