@@ -56,6 +56,13 @@ const DOMAINS = {
     group: "Transaccionales y operativos",
     dataUrl: "data/domains/controlling.json",
   },
+  transacciones: {
+    id: "transacciones",
+    label: "Transacciones",
+    title: "Transacciones",
+    group: "Transaccionales y operativos",
+    dataUrl: "data/domains/transacciones.json",
+  },
 };
 
 

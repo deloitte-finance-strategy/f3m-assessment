@@ -22,6 +22,13 @@ FILES = [
         "source": ROOT / "F3M_Controlling_assessment_ready_AI_v0.xlsx",
         "output": OUT_DIR / "controlling.json",
     },
+    {
+        "domain_id": "transacciones",
+        "domain_label": "Transacciones",
+        "domain_title": "Transacciones",
+        "source": ROOT / "F3M_Transaccional_assessment_ready_AI.xlsx",
+        "output": OUT_DIR / "transacciones.json",
+    },
 ]
 
 
