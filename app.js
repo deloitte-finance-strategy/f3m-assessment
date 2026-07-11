@@ -452,6 +452,16 @@ function getMaturityLevel(score) {
   return "5 - Avanzado/Referente";
 }
 
+
+function getMaturityLevelNumber(score) {
+  if (!Number.isFinite(score)) {
+    return null;
+  }
+
+  return Math.max(1, Math.min(5, Math.round(score)));
+}
+
+
 function round2(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
@@ -749,12 +759,36 @@ function renderDashboard() {
   const gapMedio = average(scored.map((entry) => entry.metrics.gap));
   const highCount = scored.filter((entry) => entry.metrics.prioridad === "Alta").length;
 
-  els.kpiGrid.innerHTML = [
-    kpiCard("Score global dominio", formatNumber(scoreGlobal), scored.length ? "Promedio de subcapacidades puntuadas" : "Pendiente de scoring"),
-    kpiCard("Gap medio vs objetivo", formatNumber(gapMedio), `Objetivo actual: ${state.meta.targetMaturity} - Optimizado`),
-    kpiCard("Subcapacidades puntuadas", `${scored.length}/${state.items.length}`, `${Math.round((scored.length / state.items.length) * 100)}% de avance`),
-    kpiCard("Prioridad alta", String(highCount), "Subcapacidades con gap igual o superior a 2"),
-  ].join("");
+
+els.kpiGrid.innerHTML = [
+  kpiCard(
+    "Score global dominio",
+    formatNumber(scoreGlobal),
+    scored.length
+      ? "Promedio de subcapacidades puntuadas"
+      : "Pendiente de scoring",
+    "score",
+  ),
+  kpiCard(
+    "Gap medio vs objetivo",
+    formatNumber(gapMedio),
+    `Objetivo actual: ${state.meta.targetMaturity} - Optimizado`,
+    "gap",
+  ),
+  kpiCard(
+    "Subcapacidades puntuadas",
+    `${scored.length}/${state.items.length}`,
+    `${Math.round((scored.length / state.items.length) * 100)}% de avance`,
+    "progress",
+  ),
+  kpiCard(
+    "Prioridad alta",
+    String(highCount),
+    "Subcapacidades con gap igual o superior a 2",
+    highCount > 0 ? "alert" : "neutral",
+  ),
+].join("");
+
 
   renderPriorityBars(metrics);
   renderLeverBars();
@@ -762,15 +796,17 @@ function renderDashboard() {
   renderCapabilityRadar(); // NUEVO: actualiza radar al recalcular dashboard
 }
 
-function kpiCard(label, value, note) {
+
+function kpiCard(label, value, note, tone = "neutral") {
   return `
-    <article class="kpi-card">
+    <article class="kpi-card kpi-card-${tone}">
       <span>${escapeHtml(label)}</span>
       <strong>${escapeHtml(value)}</strong>
       <p>${escapeHtml(note)}</p>
     </article>
   `;
 }
+
 
 function renderPriorityBars(entries) {
   const counts = { Alta: 0, Media: 0, Baja: 0, Pendiente: 0 };
@@ -1111,8 +1147,20 @@ function renderAssessments() {
 
     fragment.querySelector(".score-result").innerHTML = scoreResult(metrics);
 
+
+    const currentMaturityLevel = getMaturityLevelNumber(metrics.scoreMedio);
+
     fragment.querySelector(".maturity-list").innerHTML = Object.entries(item.maturity || {})
-      .map(([, text]) => `<li>${escapeHtml(text)}</li>`)
+      .map(([level, text]) => {
+        const isCurrentLevel = Number(level) === currentMaturityLevel;
+
+        return `
+          <li class="${isCurrentLevel ? "is-current-level" : ""}">
+            <span>${escapeHtml(text)}</span>
+            ${isCurrentLevel ? '<strong class="current-level-label">Nivel actual</strong>' : ""}
+          </li>
+        `;
+      })
       .join("");
 
     fragment.querySelector(".question-list").innerHTML = getItemQuestions(item)
@@ -1121,13 +1169,34 @@ function renderAssessments() {
 
     fragment.querySelector(".evidence-text").textContent = getItemEvidenceText(item);
 
-    els.assessmentList.appendChild(fragment);
+
+    const details = fragment.querySelector("details");
+    const summaryText = fragment.querySelector(".detail-summary-text");
+
+    if (details && summaryText) {
+      details.addEventListener("toggle", () => {
+        summaryText.textContent = details.open
+          ? "Ocultar detalle de evaluación"
+          : "Ver detalle de evaluación";
+      });
+    }
+
+
+  els.assessmentList.appendChild(fragment);
   });
 
   els.assessmentList.querySelectorAll(".score-select").forEach((select) => {
     select.addEventListener("change", handleScoreChange);
   });
 }
+
+
+function getScoreSelectClass(score) {
+  return Number.isInteger(score)
+    ? `score-value-${score}`
+    : "score-value-empty";
+}
+
 
 function scoreControl(item, lever) {
   const current = item.scores[lever.key];
@@ -1137,29 +1206,63 @@ function scoreControl(item, lever) {
   return `
     <label class="score-field">
       <span>${escapeHtml(lever.label)}</span>
-      <select class="score-select" data-id="${escapeAttr(item.id)}" data-lever="${lever.key}">
+      <select
+        class="score-select ${getScoreSelectClass(current)}"
+        data-id="${escapeAttr(item.id)}"
+        data-lever="${lever.key}"
+        aria-label="${escapeAttr(`${lever.label} de ${item.subcapacidad}`)}"
+      >
         ${options}
       </select>
     </label>
   `;
 }
 
+
 function scoreResult(metrics) {
   if (metrics.isPending) {
     return `
-      ${priorityBadge("Pendiente")}
-      <span class="metric-line"><strong>-</strong> score medio</span>
-      <span class="metric-line">Pendiente de scoring</span>
+      <div class="score-summary score-summary-pending">
+        <div class="score-summary-header">
+          ${priorityBadge("Pendiente")}
+        </div>
+
+        <div class="score-summary-main">
+          <strong>-</strong>
+          <span>Score medio</span>
+        </div>
+
+        <p class="score-summary-note">Pendiente de scoring</p>
+      </div>
     `;
   }
 
   return `
-    ${priorityBadge(metrics.prioridad)}
-    <span class="metric-line"><strong>${formatNumber(metrics.scoreMedio)}</strong> score medio</span>
-    <span class="metric-line"><strong>${formatNumber(metrics.gap)}</strong> gap · ${escapeHtml(metrics.oleada)}</span>
-    <span class="level-badge">${escapeHtml(metrics.nivel)}</span>
+    <div class="score-summary score-summary-${metrics.prioridad.toLowerCase()}">
+      <div class="score-summary-header">
+        ${priorityBadge(metrics.prioridad)}
+        <span class="score-summary-wave">${escapeHtml(metrics.oleada)}</span>
+      </div>
+
+      <div class="score-summary-main">
+        <strong>${formatNumber(metrics.scoreMedio)}</strong>
+        <span>Score medio</span>
+      </div>
+
+      <div class="score-summary-details">
+        <span>
+          <strong>${formatNumber(metrics.gap)}</strong>
+          Gap
+        </span>
+
+        <span class="level-badge">
+          ${escapeHtml(metrics.nivel)}
+        </span>
+      </div>
+    </div>
   `;
 }
+
 
 function handleScoreChange(event) {
   const item = state.items.find((entry) => entry.id === event.target.dataset.id);

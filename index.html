@@ -290,27 +290,43 @@
           <div class="score-result"></div>
         </div>
         <details>
-          <summary>Ver guía de evaluación, preguntas y evidencias</summary>
-          <div class="detail-grid">
-            <div>
-              <h4>Niveles de madurez</h4>
-              <ol class="maturity-list"></ol>
-            </div>
-            <div>
-              <h4>Preguntas clave</h4>
-              <ul class="question-list"></ul>
-              <h4>Evidencias</h4>
-              <p class="evidence-text"></p>
-              <h4>Criterios F3M de scoring</h4>
-                <div class="criteria-inline-action">
-                  <span class="small-note">
-                    Consulta la guía de evaluación para puntuar Procesos, Tecnología y Organización.
-                  </span>
-                  <button class="secondary-button scoring-criteria-button" type="button">
-                    Ver criterios F3M
-                  </button>
-                </div>
-              <p class="initiative-text"></p>
+          <summary>
+            <span class="detail-summary-text">Ver detalle de evaluación</span>
+          </summary>
+            <div class="detail-grid">
+              <section class="assessment-detail-block maturity-detail-block">
+                <h4>Niveles de madurez</h4>
+                <ol class="maturity-list"></ol>
+              </section>
+
+              <div class="assessment-detail-column">
+                <section class="assessment-detail-block questions-detail-block">
+                  <h4>Preguntas clave</h4>
+                  <ul class="question-list"></ul>
+                </section>
+
+                <section class="assessment-detail-block evidence-detail-block">
+                  <h4>Evidencias</h4>
+                  <p class="evidence-text"></p>
+                </section>
+
+                <section class="assessment-detail-block criteria-detail-block">
+                  <h4>Criterios F3M de scoring</h4>
+
+                  <div class="criteria-inline-action">
+                    <span class="small-note">
+                      Consulta la guía de evaluación para puntuar Procesos, Tecnología y Organización.
+                    </span>
+
+                    <button
+                      class="secondary-button scoring-criteria-button"
+                      type="button"
+                    >
+                      Ver criterios F3M
+                    </button>
+                  </div>
+                </section>
+              </div>
             </div>
           </div>
         </details>
