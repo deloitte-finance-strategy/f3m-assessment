@@ -76,10 +76,23 @@ const DOMAINS = {
 
 const STORAGE_KEY = "f3m-fpa-assessment-scenario";
 
+
 const LEVERS = [
-  { key: "procesos", label: "Procesos" },
-  { key: "tecnologia", label: "Tecnología" },
-  { key: "organizacion", label: "Organización" },
+  {
+    key: "procesos",
+    label: "Procesos",
+    color: "#86BC25",
+  },
+  {
+    key: "tecnologia",
+    label: "Tecnología",
+    color: "#ED8B00",
+  },
+  {
+    key: "organizacion",
+    label: "Organización",
+    color: "#012169",
+  },
 ];
 
 const PRIORITY_ORDER = {
@@ -218,6 +231,23 @@ function setActiveDomain(domainId) {
 }
 
 
+function resetDomainViewState() {
+  if (els.capacityFilter) {
+    els.capacityFilter.value = "all";
+  }
+
+  if (els.priorityFilter) {
+    els.priorityFilter.value = "all";
+  }
+
+  if (els.searchInput) {
+    els.searchInput.value = "";
+  }
+
+  expandedHeatmapCapabilities.clear();
+}
+
+
 async function switchDomain(domainId) {
   if (domainId === state.activeDomainId) {
     return;
@@ -229,12 +259,22 @@ async function switchDomain(domainId) {
   setActiveDomain(domainId);
 
   populateCapacityFilter();
+  resetDomainViewState();
   renderAll();
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
+  const domainSwitcher = document.querySelector(".domain-switcher");
+
+  if (domainSwitcher) {
+    domainSwitcher.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  } else {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
 }
 
 
@@ -435,7 +475,7 @@ function setupActiveTabObserver() {
   };
 
   const updateActiveTab = () => {
-    const scrollPosition = window.scrollY + 130; // MODIFICADO: compensa header/tabs sticky
+    const scrollPosition = window.scrollY + 82; // MODIFICADO: compensa header/tabs sticky
 
     let currentSectionId = sections[0].id;
 
@@ -671,6 +711,10 @@ function populateCapacityFilter() {
     `<option value="all">Todas</option>`,
     ...capacities.map((capability) => `<option value="${escapeAttr(capability)}">${escapeHtml(capability)}</option>`),
   ].join("");
+
+  els.capacityFilter.value = "all";
+  els.priorityFilter.value = "all";
+  els.searchInput.value = "";
 }
 
 function getVisibleItems() {
@@ -742,14 +786,28 @@ function renderPriorityBars(entries) {
     .join("");
 }
 
+
 function renderLeverBars() {
   const rows = LEVERS.map((lever) => {
-    const avg = average(state.items.map((item) => item.scores[lever.key]).filter((value) => Number.isFinite(value)));
+    const avg = average(
+      state.items
+        .map((item) => item.scores[lever.key])
+        .filter((value) => Number.isFinite(value)),
+    );
+
     const width = avg ? Math.round((avg / 5) * 100) : 0;
-    return barRow(lever.label, formatNumber(avg), width, "#007c89");
+
+    return barRow(
+      lever.label,
+      formatNumber(avg),
+      width,
+      lever.color,
+    );
   });
+
   els.leverBars.innerHTML = rows.join("");
 }
+
 
 function barRow(label, value, width, color) {
   return `
@@ -1295,6 +1353,13 @@ function updateHeatmapExpandAllButton(capabilityRows) {
 }
 
 
+function getWaveShortLabel(wave) {
+  const match = String(wave || "").match(/\d+/);
+
+  return match ? match[0] : "-";
+}
+
+
 function renderRoadmap() {
   const roadmapItems = getVisibleItems(); // Roadmap respeta filtros activos
 
@@ -1326,7 +1391,17 @@ function renderRoadmap() {
             IA
           </button>
         </td>
-        <td><span class="status-chip">${escapeHtml(metrics.oleada)}</span></td>
+
+        <td class="roadmap-wave-cell">
+          <span
+            class="status-chip roadmap-wave"
+            title="${escapeAttr(metrics.oleada)}"
+            aria-label="${escapeAttr(metrics.oleada)}"
+          >
+            ${escapeHtml(getWaveShortLabel(metrics.oleada))}
+          </span>
+        </td>
+
         <td>
           <input
             class="inline-input roadmap-owner"
@@ -1368,16 +1443,17 @@ function renderRoadmap() {
   `;
 
   els.roadmapTable.querySelectorAll(".roadmap-owner").forEach((input) => {
-    input.addEventListener("input", handleRoadmapFieldChange);
-  });
+  input.addEventListener("change", handleRoadmapFieldChange);
+});
 
-  els.roadmapTable.querySelectorAll(".roadmap-status").forEach((select) => {
-    select.addEventListener("change", handleRoadmapFieldChange);
-  });
+els.roadmapTable.querySelectorAll(".roadmap-status").forEach((select) => {
+  select.addEventListener("change", handleRoadmapFieldChange);
+});
 
-  els.roadmapTable.querySelectorAll(".roadmap-comment").forEach((textarea) => {
-    textarea.addEventListener("input", handleRoadmapFieldChange);
-  });
+els.roadmapTable.querySelectorAll(".roadmap-comment").forEach((textarea) => {
+  textarea.addEventListener("change", handleRoadmapFieldChange);
+});
+
 }
 
 
@@ -1524,6 +1600,7 @@ function updateSaveStatus(status, message) {
     return;
   }
 
+  els.saveStatus.hidden = false;
   els.saveStatus.className = `save-status ${status || ""}`.trim();
   els.saveStatus.textContent = message;
 }
@@ -1848,13 +1925,34 @@ function importScenario(event) {
 }
 
 
+function getActiveDomainConfig() {
+  return DOMAINS[state.activeDomainId] || {
+    id: state.activeDomainId || "domain",
+    label: state.meta?.domainLabel || "Dominio",
+    title: state.meta?.domainTitle || "Dominio",
+  };
+}
+
+function toSafeFileName(value) {
+  return String(value || "domain")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+
 function exportScenarioJson() {
   downloadFile(
-    "f3m_fpa_assessment_scenario.json",
+    "f3m_multidomain_assessment_scenario.json",
     JSON.stringify(buildScenarioPayload(), null, 2),
     "application/json",
   );
 }
+
 
 function exportCsv() {
   const summaryRows = buildSummaryRows();
@@ -1879,7 +1977,15 @@ function exportCsv() {
         Comentarios: item.comentario,
       };
     });
-  downloadFile("f3m_fpa_assessment_export.csv", toCsv([...summaryRows, ...roadmapRows]), "text/csv;charset=utf-8");
+    
+  const activeDomain = getActiveDomainConfig();
+  const domainFileName = toSafeFileName(activeDomain.id || activeDomain.label);
+
+  downloadFile(
+    `f3m_${domainFileName}_assessment_export.csv`,
+    toCsv([...summaryRows, ...roadmapRows]),
+    "text/csv;charset=utf-8",
+  );
 }
 
 
@@ -1959,8 +2065,12 @@ function buildEnhancedPdfReportData() {
     .slice(0, 15);
 
   const commentItems = visibleItems.filter((item) => item.comentario?.trim());
+  const activeDomain = getActiveDomainConfig();
 
   return {
+    domainId: activeDomain.id,
+    domainLabel: activeDomain.label,
+    domainTitle: activeDomain.title,
     generatedAt: new Date().toLocaleString("es-ES"),
     scenarioLabel: scenarioId || "Modo local",
     sourceFile: state.meta?.sourceFile || "-",
@@ -2018,14 +2128,19 @@ function buildPdfSummaryRowsFromItems(items) {
   });
 }
 
+
 function getPdfActiveFiltersLabel() {
   const filters = [];
 
-  if (els.capacityFilter?.value) {
-    filters.push(`Capacidad: ${els.capacityFilter.value}`);
+  if (els.capacityFilter?.value && els.capacityFilter.value !== "all") {
+    const capacityLabel =
+      els.capacityFilter.options[els.capacityFilter.selectedIndex]?.textContent ||
+      els.capacityFilter.value;
+
+    filters.push(`Capacidad: ${capacityLabel}`);
   }
 
-  if (els.priorityFilter?.value) {
+  if (els.priorityFilter?.value && els.priorityFilter.value !== "all") {
     filters.push(`Prioridad: ${els.priorityFilter.value}`);
   }
 
@@ -2035,6 +2150,7 @@ function getPdfActiveFiltersLabel() {
 
   return filters.length ? filters.join(" · ") : "Sin filtros activos";
 }
+
 
 function getRadarImagesForPdf() {
   return {
@@ -2057,13 +2173,14 @@ function getCanvasImageDataUrl(canvas) {
   }
 }
 
+
 function buildEnhancedPdfReportHtml(data) {
   return `
     <!doctype html>
     <html lang="es">
       <head>
         <meta charset="utf-8">
-        <title>Informe FP&A Assessment</title>
+        <title>Informe ${escapeHtml(data.domainLabel)} Assessment</title>
         <style>
           ${getEnhancedPdfReportStyles()}
         </style>
@@ -2085,17 +2202,22 @@ function buildEnhancedPdfReportHtml(data) {
   `;
 }
 
+
 function buildPdfEnhancedCover(data) {
   return `
     <section class="pdf-page pdf-cover">
       <div class="pdf-cover-accent"></div>
-      <p class="pdf-eyebrow">Finance Strategy · FP&A Assessment</p>
-      <h1>Informe preliminar de madurez FP&A</h1>
+      <p class="pdf-eyebrow">Finance Strategy · F3M Assessment</p>
+        <h1>Informe preliminar de madurez · ${escapeHtml(data.domainLabel)}</h1>
       <p class="pdf-subtitle">
         Resultados del assessment, gaps principales, visualizaciones y roadmap de iniciativas sugeridas.
       </p>
 
       <div class="pdf-meta-grid">
+        <div>
+          <span>Dominio analizado</span>
+          <strong>${escapeHtml(data.domainLabel)}</strong>
+        </div>
         <div>
           <span>Fecha de generación</span>
           <strong>${escapeHtml(data.generatedAt)}</strong>
@@ -2117,12 +2239,14 @@ function buildPdfEnhancedCover(data) {
   `;
 }
 
+
 function buildPdfEnhancedExecutiveSummary(data) {
   return `
     <section class="pdf-page">
       <h2>1. Resumen ejecutivo</h2>
       <p class="pdf-intro">
-        Este informe resume la lectura actual del assessment FP&A. Los resultados reflejan los filtros activos
+        Este informe resume la lectura actual del assessment del dominio
+        ${escapeHtml(data.domainLabel)}. Los resultados reflejan los filtros activos
         en la herramienta en el momento de la exportación.
       </p>
 
