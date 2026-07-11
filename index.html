@@ -15,13 +15,60 @@
           <p class="header-copy">Diagnóstico preliminar de madurez por subcapacidad, palanca y roadmap sugerido.</p>
         </div>
         <div class="header-actions" aria-label="Acciones de escenario">
-          <button class="primary-button" id="exportPdfButton" type="button">Exportar PDF</button>
-          <button class="primary-button" id="exportCsvButton" type="button">Exportar CSV</button>
-          <button class="secondary-button" id="importJsonButton" type="button">Importar JSON</button>
-          <button class="secondary-button" id="exportJsonButton" type="button">Exportar JSON</button>
-          <button class="ghost-button danger-ghost-button" id="resetButton" type="button">Restaurar base</button>
+          <div class="header-actions" aria-label="Acciones de escenario">
+          <div class="header-action-group header-action-group-primary">
+            <button
+              class="primary-button"
+              id="exportPdfButton"
+              type="button"
+            >
+              Exportar PDF
+            </button>
 
-          <input id="scenarioFileInput" type="file" accept="application/json,.json" hidden>
+            <button
+              class="header-secondary-action"
+              id="exportCsvButton"
+              type="button"
+            >
+              Exportar CSV
+            </button>
+          </div>
+
+          <div
+            class="header-action-group header-action-group-technical"
+            aria-label="Gestión del escenario"
+          >
+            <button
+              class="header-technical-action"
+              id="importJsonButton"
+              type="button"
+            >
+              Importar JSON
+            </button>
+
+            <button
+              class="header-technical-action"
+              id="exportJsonButton"
+              type="button"
+            >
+              Exportar JSON
+            </button>
+          </div>
+
+          <button
+            class="danger-ghost-button header-reset-action"
+            id="resetButton"
+            type="button"
+          >
+            Restaurar base
+          </button>
+
+          <input
+            id="scenarioFileInput"
+            type="file"
+            accept="application/json,.json"
+            hidden
+          >
         </div>
       </div>
     </header>
@@ -265,6 +312,18 @@
       </section>
     </main>
 
+
+    <button
+      class="back-to-top-button"
+      id="backToTopButton"
+      type="button"
+      aria-label="Volver al inicio de la herramienta"
+      title="Volver arriba"
+      hidden
+    >
+      <span aria-hidden="true">↑</span>
+      <span>Volver arriba</span>
+    </button>
 
     <div
       class="save-status"

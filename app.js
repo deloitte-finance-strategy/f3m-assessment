@@ -167,6 +167,8 @@ const expandedHeatmapCapabilities = new Set(); // NUEVO: mantiene abiertas las c
 
 
 let isApplyingRemoteScenario = false; // NUEVO: evita guardar de vuelta mientras estamos cargando datos remotos
+let scoringCriteriaTrigger = null;
+let aiInitiativeTrigger = null;
 
 
 const els = {};
@@ -367,6 +369,7 @@ function cacheElements() {
     "scoringCriteriaModal", // NUEVO: modal de criterios F3M
     "closeScoringCriteriaModalButton", // NUEVO: botón cerrar modal
     "saveStatus", // NUEVO: indicador visual de guardado
+    "backToTopButton",
     "importJsonButton",
     "exportJsonButton",
     "exportCsvButton",
@@ -394,6 +397,7 @@ function bindGlobalEvents() {
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
   setupDomainSwitcher();
+  setupBackToTopButton();
 }
 
 function normalizeItem(item) {
@@ -514,6 +518,14 @@ function setInitialLoading(isLoading) {
 }
 
 
+function updateModalOpenState() {
+  const hasOpenModal =
+    !els.scoringCriteriaModal?.hidden ||
+    !els.aiInitiativeModal?.hidden;
+
+  document.body.classList.toggle("modal-open", hasOpenModal);
+}
+
 function setupScoringCriteriaModal() {
   if (!els.scoringCriteriaModal) {
     return;
@@ -522,11 +534,12 @@ function setupScoringCriteriaModal() {
   els.assessmentList.addEventListener("click", (event) => {
     const button = event.target.closest(".scoring-criteria-button");
 
-    if (!button) {
-      return;
-    }
+      if (!button) {
+        return;
+      }
 
-    openScoringCriteriaModal();
+      scoringCriteriaTrigger = button;
+      openScoringCriteriaModal();
   });
 
   els.closeScoringCriteriaModalButton?.addEventListener("click", closeScoringCriteriaModal);
@@ -554,10 +567,18 @@ function openScoringCriteriaModal() {
   els.scoringCriteriaModal.hidden = false;
   activateScoringCriteriaTab("procesos");
   els.closeScoringCriteriaModalButton?.focus();
+  updateModalOpenState();
 }
 
 function closeScoringCriteriaModal() {
   els.scoringCriteriaModal.hidden = true;
+
+  if (scoringCriteriaTrigger?.isConnected) {
+    scoringCriteriaTrigger.focus();
+  }
+
+  scoringCriteriaTrigger = null;
+  updateModalOpenState();
 }
 
 function activateScoringCriteriaTab(tabKey) {
@@ -585,6 +606,7 @@ function setupAiInitiativeModal() {
       return;
     }
 
+    aiInitiativeTrigger = button;
     openAiInitiativeModal(button.dataset.id);
   });
 
@@ -635,6 +657,39 @@ function setupDomainSwitcher() {
 }
 
 
+function setupBackToTopButton() {
+  if (!els.backToTopButton) {
+    return;
+  }
+
+  const updateBackToTopVisibility = () => {
+    els.backToTopButton.hidden = window.scrollY < 500;
+  };
+
+  els.backToTopButton.addEventListener("click", () => {
+    const domainSwitcher = document.querySelector(".domain-switcher");
+
+    if (domainSwitcher) {
+      domainSwitcher.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      return;
+    }
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  });
+
+  window.addEventListener("scroll", updateBackToTopVisibility, {
+    passive: true,
+  });
+
+  updateBackToTopVisibility();
+}
+
 
 function getAiDataForItem(item) {
   if (item?.ai?.cases || item?.ai?.advanced) {
@@ -680,11 +735,20 @@ function openAiInitiativeModal(itemId) {
 
   els.aiInitiativeModal.hidden = false;
   els.closeAiInitiativeModalButton?.focus();
+  updateModalOpenState();
 }
 
 function closeAiInitiativeModal() {
   els.aiInitiativeModal.hidden = true;
+  updateModalOpenState();
+
+  if (aiInitiativeTrigger?.isConnected) {
+    aiInitiativeTrigger.focus();
+  }
+
+  aiInitiativeTrigger = null;
 }
+
 
 
 function updateNavigationBadges() {
