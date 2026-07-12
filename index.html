@@ -15,7 +15,6 @@
           <p class="header-copy">Diagnóstico preliminar de madurez por subcapacidad, palanca y roadmap sugerido.</p>
         </div>
         <div class="header-actions" aria-label="Acciones de escenario">
-          <div class="header-actions" aria-label="Acciones de escenario">
           <div class="header-action-group header-action-group-primary">
             <button
               class="primary-button"
@@ -229,36 +228,59 @@
         </div>
       </section>
 
-      <section id="assessment" class="section-block">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Workspace</p>
-            <h2>Scoring por subcapacidad</h2>
-          </div>
-          <div class="filters">
-            <label>
-              <span>Capacidad</span>
-              <select id="capacityFilter"></select>
-            </label>
-            <label>
-              <span>Prioridad</span>
-              <select id="priorityFilter">
-                <option value="all">Todas</option>
-                <option value="Alta">Alta</option>
-                <option value="Media">Media</option>
-                <option value="Baja">Baja</option>
-                <option value="Pendiente">Pendiente</option>
-              </select>
-            </label>
-            <label class="search-label">
-              <span>Buscar</span>
-              <input id="searchInput" type="search" placeholder="Subcapacidad, iniciativa o evidencia">
-            </label>
-          </div>
-        </div>
 
-        <div class="assessment-list" id="assessmentList"></div>
-      </section>
+<section id="assessment" class="section-block">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Workspace</p>
+      <h2>Scoring por subcapacidad</h2>
+    </div>
+
+    <div class="assessment-controls">
+      <div class="active-filters" id="activeFilters" hidden>
+        <span id="activeFiltersText">Sin filtros activos</span>
+
+        <button
+          class="clear-filters-button"
+          id="clearFiltersButton"
+          type="button"
+        >
+          Limpiar filtros
+        </button>
+      </div>
+
+      <div class="filters">
+        <label>
+          <span>Capacidad</span>
+          <select id="capacityFilter"></select>
+        </label>
+
+        <label>
+          <span>Prioridad</span>
+          <select id="priorityFilter">
+            <option value="all">Todas</option>
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
+            <option value="Pendiente">Pendiente</option>
+          </select>
+        </label>
+
+        <label class="search-label">
+          <span>Buscar</span>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Subcapacidad, iniciativa o evidencia"
+          >
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="assessment-list" id="assessmentList"></div>
+</section>
+
 
 
 <section id="heatmap" class="section-block">
@@ -387,7 +409,6 @@
                 </section>
               </div>
             </div>
-          </div>
         </details>
       </article>
     </template>

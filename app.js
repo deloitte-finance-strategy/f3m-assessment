@@ -353,6 +353,9 @@ function cacheElements() {
     "capacityFilter",
     "priorityFilter",
     "searchInput",
+    "activeFilters",
+    "activeFiltersText",
+    "clearFiltersButton",
     "assessmentList",
     "heatmapTable",
     "heatmapExpandToggle",
@@ -386,6 +389,17 @@ function bindGlobalEvents() {
   els.capacityFilter.addEventListener("change", renderAll);
   els.priorityFilter.addEventListener("change", renderAll);
   els.searchInput.addEventListener("input", renderAll);
+  els.clearFiltersButton?.addEventListener("click",clearActiveFilters,);
+
+  document.addEventListener("click", (event) => {
+  const clearButton = event.target.closest("[data-clear-filters]");
+
+  if (!clearButton) {
+    return;
+  }
+
+  clearActiveFilters();
+});
   els.importJsonButton.addEventListener("click", () => els.scenarioFileInput.click());
   els.scenarioFileInput.addEventListener("change", importScenario);
   els.exportJsonButton.addEventListener("click", exportScenarioJson);
@@ -770,8 +784,15 @@ function updateNavigationBadges() {
 
 
 function renderAll() {
-  if (!state.items.length) return;
-  els.sourceNote.textContent = `Fuente: ${state.meta.sourceFile} · Objetivo de madurez ${state.meta.targetMaturity}`;
+  if (!state.items.length) {
+    return;
+  }
+
+  els.sourceNote.textContent =
+    `Fuente: ${state.meta.sourceFile} · ` +
+    `Objetivo de madurez ${state.meta.targetMaturity}`;
+
+  updateActiveFiltersUi();
   renderDashboard();
   renderAssessments();
   renderHeatmap();
@@ -779,17 +800,91 @@ function renderAll() {
   updateNavigationBadges();
 }
 
+
 function populateCapacityFilter() {
+  const previousCapacity = els.capacityFilter.value || "all";
   const capacities = unique(state.items.map((item) => item.capacidad));
+
   els.capacityFilter.innerHTML = [
     `<option value="all">Todas</option>`,
-    ...capacities.map((capability) => `<option value="${escapeAttr(capability)}">${escapeHtml(capability)}</option>`),
+    ...capacities.map(
+      (capability) =>
+        `<option value="${escapeAttr(capability)}">${escapeHtml(capability)}</option>`,
+    ),
   ].join("");
 
+  const capacityStillExists =
+    previousCapacity === "all" ||
+    capacities.includes(previousCapacity);
+
+  els.capacityFilter.value = capacityStillExists
+    ? previousCapacity
+    : "all";
+}
+
+
+function updateActiveFiltersUi() {
+  if (
+    !els.activeFilters ||
+    !els.activeFiltersText ||
+    !els.clearFiltersButton
+  ) {
+    return;
+  }
+
+  const activeFilters = [];
+
+  if (
+    els.capacityFilter.value &&
+    els.capacityFilter.value !== "all"
+  ) {
+    const capacityLabel =
+      els.capacityFilter.options[
+        els.capacityFilter.selectedIndex
+      ]?.textContent || els.capacityFilter.value;
+
+    activeFilters.push(`Capacidad: ${capacityLabel}`);
+  }
+
+  if (
+    els.priorityFilter.value &&
+    els.priorityFilter.value !== "all"
+  ) {
+    activeFilters.push(`Prioridad: ${els.priorityFilter.value}`);
+  }
+
+  const searchQuery = els.searchInput.value.trim();
+
+  if (searchQuery) {
+    activeFilters.push(`Búsqueda: ${searchQuery}`);
+  }
+
+  const filterCount = activeFilters.length;
+
+  els.activeFilters.hidden = filterCount === 0;
+
+  if (filterCount === 0) {
+    els.activeFiltersText.textContent = "Sin filtros activos";
+    return;
+  }
+
+  els.activeFiltersText.textContent =
+    filterCount === 1
+      ? "1 filtro activo"
+      : `${filterCount} filtros activos`;
+
+  els.activeFilters.title = activeFilters.join(" · ");
+}
+
+
+function clearActiveFilters() {
   els.capacityFilter.value = "all";
   els.priorityFilter.value = "all";
   els.searchInput.value = "";
+
+  renderAll();
 }
+
 
 function getVisibleItems() {
   const capacity = els.capacityFilter.value;
@@ -1183,13 +1278,36 @@ function getItemEvidenceText(item) {
 }
 
 
+function buildFilteredEmptyState() {
+  return `
+    <div class="filtered-empty-state">
+      <strong>No hay resultados para los filtros actuales</strong>
+
+      <p>
+        Prueba con otros criterios o limpia los filtros para volver a mostrar
+        toda la información.
+      </p>
+
+      <button
+        class="clear-filters-button empty-state-clear-button"
+        type="button"
+        data-clear-filters
+      >
+        Limpiar filtros
+      </button>
+    </div>
+  `;
+}
+
+
 function renderAssessments() {
   const items = getVisibleItems();
 
   if (!items.length) {
-    els.assessmentList.innerHTML = `<div class="empty-state">No hay subcapacidades que coincidan con los filtros actuales.</div>`;
+    els.assessmentList.innerHTML = buildFilteredEmptyState();
     return;
   }
+  
 
   const template = document.getElementById("assessmentCardTemplate");
   els.assessmentList.innerHTML = "";
@@ -1402,7 +1520,13 @@ function renderHeatmap() {
       </tr>
     </thead>
     <tbody>
-      ${rows || `<tr><td colspan="8">No hay datos para los filtros actuales.</td></tr>`}
+      ${rows || `
+        <tr>
+          <td colspan="8" class="table-empty-cell">
+            ${buildFilteredEmptyState()}
+          </td>
+        </tr>
+      `}
     </tbody>
   `;
 
@@ -1605,7 +1729,13 @@ function renderRoadmap() {
       </tr>
     </thead>
     <tbody>
-      ${rows || `<tr><td colspan="10">No hay iniciativas para los filtros actuales.</td></tr>`}
+      ${rows || `
+        <tr>
+          <td colspan="10" class="table-empty-cell">
+            ${buildFilteredEmptyState()}
+          </td>
+        </tr>
+      `}
     </tbody>
   `;
 
@@ -2774,7 +2904,7 @@ function buildPdfEnhancedCommentsSection(data) {
 
   return `
     <section class="pdf-page">
-      <h2>7. Comentarios y hallazgos</h2>
+      <h2>8. Comentarios y hallazgos</h2>
       <div class="pdf-comments-grid">
         ${cards}
       </div>
@@ -2874,9 +3004,16 @@ function getEnhancedPdfReportStyles() {
     .pdf-meta-grid,
     .pdf-kpi-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       margin-top: 24px;
+    }
+
+    .pdf-meta-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .pdf-kpi-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .pdf-meta-grid div,
@@ -2903,6 +3040,16 @@ function getEnhancedPdfReportStyles() {
     .pdf-meta-grid strong,
     .pdf-kpi-grid strong {
       display: block;
+      font-size: 15pt;
+    }
+
+    .pdf-meta-grid strong {
+      font-size: 11pt;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .pdf-kpi-grid strong {
       font-size: 15pt;
     }
 
