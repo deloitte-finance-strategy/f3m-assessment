@@ -1774,40 +1774,76 @@ border-color: #eef0ed;
 }
 
 
+
+/* ==================================================
+   MODAL DE INICIATIVA IA
+   ================================================== */
+
 .ai-initiative-modal {
-max-width: 820px;
+  width: min(820px, 100%);
 }
 
 .ai-modal-content {
-display: grid;
-gap: 18px;
-padding: 22px 24px 26px;
+  display: grid;
+  gap: 12px;
+  padding: 18px 24px 24px;
 }
 
 .ai-modal-section {
-padding: 14px 16px;
-border: 1px solid var(--line);
-border-radius: var(--radius);
-background: var(--surface-muted);
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
 }
 
-.ai-modal-section h3 {
-margin-bottom: 6px;
-font-size: 1.15rem;
+/* Lineas laterales por tipo de contenido */
+.ai-modal-section:first-child {
+  border-left: 4px solid var(--green);
 }
 
+.ai-modal-section:nth-child(2) {
+  border-left: 4px solid var(--blue);
+}
+
+.ai-modal-section:nth-child(3) {
+  border-left: 4px solid var(--amber);
+}
+
+/* Mismo formato para todos los titulos */
+.ai-modal-section h3,
 .ai-modal-section h4 {
-margin-top: 0;
-margin-bottom: 8px;
+  margin: 0 0 9px;
+  color: #303832;
+  font-size: 0.82rem;
+  font-weight: 850;
+  line-height: 1.35;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
 }
 
-.ai-modal-section p {
-margin-bottom: 0;
-color: var(--ink);
+/* Mismo formato para todos los textos */
+.ai-modal-section p,
+.ai-modal-section .small-note {
+  margin: 0;
+  color: #303832;
+  font-size: 0.98rem;
+  font-weight: 450;
+  line-height: 1.58;
 }
 
+/* Fuente del contenido */
 .ai-modal-source {
-background: #ffffff;
+  padding: 10px 14px;
+  border-style: dashed;
+  background: #fafbf8;
+}
+
+.ai-modal-source .small-note {
+  display: block;
+  color: #4f5952;
+  font-size: 0.8rem;
+  font-weight: 450;
+  line-height: 1.5;
 }
 
 
@@ -1990,119 +2026,241 @@ background: #ffffff;
 }
 
 
+
+/* ==================================================
+   MODALES F3M: ESTILO COMUN
+   ================================================== */
+
 .modal-backdrop {
-position: fixed;
-inset: 0;
-z-index: 100;
-display: grid;
-place-items: center;
-padding: 24px;
-background: rgba(18, 22, 20, 0.62);
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(18, 22, 20, 0.66);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
 
 .modal-backdrop[hidden] {
-display: none;
+  display: none;
 }
 
 .criteria-modal {
-width: min(860px, 100%);
-max-height: min(82vh, 760px);
-overflow: auto;
-border: 1px solid var(--line);
-border-radius: 12px;
-background: var(--surface);
-box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  width: min(860px, 100%);
+  max-height: min(86vh, 780px);
+  overflow: auto;
+  border: 1px solid rgba(217, 223, 212, 0.95);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
 }
 
 .criteria-modal-header {
-display: flex;
-align-items: flex-start;
-justify-content: space-between;
-gap: 18px;
-padding: 22px 24px 16px;
-border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px 17px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.97);
+}
+
+.criteria-modal-header .eyebrow {
+  margin-bottom: 6px;
 }
 
 .criteria-modal-header h2 {
-margin: 0;
+  margin: 0;
+  color: #202622;
+  font-size: 1.55rem;
+  line-height: 1.2;
 }
 
+/* ==================================================
+   BOTON DE CIERRE CENTRADO Y SIN ANIMACION
+   ================================================== */
+
 .modal-close-button {
-width: 36px;
-height: 36px;
-border-radius: 999px;
-background: var(--surface-muted);
-color: var(--ink);
-font-size: 1.4rem;
-font-weight: 800;
-line-height: 1;
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.modal-close-button::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  content: "×";
+  color: var(--ink);
+  font-family: Arial, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  transform: translate(-50%, -53%);
 }
 
 .modal-close-button:hover {
-background: #e6ebdf;
+  border-color: rgba(134, 188, 37, 0.5);
+  background: #e8f4df;
 }
 
+.modal-close-button:hover::before {
+  color: var(--green-dark);
+}
+
+.modal-close-button:focus-visible {
+  border-color: var(--green);
+  outline: 3px solid rgba(134, 188, 37, 0.22);
+  outline-offset: 2px;
+}
+
+
+/* ==================================================
+   MODAL DE CRITERIOS F3M
+   ================================================== */
+
 .criteria-tabs {
-display: flex;
-gap: 8px;
-padding: 18px 24px 10px; /* MODIFICADO: añade espacio arriba y abajo para que no se corte el pill */
-border-bottom: 1px solid var(--line);
-overflow: visible; /* NUEVO: evita cortes visuales del borde redondeado */
+  position: sticky;
+  top: 94px;
+  z-index: 1;
+  display: flex;
+  gap: 8px;
+  padding: 13px 24px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  background: rgba(250, 251, 248, 0.97);
 }
 
 .criteria-tab {
-min-height: 36px;
-padding: 0 14px;
-border: 1px solid transparent;
-border-radius: 999px; /* MODIFICADO: pill completo, evita semicírculo cortado */
-background: transparent;
-color: var(--muted); /* CORREGIDO */
-font-weight: 800;
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+  white-space: nowrap;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.criteria-tab:hover {
+  border-color: rgba(134, 188, 37, 0.4);
+  background: #f3f8ea;
+  color: var(--green-dark);
 }
 
 .criteria-tab.active {
-background: var(--green);
-border-color: var(--green);
-color: #10140e;
-box-shadow: 0 6px 14px rgba(134, 188, 37, 0.22); /* NUEVO: refuerza estado activo */
+  border-color: rgba(134, 188, 37, 0.65);
+  background: #e8f4df;
+  color: #315d11;
+  box-shadow: inset 0 -2px 0 var(--green);
 }
 
 .criteria-panel {
-display: none;
-padding: 22px 24px 26px;
+  display: none;
+  padding: 20px 24px 24px;
 }
 
 .criteria-panel.active {
-display: block;
+  display: block;
 }
 
 .criteria-panel h3 {
-margin-bottom: 14px;
-font-size: 1.1rem;
+  margin: 0 0 14px;
+  color: #202622;
+  font-size: 1.05rem;
 }
 
-.criteria-levels,
+.criteria-panel h4 {
+  margin: 22px 0 10px;
+  color: #3a433d;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+}
+
+.criteria-levels {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.criteria-levels li {
+  margin: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-left: 3px solid rgba(134, 188, 37, 0.75);
+  border-radius: 7px;
+  background: #ffffff;
+  color: #353d37;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.criteria-levels li strong {
+  color: #202622;
+}
+
 .criteria-checklist {
-list-style: none; /* MODIFICADO: elimina numeración automática */
-margin: 0;
-padding-left: 0;
-
-}
-
-.criteria-levels li,
-.criteria-checklist li {
-margin-bottom: 9px;
-}
-
-.criteria-checklist {
-display: grid;
-grid-template-columns: repeat(2, minmax(0, 1fr));
-gap: 8px 18px;
-margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .criteria-checklist li {
-margin-bottom: 0;
+  position: relative;
+  min-height: 36px;
+  margin: 0;
+  padding: 9px 12px 9px 34px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fafbf8;
+  color: #3f4842;
+  font-size: 0.88rem;
+}
+
+.criteria-checklist li::before {
+  position: absolute;
+  top: 9px;
+  left: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #e8f4df;
+  color: var(--green-dark);
+  content: "✓";
+  font-size: 0.65rem;
+  font-weight: 900;
 }
 
 
@@ -2570,28 +2728,31 @@ height: 100% !important;
   }
 
   .criteria-modal {
-    max-height: 88vh;
+    max-height: 90vh;
   }
 
   .criteria-modal-header {
-    padding: 18px;
+    padding: 17px 18px 14px;
+  }
+
+  .criteria-modal-header h2 {
+    font-size: 1.3rem;
   }
 
   .criteria-tabs {
-    flex-wrap: wrap;
-    padding: 14px 18px 0;
+    top: 83px;
+    padding: 11px 18px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
   }
 
-  .criteria-panel {
+  .criteria-panel,
+  .ai-modal-content {
     padding: 18px;
   }
 
   .criteria-checklist {
     grid-template-columns: 1fr;
-  }
-
-  .ai-modal-content {
-    padding: 18px;
   }
 
   .roadmap-ai-button {

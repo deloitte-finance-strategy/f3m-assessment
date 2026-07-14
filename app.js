@@ -109,38 +109,43 @@ const AI_INITIATIVES_BY_CAPABILITY = {
   "Presupuestos y previsiones": {
     subcapacidad: "1.1-1.4",
     cases:
-      "Develop guided workflows for creating budgets; On demand forecasting and scenario modeling; AI-supported budget allocation",
+      "Desarrollo de flujos de trabajo guiados para la elaboración de presupuestos; generación de previsiones bajo demanda y modelización de escenarios; asignación presupuestaria asistida por IA",
     advanced:
       "Planificación driver-based, rolling forecast, escenarios automatizados y workflows colaborativos",
     source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
   },
+
   "Informes de gestión del rendimiento": {
     subcapacidad: "2.1-2.4",
     cases:
-      "Mgmt Reporting Actuals Plan Variance + Commentary; Generate account variance analysis and intelligent explanations; FinanceAI Insights Platform",
+      "Reporting de gestión de real frente a plan con generación de comentarios; análisis de desviaciones por cuenta y generación de explicaciones inteligentes; plataforma FinanceAI Insights",
     advanced:
       "Reporting automatizado con commentary, insights, alertas y explicación de desviaciones",
     source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
   },
+
   "Evaluación business case": {
     subcapacidad: "3.1-3.4",
-    cases: "Summarize and score project proposals; Project-level recommendations",
+    cases:
+      "Resumen y evaluación automatizada de propuestas de proyectos; generación de recomendaciones a nivel de proyecto",
     advanced:
       "Scoring de iniciativas, priorización dinámica y seguimiento de beneficios",
     source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
   },
+
   "Información y apoyo a la toma de decisiones": {
     subcapacidad: "4.1-4.4",
     cases:
-      "Perform analysis and investigation and provide insights on demand; Data access for all; Enterprise-wide data search and access",
+      "Realización de análisis e investigaciones y generación de insights bajo demanda; acceso generalizado a los datos; búsqueda y acceso a información en toda la organización",
     advanced:
       "Decision intelligence, insights predictivos y autoservicio gobernado",
     source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
   },
+
   "Planificación largo plazo": {
     subcapacidad: "5.1-5.4",
     cases:
-      "Generate investing strategies; Identify patterns to predict future financial performance; Integrated business planning",
+      "Generación de estrategias de inversión; identificación de patrones para predecir el rendimiento financiero futuro; planificación integrada del negocio",
     advanced:
       "Planificación estratégica continua, simulación avanzada y asignación dinámica de recursos",
     source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
