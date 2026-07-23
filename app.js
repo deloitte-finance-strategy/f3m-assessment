@@ -71,6 +71,13 @@ const DOMAINS = {
     group: "Estratégicos y de negocio",
     dataUrl: "data/domains/finanzas-negocio.json",
   },
+    "auditoria-interna": {
+    id: "auditoria-interna",
+    label: "Auditoría Interna",
+    title: "Auditoría Interna",
+    group: "Técnicos y especializados",
+    dataUrl: "data/domains/auditoria-interna.json",
+  },
 };
 
 

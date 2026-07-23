@@ -1,0 +1,431 @@
+{
+  "meta": {
+    "domainId": "auditoria-interna",
+    "domainLabel": "Auditoría Interna",
+    "domainTitle": "Auditoría Interna",
+    "sourceFile": "F3M_Auditoria_Interna_assessment_ready_AI_v0.xlsx",
+    "targetMaturity": 4
+  },
+  "subcapacities": [
+    {
+      "id": "auditoria-interna-1-1",
+      "capacidad": "Aseguramiento de riesgos",
+      "subcapacidad": "1.1 Universo auditable y planificación basada en riesgos",
+      "objetivo": "Evaluar si Auditoría Interna dispone de un universo auditable completo, actualizado y priorizado mediante criterios de riesgo, materialidad y criticidad para el negocio.",
+      "maturity": {
+        "1": "Universo auditable incompleto o desactualizado, con planificación basada principalmente en ciclos históricos o peticiones puntuales.",
+        "2": "Universo auditable básico y plan anual definido, aunque con criterios de priorización parciales y actualización limitada durante el año.",
+        "3": "Universo auditable documentado, con evaluación periódica de riesgos, materialidad, cobertura y criterios homogéneos de priorización.",
+        "4": "Planificación integrada con ERM, compliance, controles internos, cambios del negocio y señales de riesgo, con revisión dinámica del plan.",
+        "5": "Planificación continua y predictiva, con AI para monitorizar cambios internos/externos, anticipar áreas de riesgo y recomendar ajustes al plan de auditoría."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe un universo auditable formal y actualizado?",
+        "¿Se prioriza el plan por riesgo y materialidad?",
+        "¿Se revisa el plan ante cambios relevantes?",
+        "¿Se integran señales de ERM, compliance y negocio?"
+      ],
+      "evidencias": "Universo auditable; risk assessment; plan anual de auditoría; matriz de priorización; actas de comité; cambios de plan.",
+      "iniciativaSugerida": "Actualizar el universo auditable y definir un modelo de planificación dinámica basado en riesgo, materialidad, cobertura y señales de cambio.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive compliance monitoring; AI-powered risk management and regulatory compliance; Global policy tracking",
+        "advanced": "Planificación continua y predictiva, con AI para monitorizar cambios internos/externos, anticipar áreas de riesgo y recomendar ajustes al plan de auditoría.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.1 Universo auditable y planificación basada en riesgos"
+      }
+    },
+    {
+      "id": "auditoria-interna-1-2",
+      "capacidad": "Aseguramiento de riesgos",
+      "subcapacidad": "1.2 Diseño y ejecución de auditorías y pruebas de control",
+      "objetivo": "Evaluar si las auditorías se diseñan y ejecutan con una metodología consistente, basada en riesgos, controles clave, alcance claro y evidencia suficiente.",
+      "maturity": {
+        "1": "Programas de auditoría ad hoc, con alcance variable, pruebas manuales y dependencia elevada del criterio individual del auditor.",
+        "2": "Metodología básica de auditoría y testing, con plantillas parciales y cobertura desigual por proceso o área.",
+        "3": "Metodología estándar con objetivos, riesgos, controles, pruebas, muestreo, evidencias y revisión documentada.",
+        "4": "Ejecución integrada con analytics, controles automatizados, priorización por riesgo y trazabilidad completa de pruebas y hallazgos.",
+        "5": "Auditoría AI-enabled con pruebas continuas, selección inteligente de muestras, análisis de poblaciones completas y recomendaciones sobre foco de testing."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe metodología estándar de auditoría?",
+        "¿Se vinculan riesgos, controles y pruebas?",
+        "¿Se analiza población completa o muestras?",
+        "¿La evidencia es trazable y revisable?"
+      ],
+      "evidencias": "Programas de auditoría; matrices riesgo-control; papeles de trabajo; evidencias de testing; revisiones de calidad; muestras.",
+      "iniciativaSugerida": "Estandarizar metodología de auditoría y testing con matrices riesgo-control, evidencias, analytics y trazabilidad de ejecución.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-supported regulatory examinations and inspections; AI-powered risk management and regulatory compliance; Reconcile account balances at transaction level to invoices, purchase orders and bank statements",
+        "advanced": "Auditoría AI-enabled con pruebas continuas, selección inteligente de muestras, análisis de poblaciones completas y recomendaciones sobre foco de testing.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.2 Diseño y ejecución de auditorías y pruebas de control"
+      }
+    },
+    {
+      "id": "auditoria-interna-1-3",
+      "capacidad": "Aseguramiento de riesgos",
+      "subcapacidad": "1.3 Calidad, trazabilidad y reporting de assurance",
+      "objetivo": "Evaluar si los trabajos de aseguramiento generan conclusiones claras, trazables y útiles para los órganos de gobierno, con controles de calidad adecuados.",
+      "maturity": {
+        "1": "Informes con variabilidad en estructura, calidad y trazabilidad, centrados en hallazgos descriptivos y con revisiones manuales limitadas.",
+        "2": "Plantillas y revisiones básicas, aunque con criterios de rating, impacto y causa-raíz no plenamente homogéneos.",
+        "3": "Reporting estándar con ratings, impacto, causa-raíz, recomendaciones, evidencias y revisión formal de calidad.",
+        "4": "Reporting integrado con dashboards, tendencias de riesgos, severidad, owners, evolución de hallazgos y mensajes ejecutivos.",
+        "5": "Generación asistida de informes de assurance con AI, síntesis de evidencias, detección de inconsistencias y narrativa ejecutiva orientada a decisiones."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Los informes tienen estructura y ratings homogéneos?",
+        "¿Se documenta causa-raíz e impacto?",
+        "¿Existe trazabilidad entre evidencia y conclusión?",
+        "¿Se revisa la calidad de los trabajos?"
+      ],
+      "evidencias": "Informes de auditoría; ratings; papeles de trabajo; evidencias; revisiones de calidad; dashboards de assurance.",
+      "iniciativaSugerida": "Rediseñar reporting de assurance con estructura común, ratings, causa-raíz, trazabilidad de evidencia y dashboard ejecutivo.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Research-based report generation / KYC; Smarter intelligence; Insights for all",
+        "advanced": "Generación asistida de informes de assurance con AI, síntesis de evidencias, detección de inconsistencias y narrativa ejecutiva orientada a decisiones.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.3 Calidad, trazabilidad y reporting de assurance"
+      }
+    },
+    {
+      "id": "auditoria-interna-1-4",
+      "capacidad": "Aseguramiento de riesgos",
+      "subcapacidad": "1.4 Seguimiento de hallazgos y remediación",
+      "objetivo": "Evaluar si los hallazgos se gestionan hasta su cierre efectivo, con planes de acción, owners, vencimientos, validación y escalado.",
+      "maturity": {
+        "1": "Seguimiento manual de hallazgos, con baja trazabilidad de acciones, owners y validación de cierre.",
+        "2": "Tracker básico de acciones, aunque con retrasos, evidencias variables y escalado limitado.",
+        "3": "Proceso estándar de seguimiento con owners, fechas, estado, evidencias de cierre y reporting periódico.",
+        "4": "Gestión integrada de remediación con priorización por riesgo, alertas, escalados, validación de efectividad y reporting a comités.",
+        "5": "AI prioriza acciones, anticipa retrasos, recomienda escalados y detecta patrones recurrentes de control para prevenir reincidencias."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Cada hallazgo tiene owner, acción y fecha?",
+        "¿Se valida la efectividad del cierre?",
+        "¿Se escalan retrasos críticos?",
+        "¿Se analizan recurrencias?"
+      ],
+      "evidencias": "Tracker de hallazgos; planes de acción; evidencias de cierre; actas de comité; reportes de aging; validaciones.",
+      "iniciativaSugerida": "Implantar modelo de remediación con workflow, alertas, evidencias, validación de efectividad, escalado y análisis de recurrencias.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive compliance monitoring; Proactive defect resolution recommendations; AI-powered risk management and regulatory compliance",
+        "advanced": "AI prioriza acciones, anticipa retrasos, recomienda escalados y detecta patrones recurrentes de control para prevenir reincidencias.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.4 Seguimiento de hallazgos y remediación"
+      }
+    },
+    {
+      "id": "auditoria-interna-2-1",
+      "capacidad": "Asesoramiento de riesgos",
+      "subcapacidad": "2.1 Modelo de advisory y rol de Auditoría Interna",
+      "objetivo": "Evaluar si Auditoría Interna actúa como asesor independiente en materia de gobierno, riesgos y controles, manteniendo claridad de rol y salvaguardas de independencia.",
+      "maturity": {
+        "1": "Rol de advisory informal o reactivo, con baja claridad sobre alcance, límites de independencia y criterios de participación.",
+        "2": "Participación puntual en iniciativas relevantes, con criterios básicos de independencia y dependencia de relaciones personales.",
+        "3": "Modelo de advisory definido, con criterios de elegibilidad, independencia, alcance, entregables, gobierno y reporting.",
+        "4": "Advisory integrado en iniciativas estratégicas y de transformación, con priorización por riesgo, coordinación con segunda línea y medición de valor aportado.",
+        "5": "Modelo proactivo de advisory basado en señales de riesgo y AI, que recomienda focos de asesoramiento y aporta insights preventivos sin comprometer independencia."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Está definido el rol de advisory?",
+        "¿Existen salvaguardas de independencia?",
+        "¿Se priorizan iniciativas por riesgo?",
+        "¿Se mide el valor aportado?"
+      ],
+      "evidencias": "Modelo de advisory; criterios de independencia; portfolio de advisory; actas de steering; feedback de stakeholders; entregables.",
+      "iniciativaSugerida": "Definir modelo de advisory de Auditoría Interna con criterios de independencia, priorización por riesgo, entregables y métricas de valor.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-powered risk management and regulatory compliance; Smarter intelligence; Insights for all",
+        "advanced": "Modelo proactivo de advisory basado en señales de riesgo y AI, que recomienda focos de asesoramiento y aporta insights preventivos sin comprometer independencia.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.1 Modelo de advisory y rol de Auditoría Interna"
+      }
+    },
+    {
+      "id": "auditoria-interna-2-2",
+      "capacidad": "Asesoramiento de riesgos",
+      "subcapacidad": "2.2 Asesoramiento en transformación, procesos y controles",
+      "objetivo": "Evaluar la contribución de Auditoría Interna en el diseño preventivo de controles, riesgos y gobierno en proyectos de transformación, procesos y tecnología.",
+      "maturity": {
+        "1": "Auditoría participa tarde o de forma limitada en transformaciones, revisando controles cuando el diseño ya está cerrado.",
+        "2": "Participación en proyectos relevantes, aunque sin metodología común para asesoramiento preventivo sobre riesgos y controles.",
+        "3": "Metodología de advisory en transformación con revisión de riesgos, controles, segregación de funciones, datos y gobierno desde fases tempranas.",
+        "4": "Advisory integrado en programas críticos, con checkpoints, criterios de control by design, métricas de riesgo y coordinación con PMO/segunda línea.",
+        "5": "AI apoya la identificación temprana de riesgos de transformación, brechas de control, cambios regulatorios y recomendaciones de diseño preventivo."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Auditoría participa en proyectos desde diseño?",
+        "¿Se revisan riesgos y controles by design?",
+        "¿Hay coordinación con PMO y segunda línea?",
+        "¿Se documentan recomendaciones preventivas?"
+      ],
+      "evidencias": "Comités de proyecto; risk/control design reviews; matrices SoD; recomendaciones; checkpoints; documentación de transformación.",
+      "iniciativaSugerida": "Crear metodología de advisory en transformación con control by design, checkpoints, criterios de riesgo y coordinación con segunda línea/PMO.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Code assistant for digital transformation; AI-driven vulnerability management; Financial rules and regulations interpretations",
+        "advanced": "AI apoya la identificación temprana de riesgos de transformación, brechas de control, cambios regulatorios y recomendaciones de diseño preventivo.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.2 Asesoramiento en transformación, procesos y controles"
+      }
+    },
+    {
+      "id": "auditoria-interna-2-3",
+      "capacidad": "Asesoramiento de riesgos",
+      "subcapacidad": "2.3 Challenge independiente y soporte a decisiones de riesgo",
+      "objetivo": "Evaluar si Auditoría Interna proporciona challenge objetivo sobre decisiones, supuestos y exposiciones de riesgo relevantes para la organización.",
+      "maturity": {
+        "1": "Challenge limitado y principalmente reactivo, con baja participación en decisiones relevantes de riesgo o gobierno.",
+        "2": "Auditoría aporta comentarios en foros seleccionados, aunque con análisis poco estructurado y dependencia del criterio individual.",
+        "3": "Proceso definido para aportar challenge independiente con análisis de riesgos, evidencia, criterios y recomendaciones documentadas.",
+        "4": "Challenge integrado en decisiones críticas, con análisis de escenarios, impactos, apetito de riesgo y seguimiento de recomendaciones.",
+        "5": "Decision support AI-enabled con búsqueda de evidencias, síntesis multifuente, escenarios de riesgo y recomendaciones de challenge para comités."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Auditoría participa en foros de decisión clave?",
+        "¿El challenge se basa en evidencia?",
+        "¿Se conectan recomendaciones con apetito de riesgo?",
+        "¿Se hace seguimiento?"
+      ],
+      "evidencias": "Actas de comité; recomendaciones de Auditoría; análisis de riesgos; escenarios; documentación de decisiones; seguimiento.",
+      "iniciativaSugerida": "Formalizar modelo de challenge independiente con criterios, evidencias, escenarios, recomendaciones y seguimiento de decisiones de riesgo.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Smarter intelligence; Enterprise-wide data search and access; Global policy tracking",
+        "advanced": "Decision support AI-enabled con búsqueda de evidencias, síntesis multifuente, escenarios de riesgo y recomendaciones de challenge para comités.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.3 Challenge independiente y soporte a decisiones de riesgo"
+      }
+    },
+    {
+      "id": "auditoria-interna-2-4",
+      "capacidad": "Asesoramiento de riesgos",
+      "subcapacidad": "2.4 Gestión de conocimiento, capacidades y cultura de control",
+      "objetivo": "Evaluar si Auditoría Interna desarrolla conocimiento, capacidades y cultura de control en la organización mediante guías, formación y buenas prácticas.",
+      "maturity": {
+        "1": "Conocimiento disperso y comunicación limitada, con baja sistematización de buenas prácticas, lecciones aprendidas o formación en controles.",
+        "2": "Materiales y sesiones puntuales, aunque sin plan estructurado ni medición de adopción o impacto.",
+        "3": "Programa de conocimiento con guías, criterios de control, formación, repositorio y comunicación de lecciones aprendidas.",
+        "4": "Gestión integrada de conocimiento con comunidades, analytics de hallazgos, formación por riesgo y medición de adopción.",
+        "5": "AI knowledge assistant que permite consultar políticas, controles, hallazgos, benchmarks y recomendaciones contextualizadas para mejorar la cultura de control."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen guías y repositorio de buenas prácticas?",
+        "¿Se forman áreas de negocio en controles?",
+        "¿Se comunican lecciones aprendidas?",
+        "¿Se mide adopción?"
+      ],
+      "evidencias": "Repositorio; guías de control; planes de formación; comunicaciones; encuestas; analytics de hallazgos; lecciones aprendidas.",
+      "iniciativaSugerida": "Implantar repositorio y programa de cultura de control con guías, formación por riesgo, lecciones aprendidas y knowledge assistant.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-powered archive access and extraction; Enterprise-wide data search and access; Data access for all",
+        "advanced": "AI knowledge assistant que permite consultar políticas, controles, hallazgos, benchmarks y recomendaciones contextualizadas para mejorar la cultura de control.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.4 Gestión de conocimiento, capacidades y cultura de control"
+      }
+    },
+    {
+      "id": "auditoria-interna-3-1",
+      "capacidad": "Detección de riesgos y previsión",
+      "subcapacidad": "3.1 Monitorización continua de riesgos y controles",
+      "objetivo": "Evaluar si la organización dispone de mecanismos continuos para monitorizar riesgos, controles clave, indicadores y señales de alerta temprana.",
+      "maturity": {
+        "1": "Monitorización puntual y manual, centrada en revisiones periódicas y con baja capacidad de alerta temprana.",
+        "2": "Indicadores básicos de riesgo y control, con actualización manual y cobertura limitada de procesos críticos.",
+        "3": "KRIs/KCIs definidos, con reporting periódico, owners, umbrales y seguimiento de excepciones.",
+        "4": "Monitorización integrada con datos transaccionales, controles automatizados, workflows de excepción y reporting por riesgo.",
+        "5": "Continuous auditing AI-enabled con detección de desviaciones, priorización dinámica y alertas tempranas sobre riesgos emergentes."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen KRIs/KCIs definidos?",
+        "¿Hay umbrales y owners?",
+        "¿Se monitorizan datos transaccionales?",
+        "¿Se generan alertas tempranas?"
+      ],
+      "evidencias": "Mapa KRIs/KCIs; dashboards; umbrales; logs de excepción; controles automatizados; workflows; actas de seguimiento.",
+      "iniciativaSugerida": "Diseñar modelo de continuous auditing con KRIs/KCIs, datos transaccionales, alertas, workflows y priorización por riesgo.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive compliance monitoring; AI-powered risk management and regulatory compliance; Automated regulatory compliance",
+        "advanced": "Continuous auditing AI-enabled con detección de desviaciones, priorización dinámica y alertas tempranas sobre riesgos emergentes.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.1 Monitorización continua de riesgos y controles"
+      }
+    },
+    {
+      "id": "auditoria-interna-3-2",
+      "capacidad": "Detección de riesgos y previsión",
+      "subcapacidad": "3.2 Detección de fraude, anomalías y operaciones sospechosas",
+      "objetivo": "Evaluar la capacidad para detectar patrones anómalos, fraude potencial, entradas sospechosas y comportamientos inusuales en datos financieros u operativos.",
+      "maturity": {
+        "1": "Detección reactiva y principalmente manual, basada en denuncias, revisiones puntuales o controles ex post.",
+        "2": "Reglas básicas de detección para ciertos riesgos, con análisis manual de excepciones y alta tasa de falsos positivos.",
+        "3": "Modelo estructurado de detección con reglas, indicadores, investigación de excepciones y documentación de resultados.",
+        "4": "Analítica avanzada y monitorización recurrente sobre poblaciones completas, priorizando casos por materialidad, riesgo e impacto.",
+        "5": "Modelos AI de fraude/anomalías en tiempo real, con scoring, explicación, aprendizaje continuo y workflow de investigación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se detectan anomalías en datos financieros?",
+        "¿Se monitorizan operaciones sospechosas?",
+        "¿Existen reglas/modelos de fraude?",
+        "¿Se documenta investigación y resolución?"
+      ],
+      "evidencias": "Alertas de fraude; reglas de detección; modelos analíticos; casos investigados; logs de excepciones; informes de investigación.",
+      "iniciativaSugerida": "Implantar monitor de fraude y anomalías con reglas, modelos predictivos, scoring, explicación y workflow de investigación.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Monitor potentially suspect or fraudulent journal entries in real time; Proactive detection of fraudulent activities; Identify unusual entries recorded during the close period",
+        "advanced": "Modelos AI de fraude/anomalías en tiempo real, con scoring, explicación, aprendizaje continuo y workflow de investigación.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.2 Detección de fraude, anomalías y operaciones sospechosas"
+      }
+    },
+    {
+      "id": "auditoria-interna-3-3",
+      "capacidad": "Detección de riesgos y previsión",
+      "subcapacidad": "3.3 Modelos predictivos de riesgo y escenarios de exposición",
+      "objetivo": "Evaluar si Auditoría Interna utiliza modelos predictivos y escenarios para anticipar riesgos, cambios de exposición y áreas de posible deterioro del control.",
+      "maturity": {
+        "1": "Predicción de riesgos inexistente o basada en juicio experto no sistemático, con baja capacidad de anticipación.",
+        "2": "Análisis prospectivos puntuales para riesgos relevantes, con supuestos manuales y evidencia limitada.",
+        "3": "Metodología de escenarios y predicción básica con variables de riesgo, tendencias, supuestos y revisión periódica.",
+        "4": "Modelos predictivos recurrentes conectados con datos internos/externos, apetito de riesgo, KRIs y priorización de auditoría.",
+        "5": "AI anticipa cambios de exposición, simula escenarios de riesgo y recomienda acciones preventivas, auditorías o revisiones focalizadas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se anticipan cambios de exposición?",
+        "¿Se usan escenarios o modelos predictivos?",
+        "¿Se conectan predicciones con el plan de auditoría?",
+        "¿Se revisa precisión de modelos?"
+      ],
+      "evidencias": "Modelos predictivos; escenarios; supuestos; backtesting; KRIs; cambios de exposición; decisiones de cobertura.",
+      "iniciativaSugerida": "Desarrollar modelos predictivos de riesgo con escenarios, señales internas/externas, priorización y conexión con el plan de auditoría.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Synthetic data generation; Predictive compliance monitoring; AI-driven vulnerability management",
+        "advanced": "AI anticipa cambios de exposición, simula escenarios de riesgo y recomienda acciones preventivas, auditorías o revisiones focalizadas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.3 Modelos predictivos de riesgo y escenarios de exposición"
+      }
+    },
+    {
+      "id": "auditoria-interna-3-4",
+      "capacidad": "Detección de riesgos y previsión",
+      "subcapacidad": "3.4 Investigación, respuesta y aprendizaje sobre incidentes de riesgo",
+      "objetivo": "Evaluar si la organización investiga incidentes y señales de riesgo de forma estructurada, generando acciones, aprendizaje y mejora del entorno de control.",
+      "maturity": {
+        "1": "Investigaciones reactivas, con trazabilidad limitada, criterios variables y poca conexión con mejora de controles.",
+        "2": "Proceso básico para incidentes relevantes, aunque con documentación, análisis causa-raíz y seguimiento no homogéneos.",
+        "3": "Proceso definido de investigación con clasificación, evidencias, causa-raíz, acciones, owners y cierre documentado.",
+        "4": "Gestión integrada de incidentes con workflow, priorización por riesgo, análisis de tendencias, remediación y reporting a comités.",
+        "5": "AI apoya la investigación con análisis multifuente, clustering de incidentes, recomendaciones de respuesta y aprendizaje preventivo sobre causas recurrentes."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe proceso formal de investigación?",
+        "¿Se documentan evidencias y causa-raíz?",
+        "¿Se conectan incidentes con acciones de control?",
+        "¿Se analizan patrones recurrentes?"
+      ],
+      "evidencias": "Registros de incidentes; informes de investigación; evidencias; causa-raíz; planes de remediación; reportes de tendencia.",
+      "iniciativaSugerida": "Formalizar proceso de investigación y respuesta con taxonomy de incidentes, workflow, causa-raíz, acciones y aprendizaje preventivo.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Autonomous warranty adjudication; AI-driven visual inspection for particulate matter; Proactive defect resolution recommendations",
+        "advanced": "AI apoya la investigación con análisis multifuente, clustering de incidentes, recomendaciones de respuesta y aprendizaje preventivo sobre causas recurrentes.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.4 Investigación, respuesta y aprendizaje sobre incidentes de riesgo"
+      }
+    }
+  ]
+}

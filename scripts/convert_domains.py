@@ -35,7 +35,14 @@ FILES = [
         "domain_title": "Finanzas de negocio",
         "source": ROOT / "F3M_Finanzas_Negocio_BU_assessment_ready_AI_v0.xlsx",
         "output": OUT_DIR / "finanzas-negocio.json",
-    }
+    },
+    {
+        "domain_id": "auditoria-interna",
+        "domain_label": "Auditoría Interna",
+        "domain_title": "Auditoría Interna",
+        "source": ROOT / "F3M_Auditoria_Interna_assessment_ready_AI_v0.xlsx",
+        "output": OUT_DIR / "auditoria-interna.json",
+    },
 ]
 
 
