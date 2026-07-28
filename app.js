@@ -78,6 +78,13 @@ const DOMAINS = {
     group: "Técnicos y especializados",
     dataUrl: "data/domains/auditoria-interna.json",
   },
+    "finanzas-estrategicas": {
+    id: "finanzas-estrategicas",
+    label: "Finanzas Estratégicas",
+    title: "Finanzas Estratégicas",
+    group: "Estratégicos y de negocio",
+    dataUrl: "data/domains/finanzas-estrategicas.json",
+  },
 };
 
 

@@ -1,0 +1,431 @@
+{
+  "meta": {
+    "domainId": "finanzas-estrategicas",
+    "domainLabel": "Finanzas Estratégicas",
+    "domainTitle": "Finanzas Estratégicas",
+    "sourceFile": "F3M_Finanzas_Estrategicas_assessment_ready_AI_v0.xlsx",
+    "targetMaturity": 4
+  },
+  "subcapacities": [
+    {
+      "id": "finanzas-estrategicas-1-1",
+      "capacidad": "Visión financiera",
+      "subcapacidad": "1.1 Narrativa financiera y ambición estratégica de Finanzas",
+      "objetivo": "Evaluar si la función financiera dispone de una visión clara, compartida y accionable sobre su rol estratégico, prioridades y contribución a la creación de valor.",
+      "maturity": {
+        "1": "La visión financiera es implícita o fragmentada, con foco principalmente operativo y baja conexión con la estrategia corporativa.",
+        "2": "Existe una visión financiera básica, aunque no está plenamente traducida en prioridades, capacidades, métricas o iniciativas.",
+        "3": "Visión financiera documentada, alineada con la estrategia corporativa, con prioridades, objetivos y narrativa ejecutiva definidos.",
+        "4": "Visión financiera integrada con modelo operativo, capacidades, tecnología, datos, talento, KPIs y roadmap de transformación.",
+        "5": "Visión financiera dinámica y AI-enabled, con actualización basada en señales internas/externas, escenarios, salud financiera y recomendaciones estratégicas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe una visión financiera formal?",
+        "¿Está alineada con la estrategia corporativa?",
+        "¿Se traduce en prioridades y capacidades?",
+        "¿Se actualiza con señales internas y externas?"
+      ],
+      "evidencias": "Documento de visión financiera; estrategia corporativa; prioridades del CFO; roadmap; KPIs; presentaciones a comité; entrevistas con stakeholders.",
+      "iniciativaSugerida": "Definir o actualizar la visión financiera corporativa con narrativa estratégica, prioridades, capacidades objetivo, KPIs y roadmap asociado.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate executive level overview of company financial health; Generate investing strategies from consolidated market conditions, internal financial performance, and firm objectives; Next-level market intelligence",
+        "advanced": "Visión financiera dinámica y AI-enabled, con actualización basada en señales internas/externas, escenarios, salud financiera y recomendaciones estratégicas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.1 Narrativa financiera y ambición estratégica de Finanzas"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-1-2",
+      "capacidad": "Visión financiera",
+      "subcapacidad": "1.2 Modelo de creación de valor y capital allocation",
+      "objetivo": "Evaluar si la función financiera dispone de un marco para conectar estrategia, asignación de capital, inversiones, valor esperado y retorno real.",
+      "maturity": {
+        "1": "La asignación de capital se realiza de forma puntual o incremental, con criterios variables y seguimiento limitado del valor generado.",
+        "2": "Se utilizan criterios financieros básicos para inversiones relevantes, aunque con baja integración entre estrategia, portfolio y beneficios.",
+        "3": "Modelo de capital allocation definido con criterios de valor, riesgo, alineamiento estratégico, capacidad y seguimiento de beneficios.",
+        "4": "Capital allocation integrado con planificación estratégica, portfolio, business cases, escenarios, recursos y revisión periódica de retorno.",
+        "5": "Modelo AI-enabled de asignación dinámica de capital, con simulación de escenarios, recomendaciones de inversión/desinversión y aprendizaje sobre retornos reales."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen criterios homogéneos de asignación de capital?",
+        "¿Se conectan inversiones con estrategia y valor?",
+        "¿Se revisa retorno real vs esperado?",
+        "¿Se reasignan recursos según evolución?"
+      ],
+      "evidencias": "Política de capital allocation; portfolio de inversiones; business cases; actas de comité; benefit tracking; escenarios; decisiones de reasignación.",
+      "iniciativaSugerida": "Diseñar modelo de capital allocation con criterios de valor/riesgo, escenarios, seguimiento de beneficios y revisión dinámica del portfolio.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate investing strategies from consolidated market conditions, internal financial performance, and firm objectives; Predictive company valuation analyzing financial data; Project-level recommendations",
+        "advanced": "Modelo AI-enabled de asignación dinámica de capital, con simulación de escenarios, recomendaciones de inversión/desinversión y aprendizaje sobre retornos reales.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.2 Modelo de creación de valor y capital allocation"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-1-3",
+      "capacidad": "Visión financiera",
+      "subcapacidad": "1.3 Inteligencia de mercado, competitiva y financiera",
+      "objetivo": "Evaluar si Finanzas incorpora información de mercado, competencia, sector, entorno macro y performance interna para orientar decisiones estratégicas.",
+      "maturity": {
+        "1": "Análisis externo puntual y manual, con baja integración en planificación financiera o decisiones estratégicas.",
+        "2": "Se realizan análisis de mercado o competencia para decisiones relevantes, aunque con fuentes dispersas y actualización irregular.",
+        "3": "Proceso estructurado de inteligencia financiera con fuentes, responsables, periodicidad, benchmarks y reporting ejecutivo.",
+        "4": "Market intelligence integrado con planificación, escenarios, riesgos, capital allocation y performance management.",
+        "5": "AI monitoriza fuentes internas/externas, sintetiza señales de mercado, identifica implicaciones financieras y recomienda acciones estratégicas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se integran señales de mercado en la visión financiera?",
+        "¿Existen benchmarks recurrentes?",
+        "¿Se analizan competidores y tendencias?",
+        "¿Se traducen insights en decisiones?"
+      ],
+      "evidencias": "Informes de mercado; benchmarks; análisis de competidores; dashboards externos; actas de comité; escenarios macro/sectoriales.",
+      "iniciativaSugerida": "Crear modelo de financial market intelligence con fuentes, benchmarks, señales externas, implicaciones financieras y rutina ejecutiva.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Next-level market intelligence; Generate investing strategies from consolidated market conditions; Smarter intelligence",
+        "advanced": "AI monitoriza fuentes internas/externas, sintetiza señales de mercado, identifica implicaciones financieras y recomienda acciones estratégicas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.3 Inteligencia de mercado, competitiva y financiera"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-1-4",
+      "capacidad": "Visión financiera",
+      "subcapacidad": "1.4 Gobierno de performance estratégica y salud financiera",
+      "objetivo": "Evaluar si la dirección financiera monitoriza la salud financiera y el avance estratégico mediante KPIs integrados, alertas, decisiones y acciones.",
+      "maturity": {
+        "1": "Seguimiento de salud financiera basado en métricas agregadas y reporting histórico, con baja conexión con decisiones estratégicas.",
+        "2": "KPIs estratégicos definidos parcialmente, con reporting periódico pero análisis limitado de causas, riesgos y acciones.",
+        "3": "Modelo de performance estratégica con KPIs financieros/no financieros, objetivos, owners, desviaciones y reporting ejecutivo.",
+        "4": "Monitorización integrada de salud financiera con escenarios, riesgos, oportunidades, acciones y seguimiento de impacto.",
+        "5": "Executive financial health overview AI-enabled, con alertas tempranas, explicación automática de drivers y recomendaciones para dirección."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe cuadro de salud financiera?",
+        "¿Los KPIs están vinculados a la estrategia?",
+        "¿Se explican drivers y riesgos?",
+        "¿Se generan decisiones y acciones?"
+      ],
+      "evidencias": "Cuadro de mando estratégico; KPIs; targets; actas de comité; análisis de desviaciones; planes de acción; alertas.",
+      "iniciativaSugerida": "Implantar executive financial health dashboard con KPIs estratégicos, drivers, riesgos, alertas, owners y acciones de seguimiento.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate executive level overview of company financial health; FinanceAI Insights Platform; Identify past data patterns to predict and improve future financial performance",
+        "advanced": "Executive financial health overview AI-enabled, con alertas tempranas, explicación automática de drivers y recomendaciones para dirección.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.4 Gobierno de performance estratégica y salud financiera"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-2-1",
+      "capacidad": "Transformación financiera",
+      "subcapacidad": "2.1 Estrategia y gobierno de transformación financiera",
+      "objetivo": "Evaluar si existe una estrategia de transformación financiera clara, gobernada y alineada con prioridades del CFO, capacidades y creación de valor.",
+      "maturity": {
+        "1": "Transformación financiera gestionada como iniciativas aisladas, con baja coordinación, criterios variables y visión parcial del impacto.",
+        "2": "Roadmap básico de proyectos financieros, aunque con gobierno limitado, dependencias poco visibles y seguimiento principalmente operativo.",
+        "3": "Estrategia de transformación financiera definida con portfolio, governance, objetivos, beneficios, owners y cadencia de seguimiento.",
+        "4": "Gobierno integrado de transformación con prioridades, recursos, dependencias, riesgos, beneficios y reporting ejecutivo del avance.",
+        "5": "Transformation office AI-enabled, con priorización dinámica, recomendación de acciones, detección de riesgos y simulación de impacto del portfolio."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe roadmap de transformación financiera?",
+        "¿Hay governance y owners?",
+        "¿Se monitorizan beneficios y dependencias?",
+        "¿Se prioriza el portfolio por valor y riesgo?"
+      ],
+      "evidencias": "Roadmap de transformación; portfolio de iniciativas; comité de transformación; KPIs; benefit tracker; matriz de dependencias; riesgos.",
+      "iniciativaSugerida": "Definir modelo de gobierno de transformación financiera con portfolio, priorización, dependencias, beneficios, owners y reporting ejecutivo.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Project-level recommendations; Code assistant for digital transformation; FinanceAI Insights Platform",
+        "advanced": "Transformation office AI-enabled, con priorización dinámica, recomendación de acciones, detección de riesgos y simulación de impacto del portfolio.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.1 Estrategia y gobierno de transformación financiera"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-2-2",
+      "capacidad": "Transformación financiera",
+      "subcapacidad": "2.2 Rediseño del modelo operativo financiero",
+      "objetivo": "Evaluar si la transformación financiera rediseña el modelo operativo, roles, servicios, procesos, capacidades y formas de trabajo de Finanzas.",
+      "maturity": {
+        "1": "Modelo operativo financiero poco documentado, con roles y servicios definidos de forma heterogénea y alta dependencia de personas.",
+        "2": "Iniciativas de mejora organizativa puntuales, con documentación parcial de roles, procesos o responsabilidades.",
+        "3": "Modelo operativo definido con funciones, roles, responsabilidades, servicios, procesos, governance y capacidades requeridas.",
+        "4": "Modelo operativo integrado con tecnología, datos, talento, centros de excelencia, business partnering y mejora continua.",
+        "5": "Modelo operativo adaptable y AI-enabled, con automatización de tareas, reasignación dinámica de capacidad y roles orientados a análisis, control y valor."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Está definido el modelo operativo financiero?",
+        "¿Se identifican servicios y roles objetivo?",
+        "¿Se conecta con tecnología y datos?",
+        "¿Se mide productividad y capacidad liberada?"
+      ],
+      "evidencias": "TOM financiero; RACI; mapa de procesos; catálogo de servicios; estructura organizativa; business partnering model; KPIs de productividad.",
+      "iniciativaSugerida": "Diseñar target operating model financiero con servicios, roles, procesos, capacidades, tecnología, datos y métricas de productividad.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Code assistant for digital transformation; AI agents for software engineering; Automate financial data across diverse sources",
+        "advanced": "Modelo operativo adaptable y AI-enabled, con automatización de tareas, reasignación dinámica de capacidad y roles orientados a análisis, control y valor.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.2 Rediseño del modelo operativo financiero"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-2-3",
+      "capacidad": "Transformación financiera",
+      "subcapacidad": "2.3 Digitalización, datos y automatización de Finanzas",
+      "objetivo": "Evaluar si existe una agenda estructurada para modernizar sistemas, datos, automatización, integración y capacidades digitales de la función financiera.",
+      "maturity": {
+        "1": "Digitalización fragmentada, con alta dependencia de Excel, automatizaciones locales y datos financieros poco integrados.",
+        "2": "Herramientas y automatizaciones parciales, con integración limitada y casos de uso priorizados de forma no homogénea.",
+        "3": "Roadmap digital financiero con arquitectura, datos, automatización, casos de uso, ownership y criterios de priorización definidos.",
+        "4": "Plataforma integrada de datos y automatización, con gobierno de datos, estándares, autoservicio, controles y medición de beneficios.",
+        "5": "Finance digital backbone AI-enabled, con automatización inteligente, agentes, copilots, analítica avanzada y recomendaciones proactivas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe roadmap digital de Finanzas?",
+        "¿Hay arquitectura y gobierno de datos?",
+        "¿Se priorizan casos de automatización?",
+        "¿Se miden beneficios digitales?"
+      ],
+      "evidencias": "Arquitectura objetivo; roadmap digital; catálogo de automatizaciones; data governance; modelos de datos; KPIs de automatización; business cases.",
+      "iniciativaSugerida": "Construir roadmap digital de Finanzas con arquitectura, datos, automatización, AI use cases, gobierno y medición de beneficios.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Code assistant for digital transformation; AI agents for software engineering; Enterprise-wide data search and access; Data access for all",
+        "advanced": "Finance digital backbone AI-enabled, con automatización inteligente, agentes, copilots, analítica avanzada y recomendaciones proactivas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.3 Digitalización, datos y automatización de Finanzas"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-2-4",
+      "capacidad": "Transformación financiera",
+      "subcapacidad": "2.4 Gestión del cambio, adopción y capacidades digitales",
+      "objetivo": "Evaluar si la transformación financiera incorpora gestión del cambio, comunicación, formación, adopción y desarrollo de capacidades para sostener el cambio.",
+      "maturity": {
+        "1": "Gestión del cambio limitada o reactiva, con comunicación puntual y baja medición de adopción o competencias.",
+        "2": "Planes de comunicación/formación para iniciativas relevantes, aunque con seguimiento parcial de adopción y capacidades.",
+        "3": "Modelo de change management estructurado con stakeholders, impacto, comunicación, formación, adopción y métricas.",
+        "4": "Gestión del cambio integrada con roadmap, liderazgo, capacidades digitales, redes de champions y medición de adopción/valor.",
+        "5": "AI apoya adopción y aprendizaje personalizado, detecta barreras de cambio, recomienda intervenciones y mide uso/impacto de nuevas capacidades."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe plan de gestión del cambio?",
+        "¿Se miden adopción y satisfacción?",
+        "¿Se desarrollan capacidades digitales?",
+        "¿Se ajustan intervenciones según uso real?"
+      ],
+      "evidencias": "Plan de change; mapa de stakeholders; materiales de formación; métricas de adopción; encuestas; red de champions; comunicaciones.",
+      "iniciativaSugerida": "Implantar modelo de gestión del cambio con stakeholders, formación, adopción, champions, métricas de uso y refuerzo de capacidades digitales.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-powered archive access and extraction; Enterprise-wide data search and access; Code assistant for digital transformation",
+        "advanced": "AI apoya adopción y aprendizaje personalizado, detecta barreras de cambio, recomienda intervenciones y mide uso/impacto de nuevas capacidades.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.4 Gestión del cambio, adopción y capacidades digitales"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-3-1",
+      "capacidad": "Transformación empresarial",
+      "subcapacidad": "3.1 Alineamiento de Finanzas con la transformación empresarial",
+      "objetivo": "Evaluar si Finanzas participa de forma activa en transformaciones corporativas, aportando visión económica, control, financiación, riesgos y medición de valor.",
+      "maturity": {
+        "1": "Finanzas participa de forma tardía o limitada en transformaciones empresariales, con foco en control presupuestario o reporting ex post.",
+        "2": "Participación financiera en iniciativas relevantes, aunque con rol variable según proyecto y baja homogeneidad de criterios.",
+        "3": "Rol de Finanzas definido en transformaciones empresariales, con criterios de business case, funding, control, riesgos y reporting.",
+        "4": "Finanzas co-lidera transformaciones críticas, integrando valor, recursos, riesgos, dependencias, beneficios y decisiones de portfolio.",
+        "5": "Finance as strategic transformation partner, con AI para identificar oportunidades, riesgos, impactos, dependencias y recomendaciones de acción."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Finanzas participa desde fases tempranas?",
+        "¿Existe rol financiero definido en transformaciones?",
+        "¿Se conectan business case, funding y beneficios?",
+        "¿Se reporta impacto empresarial?"
+      ],
+      "evidencias": "Portfolio de transformación; business cases; comités de transformación; roles de Finanzas; reportes de beneficios; decisiones de financiación.",
+      "iniciativaSugerida": "Definir rol de Finanzas en transformación empresarial con governance, business case, funding, riesgos, beneficios y reporting de valor.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Project-level recommendations; Recommend, summarize, and detect risk from M&A cleanroom data; Generate executive level overview of company financial health",
+        "advanced": "Finance as strategic transformation partner, con AI para identificar oportunidades, riesgos, impactos, dependencias y recomendaciones de acción.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.1 Alineamiento de Finanzas con la transformación empresarial"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-3-2",
+      "capacidad": "Transformación empresarial",
+      "subcapacidad": "3.2 Gestión de portfolio de iniciativas estratégicas",
+      "objetivo": "Evaluar si la organización gestiona iniciativas estratégicas como un portfolio integrado, priorizado por valor, riesgo, capacidad, dependencias y alineamiento.",
+      "maturity": {
+        "1": "Iniciativas estratégicas gestionadas individualmente, con baja visibilidad consolidada de valor, riesgos y dependencias.",
+        "2": "Portfolio básico con seguimiento de proyectos principales, aunque la priorización se basa en criterios parciales o cualitativos.",
+        "3": "Modelo de portfolio definido con criterios de valor, esfuerzo, riesgo, dependencias, capacidad y alineamiento estratégico.",
+        "4": "Portfolio integrado con planificación financiera, recursos, roadmap, beneficios, escenarios y revisión periódica de prioridades.",
+        "5": "AI recomienda priorización del portfolio, detecta dependencias y riesgos, simula escenarios de ejecución y propone reasignación de recursos."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe portfolio consolidado de iniciativas?",
+        "¿Se prioriza por valor/riesgo/capacidad?",
+        "¿Se gestionan dependencias?",
+        "¿Se revisa el portfolio periódicamente?"
+      ],
+      "evidencias": "Portfolio estratégico; criterios de priorización; roadmap; matriz de dependencias; capacity planning; actas de comité; benefit tracker.",
+      "iniciativaSugerida": "Implantar modelo de portfolio estratégico con priorización por valor, riesgo, capacidad, dependencias, escenarios y seguimiento de beneficios.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Project-level recommendations; Summarize and score project proposals across the organization; Identify past data patterns to predict and improve future financial performance",
+        "advanced": "AI recomienda priorización del portfolio, detecta dependencias y riesgos, simula escenarios de ejecución y propone reasignación de recursos.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.2 Gestión de portfolio de iniciativas estratégicas"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-3-3",
+      "capacidad": "Transformación empresarial",
+      "subcapacidad": "3.3 M&A, integración y decisiones corporativas complejas",
+      "objetivo": "Evaluar la capacidad de Finanzas para apoyar decisiones corporativas complejas como M&A, integraciones, separaciones o restructuraciones con análisis financiero y de riesgo.",
+      "maturity": {
+        "1": "Soporte financiero a decisiones corporativas complejo, puntual y dependiente de análisis ad hoc o asesores externos.",
+        "2": "Análisis financiero básico para operaciones relevantes, aunque con baja estandarización de supuestos, riesgos y seguimiento post-deal.",
+        "3": "Metodología definida para análisis financiero de M&A/integración con valoración, sinergias, costes, riesgos, cash y escenarios.",
+        "4": "Gestión integrada de decisiones corporativas con due diligence, clean room, integración, sinergias, riesgos, beneficios y governance post-deal.",
+        "5": "AI analiza información de clean room, resume riesgos, identifica sinergias, modeliza escenarios y recomienda focos de decisión/integración."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe metodología financiera para M&A/integración?",
+        "¿Se modelizan sinergias y riesgos?",
+        "¿Se conectan decisiones con cash y valor?",
+        "¿Se realiza seguimiento post-deal?"
+      ],
+      "evidencias": "Modelos de valoración; due diligence; clean room outputs; synergy tracker; integration plan; business case; post-deal review.",
+      "iniciativaSugerida": "Diseñar metodología financiera para M&A e integración con valoración, sinergias, riesgos, escenarios, governance y seguimiento post-deal.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Recommend, summarize, and detect risk from M&A cleanroom data; Predictive company valuation analyzing financial data; Generate investing strategies",
+        "advanced": "AI analiza información de clean room, resume riesgos, identifica sinergias, modeliza escenarios y recomienda focos de decisión/integración.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.3 M&A, integración y decisiones corporativas complejas"
+      }
+    },
+    {
+      "id": "finanzas-estrategicas-3-4",
+      "capacidad": "Transformación empresarial",
+      "subcapacidad": "3.4 Seguimiento de beneficios, valor y aprendizaje empresarial",
+      "objetivo": "Evaluar si la organización captura, mide y aprende del valor generado por transformaciones empresariales y decisiones estratégicas.",
+      "maturity": {
+        "1": "Seguimiento de beneficios limitado o inexistente tras aprobar iniciativas, con baja trazabilidad entre promesas de valor y resultados reales.",
+        "2": "Tracking manual de beneficios en iniciativas relevantes, con criterios y cadencia variables.",
+        "3": "Modelo de benefit tracking definido con línea base, KPIs, owners, beneficios esperados/reales y reporting periódico.",
+        "4": "Gestión integrada de valor con estrategia, portfolio, forecast, acciones correctivas, aprendizaje y decisiones de reasignación.",
+        "5": "AI compara beneficios esperados/reales, detecta patrones de captura de valor, recomienda acciones y retroalimenta futuros business cases."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se miden beneficios reales vs esperados?",
+        "¿Hay owners de beneficios?",
+        "¿Se conectan resultados con forecast y portfolio?",
+        "¿Se incorporan aprendizajes a futuras decisiones?"
+      ],
+      "evidencias": "Benefit tracker; líneas base; KPIs de valor; reportes de impacto; acciones correctivas; post-mortems; decisiones de portfolio.",
+      "iniciativaSugerida": "Implantar modelo de value realization con línea base, owners, métricas, seguimiento, acciones correctivas y aprendizaje para futuros casos.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Project-level recommendations; Generate executive level overview of company financial health; FinanceAI Insights Platform",
+        "advanced": "AI compara beneficios esperados/reales, detecta patrones de captura de valor, recomienda acciones y retroalimenta futuros business cases.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.4 Seguimiento de beneficios, valor y aprendizaje empresarial"
+      }
+    }
+  ]
+}

@@ -43,6 +43,13 @@ FILES = [
         "source": ROOT / "F3M_Auditoria_Interna_assessment_ready_AI_v0.xlsx",
         "output": OUT_DIR / "auditoria-interna.json",
     },
+    {
+        "domain_id": "finanzas-estrategicas",
+        "domain_label": "Finanzas Estratégicas",
+        "domain_title": "Finanzas Estratégicas",
+        "source": ROOT / "F3M_Finanzas_Estrategicas_assessment_ready_AI_v0.xlsx",
+        "output": OUT_DIR / "finanzas-estrategicas.json",
+    },
 ]
 
 
