@@ -1,0 +1,711 @@
+{
+  "meta": {
+    "domainId": "tesoreria",
+    "domainLabel": "Tesorería",
+    "domainTitle": "Tesorería",
+    "sourceFile": "F3M_Tesoreria_assessment_ready_AI_v0.xlsx",
+    "targetMaturity": 4
+  },
+  "subcapacities": [
+    {
+      "id": "tesoreria-1-1",
+      "capacidad": "Contabilidad y provisión fiscal",
+      "subcapacidad": "1.1 Gobierno contable-fiscal de operaciones de tesorería",
+      "objetivo": "Evaluar si las operaciones de tesorería tienen un tratamiento contable-fiscal gobernado, trazable y coordinado con cierre, fiscalidad y reporting.",
+      "maturity": {
+        "1": "Registro contable-fiscal de operaciones de tesorería manual, reactivo y con baja trazabilidad de criterios y aprobaciones.",
+        "2": "Criterios básicos definidos para operaciones relevantes, aunque con revisiones manuales y variabilidad entre entidades.",
+        "3": "Políticas documentadas para tratamiento contable-fiscal de instrumentos, intereses, retenciones, comisiones y ajustes de tesorería.",
+        "4": "Proceso integrado con cierre, fiscalidad, reporting y controles automáticos, con revisión periódica de criterios y excepciones.",
+        "5": "Modelo AI-enabled que detecta tratamientos anómalos, sugiere clasificaciones contable-fiscales y explica variaciones de resultados financieros."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen políticas contable-fiscales para operaciones de tesorería?",
+        "¿Se revisan tratamientos de intereses, retenciones y comisiones?",
+        "¿Se conectan con cierre y reporting?",
+        "¿Hay trazabilidad de ajustes?"
+      ],
+      "evidencias": "Políticas contables/fiscales; registros de operaciones; conciliaciones; evidencias de revisión; workpapers; reporting financiero.",
+      "iniciativaSugerida": "Definir gobierno contable-fiscal de tesorería con políticas, controles, trazabilidad, owners y revisión recurrente de excepciones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Accurate tax report generation; Identify inconsistencies in master data records; Generate account variance analysis and intelligent explanations",
+        "advanced": "Modelo AI-enabled que detecta tratamientos anómalos, sugiere clasificaciones contable-fiscales y explica variaciones de resultados financieros.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.1 Gobierno contable-fiscal de operaciones de tesorería"
+      }
+    },
+    {
+      "id": "tesoreria-1-2",
+      "capacidad": "Contabilidad y provisión fiscal",
+      "subcapacidad": "1.2 Registro, conciliación y devengo de intereses y comisiones",
+      "objetivo": "Evaluar la calidad del registro, devengo, conciliación y explicación de intereses, comisiones y gastos financieros.",
+      "maturity": {
+        "1": "Devengos y registros manuales, con conciliaciones puntuales y dependencia de hojas de cálculo.",
+        "2": "Plantillas recurrentes para devengos y conciliaciones, aunque con controles manuales y baja automatización.",
+        "3": "Modelo estándar de devengos y conciliaciones con reglas, calendarios, fuentes, soportes y responsables definidos.",
+        "4": "Devengos integrados con contratos, bancos, deuda, cierre y reporting, con controles automáticos y explicación de variaciones.",
+        "5": "AI identifica devengos esperados, detecta omisiones o anomalías y genera explicaciones inteligentes de variaciones financieras."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se registran devengos de forma sistemática?",
+        "¿Se concilian intereses y comisiones con bancos/contratos?",
+        "¿Se explican variaciones?",
+        "¿Se detectan omisiones?"
+      ],
+      "evidencias": "Contratos financieros; extractos bancarios; cálculos de intereses; conciliaciones; asientos; reportes de variación; evidencias de aprobación.",
+      "iniciativaSugerida": "Implantar modelo de devengo y conciliación de intereses/comisiones con reglas, fuentes oficiales, controles y alertas de omisiones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Identify missing monthly accruals based on historic trends; Generate account variance analysis and intelligent explanations; Reconcile account balances at transaction level",
+        "advanced": "AI identifica devengos esperados, detecta omisiones o anomalías y genera explicaciones inteligentes de variaciones financieras.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.2 Registro, conciliación y devengo de intereses y comisiones"
+      }
+    },
+    {
+      "id": "tesoreria-1-3",
+      "capacidad": "Contabilidad y provisión fiscal",
+      "subcapacidad": "1.3 Calidad del dato maestro financiero y bancario",
+      "objetivo": "Evaluar si los datos maestros financieros y bancarios son fiables, completos, actualizados y gobernados.",
+      "maturity": {
+        "1": "Maestros bancarios y financieros gestionados manualmente, con duplicidades, inconsistencias y controles limitados.",
+        "2": "Controles básicos de actualización y validación, aunque con workflow parcial y visibilidad limitada de calidad del dato.",
+        "3": "Modelo de gobierno de datos maestros financieros con owners, reglas, aprobaciones, controles y auditoría de cambios.",
+        "4": "Gobierno integrado con bancos, ERP, TMS, pagos, deuda y reporting, con controles automáticos y gestión de incidencias.",
+        "5": "AI detecta inconsistencias en datos maestros, propone remediación y guía workflows adaptativos de cambios financieros/bancarios."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen owners de datos maestros bancarios?",
+        "¿Se controlan altas/cambios?",
+        "¿Hay auditoría de cambios?",
+        "¿Se mide calidad de dato?"
+      ],
+      "evidencias": "Maestros bancarios; workflows de alta/cambio; logs; controles de calidad; incidencias; aprobaciones; políticas de datos.",
+      "iniciativaSugerida": "Implantar gobierno de master data financiero/bancario con owners, workflow, controles automáticos, trazabilidad y gestión de incidencias.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Identify inconsistencies in master data records; Guided adaptable workflows for master data record changes; Generate metadata documentation",
+        "advanced": "AI detecta inconsistencias en datos maestros, propone remediación y guía workflows adaptativos de cambios financieros/bancarios.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.3 Calidad del dato maestro financiero y bancario"
+      }
+    },
+    {
+      "id": "tesoreria-1-4",
+      "capacidad": "Contabilidad y provisión fiscal",
+      "subcapacidad": "1.4 Reporting financiero de resultados de tesorería",
+      "objetivo": "Evaluar si los resultados financieros de tesorería se reportan de forma clara, oportuna y explicable para dirección y cierre.",
+      "maturity": {
+        "1": "Reporting de resultados financieros manual, agregado y orientado al cierre, con baja explicación de drivers.",
+        "2": "Reporting recurrente de gastos/ingresos financieros, aunque con narrativa limitada y análisis manual.",
+        "3": "Reporting estándar con KPIs, variaciones, drivers, posiciones, coste financiero y comentarios ejecutivos.",
+        "4": "Reporting integrado con deuda, liquidez, inversiones, riesgos financieros, forecast y acciones de gestión.",
+        "5": "Reporting AI-enabled con narrativa automática, explicación de drivers, alertas tempranas y recomendaciones sobre coste financiero y liquidez."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se reportan resultados financieros de tesorería?",
+        "¿Se explican drivers de variación?",
+        "¿Se conectan con liquidez, deuda y riesgos?",
+        "¿Se generan acciones?"
+      ],
+      "evidencias": "Reporting de tesorería; análisis de variaciones; KPIs de coste financiero; comité financiero; forecast; acciones de gestión.",
+      "iniciativaSugerida": "Crear reporting financiero de tesorería con drivers, KPIs, narrativa ejecutiva, conexión con forecast y recomendaciones de acción.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate executive level overview of company financial health; Generate account variance analysis and intelligent explanations; FinanceAI Insights Platform",
+        "advanced": "Reporting AI-enabled con narrativa automática, explicación de drivers, alertas tempranas y recomendaciones sobre coste financiero y liquidez.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.4 Reporting financiero de resultados de tesorería"
+      }
+    },
+    {
+      "id": "tesoreria-2-1",
+      "capacidad": "Gestión de riesgos financieros",
+      "subcapacidad": "2.1 Marco de gestión de riesgos financieros y políticas",
+      "objetivo": "Evaluar si existe un marco formal para identificar, medir, limitar y gobernar riesgos financieros: FX, tipos, crédito, liquidez y contraparte.",
+      "maturity": {
+        "1": "Riesgos financieros gestionados de forma reactiva, con políticas incompletas y límites poco formalizados.",
+        "2": "Políticas básicas y límites para riesgos principales, aunque con seguimiento manual y cobertura parcial.",
+        "3": "Marco de gestión de riesgos financieros documentado con apetito, límites, roles, métricas, aprobaciones y reporting.",
+        "4": "Gestión integrada con posiciones, exposiciones, coberturas, escenarios, límites y comités de seguimiento.",
+        "5": "Modelo AI-enabled que monitoriza exposiciones, detecta desviaciones frente a límites y recomienda acciones de cobertura o mitigación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe política de riesgos financieros?",
+        "¿Se definen límites y apetito de riesgo?",
+        "¿Se monitorizan exposiciones?",
+        "¿Hay reporting a comité?"
+      ],
+      "evidencias": "Política de riesgos; límites; exposiciones; reportes de comité; aprobaciones; métricas VaR/sensibilidad; excepciones.",
+      "iniciativaSugerida": "Definir marco integral de riesgos financieros con políticas, límites, métricas, reporting, governance y workflow de excepciones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Optimize foreign exchange operations by evaluating foreign exchange data and identifying patterns and trends to reduce financial risks; AI agents for credit underwriting; Predictive compliance monitoring",
+        "advanced": "Modelo AI-enabled que monitoriza exposiciones, detecta desviaciones frente a límites y recomienda acciones de cobertura o mitigación.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.1 Marco de gestión de riesgos financieros y políticas"
+      }
+    },
+    {
+      "id": "tesoreria-2-2",
+      "capacidad": "Gestión de riesgos financieros",
+      "subcapacidad": "2.2 Medición y cobertura de riesgo de divisa",
+      "objetivo": "Evaluar la capacidad para identificar, medir, forecastar y cubrir exposiciones de divisa de forma alineada con política y negocio.",
+      "maturity": {
+        "1": "Exposición FX identificada parcialmente y gestionada mediante análisis manual o coberturas puntuales.",
+        "2": "Forecast de exposición y coberturas básicas, aunque con baja integración con presupuesto, ventas/compras o cash forecast.",
+        "3": "Modelo estándar de exposición FX con fuentes, periodicidad, sensibilidad, instrumentos, aprobaciones y reporting.",
+        "4": "Gestión integrada de FX con forecast, operaciones, posiciones, escenarios, límites, efectividad de cobertura y contabilidad.",
+        "5": "AI identifica patrones FX, anticipa exposición, simula escenarios y recomienda estrategias de cobertura según riesgo, coste y política."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se mide exposición FX por moneda y horizonte?",
+        "¿Se conecta con forecast y operaciones?",
+        "¿Se evalúa efectividad de coberturas?",
+        "¿Se simulan escenarios?"
+      ],
+      "evidencias": "Mapa de exposición FX; forecast por moneda; contratos de cobertura; sensibilidad; hedge effectiveness; reporting de límites.",
+      "iniciativaSugerida": "Implantar modelo de gestión FX con forecast de exposición, límites, escenarios, tracking de coberturas y recomendaciones de mitigación.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Optimize foreign exchange operations by evaluating foreign exchange data and identifying patterns and trends to reduce financial risks; Predictive Analysis + GenAI; Generate investing strategies",
+        "advanced": "AI identifica patrones FX, anticipa exposición, simula escenarios y recomienda estrategias de cobertura según riesgo, coste y política.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.2 Medición y cobertura de riesgo de divisa"
+      }
+    },
+    {
+      "id": "tesoreria-2-3",
+      "capacidad": "Gestión de riesgos financieros",
+      "subcapacidad": "2.3 Gestión de riesgo de tipos, contraparte y crédito financiero",
+      "objetivo": "Evaluar si la organización mide y gestiona riesgo de tipo de interés, contraparte, crédito financiero y exposición con entidades financieras.",
+      "maturity": {
+        "1": "Riesgos de tipo, contraparte o crédito financiero gestionados de forma puntual, con visibilidad limitada de exposición consolidada.",
+        "2": "Seguimiento básico de deuda, tipos y contrapartes principales, aunque con análisis manual y límites parciales.",
+        "3": "Modelo definido de exposición a tipos/contrapartes con métricas, límites, ratings, sensibilidad y políticas de diversificación.",
+        "4": "Gestión integrada con deuda, inversiones, bancos, derivados, límites, escenarios macro y decisiones de financiación/inversión.",
+        "5": "AI calcula sensibilidades, anticipa cambios de riesgo, alerta sobre límites y recomienda acciones de refinanciación, cobertura o diversificación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se mide sensibilidad a tipos?",
+        "¿Existen límites por contraparte?",
+        "¿Se monitorizan ratings y concentración?",
+        "¿Se conectan riesgos con deuda/inversiones?"
+      ],
+      "evidencias": "Mapa de contrapartes; ratings; límites; sensibilidad a tipos; cartera de deuda; derivados; reportes de concentración.",
+      "iniciativaSugerida": "Diseñar modelo de gestión de riesgo de tipos y contraparte con límites, sensibilidad, escenarios, alertas y decisiones de cobertura/diversificación.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI agents for credit underwriting; Predictive company valuation analyzing financial data; Grid and energy efficiency optimization",
+        "advanced": "AI calcula sensibilidades, anticipa cambios de riesgo, alerta sobre límites y recomienda acciones de refinanciación, cobertura o diversificación.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.3 Gestión de riesgo de tipos, contraparte y crédito financiero"
+      }
+    },
+    {
+      "id": "tesoreria-2-4",
+      "capacidad": "Gestión de riesgos financieros",
+      "subcapacidad": "2.4 Escenarios, stress testing y reporting de riesgos financieros",
+      "objetivo": "Evaluar si Tesorería realiza escenarios y stress tests para anticipar impactos financieros y tomar decisiones preventivas.",
+      "maturity": {
+        "1": "Escenarios financieros puntuales o cualitativos, con baja conexión con decisiones de liquidez, deuda o cobertura.",
+        "2": "Stress testing básico para riesgos relevantes, con supuestos manuales y reporting limitado.",
+        "3": "Metodología de escenarios financieros con variables, supuestos, sensibilidad, impactos y revisión periódica.",
+        "4": "Stress testing integrado con cash forecast, deuda, covenants, FX, tipos, liquidez, capital allocation y comités.",
+        "5": "AI simula escenarios dinámicos, identifica early warnings, estima impactos y recomienda respuestas financieras preventivas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se realizan stress tests financieros?",
+        "¿Se cuantifican impactos en liquidez/deuda/covenants?",
+        "¿Se conectan con decisiones de cobertura?",
+        "¿Hay alertas tempranas?"
+      ],
+      "evidencias": "Modelos de escenarios; supuestos macro; sensibilidad; reportes de stress; actas de comité; decisiones preventivas.",
+      "iniciativaSugerida": "Crear framework de stress testing financiero con variables clave, impactos, alertas y planes de respuesta.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive cash flow forecasting tool; Optimize foreign exchange operations; Identify past data patterns to predict and improve future financial performance",
+        "advanced": "AI simula escenarios dinámicos, identifica early warnings, estima impactos y recomienda respuestas financieras preventivas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.4 Escenarios, stress testing y reporting de riesgos financieros"
+      }
+    },
+    {
+      "id": "tesoreria-3-1",
+      "capacidad": "Mercados de deuda y capitales",
+      "subcapacidad": "3.1 Estrategia de financiación y estructura de capital",
+      "objetivo": "Evaluar si existe una estrategia de financiación alineada con estructura de capital, liquidez, coste, riesgo y objetivos corporativos.",
+      "maturity": {
+        "1": "Financiación gestionada de forma reactiva ante necesidades puntuales, con baja planificación de estructura de capital.",
+        "2": "Plan de financiación básico con análisis de deuda existente y necesidades previsibles, aunque con escenarios limitados.",
+        "3": "Estrategia de financiación definida con objetivos de estructura de capital, coste, vencimientos, liquidez, covenants y rating.",
+        "4": "Estrategia integrada con plan estratégico, cash forecast, inversiones, mercado, riesgos financieros y capital allocation.",
+        "5": "AI recomienda estrategias de financiación considerando mercado, coste de capital, rating, liquidez, escenarios y objetivos corporativos."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe estrategia de financiación?",
+        "¿Se define estructura objetivo de capital?",
+        "¿Se analizan vencimientos y coste?",
+        "¿Se incorpora mercado y rating?"
+      ],
+      "evidencias": "Plan de financiación; estructura de capital; vencimientos; coste de deuda; rating/covenants; actas de comité; escenarios.",
+      "iniciativaSugerida": "Definir estrategia de financiación y estructura de capital con escenarios, vencimientos, coste, covenants, rating y conexión con plan estratégico.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate investing strategies from consolidated market conditions, internal financial performance, and firm objectives; Predictive company valuation analyzing financial data; Generate executive level overview of company financial health",
+        "advanced": "AI recomienda estrategias de financiación considerando mercado, coste de capital, rating, liquidez, escenarios y objetivos corporativos.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.1 Estrategia de financiación y estructura de capital"
+      }
+    },
+    {
+      "id": "tesoreria-3-2",
+      "capacidad": "Mercados de deuda y capitales",
+      "subcapacidad": "3.2 Gestión de deuda, covenants y relación con financiadores",
+      "objetivo": "Evaluar la gestión operativa y estratégica de deuda, covenants, financiación bancaria y relación con entidades financieras.",
+      "maturity": {
+        "1": "Deuda y covenants gestionados manualmente, con seguimiento disperso y baja anticipación de riesgos de incumplimiento.",
+        "2": "Seguimiento básico de deuda, amortizaciones y covenants, aunque con reporting manual y documentación dispersa.",
+        "3": "Modelo estándar de gestión de deuda con calendario, contratos, covenants, costes, responsables y reporting periódico.",
+        "4": "Gestión integrada en TMS/ERP con alertas, escenarios, covenant forecasting, relación bancaria y control de documentación.",
+        "5": "AI anticipa riesgos de covenant, recomienda acciones de refinanciación y sintetiza documentación financiera para financiadores."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se monitorizan covenants y vencimientos?",
+        "¿Hay relación estructurada con financiadores?",
+        "¿Se anticipan necesidades de refinanciación?",
+        "¿Se controla documentación?"
+      ],
+      "evidencias": "Contratos de deuda; covenant tracker; calendario de vencimientos; reportes a bancos; actas; forecasts; documentación financiera.",
+      "iniciativaSugerida": "Implantar gestión integrada de deuda con covenant tracking, alertas, forecast, repositorio documental y estrategia de relación bancaria.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate executive level overview of company financial health; Predictive cash flow forecasting tool; Research-based report generation / KYC",
+        "advanced": "AI anticipa riesgos de covenant, recomienda acciones de refinanciación y sintetiza documentación financiera para financiadores.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.2 Gestión de deuda, covenants y relación con financiadores"
+      }
+    },
+    {
+      "id": "tesoreria-3-3",
+      "capacidad": "Mercados de deuda y capitales",
+      "subcapacidad": "3.3 Acceso a mercados, instrumentos y ejecución de operaciones",
+      "objetivo": "Evaluar la capacidad para evaluar, seleccionar y ejecutar instrumentos de deuda/capital de acuerdo con necesidades financieras y condiciones de mercado.",
+      "maturity": {
+        "1": "Selección de instrumentos financiera caso a caso, con análisis limitado de alternativas, costes, riesgos y ejecución.",
+        "2": "Comparativas básicas entre fuentes de financiación, aunque con criterios poco homogéneos y dependencia de asesores externos.",
+        "3": "Metodología de evaluación de instrumentos con coste, riesgo, vencimiento, flexibilidad, covenants, mercado y proceso de aprobación.",
+        "4": "Ejecución integrada con estrategia de financiación, ventanas de mercado, rating, inversores, bancos, riesgos y reporting de operación.",
+        "5": "AI analiza condiciones de mercado, simula alternativas de instrumentos y recomienda timing, estructura y fuentes óptimas de financiación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se comparan fuentes e instrumentos?",
+        "¿Se analizan coste, riesgo y flexibilidad?",
+        "¿Se evalúan ventanas de mercado?",
+        "¿Existe proceso de aprobación?"
+      ],
+      "evidencias": "Análisis de alternativas; term sheets; comparativas de coste; aprobaciones; rating; investor/bank materials; documentación de operación.",
+      "iniciativaSugerida": "Crear metodología de evaluación y ejecución de instrumentos financieros con escenarios de mercado, coste/riesgo, approvals y lessons learned.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI agents for algorithmic trading and market simulation; Generate investing strategies; Predictive company valuation analyzing financial data",
+        "advanced": "AI analiza condiciones de mercado, simula alternativas de instrumentos y recomienda timing, estructura y fuentes óptimas de financiación.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.3 Acceso a mercados, instrumentos y ejecución de operaciones"
+      }
+    },
+    {
+      "id": "tesoreria-3-4",
+      "capacidad": "Mercados de deuda y capitales",
+      "subcapacidad": "3.4 Reporting de capital markets e inteligencia de financiación",
+      "objetivo": "Evaluar si Tesorería monitoriza mercados, condiciones financieras, apetito inversor/bancario y oportunidades de financiación.",
+      "maturity": {
+        "1": "Monitorización de mercados puntual y manual, con baja sistematización de señales y oportunidades.",
+        "2": "Seguimiento básico de tipos, spreads y noticias de mercado, aunque con análisis irregular y baja conexión con decisiones.",
+        "3": "Market intelligence financiero con fuentes, indicadores, benchmarks, reporting periódico y responsables.",
+        "4": "Inteligencia integrada con estrategia de financiación, deuda, inversión, riesgos, escenarios y decisiones de timing.",
+        "5": "AI sintetiza señales de mercado, detecta oportunidades de financiación, genera alertas y recomienda acciones de capital markets."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se monitorizan mercados de deuda/capitales?",
+        "¿Existen benchmarks y señales clave?",
+        "¿Se conecta con decisiones de financiación?",
+        "¿Se generan alertas?"
+      ],
+      "evidencias": "Reportes de mercado; benchmarks; curvas de tipos; spreads; actas de comité; recomendaciones de financiación; alertas.",
+      "iniciativaSugerida": "Implantar capital markets intelligence con fuentes, indicadores, alertas, benchmarks y conexión con estrategia de financiación.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Next-level market intelligence; Generate investing strategies; AI agents for algorithmic trading and market simulation",
+        "advanced": "AI sintetiza señales de mercado, detecta oportunidades de financiación, genera alertas y recomienda acciones de capital markets.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.4 Reporting de capital markets e inteligencia de financiación"
+      }
+    },
+    {
+      "id": "tesoreria-4-1",
+      "capacidad": "Gestión de cash flow y reporte",
+      "subcapacidad": "4.1 Gobierno y modelo de cash forecasting",
+      "objetivo": "Evaluar si existe un proceso formal para forecastar caja, con calendario, responsables, metodología, fuentes y revisión de calidad.",
+      "maturity": {
+        "1": "Cash forecast manual, poco frecuente, con baja fiabilidad y dependencia de inputs no homogéneos.",
+        "2": "Forecast básico con periodicidad definida, aunque con inputs manuales, baja integración y análisis limitado de desviaciones.",
+        "3": "Modelo estándar de cash forecasting con metodología, fuentes, owners, horizonte, granularidad y control de calidad.",
+        "4": "Forecast integrado con ERP/TMS, presupuesto, ventas, compras, deuda, working capital, escenarios y revisión de desviaciones.",
+        "5": "Cash forecasting predictivo AI-enabled con aprendizaje histórico, señales operativas, escenarios dinámicos y recomendaciones de acción."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe metodología formal de cash forecast?",
+        "¿Quién provee inputs y con qué frecuencia?",
+        "¿Se mide precisión del forecast?",
+        "¿Se analizan desviaciones?"
+      ],
+      "evidencias": "Modelo de forecast; calendario; inputs; histórico de precisión; desviaciones; TMS/ERP; comités de liquidez.",
+      "iniciativaSugerida": "Implantar modelo de cash forecasting con metodología, owners, integración de fuentes, medición de precisión y escenarios.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive cash flow forecasting tool; Enhance cash flow analysis, minimizing liquidity risks, improving forecasting accuracy, and maximizing returns on cash holdings; Intraday liquidity optimization",
+        "advanced": "Cash forecasting predictivo AI-enabled con aprendizaje histórico, señales operativas, escenarios dinámicos y recomendaciones de acción.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.1 Gobierno y modelo de cash forecasting"
+      }
+    },
+    {
+      "id": "tesoreria-4-2",
+      "capacidad": "Gestión de cash flow y reporte",
+      "subcapacidad": "4.2 Posición de liquidez y visibilidad bancaria",
+      "objetivo": "Evaluar si Tesorería dispone de visibilidad oportuna y fiable de posiciones bancarias, liquidez disponible y restricciones.",
+      "maturity": {
+        "1": "Visibilidad de caja dispersa, manual y tardía, con dependencia de extractos y bancos individuales.",
+        "2": "Consolidación básica de posiciones bancarias, aunque con baja automatización e información incompleta sobre restricciones.",
+        "3": "Modelo de posición de liquidez con bancos, divisas, cuentas, disponibilidad, restricciones, responsables y reporting diario/recurrente.",
+        "4": "Visibilidad integrada e intradía con TMS/bancos, cash pooling, límites, alertas y conciliación automatizada.",
+        "5": "AI optimiza liquidez intradía, anticipa necesidades, detecta saldos ociosos/restricciones y recomienda movimientos o inversiones."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe visibilidad diaria/intradía de caja?",
+        "¿Se identifican restricciones de liquidez?",
+        "¿Hay integración bancaria/TMS?",
+        "¿Se optimizan saldos?"
+      ],
+      "evidencias": "Reportes de posición; extractos bancarios; TMS; cash pooling; saldos por divisa; restricciones; alertas; conciliaciones.",
+      "iniciativaSugerida": "Implantar visibilidad integrada de liquidez con conexiones bancarias, cash pooling, alertas y análisis de saldos disponibles/restringidos.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Intraday liquidity optimization; Enhance cash flow analysis, minimizing liquidity risks; Data access for all",
+        "advanced": "AI optimiza liquidez intradía, anticipa necesidades, detecta saldos ociosos/restricciones y recomienda movimientos o inversiones.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.2 Posición de liquidez y visibilidad bancaria"
+      }
+    },
+    {
+      "id": "tesoreria-4-3",
+      "capacidad": "Gestión de cash flow y reporte",
+      "subcapacidad": "4.3 Gestión de liquidez, working capital y decisiones de caja",
+      "objetivo": "Evaluar si Tesorería optimiza liquidez y working capital conectando caja, cobros, pagos, inventarios, deuda e inversiones.",
+      "maturity": {
+        "1": "Decisiones de caja reactivas, con baja conexión con working capital, pagos/cobros, deuda o inversiones.",
+        "2": "Seguimiento básico de liquidez y working capital, aunque con acciones manuales y baja priorización por impacto.",
+        "3": "KPIs de liquidez y working capital definidos, con rutinas de seguimiento, owners y acciones de mejora.",
+        "4": "Gestión integrada de liquidez con O2C/P2P, forecast, deuda, inversiones, pagos, cobros, DSO/DPO/DIO y escenarios.",
+        "5": "AI recomienda términos de pago/cobro, timing óptimo, acciones sobre working capital e inversiones de excedentes según liquidez y riesgo."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se conectan liquidez y working capital?",
+        "¿Se gestionan DSO/DPO/DIO?",
+        "¿Se priorizan pagos/cobros por impacto?",
+        "¿Se recomiendan acciones de caja?"
+      ],
+      "evidencias": "KPIs working capital; aging; pagos; cobros; inventario; cash forecast; acciones de mejora; comités de cash.",
+      "iniciativaSugerida": "Crear modelo de optimización de liquidez y working capital con KPIs, escenarios, acciones y recomendaciones de cobro/pago/inventario.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Recommend optimal payment terms to improve DSO; Recommend most optimal payment timing; Dynamic inventory management",
+        "advanced": "AI recomienda términos de pago/cobro, timing óptimo, acciones sobre working capital e inversiones de excedentes según liquidez y riesgo.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.3 Gestión de liquidez, working capital y decisiones de caja"
+      }
+    },
+    {
+      "id": "tesoreria-4-4",
+      "capacidad": "Gestión de cash flow y reporte",
+      "subcapacidad": "4.4 Reporting de tesorería y rutinas de gestión de liquidez",
+      "objetivo": "Evaluar si el reporting de tesorería genera decisiones, seguimiento de acciones y control de riesgos de liquidez.",
+      "maturity": {
+        "1": "Reporting de tesorería principalmente descriptivo, manual y sin rutina formal de decisión o seguimiento de acciones.",
+        "2": "Reporting recurrente de caja y deuda, aunque con narrativa limitada y acciones poco trazadas.",
+        "3": "Pack de tesorería estándar con posición, forecast, desviaciones, deuda, riesgos, KPIs, owners y acciones.",
+        "4": "Rutinas integradas de liquidez con comité, decisiones, seguimiento de acciones, alertas, escenarios y beneficios esperados.",
+        "5": "Reporting AI-enabled con narrativa ejecutiva, alertas, explicación de desviaciones, escenarios y recomendaciones de liquidez."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe pack de tesorería?",
+        "¿Se revisa en comités?",
+        "¿Se documentan decisiones y acciones?",
+        "¿Se reportan riesgos de liquidez?"
+      ],
+      "evidencias": "Pack de tesorería; actas de comité; KPIs; forecast; tracker de acciones; escenarios; reportes de desviación.",
+      "iniciativaSugerida": "Formalizar reporting y rutinas de liquidez con pack estándar, decisiones, actions tracker, escenarios y recomendaciones ejecutivas.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate executive level overview of company financial health; FinanceAI Insights Platform; Generate account variance analysis and intelligent explanations",
+        "advanced": "Reporting AI-enabled con narrativa ejecutiva, alertas, explicación de desviaciones, escenarios y recomendaciones de liquidez.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.4 Reporting de tesorería y rutinas de gestión de liquidez"
+      }
+    },
+    {
+      "id": "tesoreria-5-1",
+      "capacidad": "Inversiones",
+      "subcapacidad": "5.1 Política de inversiones y gobierno de excedentes",
+      "objetivo": "Evaluar si existe una política para invertir excedentes de caja alineada con liquidez, seguridad, rentabilidad, riesgo y cumplimiento.",
+      "maturity": {
+        "1": "Decisiones de inversión de excedentes puntuales, con política limitada y baja trazabilidad de criterios de riesgo/rentabilidad.",
+        "2": "Política básica de inversiones, aunque con límites parciales, seguimiento manual y revisión poco frecuente.",
+        "3": "Política de inversiones definida con objetivos, instrumentos permitidos, límites, contrapartes, liquidez, aprobaciones y reporting.",
+        "4": "Gobierno integrado con cash forecast, riesgos financieros, límites de contraparte, escenarios, compliance y revisión periódica de performance.",
+        "5": "AI recomienda asignación de excedentes considerando liquidez futura, retorno, riesgo, límites, mercado y restricciones corporativas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe política de inversiones?",
+        "¿Se definen límites e instrumentos?",
+        "¿Se conecta con liquidez futura?",
+        "¿Se reporta rentabilidad y riesgo?"
+      ],
+      "evidencias": "Política de inversiones; cartera; límites; aprobaciones; reportes de rentabilidad; cash forecast; rating contrapartes.",
+      "iniciativaSugerida": "Definir política y gobierno de inversiones de excedentes con límites, instrumentos, contrapartes, liquidez, reporting y revisión periódica.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Enhance cash flow analysis, minimizing liquidity risks, improving forecasting accuracy, and maximizing returns on cash holdings; Generate investing strategies; Predictive cash flow forecasting tool",
+        "advanced": "AI recomienda asignación de excedentes considerando liquidez futura, retorno, riesgo, límites, mercado y restricciones corporativas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "5.1 Política de inversiones y gobierno de excedentes"
+      }
+    },
+    {
+      "id": "tesoreria-5-2",
+      "capacidad": "Inversiones",
+      "subcapacidad": "5.2 Gestión de cartera, rentabilidad y riesgo de inversiones",
+      "objetivo": "Evaluar si la cartera de inversiones se gestiona con visibilidad de rentabilidad, riesgo, liquidez, vencimientos y concentración.",
+      "maturity": {
+        "1": "Cartera de inversiones monitorizada manualmente, con baja visibilidad agregada de riesgo, rendimiento y liquidez.",
+        "2": "Seguimiento básico de inversiones y vencimientos, aunque con análisis limitado de rendimiento ajustado por riesgo.",
+        "3": "Modelo estándar de cartera con valoración, rendimiento, vencimientos, liquidez, límites, contrapartes y reporting periódico.",
+        "4": "Gestión integrada con mercado, cash forecast, riesgos, accounting, compliance y decisiones de reinversión/desinversión.",
+        "5": "AI analiza rendimiento y riesgo, detecta concentración o desviaciones y recomienda rebalanceo o reinversión según escenarios."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se monitoriza rentabilidad y riesgo de la cartera?",
+        "¿Se controlan vencimientos y concentración?",
+        "¿Se conecta con liquidez y mercado?",
+        "¿Se revisa rebalanceo?"
+      ],
+      "evidencias": "Cartera de inversiones; valoración; rendimientos; vencimientos; límites; ratings; reportes de riesgo; decisiones de rebalanceo.",
+      "iniciativaSugerida": "Implantar gestión de cartera con rentabilidad ajustada por riesgo, vencimientos, límites, concentración y recomendaciones de reinversión.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate investing strategies; Enhance cash flow analysis; AI agents for algorithmic trading and market simulation",
+        "advanced": "AI analiza rendimiento y riesgo, detecta concentración o desviaciones y recomienda rebalanceo o reinversión según escenarios.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "5.2 Gestión de cartera, rentabilidad y riesgo de inversiones"
+      }
+    },
+    {
+      "id": "tesoreria-5-3",
+      "capacidad": "Inversiones",
+      "subcapacidad": "5.3 Integración de inversiones con liquidez y planificación financiera",
+      "objetivo": "Evaluar si las decisiones de inversión se integran con necesidades futuras de caja, deuda, capital allocation y escenarios financieros.",
+      "maturity": {
+        "1": "Inversiones gestionadas de forma separada del cash forecast y planificación financiera, con riesgo de desalineación de liquidez.",
+        "2": "Coordinación básica con liquidez esperada, aunque con escenarios limitados y revisión manual.",
+        "3": "Proceso definido para conectar inversiones con cash forecast, horizonte de liquidez, vencimientos, deuda y restricciones.",
+        "4": "Integración completa con planificación financiera, estructura de capital, riesgos, escenarios, inversiones operativas y capital allocation.",
+        "5": "AI simula liquidez futura, necesidades de financiación y oportunidades de inversión, recomendando asignación óptima de excedentes."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Las inversiones se conectan con cash forecast?",
+        "¿Se consideran necesidades futuras de liquidez?",
+        "¿Se evalúan escenarios?",
+        "¿Se alinea con deuda/capital allocation?"
+      ],
+      "evidencias": "Cash forecast; plan financiero; cartera de inversiones; vencimientos; escenarios; decisiones de inversión/desinversión; comités.",
+      "iniciativaSugerida": "Diseñar proceso integrado de inversiones y liquidez con escenarios, restricciones, vencimientos, necesidades futuras y capital allocation.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive cash flow forecasting tool; Generate investing strategies; Identify past data patterns to predict and improve future financial performance",
+        "advanced": "AI simula liquidez futura, necesidades de financiación y oportunidades de inversión, recomendando asignación óptima de excedentes.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "5.3 Integración de inversiones con liquidez y planificación financiera"
+      }
+    },
+    {
+      "id": "tesoreria-5-4",
+      "capacidad": "Inversiones",
+      "subcapacidad": "5.4 Reporting, cumplimiento y control de inversiones",
+      "objetivo": "Evaluar si las inversiones se reportan y controlan con criterios de cumplimiento, límites, performance, riesgos y evidencias de decisión.",
+      "maturity": {
+        "1": "Reporting de inversiones manual y disperso, con baja trazabilidad de decisiones, límites y cumplimiento de política.",
+        "2": "Reportes periódicos básicos, aunque con controles manuales de límites y documentación parcial.",
+        "3": "Reporting estándar de inversiones con rentabilidad, riesgo, límites, cumplimiento, vencimientos, contrapartes y aprobaciones.",
+        "4": "Control integrado con workflows, alertas de límites, evidencias, accounting, compliance y revisión de performance.",
+        "5": "AI genera reporting ejecutivo, detecta incumplimientos potenciales, explica variaciones y recomienda acciones correctivas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se reporta cumplimiento de política?",
+        "¿Se controlan límites y excepciones?",
+        "¿Se documentan decisiones?",
+        "¿Se explica performance?"
+      ],
+      "evidencias": "Reporting de inversiones; policy compliance; excepciones; aprobaciones; logs; actas de comité; análisis de rendimiento/riesgo.",
+      "iniciativaSugerida": "Crear reporting y control de inversiones con límites, evidencias, alertas, performance, compliance y decisiones trazables.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate executive level overview of company financial health; FinanceAI Insights Platform; Predictive compliance monitoring",
+        "advanced": "AI genera reporting ejecutivo, detecta incumplimientos potenciales, explica variaciones y recomienda acciones correctivas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "5.4 Reporting, cumplimiento y control de inversiones"
+      }
+    }
+  ]
+}

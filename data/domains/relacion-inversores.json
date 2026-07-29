@@ -1,0 +1,431 @@
+{
+  "meta": {
+    "domainId": "relacion-inversores",
+    "domainLabel": "Relación con Inversores",
+    "domainTitle": "Relación con Inversores",
+    "sourceFile": "F3M_Relacion_Inversores_assessment_ready_AI_v0.xlsx",
+    "targetMaturity": 4
+  },
+  "subcapacities": [
+    {
+      "id": "relacion-inversores-1-1",
+      "capacidad": "Regulación y gobernanza",
+      "subcapacidad": "1.1 Gobierno de reporting regulatorio e información al mercado",
+      "objetivo": "Evaluar si existe un modelo de gobierno para preparar, revisar, aprobar y publicar información regulatoria y financiera dirigida al mercado.",
+      "maturity": {
+        "1": "Reporting regulatorio gestionado de forma reactiva, manual y dependiente de personas clave, con trazabilidad limitada de aprobaciones.",
+        "2": "Calendario y responsables básicos definidos, aunque con variabilidad en revisiones, documentación y coordinación entre áreas.",
+        "3": "Modelo de gobierno documentado con calendario, roles, controles, fuentes, aprobaciones y responsables por tipo de comunicación o filing.",
+        "4": "Gobierno integrado con Finanzas, Legal, Compliance, Comunicación, Secretaría General y Dirección, con workflow, evidencias y control de versiones.",
+        "5": "Reporting regulatorio AI-enabled con generación asistida de borradores, validación de consistencia, alertas regulatorias y trazabilidad completa de revisión humana."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe calendario formal de reporting regulatorio?",
+        "¿Están definidos roles y aprobaciones?",
+        "¿Se controla versión y evidencia?",
+        "¿Se coordina con Finanzas, Legal y Compliance?"
+      ],
+      "evidencias": "Calendario regulatorio; matriz RACI; filings; aprobaciones; evidencias de revisión; control de versiones; actas de comité.",
+      "iniciativaSugerida": "Diseñar modelo de gobierno de reporting regulatorio con calendario, RACI, workflow de revisión, control de versiones y evidencias de aprobación.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate draft regulatory filings; Draft sections of 10Q / 10K generation; Consolidate written financial reports into one compliant report",
+        "advanced": "Reporting regulatorio AI-enabled con generación asistida de borradores, validación de consistencia, alertas regulatorias y trazabilidad completa de revisión humana.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.1 Gobierno de reporting regulatorio e información al mercado"
+      }
+    },
+    {
+      "id": "relacion-inversores-1-2",
+      "capacidad": "Regulación y gobernanza",
+      "subcapacidad": "1.2 Monitorización normativa y cumplimiento de obligaciones de mercado",
+      "objetivo": "Evaluar si la organización monitoriza cambios normativos, obligaciones de mercado y requerimientos aplicables a emisores/inversores.",
+      "maturity": {
+        "1": "Monitorización normativa puntual y manual, con baja trazabilidad de obligaciones, cambios e impactos en procesos o comunicaciones.",
+        "2": "Seguimiento básico de cambios relevantes, aunque con análisis de impacto y actualización de obligaciones no siempre sistemáticos.",
+        "3": "Proceso estructurado de regulatory tracking con fuentes, responsables, matriz de obligaciones, análisis de impacto y actualización periódica.",
+        "4": "Monitorización integrada con Legal, Compliance, RI y Finanzas, con alertas, owners, workflow de evaluación y reporting a governance.",
+        "5": "AI monitoriza regulación global, sintetiza cambios, evalúa impacto preliminar y recomienda acciones de cumplimiento o comunicación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se monitorizan cambios regulatorios?",
+        "¿Existe matriz de obligaciones?",
+        "¿Se evalúa impacto en reporting y comunicación?",
+        "¿Hay owners de remediación?"
+      ],
+      "evidencias": "Matriz de obligaciones; alertas regulatorias; análisis de impacto; actas de seguimiento; políticas actualizadas; evidencias de acciones.",
+      "iniciativaSugerida": "Implantar regulatory intelligence para RI con matriz de obligaciones, alertas, análisis de impacto, owners y seguimiento de acciones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Monitor emerging regulations and evaluate current state compliance; Global policy tracking; Summarizing legislative documents",
+        "advanced": "AI monitoriza regulación global, sintetiza cambios, evalúa impacto preliminar y recomienda acciones de cumplimiento o comunicación.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.2 Monitorización normativa y cumplimiento de obligaciones de mercado"
+      }
+    },
+    {
+      "id": "relacion-inversores-1-3",
+      "capacidad": "Regulación y gobernanza",
+      "subcapacidad": "1.3 Gobierno de información privilegiada, consistencia y disclosure controls",
+      "objetivo": "Evaluar si existen controles para asegurar consistencia, oportunidad, confidencialidad y cumplimiento en información sensible o privilegiada.",
+      "maturity": {
+        "1": "Controles de disclosure e información privilegiada poco formalizados, con dependencia de revisiones manuales y criterios no homogéneos.",
+        "2": "Políticas básicas de comunicación e información sensible, aunque con controles parciales y evidencias variables.",
+        "3": "Modelo de disclosure controls definido con criterios de materialidad, confidencialidad, aprobación, registro y revisión documental.",
+        "4": "Controles integrados con calendario financiero, comités, Legal/Compliance, canales de comunicación y gestión de insiders.",
+        "5": "AI revisa consistencia entre comunicaciones, detecta posibles inconsistencias o riesgos de disclosure y recomienda validaciones previas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen disclosure controls formalizados?",
+        "¿Se define materialidad y confidencialidad?",
+        "¿Se revisa consistencia entre comunicaciones?",
+        "¿Se guardan evidencias?"
+      ],
+      "evidencias": "Política de disclosure; insider lists; versionado; aprobaciones; actas; comunicaciones externas; checklist de revisión.",
+      "iniciativaSugerida": "Formalizar controles de disclosure con criterios de materialidad, workflow, revisión de consistencia, evidencias y gestión de información sensible.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Financial rules and regulations interpretations; Generate draft regulatory filings; AI-powered risk management and regulatory compliance",
+        "advanced": "AI revisa consistencia entre comunicaciones, detecta posibles inconsistencias o riesgos de disclosure y recomienda validaciones previas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.3 Gobierno de información privilegiada, consistencia y disclosure controls"
+      }
+    },
+    {
+      "id": "relacion-inversores-1-4",
+      "capacidad": "Regulación y gobernanza",
+      "subcapacidad": "1.4 Coordinación con órganos de gobierno, auditoría y stakeholders internos",
+      "objetivo": "Evaluar si la función de RI coordina adecuadamente información, decisiones y mensajes con órganos de gobierno y stakeholders internos clave.",
+      "maturity": {
+        "1": "Coordinación informal con áreas internas, con baja planificación y dependencia de relaciones personales para preparar mensajes al mercado.",
+        "2": "Foros básicos de coordinación para eventos relevantes, aunque con agendas, decisiones y evidencias parcialmente documentadas.",
+        "3": "Modelo de coordinación definido con calendario, comités, roles, inputs, decisiones, mensajes clave y seguimiento de acuerdos.",
+        "4": "Coordinación integrada con CFO, CEO, Consejo/Comisiones, Legal, Comunicación, Auditoría y Finanzas, con trazabilidad de decisiones.",
+        "5": "AI sintetiza inputs internos, identifica inconsistencias, prepara briefs ejecutivos y facilita la alineación de mensajes antes de interacciones externas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen foros de coordinación de RI?",
+        "¿Se documentan decisiones y mensajes clave?",
+        "¿Participan áreas críticas?",
+        "¿Se trazan aprobaciones?"
+      ],
+      "evidencias": "Calendario de comités; actas; briefing books; versiones de mensajes; aprobaciones; inputs de áreas; documentación del Consejo.",
+      "iniciativaSugerida": "Crear rutina de coordinación de RI con stakeholders internos, agenda, inputs, decisiones, mensajes clave y trazabilidad de aprobaciones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate executive level overview of company financial health; FinanceAI Insights Platform; Consolidate written financial reports into one compliant report",
+        "advanced": "AI sintetiza inputs internos, identifica inconsistencias, prepara briefs ejecutivos y facilita la alineación de mensajes antes de interacciones externas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.4 Coordinación con órganos de gobierno, auditoría y stakeholders internos"
+      }
+    },
+    {
+      "id": "relacion-inversores-2-1",
+      "capacidad": "Planificación y estrategia de RI",
+      "subcapacidad": "2.1 Estrategia de relación con inversores y posicionamiento equity story",
+      "objetivo": "Evaluar si existe una estrategia de RI clara, alineada con equity story, objetivos corporativos, perfil inversor y mensajes al mercado.",
+      "maturity": {
+        "1": "Estrategia de RI implícita o reactiva, con mensajes dispersos y baja segmentación de inversores o prioridades de comunicación.",
+        "2": "Equity story básica y plan de comunicación anual, aunque con segmentación limitada y baja conexión con feedback del mercado.",
+        "3": "Estrategia de RI documentada con equity story, mensajes clave, segmentos de inversores, calendario, objetivos y KPIs.",
+        "4": "Estrategia integrada con plan corporativo, capital allocation, performance, ESG, feedback inversor y análisis competitivo.",
+        "5": "AI analiza mercado, feedback, preguntas de inversores y tendencias para ajustar equity story, mensajes y prioridades de engagement."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe estrategia de RI documentada?",
+        "¿Está definida la equity story?",
+        "¿Se segmentan inversores?",
+        "¿Se actualizan mensajes con feedback del mercado?"
+      ],
+      "evidencias": "Plan RI; equity story; investor targeting; calendario; KPIs; feedback de inversores; presentaciones; análisis de percepción.",
+      "iniciativaSugerida": "Definir estrategia de RI con equity story, segmentación de inversores, mensajes clave, calendario, KPIs y mecanismo de feedback.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Marketing content assistant; Next-level market intelligence; Generate executive level overview of company financial health",
+        "advanced": "AI analiza mercado, feedback, preguntas de inversores y tendencias para ajustar equity story, mensajes y prioridades de engagement.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.1 Estrategia de relación con inversores y posicionamiento equity story"
+      }
+    },
+    {
+      "id": "relacion-inversores-2-2",
+      "capacidad": "Planificación y estrategia de RI",
+      "subcapacidad": "2.2 Calendario de comunicación financiera y eventos con mercado",
+      "objetivo": "Evaluar si la función de RI planifica y ejecuta de forma estructurada eventos, roadshows, resultados, investor days y comunicaciones recurrentes.",
+      "maturity": {
+        "1": "Calendario de eventos gestionado de forma manual y reactiva, con preparación variable y baja trazabilidad de materiales y follow-up.",
+        "2": "Calendario básico de resultados y eventos principales, aunque con coordinación parcial y preparación intensiva manual.",
+        "3": "Calendario RI documentado con eventos, responsables, materiales, aprobaciones, audiencias, logística y acciones de seguimiento.",
+        "4": "Plan integrado con reporting financiero, estrategia, comunicación, agenda ejecutiva, targeting de inversores y feedback post-evento.",
+        "5": "AI genera briefs, Q&A, resúmenes de feedback, propuestas de mensajes y materiales base para eventos y comunicaciones financieras."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe calendario anual de RI?",
+        "¿Se preparan y aprueban materiales de forma estructurada?",
+        "¿Se registra feedback post-evento?",
+        "¿Se hace seguimiento de acciones?"
+      ],
+      "evidencias": "Calendario RI; earnings materials; Q&A; roadshow tracker; investor day materials; feedback logs; approvals; follow-up actions.",
+      "iniciativaSugerida": "Implantar modelo de planificación de eventos RI con calendario, materiales, Q&A, approvals, feedback y seguimiento de acciones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Marketing content assistant; Generate executive level overview of company financial health; Consolidate written financial reports into one compliant report",
+        "advanced": "AI genera briefs, Q&A, resúmenes de feedback, propuestas de mensajes y materiales base para eventos y comunicaciones financieras.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.2 Calendario de comunicación financiera y eventos con mercado"
+      }
+    },
+    {
+      "id": "relacion-inversores-2-3",
+      "capacidad": "Planificación y estrategia de RI",
+      "subcapacidad": "2.3 Gestión de inversores, analistas y feedback del mercado",
+      "objetivo": "Evaluar si RI gestiona de forma estructurada relaciones, interacciones, feedback, percepción y necesidades de inversores y analistas.",
+      "maturity": {
+        "1": "Relación con inversores y analistas gestionada de forma individual, con registros incompletos y baja explotación del feedback.",
+        "2": "CRM o tracker básico de contactos e interacciones, aunque con análisis limitado de percepción, temas recurrentes o prioridades.",
+        "3": "Modelo de investor engagement con segmentación, registro de interacciones, feedback, temas clave, owners y seguimiento.",
+        "4": "Gestión integrada con targeting, mensajes, calendario, percepción del mercado, análisis de preguntas y acciones de mejora.",
+        "5": "AI sintetiza feedback de inversores/analistas, identifica temas recurrentes, riesgos de percepción y recomendaciones de engagement."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe CRM/tracker de inversores?",
+        "¿Se registra feedback y preguntas?",
+        "¿Se analizan temas recurrentes?",
+        "¿Se traduce feedback en acciones o mensajes?"
+      ],
+      "evidencias": "CRM RI; logs de reuniones; feedback de inversores; informes de analistas; Q&A; trackers de acciones; segmentación.",
+      "iniciativaSugerida": "Crear modelo de investor intelligence con CRM, feedback estructurado, análisis de temas, percepción, acciones y reporting ejecutivo.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "FinanceAI Insights Platform; Smarter intelligence; Enterprise-wide data search and access",
+        "advanced": "AI sintetiza feedback de inversores/analistas, identifica temas recurrentes, riesgos de percepción y recomendaciones de engagement.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.3 Gestión de inversores, analistas y feedback del mercado"
+      }
+    },
+    {
+      "id": "relacion-inversores-2-4",
+      "capacidad": "Planificación y estrategia de RI",
+      "subcapacidad": "2.4 Métricas de efectividad, percepción y mejora continua de RI",
+      "objetivo": "Evaluar si la función de RI mide efectividad de sus actividades, percepción del mercado, calidad de comunicación y mejora continua.",
+      "maturity": {
+        "1": "No existen KPIs estructurados de RI o se limitan a actividad realizada, sin medición de impacto o percepción.",
+        "2": "KPIs básicos de actividad y cobertura, aunque con análisis limitado de calidad, percepción, mensajes o outcomes.",
+        "3": "KPIs definidos de RI incluyendo actividad, cobertura, feedback, percepción, calidad de materiales, cumplimiento y acciones.",
+        "4": "Modelo integrado de performance RI con objetivos, benchmarking, percepción de mercado, análisis de analistas y mejora continua.",
+        "5": "AI identifica relaciones entre actividad RI, percepción de mercado, narrativa, preguntas y recomendaciones para mejorar efectividad."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen KPIs de RI?",
+        "¿Se mide percepción de inversores/analistas?",
+        "¿Se comparan frente a peers?",
+        "¿Se generan acciones de mejora?"
+      ],
+      "evidencias": "Dashboard RI; encuestas de percepción; coverage de analistas; feedback; benchmarking; KPIs de actividad; acciones de mejora.",
+      "iniciativaSugerida": "Implantar scorecard de RI con KPIs de actividad, percepción, cobertura, feedback, benchmarking y mejora continua.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Next-level market intelligence; FinanceAI Insights Platform; Generate executive level overview of company financial health",
+        "advanced": "AI identifica relaciones entre actividad RI, percepción de mercado, narrativa, preguntas y recomendaciones para mejorar efectividad.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.4 Métricas de efectividad, percepción y mejora continua de RI"
+      }
+    },
+    {
+      "id": "relacion-inversores-3-1",
+      "capacidad": "Financiación y valoración de mercados de capitales",
+      "subcapacidad": "3.1 Análisis de valoración, múltiplos y percepción del mercado",
+      "objetivo": "Evaluar si RI y Finanzas analizan valoración, múltiplos, drivers de mercado, perspectiva de analistas y comparables para orientar decisiones.",
+      "maturity": {
+        "1": "Análisis de valoración puntual, manual y centrado en múltiplos básicos, con baja conexión con estrategia o mensajes al mercado.",
+        "2": "Análisis recurrente de cotización, múltiplos y peers, aunque con fuentes dispersas y explicación limitada de drivers.",
+        "3": "Modelo de valoración de mercado con comparables, múltiplos, consensus, drivers, sensibilidad y narrativa de implicaciones.",
+        "4": "Análisis integrado con equity story, capital allocation, performance, riesgos, feedback inversor y decisiones de comunicación.",
+        "5": "AI analiza datos financieros y de mercado, predice valoración relativa, identifica drivers y recomienda focos de comunicación o acción."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se analiza valoración y múltiplos frente a peers?",
+        "¿Se incorporan consensus y drivers?",
+        "¿Se conectan resultados con equity story?",
+        "¿Se explican variaciones de mercado?"
+      ],
+      "evidencias": "Modelo de valoración; comparables; consensus; informes de analistas; evolución de múltiplos; presentaciones; análisis de sensibilidad.",
+      "iniciativaSugerida": "Crear modelo de valoración y percepción de mercado con peers, consensus, drivers, sensibilidad y recomendaciones de comunicación.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive company valuation analyzing financial data; Generate investing strategies; Next-level market intelligence",
+        "advanced": "AI analiza datos financieros y de mercado, predice valoración relativa, identifica drivers y recomienda focos de comunicación o acción.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.1 Análisis de valoración, múltiplos y percepción del mercado"
+      }
+    },
+    {
+      "id": "relacion-inversores-3-2",
+      "capacidad": "Financiación y valoración de mercados de capitales",
+      "subcapacidad": "3.2 Soporte financiero a operaciones de mercado y financiación corporativa",
+      "objetivo": "Evaluar si RI aporta información y coordinación en operaciones de financiación, emisiones, recompras, ampliaciones u otras operaciones de mercado.",
+      "maturity": {
+        "1": "Soporte de RI a operaciones de mercado puntual y reactivo, con baja coordinación entre bancos, Finanzas, Legal y Comunicación.",
+        "2": "Participación en operaciones relevantes, aunque con roles y entregables variables según operación.",
+        "3": "Modelo definido para soporte RI en operaciones de mercado con roles, mensajes, datos financieros, Q&A, aprobaciones y calendario.",
+        "4": "Coordinación integrada con estrategia de financiación, capital markets, bancos, rating, comunicación, legal y dirección.",
+        "5": "AI sintetiza información financiera, mercado y riesgos, prepara materiales base y recomienda mensajes según operación y audiencia."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Está definido el rol de RI en operaciones de mercado?",
+        "¿Se coordinan mensajes y materiales?",
+        "¿Se preparan Q&A específicos?",
+        "¿Se recopila feedback post-operación?"
+      ],
+      "evidencias": "Deal materials; Q&A; calendario de operación; actas; feedback de bancos/inversores; approvals; documentación financiera.",
+      "iniciativaSugerida": "Definir playbook de RI para operaciones de mercado con roles, materiales, Q&A, approvals, feedback y coordinación con stakeholders.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate investing strategies; Research-based report generation / KYC; Generate executive level overview of company financial health",
+        "advanced": "AI sintetiza información financiera, mercado y riesgos, prepara materiales base y recomienda mensajes según operación y audiencia.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.2 Soporte financiero a operaciones de mercado y financiación corporativa"
+      }
+    },
+    {
+      "id": "relacion-inversores-3-3",
+      "capacidad": "Financiación y valoración de mercados de capitales",
+      "subcapacidad": "3.3 Gestión de consensus, guidance y expectativas del mercado",
+      "objetivo": "Evaluar si la organización monitoriza y gestiona consensus, guidance, expectativas y desviaciones percibidas por el mercado.",
+      "maturity": {
+        "1": "Consensus y expectativas se revisan de forma manual y puntual, con baja trazabilidad de supuestos y riesgos de desviación.",
+        "2": "Seguimiento básico de consensus y guidance para resultados, aunque con análisis limitado de drivers y sensibilidad.",
+        "3": "Modelo de seguimiento de consensus con analistas, supuestos, guidance, desviaciones, mensajes clave y riesgos de comunicación.",
+        "4": "Gestión integrada con forecast interno, planificación, performance, equity story y preparación de resultados/Q&A.",
+        "5": "AI compara consensus vs forecast, identifica gaps de expectativa, explica drivers y recomienda puntos de comunicación preventiva."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se monitoriza consensus de analistas?",
+        "¿Se compara con forecast interno?",
+        "¿Se identifican gaps de expectativa?",
+        "¿Se preparan mensajes o Q&A?"
+      ],
+      "evidencias": "Consensus tracker; guidance; forecast interno; informes de analistas; Q&A; earnings prep; análisis de gaps.",
+      "iniciativaSugerida": "Implantar modelo de consensus management con tracker de analistas, comparación con forecast, gaps de expectativa y recomendaciones de mensajes.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate executive level overview of company financial health; FinanceAI Insights Platform; Identify past data patterns to predict and improve future financial performance",
+        "advanced": "AI compara consensus vs forecast, identifica gaps de expectativa, explica drivers y recomienda puntos de comunicación preventiva.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.3 Gestión de consensus, guidance y expectativas del mercado"
+      }
+    },
+    {
+      "id": "relacion-inversores-3-4",
+      "capacidad": "Financiación y valoración de mercados de capitales",
+      "subcapacidad": "3.4 Reporting estratégico a dirección sobre mercado, inversores y capital",
+      "objetivo": "Evaluar si RI proporciona a la Dirección y órganos de gobierno una visión integrada sobre mercado, valoración, inversores, analistas y opciones de capital.",
+      "maturity": {
+        "1": "Reporting a dirección limitado o ad hoc, con información de mercado dispersa y baja conexión con decisiones estratégicas.",
+        "2": "Reporting periódico básico sobre cotización, analistas e inversores, aunque con análisis limitado de implicaciones.",
+        "3": "Pack ejecutivo RI con mercado, valoración, consensus, analistas, inversores, feedback, riesgos y recomendaciones.",
+        "4": "Reporting integrado con estrategia, capital allocation, financiación, comunicación, riesgos y decisiones del comité/directorio.",
+        "5": "AI genera overview ejecutivo del mercado de capitales, resume feedback, identifica riesgos/oportunidades y recomienda acciones estratégicas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe reporting RI para dirección?",
+        "¿Incluye mercado, valoración, investors y analistas?",
+        "¿Se presentan implicaciones y recomendaciones?",
+        "¿Se conectan con decisiones de capital?"
+      ],
+      "evidencias": "Pack ejecutivo RI; actas de comité; análisis de mercado; feedback inversor; coverage de analistas; recomendaciones; decisiones.",
+      "iniciativaSugerida": "Crear pack ejecutivo de RI/capital markets con valoración, consensus, feedback, riesgos, oportunidades y recomendaciones de acción.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Generate executive level overview of company financial health; Next-level market intelligence; FinanceAI Insights Platform",
+        "advanced": "AI genera overview ejecutivo del mercado de capitales, resume feedback, identifica riesgos/oportunidades y recomienda acciones estratégicas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.4 Reporting estratégico a dirección sobre mercado, inversores y capital"
+      }
+    }
+  ]
+}

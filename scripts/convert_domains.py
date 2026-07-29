@@ -50,6 +50,27 @@ FILES = [
         "source": ROOT / "F3M_Finanzas_Estrategicas_assessment_ready_AI_v0.xlsx",
         "output": OUT_DIR / "finanzas-estrategicas.json",
     },
+    {
+        "domain_id": "relacion-inversores",
+        "domain_label": "Relación con Inversores",
+        "domain_title": "Relación con Inversores",
+        "source": ROOT / "F3M_Relacion_Inversores_assessment_ready_AI_v0.xlsx",
+        "output": OUT_DIR / "relacion-inversores.json",
+    },
+    {
+        "domain_id": "tesoreria",
+        "domain_label": "Tesorería",
+        "domain_title": "Tesorería",
+        "source": ROOT / "F3M_Tesoreria_assessment_ready_AI_v0.xlsx",
+        "output": OUT_DIR / "tesoreria.json",
+    },
+    {
+        "domain_id": "fiscal",
+        "domain_label": "Fiscal",
+        "domain_title": "Fiscal",
+        "source": ROOT / "F3M_Fiscal_assessment_ready_AI_v0.xlsx",
+        "output": OUT_DIR / "fiscal.json",
+    },
 ]
 
 

@@ -85,6 +85,29 @@ const DOMAINS = {
     group: "Estratégicos y de negocio",
     dataUrl: "data/domains/finanzas-estrategicas.json",
   },
+    "relacion-inversores": {
+    id: "relacion-inversores",
+    label: "Relación con Inversores",
+    title: "Relación con Inversores",
+    group: "Técnicos y especializados",
+    dataUrl: "data/domains/relacion-inversores.json",
+  },
+
+  tesoreria: {
+    id: "tesoreria",
+    label: "Tesorería",
+    title: "Tesorería",
+    group: "Técnicos y especializados",
+    dataUrl: "data/domains/tesoreria.json",
+  },
+
+  fiscal: {
+    id: "fiscal",
+    label: "Fiscal",
+    title: "Fiscal",
+    group: "Técnicos y especializados",
+    dataUrl: "data/domains/fiscal.json",
+  },
 };
 
 

@@ -1,0 +1,571 @@
+{
+  "meta": {
+    "domainId": "fiscal",
+    "domainLabel": "Fiscal",
+    "domainTitle": "Fiscal",
+    "sourceFile": "F3M_Fiscal_assessment_ready_AI_v0.xlsx",
+    "targetMaturity": 4
+  },
+  "subcapacities": [
+    {
+      "id": "fiscal-1-1",
+      "capacidad": "Contabilidad y provisión fiscal",
+      "subcapacidad": "1.1 Gobierno del tax accounting y calendario de provisión fiscal",
+      "objetivo": "Evaluar si existe un proceso formal, gobernado y calendarizado para calcular, revisar, aprobar y reportar la provisión fiscal.",
+      "maturity": {
+        "1": "Proceso de provisión fiscal manual o ad hoc, con calendario poco formalizado, elevada dependencia de personas clave y documentación limitada.",
+        "2": "Calendario y responsables básicos definidos, aunque con variabilidad entre sociedades, revisiones manuales y dependencias relevantes de Excel.",
+        "3": "Proceso documentado con calendario, roles, entregables, controles, aprobaciones y criterios contables/fiscales comunes.",
+        "4": "Proceso integrado con cierre, reporting, consolidación y fiscalidad local, con controles automatizados, trazabilidad y mejora continua.",
+        "5": "Tax accounting continuo y AI-enabled, con generación asistida de provisiones, validaciones inteligentes, alertas de desviación y explicación automática de variaciones."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe calendario formal de provisión fiscal?",
+        "¿Están definidos roles y aprobaciones?",
+        "¿Se conecta con cierre y reporting?",
+        "¿Se documentan ajustes y supuestos?"
+      ],
+      "evidencias": "Calendario de cierre fiscal; RACI; workpapers de provisión; aprobaciones; conciliaciones; políticas contables/fiscales; evidencias de revisión.",
+      "iniciativaSugerida": "Diseñar modelo de gobierno de tax accounting con calendario, RACI, controles, aprobaciones, trazabilidad de supuestos y conexión con cierre/reporting.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Accurate tax report generation; Automated financial statement preparation; Generate account variance analysis and intelligent explanations",
+        "advanced": "Tax accounting continuo y AI-enabled, con generación asistida de provisiones, validaciones inteligentes, alertas de desviación y explicación automática de variaciones.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.1 Gobierno del tax accounting y calendario de provisión fiscal"
+      }
+    },
+    {
+      "id": "fiscal-1-2",
+      "capacidad": "Contabilidad y provisión fiscal",
+      "subcapacidad": "1.2 Cálculo de impuesto corriente, diferido y ETR",
+      "objetivo": "Evaluar la robustez, trazabilidad y consistencia del cálculo de impuesto corriente, diferido y tasa efectiva.",
+      "maturity": {
+        "1": "Cálculos manuales y no homogéneos, con trazabilidad limitada entre resultado contable, ajustes fiscales, diferidos y ETR.",
+        "2": "Plantillas recurrentes para sociedades relevantes, aunque con revisión manual, criterios parciales y consolidación compleja.",
+        "3": "Modelo estándar de cálculo con vínculo entre resultado contable, ajustes permanentes/temporales, impuesto corriente, diferido y ETR.",
+        "4": "Cálculo integrado con ERP/consolidación, reglas fiscales, validaciones, análisis de variaciones y reconciliación corriente/diferido.",
+        "5": "Motor inteligente de cálculo fiscal con detección de inconsistencias, explicación de drivers de ETR y recomendaciones de revisión de diferidos o posiciones fiscales."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿El cálculo de impuesto corriente/diferido es trazable?",
+        "¿Se explican variaciones de ETR?",
+        "¿Se validan diferencias permanentes y temporales?",
+        "¿Hay reconciliación entre tax accounting y reporting?"
+      ],
+      "evidencias": "Modelo de provisión; conciliación contable-fiscal; cálculo ETR; detalle de diferidos; ajustes permanentes/temporales; evidencias de revisión.",
+      "iniciativaSugerida": "Estandarizar cálculo de impuesto corriente, diferido y ETR con reglas, conciliaciones, validaciones automáticas y análisis de drivers.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Accurate tax report generation; Identify inconsistencies in master data records; Generate account variance analysis and intelligent explanations",
+        "advanced": "Motor inteligente de cálculo fiscal con detección de inconsistencias, explicación de drivers de ETR y recomendaciones de revisión de diferidos o posiciones fiscales.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.2 Cálculo de impuesto corriente, diferido y ETR"
+      }
+    },
+    {
+      "id": "fiscal-1-3",
+      "capacidad": "Contabilidad y provisión fiscal",
+      "subcapacidad": "1.3 Calidad, integración y trazabilidad del dato fiscal-contable",
+      "objetivo": "Evaluar si los datos utilizados para tax accounting son completos, fiables, trazables e integrados con fuentes financieras oficiales.",
+      "maturity": {
+        "1": "Datos extraídos manualmente desde múltiples fuentes, con reconciliaciones frecuentes y baja trazabilidad de ajustes.",
+        "2": "Fuentes principales identificadas, aunque con integraciones parciales, controles manuales y calidad variable entre entidades.",
+        "3": "Modelo de datos fiscal-contable definido, con fuentes oficiales, reglas de calidad, conciliaciones y owners por dato clave.",
+        "4": "Capa integrada de datos fiscal-contables con controles automáticos, reconciliaciones recurrentes, gestión de incidencias y trazabilidad end-to-end.",
+        "5": "AI detecta inconsistencias, clasificaciones anómalas y gaps de dato, genera metadata fiscal y recomienda acciones de remediación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existen fuentes oficiales para datos fiscales?",
+        "¿Se realizan controles de calidad?",
+        "¿Los ajustes son trazables?",
+        "¿Hay owners de datos clave?"
+      ],
+      "evidencias": "Modelo de datos fiscal; fuentes oficiales; reglas de calidad; reconciliaciones; incidencias de dato; documentación de ajustes; metadata.",
+      "iniciativaSugerida": "Implantar capa de datos fiscal-contables con fuentes oficiales, reglas de calidad, reconciliaciones, owners y workflow de remediación.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automate financial data across diverse sources; Identify inconsistencies in master data records; Generate metadata documentation",
+        "advanced": "AI detecta inconsistencias, clasificaciones anómalas y gaps de dato, genera metadata fiscal y recomienda acciones de remediación.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.3 Calidad, integración y trazabilidad del dato fiscal-contable"
+      }
+    },
+    {
+      "id": "fiscal-1-4",
+      "capacidad": "Contabilidad y provisión fiscal",
+      "subcapacidad": "1.4 Reporting fiscal financiero y explicación ejecutiva",
+      "objetivo": "Evaluar si la información de tax accounting se comunica de forma oportuna, clara y orientada a decisión para dirección, auditoría y reporting externo.",
+      "maturity": {
+        "1": "Reporting fiscal financiero tardío, manual y con foco en cumplimiento, con explicación limitada de variaciones o riesgos.",
+        "2": "Reportes recurrentes para cierres relevantes, aunque con narrativa variable y dependencia de análisis manual.",
+        "3": "Reporting tax accounting estándar con KPIs, ETR, cash tax, diferidos, riesgos, variaciones y comentarios ejecutivos.",
+        "4": "Reporting integrado con cierre, forecast, auditoría, riesgos fiscales, acciones y revisión ejecutiva periódica.",
+        "5": "Reporting fiscal AI-enabled con generación automática de narrative commentary, explicación de variaciones, alertas y recomendaciones de gestión."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se reporta ETR/cash tax/diferidos de forma ejecutiva?",
+        "¿Se explican variaciones y riesgos?",
+        "¿Se conecta con auditoría y reporting externo?",
+        "¿Se generan acciones?"
+      ],
+      "evidencias": "Tax reporting pack; análisis ETR; cash tax; comentarios ejecutivos; actas de revisión; auditoría; acciones de seguimiento.",
+      "iniciativaSugerida": "Crear reporting fiscal financiero con KPIs, narrativa ejecutiva, análisis de variaciones, riesgos, acciones y conexión con reporting externo.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Accurate tax report generation; Consolidate written financial reports into one compliant report; Generate account variance analysis and intelligent explanations",
+        "advanced": "Reporting fiscal AI-enabled con generación automática de narrative commentary, explicación de variaciones, alertas y recomendaciones de gestión.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "1.4 Reporting fiscal financiero y explicación ejecutiva"
+      }
+    },
+    {
+      "id": "fiscal-2-1",
+      "capacidad": "Cumplimiento tributario directo",
+      "subcapacidad": "2.1 Gobierno, calendario y obligaciones de impuestos directos",
+      "objetivo": "Evaluar si existe un marco formal para gestionar obligaciones de impuestos directos, vencimientos, responsables, aprobaciones y evidencias.",
+      "maturity": {
+        "1": "Obligaciones de impuestos directos gestionadas de forma reactiva y manual, con calendario incompleto y alta dependencia de conocimiento individual.",
+        "2": "Calendario fiscal básico y responsables identificados, aunque con seguimiento manual y controles parciales de vencimientos.",
+        "3": "Modelo de cumplimiento directo documentado con calendario, owners, entregables, aprobaciones, controles y repositorio de evidencias.",
+        "4": "Cumplimiento integrado con datos financieros, workflow, gestión documental, alertas y reporting de estatus/riesgos.",
+        "5": "Compliance directo AI-enabled con monitorización de vencimientos, revisión asistida de obligaciones, alertas regulatorias y generación de borradores."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe calendario fiscal de impuestos directos?",
+        "¿Hay owners y aprobaciones definidos?",
+        "¿Se controlan vencimientos y evidencias?",
+        "¿Se monitorizan cambios regulatorios?"
+      ],
+      "evidencias": "Calendario fiscal; matriz de obligaciones; declaraciones; workflow de aprobación; evidencias; repositorio documental; alertas regulatorias.",
+      "iniciativaSugerida": "Implantar gobierno de cumplimiento directo con calendario, matriz de obligaciones, workflow, repositorio de evidencias y alertas regulatorias.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automate tax filing processes, analyze financial data, and generate accurate tax reports; Automated regulatory compliance; Global policy tracking",
+        "advanced": "Compliance directo AI-enabled con monitorización de vencimientos, revisión asistida de obligaciones, alertas regulatorias y generación de borradores.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.1 Gobierno, calendario y obligaciones de impuestos directos"
+      }
+    },
+    {
+      "id": "fiscal-2-2",
+      "capacidad": "Cumplimiento tributario directo",
+      "subcapacidad": "2.2 Preparación, revisión y presentación de declaraciones directas",
+      "objetivo": "Evaluar el grado de estandarización, control, automatización y trazabilidad en la preparación y presentación de declaraciones de impuestos directos.",
+      "maturity": {
+        "1": "Declaraciones preparadas manualmente, con alta dependencia de hojas de cálculo, ajustes manuales y revisiones no homogéneas.",
+        "2": "Plantillas y revisiones básicas para principales declaraciones, aunque con extracción manual de datos y validaciones limitadas.",
+        "3": "Proceso estándar de preparación, revisión y presentación con plantillas, controles, fuentes definidas y aprobaciones formales.",
+        "4": "Preparación integrada con datos financieros oficiales, validaciones automáticas, workflow de revisión y trazabilidad de ajustes.",
+        "5": "Generación asistida de declaraciones con AI/NLP, validaciones inteligentes, detección de inconsistencias y preparación de documentación soporte."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Las declaraciones se preparan con proceso estándar?",
+        "¿Los datos vienen de fuentes oficiales?",
+        "¿Existen controles y aprobaciones?",
+        "¿Se trazan ajustes y soportes?"
+      ],
+      "evidencias": "Declaraciones directas; plantillas; fuentes de datos; logs de revisión; aprobaciones; documentación soporte; justificantes de presentación.",
+      "iniciativaSugerida": "Estandarizar preparación y revisión de declaraciones directas con fuentes oficiales, validaciones, workflow y trazabilidad de ajustes.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automate tax filing processes, analyze financial data, and generate accurate tax reports; Accurate tax report generation; Financial rules and regulations interpretations",
+        "advanced": "Generación asistida de declaraciones con AI/NLP, validaciones inteligentes, detección de inconsistencias y preparación de documentación soporte.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.2 Preparación, revisión y presentación de declaraciones directas"
+      }
+    },
+    {
+      "id": "fiscal-2-3",
+      "capacidad": "Cumplimiento tributario directo",
+      "subcapacidad": "2.3 Controversias, requerimientos y relación con autoridades fiscales",
+      "objetivo": "Evaluar la capacidad para gestionar requerimientos, inspecciones, controversias y comunicaciones con autoridades fiscales de forma controlada y trazable.",
+      "maturity": {
+        "1": "Gestión reactiva de requerimientos, con documentación dispersa, coordinación informal y seguimiento limitado de riesgos.",
+        "2": "Registro básico de requerimientos y controversias, aunque con seguimiento manual, evidencias variables y baja visión agregada.",
+        "3": "Proceso definido para gestionar requerimientos, respuestas, evidencias, responsables, plazos, riesgos y aprobaciones.",
+        "4": "Gestión integrada de controversias con workflow, repositorio documental, scoring de riesgo, reporting de exposición y aprendizaje recurrente.",
+        "5": "AI sintetiza requerimientos, localiza evidencias, propone borradores de respuesta, identifica riesgos y prioriza controversias por exposición."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe tracker de requerimientos y controversias?",
+        "¿Se gestionan plazos y evidencias?",
+        "¿Se cuantifica exposición?",
+        "¿Se reutilizan aprendizajes?"
+      ],
+      "evidencias": "Tracker de controversias; requerimientos; respuestas; evidencias; actas con asesores; estimación de exposición; documentación de cierre.",
+      "iniciativaSugerida": "Crear modelo de gestión de controversias fiscales con workflow, repositorio de evidencias, scoring de riesgo, reporting y lessons learned.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "AI-powered archive access and extraction; Financial rules and regulations interpretations; Research-based report generation / KYC",
+        "advanced": "AI sintetiza requerimientos, localiza evidencias, propone borradores de respuesta, identifica riesgos y prioriza controversias por exposición.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.3 Controversias, requerimientos y relación con autoridades fiscales"
+      }
+    },
+    {
+      "id": "fiscal-2-4",
+      "capacidad": "Cumplimiento tributario directo",
+      "subcapacidad": "2.4 Control, trazabilidad y mejora continua del cumplimiento directo",
+      "objetivo": "Evaluar si el cumplimiento de impuestos directos se mide, controla y mejora mediante KPIs, controles, incidencias y acciones preventivas.",
+      "maturity": {
+        "1": "Controles de cumplimiento limitados y ex post, con baja medición de errores, retrasos o causas recurrentes.",
+        "2": "Controles básicos de revisión y seguimiento de incidencias, aunque con análisis limitado de causas y mejora.",
+        "3": "Matriz de controles definida con KPIs, incidencias, owners, evidencias y seguimiento periódico de cumplimiento.",
+        "4": "Modelo de mejora continua con análisis causa-raíz, controles preventivos, automatización progresiva y reporting de calidad del cumplimiento.",
+        "5": "AI detecta patrones de error, anticipa riesgos de incumplimiento, recomienda controles preventivos y prioriza acciones de mejora."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se miden errores y retrasos?",
+        "¿Existe matriz de controles fiscales?",
+        "¿Se analizan causas recurrentes?",
+        "¿Se implementan acciones preventivas?"
+      ],
+      "evidencias": "Matriz de controles; KPIs de cumplimiento; incidencias; análisis causa-raíz; evidencias; planes de mejora; reporting de calidad.",
+      "iniciativaSugerida": "Implantar modelo de control y mejora continua del cumplimiento directo con KPIs, controles, causa-raíz, automatización y acciones preventivas.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive compliance monitoring; Automated regulatory compliance; Proactive defect resolution recommendations",
+        "advanced": "AI detecta patrones de error, anticipa riesgos de incumplimiento, recomienda controles preventivos y prioriza acciones de mejora.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "2.4 Control, trazabilidad y mejora continua del cumplimiento directo"
+      }
+    },
+    {
+      "id": "fiscal-3-1",
+      "capacidad": "Cumplimiento de impuestos indirectos",
+      "subcapacidad": "3.1 Gobierno de IVA/impuestos indirectos y modelo operativo",
+      "objetivo": "Evaluar si existe un modelo operativo y de gobierno para gestionar IVA, impuestos indirectos, responsabilidades, controles y coordinación con negocio.",
+      "maturity": {
+        "1": "Gestión de impuestos indirectos descentralizada, manual y con criterios variables entre sociedades, países o unidades.",
+        "2": "Modelo básico de responsabilidades y calendario, aunque con coordinación parcial con ventas, compras, sistemas y operaciones.",
+        "3": "Gobierno documentado de impuestos indirectos con roles, calendario, reglas, controles, procesos y responsables por jurisdicción.",
+        "4": "Modelo integrado con procesos comerciales, compras, ERP, facturación, maestros fiscales, controles automáticos y reporting de incidencias.",
+        "5": "Modelo indirect tax AI-enabled con monitorización continua de transacciones, detección de errores, alertas regulatorias y recomendaciones de tratamiento fiscal."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe modelo operativo de impuestos indirectos?",
+        "¿Está conectado con ventas, compras y sistemas?",
+        "¿Hay owners por jurisdicción?",
+        "¿Se controlan reglas de IVA/impuestos indirectos?"
+      ],
+      "evidencias": "Modelo operativo; calendario IVA; RACI; reglas fiscales; matriz de jurisdicciones; controles; incidencias; documentación de procesos.",
+      "iniciativaSugerida": "Definir modelo operativo de impuestos indirectos con roles, calendario, reglas fiscales, controles, integración con procesos y reporting de incidencias.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automated regulatory compliance; Financial rules and regulations interpretations; Identify inconsistencies in master data records",
+        "advanced": "Modelo indirect tax AI-enabled con monitorización continua de transacciones, detección de errores, alertas regulatorias y recomendaciones de tratamiento fiscal.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.1 Gobierno de IVA/impuestos indirectos y modelo operativo"
+      }
+    },
+    {
+      "id": "fiscal-3-2",
+      "capacidad": "Cumplimiento de impuestos indirectos",
+      "subcapacidad": "3.2 Determinación fiscal en transacciones y facturación",
+      "objetivo": "Evaluar si el tratamiento de impuestos indirectos en ventas, compras, facturación y operaciones se determina de forma correcta, automatizada y trazable.",
+      "maturity": {
+        "1": "Determinación fiscal manual o con reglas incompletas, generando errores frecuentes en facturas, códigos fiscales o tratamientos.",
+        "2": "Reglas básicas en sistemas para operaciones principales, aunque con excepciones manuales y revisiones posteriores relevantes.",
+        "3": "Modelo de determinación fiscal documentado con códigos, reglas, atributos maestros, validaciones y controles recurrentes.",
+        "4": "Determinación integrada en ERP/facturación con controles preventivos, validación de maestros, excepciones y trazabilidad transaccional.",
+        "5": "AI detecta tratamientos anómalos, incoherencias en maestros/códigos fiscales, errores de factura y recomienda correcciones antes de presentación."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Las reglas fiscales están configuradas en sistemas?",
+        "¿Se validan códigos y maestros fiscales?",
+        "¿Se detectan errores antes de facturar/declarar?",
+        "¿Existe trazabilidad transaccional?"
+      ],
+      "evidencias": "Reglas ERP; códigos fiscales; facturas; maestros de cliente/proveedor/material; excepciones; notas de crédito; controles preventivos.",
+      "iniciativaSugerida": "Implantar controles de determinación fiscal en ERP/facturación con revisión de maestros, reglas, excepciones y alertas de tratamiento anómalo.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automated invoice error detection & correction; Identify inconsistencies in master data records; Financial rules and regulations interpretations",
+        "advanced": "AI detecta tratamientos anómalos, incoherencias en maestros/códigos fiscales, errores de factura y recomienda correcciones antes de presentación.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.2 Determinación fiscal en transacciones y facturación"
+      }
+    },
+    {
+      "id": "fiscal-3-3",
+      "capacidad": "Cumplimiento de impuestos indirectos",
+      "subcapacidad": "3.3 Preparación, conciliación y presentación de declaraciones indirectas",
+      "objetivo": "Evaluar el proceso de preparación, conciliación, revisión y presentación de declaraciones de IVA/impuestos indirectos.",
+      "maturity": {
+        "1": "Declaraciones indirectas preparadas manualmente, con conciliaciones complejas, ajustes frecuentes y baja trazabilidad de datos.",
+        "2": "Plantillas recurrentes y conciliaciones básicas, aunque con extracción manual y controles limitados sobre errores transaccionales.",
+        "3": "Proceso estándar con fuentes definidas, conciliaciones, controles, aprobaciones, evidencias y presentación recurrente documentada.",
+        "4": "Preparación integrada con datos transaccionales, validaciones automáticas, conciliación contable-fiscal y workflow de revisión/aprobación.",
+        "5": "Generación asistida de declaraciones indirectas con AI, detección de transacciones anómalas, reconciliación inteligente y explicación de variaciones."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se concilian bases fiscales con contabilidad?",
+        "¿Las declaraciones proceden de fuentes oficiales?",
+        "¿Existen controles de revisión?",
+        "¿Se explican variaciones por periodo?"
+      ],
+      "evidencias": "Declaraciones IVA; conciliaciones; libros registro; fuentes de datos; aprobaciones; ajustes; justificantes de presentación; reportes de errores.",
+      "iniciativaSugerida": "Estandarizar preparación de declaraciones indirectas con conciliación contable-fiscal, validaciones automáticas, workflow y análisis de variaciones.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Automate tax filing processes, analyze financial data, and generate accurate tax reports; Accurate tax report generation; Reconcile account balances at transaction level",
+        "advanced": "Generación asistida de declaraciones indirectas con AI, detección de transacciones anómalas, reconciliación inteligente y explicación de variaciones.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.3 Preparación, conciliación y presentación de declaraciones indirectas"
+      }
+    },
+    {
+      "id": "fiscal-3-4",
+      "capacidad": "Cumplimiento de impuestos indirectos",
+      "subcapacidad": "3.4 Monitorización de riesgos, cambios regulatorios y controles indirectos",
+      "objetivo": "Evaluar si la organización monitoriza riesgos, cambios normativos, errores recurrentes y controles clave de impuestos indirectos.",
+      "maturity": {
+        "1": "Monitorización reactiva de riesgos y cambios regulatorios, con baja trazabilidad de impactos en procesos, sistemas o declaraciones.",
+        "2": "Seguimiento básico de cambios relevantes, aunque con análisis manual de impacto y remediación parcial.",
+        "3": "Proceso definido para monitorizar cambios, evaluar impacto, actualizar reglas/procesos y revisar controles indirectos.",
+        "4": "Gestión integrada de riesgos indirectos con KRIs, controles automatizados, change management, testing periódico y reporting a comités.",
+        "5": "AI monitoriza cambios regulatorios, identifica transacciones de riesgo, recomienda actualizaciones de reglas y prioriza controles por exposición."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se monitorizan cambios de IVA/impuestos indirectos?",
+        "¿Se evalúa impacto en sistemas y procesos?",
+        "¿Hay KRIs y controles?",
+        "¿Se priorizan riesgos por exposición?"
+      ],
+      "evidencias": "Alertas regulatorias; análisis de impacto; cambios de configuración; matriz de controles; KRIs; incidencias; actas de seguimiento.",
+      "iniciativaSugerida": "Crear modelo de monitorización de riesgos indirectos con regulatory tracking, análisis de impacto, KRIs, controles y actualización de reglas.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Monitor emerging regulations and evaluate current state compliance; Global policy tracking; Predictive compliance monitoring",
+        "advanced": "AI monitoriza cambios regulatorios, identifica transacciones de riesgo, recomienda actualizaciones de reglas y prioriza controles por exposición.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "3.4 Monitorización de riesgos, cambios regulatorios y controles indirectos"
+      }
+    },
+    {
+      "id": "fiscal-4-1",
+      "capacidad": "Asesoría fiscal",
+      "subcapacidad": "4.1 Modelo de tax advisory y demanda de negocio",
+      "objetivo": "Evaluar si la función fiscal proporciona asesoramiento estructurado, oportuno y alineado con necesidades de negocio, estrategia y gestión de riesgos.",
+      "maturity": {
+        "1": "Asesoría fiscal reactiva, caso a caso, con baja priorización, documentación variable y dependencia de expertos individuales.",
+        "2": "Canales básicos de consulta y soporte para temas relevantes, aunque con criterios de priorización y trazabilidad parciales.",
+        "3": "Modelo de advisory definido con demanda, intake, priorización, roles, entregables, criterios de riesgo y documentación de consultas.",
+        "4": "Advisory integrado con negocio, operaciones, legal, finanzas y estrategia, con seguimiento de impacto, riesgos y decisiones.",
+        "5": "Tax advisory AI-enabled con asistente de consultas, búsqueda normativa, recomendaciones preliminares y priorización de asuntos por riesgo/valor."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe proceso de intake y priorización de consultas?",
+        "¿Se documentan criterios y recomendaciones?",
+        "¿Se conecta con negocio y estrategia?",
+        "¿Se mide impacto del advisory?"
+      ],
+      "evidencias": "Registro de consultas; tax memos; criterios de priorización; aprobaciones; actas con negocio; seguimiento de decisiones; feedback.",
+      "iniciativaSugerida": "Definir modelo de tax advisory con intake, priorización por riesgo/valor, documentación estándar, approval workflow y seguimiento de impacto.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Evaluate tax laws and regulations and provide recommendations for tax planning, compliance, and risk management; Financial rules and regulations interpretations; Enterprise-wide data search and access",
+        "advanced": "Tax advisory AI-enabled con asistente de consultas, búsqueda normativa, recomendaciones preliminares y priorización de asuntos por riesgo/valor.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.1 Modelo de tax advisory y demanda de negocio"
+      }
+    },
+    {
+      "id": "fiscal-4-2",
+      "capacidad": "Asesoría fiscal",
+      "subcapacidad": "4.2 Planificación fiscal, escenarios y optimización dentro del marco normativo",
+      "objetivo": "Evaluar si la función fiscal anticipa impactos, construye escenarios y asesora en planificación fiscal sostenible y alineada con el apetito de riesgo.",
+      "maturity": {
+        "1": "Planificación fiscal puntual y reactiva, con análisis manual y baja conexión con estrategia, forecast o estructura operativa.",
+        "2": "Análisis de planificación para operaciones relevantes, aunque con escenarios limitados y documentación no siempre homogénea.",
+        "3": "Metodología de planificación fiscal con escenarios, supuestos, riesgos, sensibilidad, impacto financiero y approvals.",
+        "4": "Planificación integrada con estrategia, cash tax, estructura legal/operativa, transfer pricing, forecast y gobierno de riesgo fiscal.",
+        "5": "Planificación predictiva AI-enabled que simula escenarios, impactos regulatorios, cash tax, riesgos y recomendaciones de optimización responsable."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Se realizan escenarios de planificación fiscal?",
+        "¿Se cuantifica impacto financiero y cash tax?",
+        "¿Se documentan riesgos y supuestos?",
+        "¿Se valida con governance fiscal?"
+      ],
+      "evidencias": "Tax planning memos; escenarios; cálculos de cash tax; análisis de sensibilidad; approvals; políticas de riesgo fiscal; business cases.",
+      "iniciativaSugerida": "Crear framework de planificación fiscal con escenarios, cash tax, sensibilidad, riesgos, aprobaciones y conexión con forecast/estrategia.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive tax planning, compliance, and risk management; Evaluate tax laws and regulations and provide recommendations; Generate investing strategies",
+        "advanced": "Planificación predictiva AI-enabled que simula escenarios, impactos regulatorios, cash tax, riesgos y recomendaciones de optimización responsable.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.2 Planificación fiscal, escenarios y optimización dentro del marco normativo"
+      }
+    },
+    {
+      "id": "fiscal-4-3",
+      "capacidad": "Asesoría fiscal",
+      "subcapacidad": "4.3 Gestión de riesgos fiscales y posiciones inciertas",
+      "objetivo": "Evaluar si los riesgos fiscales, posiciones inciertas y exposiciones se identifican, valoran, monitorizan y reportan de forma estructurada.",
+      "maturity": {
+        "1": "Riesgos fiscales identificados de forma reactiva, con inventario incompleto y baja cuantificación de exposición.",
+        "2": "Registro básico de riesgos relevantes, aunque con valoración manual, seguimiento irregular y conexión limitada con reporting.",
+        "3": "Modelo de gestión de riesgos fiscales con inventario, clasificación, probabilidad, impacto, owners, mitigantes y reporting.",
+        "4": "Riesgo fiscal integrado con ERM, provisión, controversias, cambios normativos, governance y seguimiento periódico de exposición.",
+        "5": "AI detecta señales de riesgo fiscal, prioriza posiciones inciertas, simula exposición y recomienda mitigantes/documentación soporte."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe inventario de riesgos fiscales?",
+        "¿Se cuantifica probabilidad e impacto?",
+        "¿Se conectan riesgos con provisión/controversias?",
+        "¿Se reportan a governance?"
+      ],
+      "evidencias": "Tax risk register; posiciones inciertas; cuantificación de exposición; mitigantes; actas de comité; provisiones; controversias.",
+      "iniciativaSugerida": "Implantar tax risk register con clasificación, probabilidad/impacto, owners, mitigantes, conexión con provisión y reporting a governance.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Predictive tax planning, compliance, and risk management; AI-powered risk management and regulatory compliance; Predictive compliance monitoring",
+        "advanced": "AI detecta señales de riesgo fiscal, prioriza posiciones inciertas, simula exposición y recomienda mitigantes/documentación soporte.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.3 Gestión de riesgos fiscales y posiciones inciertas"
+      }
+    },
+    {
+      "id": "fiscal-4-4",
+      "capacidad": "Asesoría fiscal",
+      "subcapacidad": "4.4 Gestión de conocimiento fiscal, normativa y soporte a decisiones",
+      "objetivo": "Evaluar si la función fiscal gestiona conocimiento, normativa, criterios técnicos y documentación para apoyar decisiones consistentes.",
+      "maturity": {
+        "1": "Conocimiento fiscal disperso en personas o documentos no estructurados, con baja reutilización de criterios y precedentes.",
+        "2": "Repositorios o archivos básicos de documentos, aunque con búsqueda limitada y actualización manual de normativa/criterios.",
+        "3": "Repositorio estructurado de normativa, consultas, criterios, tax memos, posiciones, templates y lessons learned.",
+        "4": "Gestión de conocimiento integrada con workflow de consultas, actualización normativa, control de versiones, formación y reutilización de criterios.",
+        "5": "Tax knowledge assistant AI-enabled que busca normativa, resume cambios, recupera precedentes y propone borradores de análisis o respuestas."
+      },
+      "scores": {
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
+      },
+      "preguntas": [
+        "¿Existe repositorio fiscal estructurado?",
+        "¿Se actualizan cambios normativos?",
+        "¿Se reutilizan criterios y precedentes?",
+        "¿Se controla versión y aprobación?"
+      ],
+      "evidencias": "Repositorio fiscal; tax memos; criterios técnicos; alertas normativas; plantillas; control de versiones; materiales de formación.",
+      "iniciativaSugerida": "Crear tax knowledge hub con normativa, criterios, precedentes, templates, alertas de cambios y asistente de búsqueda/resumen.",
+      "comentario": "",
+      "owner": "",
+      "status": "No iniciado",
+      "ai": {
+        "cases": "Financial rules and regulations interpretations; AI-powered archive access and extraction; Global policy tracking",
+        "advanced": "Tax knowledge assistant AI-enabled que busca normativa, resume cambios, recupera precedentes y propone borradores de análisis o respuestas.",
+        "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
+        "subcapacidad": "4.4 Gestión de conocimiento fiscal, normativa y soporte a decisiones"
+      }
+    }
+  ]
+}
