@@ -984,6 +984,23 @@ display: none;
   font-size: 0.78rem;
 }
 
+
+.score-summary-target {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.score-summary-target strong {
+  color: #303832;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+
 .score-summary-details {
   display: flex;
   align-items: center;
@@ -2531,6 +2548,208 @@ height: 100% !important;
 
 
 
+/* ==================================================
+   OBJETIVOS DE MADUREZ POR CAPACIDAD
+   ================================================== */
+
+.capability-targets-panel {
+  margin-bottom: 18px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+  box-shadow: var(--shadow);
+}
+
+.capability-targets-panel[hidden] {
+  display: none;
+}
+
+.capability-targets-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(
+    180deg,
+    #f8faf5 0%,
+    #ffffff 100%
+  );
+}
+
+.capability-targets-header h3 {
+  margin: 0 0 5px;
+  color: #202622;
+  font-size: 1.08rem;
+  font-weight: 850;
+}
+
+.capability-targets-header .small-note {
+  max-width: 720px;
+  line-height: 1.5;
+}
+
+.reset-targets-button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--green-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.reset-targets-button:hover {
+  border-color: var(--green);
+  background: #f3f8ea;
+}
+
+.capability-targets-table {
+  padding: 0 20px 16px;
+}
+
+.capability-targets-columns,
+.capability-target-row {
+  display: grid;
+  grid-template-columns:
+    minmax(260px, 1fr)
+    minmax(100px, 130px)
+    minmax(100px, 130px)
+    minmax(100px, 130px);
+  gap: 12px;
+  align-items: center;
+}
+
+.capability-targets-columns {
+  padding: 12px 0 8px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.capability-targets-columns span:not(:first-child) {
+  text-align: center;
+}
+
+.target-column {
+  position: relative;
+}
+
+.target-column::before {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  content: "";
+}
+
+.target-column-procesos::before {
+  background: var(--green);
+}
+
+.target-column-tecnologia::before {
+  background: #ed8b00;
+}
+
+.target-column-organizacion::before {
+  background: #012169;
+}
+
+.capability-targets-rows {
+  display: grid;
+}
+
+.capability-target-row {
+  min-height: 68px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.capability-target-row:last-child {
+  border-bottom: 0;
+}
+
+.capability-target-row:hover {
+  background: rgba(241, 244, 236, 0.35);
+}
+
+.capability-target-name {
+  display: grid;
+  gap: 3px;
+  padding-right: 14px;
+}
+
+.capability-target-name strong {
+  color: #252c27;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.capability-target-name span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.capability-target-field {
+  display: grid;
+  justify-items: center;
+}
+
+.capability-target-mobile-label {
+  display: none;
+}
+
+.capability-target-select {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 30px 0 12px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--neutral);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--ink);
+  font-size: 0.94rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.capability-target-select.target-procesos {
+  border-left-color: var(--green);
+}
+
+.capability-target-select.target-tecnologia {
+  border-left-color: #ed8b00;
+}
+
+.capability-target-select.target-organizacion {
+  border-left-color: #012169;
+}
+
+.capability-target-select:hover {
+  border-color: rgba(134, 188, 37, 0.75);
+}
+
+.capability-target-select:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(134, 188, 37, 0.14);
+  outline: none;
+}
+
+
+
+
+
+
 /* ========================================
    RESPONSIVE: PORTATIL Y TABLET
    ======================================== */
@@ -2611,6 +2830,18 @@ height: 100% !important;
   .domain-group:last-child {
     grid-column: 1 / -1;
   }
+
+  .capability-targets-header {
+  align-items: flex-start;
+  }
+
+  .capability-targets-columns,
+  .capability-target-row {
+    grid-template-columns:
+      minmax(220px, 1fr)
+      repeat(3, minmax(90px, 110px));
+  }
+
 }
 
 
@@ -2801,5 +3032,16 @@ height: 100% !important;
 
   .back-to-top-button > span:last-child {
     display: none;
+  }
+
+  .capability-targets-header {
+    align-items: flex-start;
+  }
+
+  .capability-targets-columns,
+  .capability-target-row {
+    grid-template-columns:
+      minmax(220px, 1fr)
+      repeat(3, minmax(90px, 110px));
   }
 }

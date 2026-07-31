@@ -41,6 +41,8 @@ const DATA_URL = "data/fpa_assessment.json";
 
 const DEFAULT_DOMAIN_ID = "fpa";
 
+const DEFAULT_TARGET_MATURITY = 4;
+
 
 const DOMAINS = {
   fpa: {
@@ -195,6 +197,7 @@ const state = {
   domains: {},
   meta: null,
   items: [],
+  targets: {},
 };
 
 
@@ -209,6 +212,8 @@ const expandedHeatmapCapabilities = new Set(); // NUEVO: mantiene abiertas las c
 
 
 let isApplyingRemoteScenario = false; // NUEVO: evita guardar de vuelta mientras estamos cargando datos remotos
+let pendingScenarioWrites = 0;
+
 let scoringCriteriaTrigger = null;
 let aiInitiativeTrigger = null;
 
@@ -237,9 +242,21 @@ async function loadDomainData(domainId) {
 
   const data = await response.json();
 
+  const items = data.subcapacities.map(normalizeItem);
+
+  const defaultTarget = normalizeTargetValue(
+    data.meta?.targetMaturity,
+    DEFAULT_TARGET_MATURITY,
+  );
+
   state.domains[domainId] = {
     meta: data.meta,
-    items: data.subcapacities.map(normalizeItem),
+    items,
+    targets: normalizeDomainTargets(
+      items,
+      data.targets,
+      defaultTarget,
+    ),
   };
 
   return state.domains[domainId];
@@ -250,6 +267,7 @@ async function loadCoreDomains() {
 }
 
 
+
 function syncActiveDomainState() {
   if (!state.activeDomainId || !state.domains[state.activeDomainId]) {
     return;
@@ -257,7 +275,9 @@ function syncActiveDomainState() {
 
   state.domains[state.activeDomainId].items = state.items;
   state.domains[state.activeDomainId].meta = state.meta;
+  state.domains[state.activeDomainId].targets = state.targets;
 }
+
 
 
 function setActiveDomain(domainId) {
@@ -267,12 +287,27 @@ function setActiveDomain(domainId) {
     throw new Error(`Dominio no cargado: ${domainId}`);
   }
 
+  const defaultTarget = normalizeTargetValue(
+    domainData.meta?.targetMaturity,
+    DEFAULT_TARGET_MATURITY,
+  );
+
+  domainData.targets = normalizeDomainTargets(
+    domainData.items,
+    domainData.targets,
+    defaultTarget,
+  );
+
   state.activeDomainId = domainId;
   state.meta = domainData.meta;
   state.items = domainData.items;
+  state.targets = domainData.targets;
 
   updateActiveDomainUi();
+
+
 }
+
 
 
 function resetDomainViewState() {
@@ -359,9 +394,8 @@ async function init() {
         await loadCoreDomains();
         setActiveDomain(DEFAULT_DOMAIN_ID);
 
-        if (!scenarioId) {
-          applyStoredScenario();
-        }
+      /* La copia local se carga siempre, también en escenarios compartidos */
+      applyStoredScenario();
 
 
     await initializeSharedScenario();
@@ -398,6 +432,7 @@ function cacheElements() {
     "activeFilters",
     "activeFiltersText",
     "clearFiltersButton",
+    "capabilityTargetsPanel",
     "assessmentList",
     "heatmapTable",
     "heatmapExpandToggle",
@@ -456,6 +491,254 @@ function bindGlobalEvents() {
   setupBackToTopButton();
 }
 
+
+
+function createDefaultTargets(items, defaultTarget = DEFAULT_TARGET_MATURITY) {
+  const targets = {};
+
+  unique(items.map((item) => item.capacidad)).forEach((capability) => {
+    targets[capability] = {
+      procesos: defaultTarget,
+      tecnologia: defaultTarget,
+      organizacion: defaultTarget,
+    };
+  });
+
+  return targets;
+}
+
+
+
+function toFirebaseSafeKey(value) {
+  const text = String(value || "").trim();
+
+  if (!text) {
+    return "capability";
+  }
+
+  let decodedText = text;
+
+  try {
+    decodedText = decodeURIComponent(text);
+  } catch (error) {
+    decodedText = text;
+  }
+
+  return encodeURIComponent(decodedText)
+    .replace(/\./g, "%2E");
+}
+
+
+
+function normalizeTargetValue(value, fallback = DEFAULT_TARGET_MATURITY) {
+  const number = Number(value);
+
+  if (Number.isInteger(number) && number >= 1 && number <= 5) {
+    return number;
+  }
+
+  return fallback;
+}
+
+
+
+function normalizeDomainTargets(
+  items,
+  savedTargets = {},
+  defaultTarget = DEFAULT_TARGET_MATURITY,
+) {
+  const targets = createDefaultTargets(
+    items,
+    defaultTarget,
+  );
+
+  const savedTargetsArray = Array.isArray(savedTargets)
+    ? savedTargets
+    : Object.entries(savedTargets || {}).map(
+        ([capabilityKey, capabilityTargets]) => {
+          let capability = capabilityKey;
+
+          try {
+            capability = decodeURIComponent(
+              capabilityKey,
+            );
+          } catch (error) {
+            capability = capabilityKey;
+          }
+
+          return {
+            capacidad:
+              capabilityTargets?.capacidad ||
+              capability,
+            procesos:
+              capabilityTargets?.procesos,
+            tecnologia:
+              capabilityTargets?.tecnologia,
+            organizacion:
+              capabilityTargets?.organizacion,
+          };
+        },
+      );
+
+  savedTargetsArray.forEach((savedTarget) => {
+    const savedCapability =
+      savedTarget?.capacidad;
+
+    if (!savedCapability) {
+      return;
+    }
+
+    const matchingCapability =
+      Object.keys(targets).find(
+        (capability) =>
+          normalizeMatchKey(capability) ===
+          normalizeMatchKey(savedCapability),
+      );
+
+    if (!matchingCapability) {
+      return;
+    }
+
+    targets[matchingCapability] = {
+      procesos: normalizeTargetValue(
+        savedTarget.procesos,
+        defaultTarget,
+      ),
+      tecnologia: normalizeTargetValue(
+        savedTarget.tecnologia,
+        defaultTarget,
+      ),
+      organizacion: normalizeTargetValue(
+        savedTarget.organizacion,
+        defaultTarget,
+      ),
+    };
+  });
+
+  return targets;
+}
+
+
+
+function serializeTargetsForFirebase(
+  items,
+  targets,
+  defaultTarget = DEFAULT_TARGET_MATURITY,
+) {
+  const normalizedTargets =
+    normalizeDomainTargets(
+      items,
+      targets,
+      defaultTarget,
+    );
+
+  return Object.entries(
+    normalizedTargets,
+  ).map(
+    ([capability, capabilityTargets]) => ({
+      capacidad: capability,
+
+      procesos: normalizeTargetValue(
+        capabilityTargets.procesos,
+        defaultTarget,
+      ),
+
+      tecnologia: normalizeTargetValue(
+        capabilityTargets.tecnologia,
+        defaultTarget,
+      ),
+
+      organizacion: normalizeTargetValue(
+        capabilityTargets.organizacion,
+        defaultTarget,
+      ),
+    }),
+  );
+}
+
+
+
+function sanitizeScenarioForFirebase(payload) {
+  if (!payload || typeof payload !== "object") {
+    return payload;
+  }
+
+  const sanitizedPayload = {
+    ...payload,
+    version: 3,
+    domains: {},
+  };
+
+  Object.entries(
+    payload.domains || {},
+  ).forEach(([domainId, domain]) => {
+    const domainItems = Array.isArray(domain.items)
+      ? domain.items
+      : Object.values(domain.items || {});
+
+    const defaultTarget =
+      normalizeTargetValue(
+        domain.meta?.targetMaturity,
+        DEFAULT_TARGET_MATURITY,
+      );
+
+    sanitizedPayload.domains[domainId] = {
+      ...domain,
+
+      targets: serializeTargetsForFirebase(
+        domainItems,
+        domain.targets,
+        defaultTarget,
+      ),
+
+      items: domainItems,
+    };
+  });
+
+  return sanitizedPayload;
+}
+
+
+
+function getCapabilityTargets(capability) {
+  const defaultTarget = normalizeTargetValue(
+    state.meta?.targetMaturity,
+    DEFAULT_TARGET_MATURITY,
+  );
+
+  const activeDomainTargets =
+    state.domains[state.activeDomainId]?.targets;
+
+  const capabilityTargets =
+    activeDomainTargets?.[capability] ||
+    state.targets?.[capability];
+
+  if (!capabilityTargets) {
+    return {
+      procesos: defaultTarget,
+      tecnologia: defaultTarget,
+      organizacion: defaultTarget,
+    };
+  }
+
+  return {
+    procesos: normalizeTargetValue(
+      capabilityTargets.procesos,
+      defaultTarget,
+    ),
+    tecnologia: normalizeTargetValue(
+      capabilityTargets.tecnologia,
+      defaultTarget,
+    ),
+    organizacion: normalizeTargetValue(
+      capabilityTargets.organizacion,
+      defaultTarget,
+    ),
+  };
+}
+
+
+
 function normalizeItem(item) {
   return {
     ...item,
@@ -475,34 +758,100 @@ function toScore(value) {
   return Number.isInteger(number) && number >= 1 && number <= 5 ? number : null;
 }
 
+
+
 function calculate(item) {
-  const values = LEVERS.map((lever) => item.scores[lever.key]).filter((value) => Number.isFinite(value));
-  if (!values.length) {
+  const capabilityTargets = getCapabilityTargets(
+    item.capacidad,
+  );
+
+  const scoredLevers = LEVERS
+    .map((lever) => {
+      const score = item.scores[lever.key];
+      const target = normalizeTargetValue(
+        capabilityTargets[lever.key],
+        DEFAULT_TARGET_MATURITY,
+      );
+
+      if (!Number.isFinite(score)) {
+        return null;
+      }
+
+      return {
+        lever: lever.key,
+        score,
+        target,
+        gap: round2(
+          Math.max(0, target - score),
+        ),
+      };
+    })
+    .filter(Boolean);
+
+  if (!scoredLevers.length) {
     return {
       isPending: true,
       scoreMedio: null,
+      targetMedio: null,
       nivel: "",
       gap: null,
+      gaps: {
+        procesos: null,
+        tecnologia: null,
+        organizacion: null,
+      },
+      targets: capabilityTargets,
       prioridad: "Pendiente",
       oleada: "Pendiente",
     };
   }
 
-  const scoreMedio = round2(values.reduce((sum, value) => sum + value, 0) / values.length);
+  const scoreMedio = average(
+    scoredLevers.map((entry) => entry.score),
+  );
+
+  const targetMedio = average(
+    scoredLevers.map((entry) => entry.target),
+  );
+
+  const gap = average(
+    scoredLevers.map((entry) => entry.gap),
+  );
+
+  const gaps = {
+    procesos: null,
+    tecnologia: null,
+    organizacion: null,
+  };
+
+  scoredLevers.forEach((entry) => {
+    gaps[entry.lever] = entry.gap;
+  });
+
   const nivel = getMaturityLevel(scoreMedio);
-  const gap = round2(Math.max(0, state.meta.targetMaturity - scoreMedio));
-  const prioridad = gap >= 2 ? "Alta" : gap >= 1 ? "Media" : "Baja";
-  const oleada = prioridad === "Alta" ? "Oleada 1" : prioridad === "Media" ? "Oleada 2" : "Oleada 3";
+  const prioridad = priorityFromGap(gap);
+
+  const oleada =
+    prioridad === "Alta"
+      ? "Oleada 1"
+      : prioridad === "Media"
+        ? "Oleada 2"
+        : "Oleada 3";
 
   return {
     isPending: false,
     scoreMedio,
+    targetMedio,
     nivel,
     gap,
+    gaps,
+    targets: capabilityTargets,
     prioridad,
     oleada,
   };
 }
+
+
 
 function getMaturityLevel(score) {
   if (score < 1.5) return "1 - Inicial";
@@ -836,6 +1185,7 @@ function renderAll() {
 
   updateActiveFiltersUi();
   renderDashboard();
+  renderCapabilityTargets();
   renderAssessments();
   renderHeatmap();
   renderRoadmap();
@@ -973,7 +1323,7 @@ els.kpiGrid.innerHTML = [
   kpiCard(
     "Gap medio vs objetivo",
     formatNumber(gapMedio),
-    `Objetivo actual: ${state.meta.targetMaturity} - Optimizado`,
+    "Calculado con los objetivos definidos por capacidad y palanca",
     "gap",
   ),
   kpiCard(
@@ -1056,25 +1406,100 @@ function barRow(label, value, width, color) {
   `;
 }
 
+
+
 function renderSummaryTable() {
-  const capacities = unique(state.items.map((item) => item.capacidad));
+  const capacities = unique(
+    state.items.map((item) => item.capacidad),
+  );
+
   const rows = capacities.map((capability) => {
-    const items = state.items.filter((item) => item.capacidad === capability);
-    const entries = items.map((item) => ({ item, metrics: calculate(item) }));
-    const scored = entries.filter((entry) => !entry.metrics.isPending);
-    const scoreMedio = average(scored.map((entry) => entry.metrics.scoreMedio));
-    const gap = scoreMedio === null ? null : round2(Math.max(0, state.meta.targetMaturity - scoreMedio));
+    const items = state.items.filter(
+      (item) => item.capacidad === capability,
+    );
+
+    const entries = items.map((item) => ({
+      item,
+      metrics: calculate(item),
+    }));
+
+    const scored = entries.filter(
+      (entry) => !entry.metrics.isPending,
+    );
+
+    const scoreMedio = average(
+      scored.map(
+        (entry) => entry.metrics.scoreMedio,
+      ),
+    );
+
+    const targetMedio = average(
+      scored.map(
+        (entry) => entry.metrics.targetMedio,
+      ),
+    );
+
+    const gap = average(
+      scored.map(
+        (entry) => entry.metrics.gap,
+      ),
+    );
+
     const prioridad = priorityFromGap(gap);
+
     return `
       <tr>
         <td>${escapeHtml(capability)}</td>
-        <td class="number">${formatNumber(average(items.map((item) => item.scores.procesos).filter(Number.isFinite)))}</td>
-        <td class="number">${formatNumber(average(items.map((item) => item.scores.tecnologia).filter(Number.isFinite)))}</td>
-        <td class="number">${formatNumber(average(items.map((item) => item.scores.organizacion).filter(Number.isFinite)))}</td>
-        <td class="number">${formatNumber(scoreMedio)}</td>
-        <td class="number">${formatNumber(gap)}</td>
-        <td>${priorityBadge(prioridad)}</td>
-        <td class="number">${scored.length}/${items.length}</td>
+
+        <td class="number">
+          ${formatNumber(
+            average(
+              items
+                .map((item) => item.scores.procesos)
+                .filter(Number.isFinite),
+            ),
+          )}
+        </td>
+
+        <td class="number">
+          ${formatNumber(
+            average(
+              items
+                .map((item) => item.scores.tecnologia)
+                .filter(Number.isFinite),
+            ),
+          )}
+        </td>
+
+        <td class="number">
+          ${formatNumber(
+            average(
+              items
+                .map((item) => item.scores.organizacion)
+                .filter(Number.isFinite),
+            ),
+          )}
+        </td>
+
+        <td class="number">
+          ${formatNumber(scoreMedio)}
+        </td>
+
+        <td class="number">
+          ${formatNumber(targetMedio)}
+        </td>
+
+        <td class="number">
+          ${formatNumber(gap)}
+        </td>
+
+        <td>
+          ${priorityBadge(prioridad)}
+        </td>
+
+        <td class="number">
+          ${scored.length}/${items.length}
+        </td>
       </tr>
     `;
   });
@@ -1087,12 +1512,16 @@ function renderSummaryTable() {
         <th class="number">Tecnología</th>
         <th class="number">Organización</th>
         <th class="number">Score medio</th>
-        <th class="number">Gap</th>
+        <th class="number">Objetivo medio</th>
+        <th class="number">Gap vs objetivo</th>
         <th>Prioridad</th>
         <th class="number">Avance</th>
       </tr>
     </thead>
-    <tbody>${rows.join("")}</tbody>
+
+    <tbody>
+      ${rows.join("")}
+    </tbody>
   `;
 }
 
@@ -1106,54 +1535,90 @@ function renderCapabilityRadar() {
   const radarData = buildCapabilityRadarData();
 
   renderSingleCapabilityRadar({
-  key: "procesos",
-  canvas: els.capabilityRadarProcessesChart,
-  label: "Procesos",
-  values: radarData.procesos,
-  color: "#86BC25",
-  backgroundColor: "rgba(134, 188, 37, 0.24)",
-  radarData,
-});
+    key: "procesos",
+    canvas: els.capabilityRadarProcessesChart,
+    label: "Procesos",
+    values: radarData.procesos,
+    targetValues: radarData.objetivoProcesos,
+    color: "#86BC25",
+    backgroundColor: "rgba(134, 188, 37, 0.24)",
+    radarData,
+  });
 
-renderSingleCapabilityRadar({
-  key: "tecnologia",
-  canvas: els.capabilityRadarTechnologyChart,
-  label: "Tecnología",
-  values: radarData.tecnologia,
-  color: "#ED8B00",
-  backgroundColor: "rgba(237, 139, 0, 0.22)",
-  radarData,
-});
+  renderSingleCapabilityRadar({
+    key: "tecnologia",
+    canvas: els.capabilityRadarTechnologyChart,
+    label: "Tecnología",
+    values: radarData.tecnologia,
+    targetValues: radarData.objetivoTecnologia,
+    color: "#ED8B00",
+    backgroundColor: "rgba(237, 139, 0, 0.22)",
+    radarData,
+  });
 
-renderSingleCapabilityRadar({
-  key: "organizacion",
-  canvas: els.capabilityRadarOrganizationChart,
-  label: "Organización",
-  values: radarData.organizacion,
-  color: "#012169",
-  backgroundColor: "rgba(1, 33, 105, 0.18)",
-  radarData,
-});
+  renderSingleCapabilityRadar({
+    key: "organizacion",
+    canvas: els.capabilityRadarOrganizationChart,
+    label: "Organización",
+    values: radarData.organizacion,
+    targetValues: radarData.objetivoOrganizacion,
+    color: "#012169",
+    backgroundColor: "rgba(1, 33, 105, 0.18)",
+    radarData,
+  });
 }
 
-function renderSingleCapabilityRadar({ key, canvas, label, values, color, backgroundColor, radarData }) {
+
+
+function renderSingleCapabilityRadar({
+  key,
+  canvas,
+  label,
+  values,
+  targetValues,
+  color,
+  backgroundColor,
+  radarData,
+}) {
   if (!canvas) {
     return;
   }
 
   const chartData = {
     labels: radarData.displayLabels,
+
     datasets: [
       {
-        label,
+        label: `${label} actual`,
         data: values,
         fill: true,
         backgroundColor,
         borderColor: color,
+        borderWidth: 2.5,
         pointBackgroundColor: color,
         pointBorderColor: "#ffffff",
+        pointBorderWidth: 2,
+        pointRadius: 3.5,
+        pointHoverRadius: 6,
         pointHoverBackgroundColor: "#ffffff",
         pointHoverBorderColor: color,
+        order: 2,
+      },
+      {
+        label: `${label} objetivo`,
+        data: targetValues,
+        fill: false,
+        borderColor: "#4f5952",
+        borderWidth: 2.25,
+        borderDash: [7, 5],
+        pointBackgroundColor: "#ffffff",
+        pointBorderColor: "#4f5952",
+        pointBorderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "#4f5952",
+        pointHoverBorderColor: "#ffffff",
+        order: 1,
       },
     ],
   };
@@ -1161,59 +1626,81 @@ function renderSingleCapabilityRadar({ key, canvas, label, values, color, backgr
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+
     layout: {
       padding: 4,
     },
+
     plugins: {
       legend: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          title: (items) => {
-            const index = items[0]?.dataIndex ?? 0;
-            return radarData.originalLabels[index] || "";
-          },
-          label: (context) => `${context.dataset.label}: ${formatNumber(context.parsed.r)}`,
-        },
-      },
-    },
-    scales: {
-      r: {
-        min: 0,
-        max: 5,
-        ticks: {
-          stepSize: 1,
-          backdropColor: "transparent",
-          color: "#5c665e",
+        display: true,
+        position: "bottom",
+
+        labels: {
+          usePointStyle: true,
+          pointStyle: "line",
+          boxWidth: 28,
+          boxHeight: 8,
+          padding: 16,
+          color: "#3a433d",
+
           font: {
             size: 11,
             weight: "700",
           },
         },
+      },
+
+      tooltip: {
+        callbacks: {
+          title: (items) => {
+            const index = items[0]?.dataIndex ?? 0;
+
+            return radarData.originalLabels[index] || "";
+          },
+
+          label: (context) => {
+            return `${context.dataset.label}: ${formatNumber(
+              context.parsed.r,
+            )}`;
+          },
+        },
+      },
+    },
+
+    scales: {
+      r: {
+        min: 0,
+        max: 5,
+
+        ticks: {
+          stepSize: 1,
+          backdropColor: "transparent",
+          color: "#5c665e",
+
+          font: {
+            size: 11,
+            weight: "700",
+          },
+        },
+
         pointLabels: {
           color: "#323a35",
           padding: 8,
+
           font: {
             size: 11,
             weight: "800",
           },
         },
+
         grid: {
           color: "#d9dfd4",
         },
+
         angleLines: {
           color: "#d9dfd4",
         },
-      },
-    },
-    elements: {
-      line: {
-        borderWidth: 2.5,
-      },
-      point: {
-        radius: 3.5,
-        hoverRadius: 6,
       },
     },
   };
@@ -1239,13 +1726,41 @@ function buildCapabilityRadarData() {
   const rows = buildSummaryRows();
 
   return {
-    originalLabels: rows.map((row) => row.Capacidad),
-    displayLabels: rows.map((row) => getRadarShortLabel(row.Capacidad)),
-    procesos: rows.map((row) => toRadarNumber(row.Procesos)),
-    tecnologia: rows.map((row) => toRadarNumber(row.Tecnologia)),
-    organizacion: rows.map((row) => toRadarNumber(row.Organizacion)),
+    originalLabels: rows.map(
+      (row) => row.Capacidad,
+    ),
+
+    displayLabels: rows.map(
+      (row) => getRadarShortLabel(row.Capacidad),
+    ),
+
+    procesos: rows.map(
+      (row) => toRadarNumber(row.Procesos),
+    ),
+
+    objetivoProcesos: rows.map(
+      (row) => toRadarNumber(row.ObjetivoProcesos),
+    ),
+
+    tecnologia: rows.map(
+      (row) => toRadarNumber(row.Tecnologia),
+    ),
+
+    objetivoTecnologia: rows.map(
+      (row) => toRadarNumber(row.ObjetivoTecnologia),
+    ),
+
+    organizacion: rows.map(
+      (row) => toRadarNumber(row.Organizacion),
+    ),
+
+    objetivoOrganizacion: rows.map(
+      (row) => toRadarNumber(row.ObjetivoOrganizacion),
+    ),
   };
 }
+
+
 
 function toRadarNumber(value) {
   const number = Number(value);
@@ -1339,6 +1854,223 @@ function buildFilteredEmptyState() {
       </button>
     </div>
   `;
+}
+
+
+
+function renderCapabilityTargets() {
+  if (!els.capabilityTargetsPanel) {
+    return;
+  }
+
+  const capabilities = unique(
+    state.items.map((item) => item.capacidad),
+  );
+
+  if (!capabilities.length) {
+    els.capabilityTargetsPanel.innerHTML = "";
+    els.capabilityTargetsPanel.hidden = true;
+    return;
+  }
+
+  els.capabilityTargetsPanel.hidden = false;
+
+  const rows = capabilities
+    .map((capability) => {
+      const targets = getCapabilityTargets(capability);
+
+      return `
+        <div class="capability-target-row">
+          <div class="capability-target-name">
+            <strong>${escapeHtml(capability)}</strong>
+
+            <span>
+              Objetivo utilizado para calcular los gaps de sus subcapacidades
+            </span>
+          </div>
+
+          ${LEVERS.map((lever) =>
+            capabilityTargetControl(
+              capability,
+              lever,
+              targets[lever.key],
+            ),
+          ).join("")}
+        </div>
+      `;
+    })
+    .join("");
+
+  els.capabilityTargetsPanel.innerHTML = `
+    <div class="capability-targets-header">
+      <div>
+        <p class="eyebrow">Ambición de madurez</p>
+
+        <h3>Objetivos por capacidad y palanca</h3>
+
+        <p class="small-note">
+          Define el nivel objetivo de Procesos, Tecnología y Organización.
+          Si no se modifica, se utiliza el nivel 4.
+        </p>
+      </div>
+
+      <button
+        class="secondary-button reset-targets-button"
+        type="button"
+        data-reset-capability-targets
+      >
+        Restaurar objetivos a 4
+      </button>
+    </div>
+
+    <div class="capability-targets-table">
+      <div class="capability-targets-columns" aria-hidden="true">
+        <span>Capacidad</span>
+
+        ${LEVERS.map(
+          (lever) => `
+            <span class="target-column target-column-${lever.key}">
+              ${escapeHtml(lever.label)}
+            </span>
+          `,
+        ).join("")}
+      </div>
+
+      <div class="capability-targets-rows">
+        ${rows}
+      </div>
+    </div>
+  `;
+
+  els.capabilityTargetsPanel
+    .querySelectorAll(".capability-target-select")
+    .forEach((select) => {
+      select.addEventListener(
+        "change",
+        handleCapabilityTargetChange,
+      );
+    });
+
+  els.capabilityTargetsPanel
+    .querySelector("[data-reset-capability-targets]")
+    ?.addEventListener(
+      "click",
+      resetCapabilityTargets,
+    );
+}
+
+function capabilityTargetControl(
+  capability,
+  lever,
+  currentValue,
+) {
+  const options = [1, 2, 3, 4, 5]
+    .map(
+      (value) => `
+        <option
+          value="${value}"
+          ${currentValue === value ? "selected" : ""}
+        >
+          ${value}
+        </option>
+      `,
+    )
+    .join("");
+
+  return `
+    <label class="capability-target-field">
+      <span class="capability-target-mobile-label">
+        ${escapeHtml(lever.label)}
+      </span>
+
+      <select
+        class="capability-target-select target-${lever.key}"
+        data-capability="${escapeAttr(capability)}"
+        data-lever="${escapeAttr(lever.key)}"
+        aria-label="${escapeAttr(
+          `Objetivo de ${lever.label} para ${capability}`,
+        )}"
+      >
+        ${options}
+      </select>
+    </label>
+  `;
+}
+
+
+
+function handleCapabilityTargetChange(event) {
+  const select = event.currentTarget;
+  const capability = select.dataset.capability;
+  const leverKey = select.dataset.lever;
+
+  if (!capability || !leverKey) {
+    return;
+  }
+
+  const targetValue = normalizeTargetValue(
+    select.value,
+    DEFAULT_TARGET_MATURITY,
+  );
+
+  const activeDomain = state.domains[state.activeDomainId];
+
+  if (!activeDomain) {
+    return;
+  }
+
+  if (!activeDomain.targets) {
+    activeDomain.targets = {};
+  }
+
+  if (!activeDomain.targets[capability]) {
+    activeDomain.targets[capability] = {
+      procesos: DEFAULT_TARGET_MATURITY,
+      tecnologia: DEFAULT_TARGET_MATURITY,
+      organizacion: DEFAULT_TARGET_MATURITY,
+    };
+  }
+
+  activeDomain.targets[capability][leverKey] = targetValue;
+  state.targets = activeDomain.targets;
+
+  syncActiveDomainState();
+
+  renderAll();
+  persistScenario();
+}
+
+
+
+function resetCapabilityTargets() {
+  const confirmed = window.confirm(
+    "¿Quieres restaurar a 4 todos los objetivos del dominio actual?",
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const activeDomain = state.domains[state.activeDomainId];
+
+  if (!activeDomain) {
+    return;
+  }
+
+  const defaultTargets = createDefaultTargets(
+    state.items,
+    DEFAULT_TARGET_MATURITY,
+  );
+
+  activeDomain.targets = defaultTargets;
+  state.targets = activeDomain.targets;
+
+  renderAll();
+  persistScenario();
+
+  showNotice(
+    "Los objetivos del dominio actual se han restaurado a nivel 4.",
+  );
 }
 
 
@@ -1465,12 +2197,20 @@ function scoreResult(metrics) {
     <div class="score-summary score-summary-${metrics.prioridad.toLowerCase()}">
       <div class="score-summary-header">
         ${priorityBadge(metrics.prioridad)}
-        <span class="score-summary-wave">${escapeHtml(metrics.oleada)}</span>
+
+        <span class="score-summary-wave">
+          ${escapeHtml(metrics.oleada)}
+        </span>
       </div>
 
       <div class="score-summary-main">
         <strong>${formatNumber(metrics.scoreMedio)}</strong>
         <span>Score medio</span>
+      </div>
+
+      <div class="score-summary-target">
+        Objetivo medio:
+        <strong>${formatNumber(metrics.targetMedio)}</strong>
       </div>
 
       <div class="score-summary-details">
@@ -1489,10 +2229,23 @@ function scoreResult(metrics) {
 
 
 function handleScoreChange(event) {
-  const item = state.items.find((entry) => entry.id === event.target.dataset.id);
-  item.scores[event.target.dataset.lever] = toScore(event.target.value);
-  persistScenario();
+  const item = state.items.find(
+    (entry) => entry.id === event.target.dataset.id,
+  );
+
+  if (!item) {
+    return;
+  }
+
+  const leverKey = event.target.dataset.lever;
+  const score = toScore(event.target.value);
+
+  item.scores[leverKey] = score;
+
+  syncActiveDomainState();
+
   renderAll();
+  persistScenario();
 }
 
 
@@ -1557,7 +2310,7 @@ function renderHeatmap() {
         <th class="number">Tecnología</th>
         <th class="number">Organización</th>
         <th class="number">Score medio</th>
-        <th class="number">Gap</th>
+        <th class="number">Gap vs objetivo</th>
         <th>Prioridad</th>
       </tr>
     </thead>
@@ -1581,28 +2334,61 @@ function renderHeatmap() {
 }
 
 
+
 function buildHeatmapCapabilityRows(items) {
-  const capabilities = unique(items.map((item) => item.capacidad));
+  const capabilities = unique(
+    items.map((item) => item.capacidad),
+  );
 
   return capabilities.map((capability) => {
-    const capabilityItems = items.filter((item) => item.capacidad === capability);
-    const calculatedItems = capabilityItems.map((item) => calculate(item));
-    const scoredItems = calculatedItems.filter((metrics) => !metrics.isPending);
+    const capabilityItems = items.filter(
+      (item) => item.capacidad === capability,
+    );
+
+    const calculatedItems = capabilityItems.map(
+      (item) => calculate(item),
+    );
+
+    const scoredItems = calculatedItems.filter(
+      (metrics) => !metrics.isPending,
+    );
 
     const procesos = average(
-      capabilityItems.map((item) => item.scores.procesos).filter(Number.isFinite),
+      capabilityItems
+        .map((item) => item.scores.procesos)
+        .filter(Number.isFinite),
     );
 
     const tecnologia = average(
-      capabilityItems.map((item) => item.scores.tecnologia).filter(Number.isFinite),
+      capabilityItems
+        .map((item) => item.scores.tecnologia)
+        .filter(Number.isFinite),
     );
 
     const organizacion = average(
-      capabilityItems.map((item) => item.scores.organizacion).filter(Number.isFinite),
+      capabilityItems
+        .map((item) => item.scores.organizacion)
+        .filter(Number.isFinite),
     );
 
-    const scoreMedio = average(scoredItems.map((metrics) => metrics.scoreMedio));
-    const gap = scoreMedio === null ? null : round2(Math.max(0, state.meta.targetMaturity - scoreMedio));
+    const scoreMedio = average(
+      scoredItems.map(
+        (metrics) => metrics.scoreMedio,
+      ),
+    );
+
+    const targetMedio = average(
+      scoredItems.map(
+        (metrics) => metrics.targetMedio,
+      ),
+    );
+
+    const gap = average(
+      scoredItems.map(
+        (metrics) => metrics.gap,
+      ),
+    );
+
     const prioridad = priorityFromGap(gap);
 
     return {
@@ -1612,11 +2398,13 @@ function buildHeatmapCapabilityRows(items) {
       tecnologia,
       organizacion,
       scoreMedio,
+      targetMedio,
       gap,
       prioridad,
     };
   });
 }
+
 
 
 function handleHeatmapToggle(event) {
@@ -1862,43 +2650,197 @@ function unique(values) {
 }
 
 
+
+function getStoredScenario() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+
+  if (!stored) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(stored);
+  } catch (error) {
+    console.warn(
+      "No se pudo leer el escenario guardado localmente.",
+      error,
+    );
+
+    return null;
+  }
+}
+
+function getScenarioTimestamp(payload) {
+  const timestamp = Date.parse(
+    payload?.updatedAt || "",
+  );
+
+  return Number.isFinite(timestamp)
+    ? timestamp
+    : 0;
+}
+
+function isScenarioNewer(candidate, reference) {
+  return (
+    getScenarioTimestamp(candidate) >
+    getScenarioTimestamp(reference)
+  );
+}
+
+function readScenarioFromFirebase(timeoutMs = 8000) {
+  const firebaseRead = get(scenarioDatabaseRef);
+
+  const timeout = new Promise((_, reject) => {
+    window.setTimeout(() => {
+      reject(
+        new Error(
+          "Tiempo de espera agotado al leer Firebase",
+        ),
+      );
+    }, timeoutMs);
+  });
+
+  return Promise.race([
+    firebaseRead,
+    timeout,
+  ]);
+}
+
+
+
 async function initializeSharedScenario() {
   if (!scenarioDatabaseRef) {
     return;
   }
 
-  try {
-    const snapshot = await get(scenarioDatabaseRef);
+  const localScenario = getStoredScenario();
 
-    if (snapshot.exists()) {
+  try {
+    const snapshot = await readScenarioFromFirebase();
+
+    const remoteScenario = snapshot.exists()
+      ? snapshot.val()
+      : null;
+
+    if (!remoteScenario) {
+      const initialPayload =
+        localScenario || buildScenarioPayload();
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(initialPayload),
+      );
+
+      try {
+        await saveScenarioToFirebase(
+          initialPayload,
+        );
+
+        updateSaveStatus(
+          "saved",
+          "Guardado ✓",
+        );
+      } catch (error) {
+        console.warn(
+          "El escenario se ha guardado localmente, pero no se ha podido crear en Firebase.",
+          error,
+        );
+
+        updateSaveStatus(
+          "saved",
+          "Guardado local ✓",
+        );
+      }
+
+      subscribeToSharedScenario();
+      return;
+    }
+
+    if (
+      localScenario &&
+      isScenarioNewer(
+        localScenario,
+        remoteScenario,
+      )
+    ) {
       isApplyingRemoteScenario = true;
 
-      applyScenarioPayload(snapshot.val());
+      try {
+        applyScenarioPayload(localScenario);
+        populateCapacityFilter();
+        renderAll();
+      } finally {
+        isApplyingRemoteScenario = false;
+      }
 
-      isApplyingRemoteScenario = false;
+      try {
+        await saveScenarioToFirebase(
+          localScenario,
+        );
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
+        updateSaveStatus(
+          "saved",
+          "Sincronizado ✓",
+        );
+      } catch (error) {
+        console.warn(
+          "La versión local es más reciente, pero no se pudo enviar a Firebase.",
+          error,
+        );
+
+        updateSaveStatus(
+          "saved",
+          "Guardado local ✓",
+        );
+      }
+
+      subscribeToSharedScenario();
+      return;
+    }
+
+    isApplyingRemoteScenario = true;
+
+    try {
+      applyScenarioPayload(remoteScenario);
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(remoteScenario),
+      );
+
       populateCapacityFilter();
       renderAll();
-
-      showNotice(`Escenario compartido cargado: ${scenarioId}`);
-      updateSaveStatus("saved", "Sincronizado ✓");
-    } else {
-      await set(scenarioDatabaseRef, buildScenarioPayload());
-
-      showNotice(`Escenario compartido creado: ${scenarioId}`);
-      updateSaveStatus("saved", "Guardado ✓");
+    } finally {
+      isApplyingRemoteScenario = false;
     }
+
+    updateSaveStatus(
+      "saved",
+      "Sincronizado ✓",
+    );
 
     subscribeToSharedScenario();
   } catch (error) {
     isApplyingRemoteScenario = false;
+    pendingScenarioWrites = 0;
 
-    showNotice("No se pudo conectar con el escenario compartido. Se mantiene el modo local.", true);
-    updateSaveStatus("saved", "Guardado ✓");
-    console.error(error);
+    console.warn(
+      "Firebase no está disponible. Se conserva la copia local.",
+      error,
+    );
+
+    updateSaveStatus(
+      "saved",
+      "Guardado local ✓",
+    );
+
+    showNotice(
+      "No se pudo sincronizar con Firebase. Los cambios se mantienen guardados en este navegador.",
+      true,
+    );
   }
 }
+
 
 
 function subscribeToSharedScenario() {
@@ -1906,32 +2848,78 @@ function subscribeToSharedScenario() {
     return;
   }
 
-  onValue(scenarioDatabaseRef, (snapshot) => {
-    const remoteScenario = snapshot.val();
+  onValue(
+    scenarioDatabaseRef,
+    (snapshot) => {
+      const remoteScenario = snapshot.val();
 
-    if (!remoteScenario) {
-      return;
-    }
+      if (!remoteScenario) {
+        return;
+      }
 
-    try {
-      isApplyingRemoteScenario = true;
+      if (pendingScenarioWrites > 0) {
+        return;
+      }
 
-      applyScenarioPayload(remoteScenario);
+      const localScenario = getStoredScenario();
 
-      isApplyingRemoteScenario = false;
+      if (
+        localScenario &&
+        isScenarioNewer(
+          localScenario,
+          remoteScenario,
+        )
+      ) {
+        return;
+      }
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
-      populateCapacityFilter();
-      renderAll();
-      updateSaveStatus("saved", "Sincronizado ✓");
-    } catch (error) {
-      isApplyingRemoteScenario = false;
+      try {
+        isApplyingRemoteScenario = true;
 
-      console.error("No se pudo aplicar el escenario remoto.", error);
-      showNotice("No se pudo aplicar el escenario remoto.", true);
-    }
-  });
+        applyScenarioPayload(
+          remoteScenario,
+        );
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(remoteScenario),
+        );
+
+        populateCapacityFilter();
+        renderAll();
+
+        updateSaveStatus(
+          "saved",
+          "Sincronizado ✓",
+        );
+      } catch (error) {
+        console.error(
+          "No se pudo aplicar el escenario remoto.",
+          error,
+        );
+
+        showNotice(
+          "No se pudo aplicar el escenario remoto.",
+          true,
+        );
+      } finally {
+        isApplyingRemoteScenario = false;
+      }
+    },
+    (error) => {
+      console.warn(
+        "Se perdió la conexión con Firebase.",
+        error,
+      );
+
+      updateSaveStatus(
+        "saved",
+        "Guardado local ✓",
+      );
+    },
+  );
 }
+
 
 
 function updateSaveStatus(status, message) {
@@ -1946,30 +2934,105 @@ function updateSaveStatus(status, message) {
 
 
 
+function saveScenarioToFirebase(
+  payload,
+  timeoutMs = 8000,
+) {
+  if (!scenarioDatabaseRef) {
+    return Promise.resolve();
+  }
+
+  const sanitizedPayload =
+    sanitizeScenarioForFirebase(payload);
+
+  let timeoutId;
+
+  const firebaseSave = set(
+    scenarioDatabaseRef,
+    sanitizedPayload,
+  );
+
+  const timeout = new Promise(
+    (_, reject) => {
+      timeoutId = window.setTimeout(() => {
+        reject(
+          new Error(
+            "Tiempo de espera agotado al guardar en Firebase",
+          ),
+        );
+      }, timeoutMs);
+    },
+  );
+
+  return Promise.race([
+    firebaseSave,
+    timeout,
+  ]).finally(() => {
+    window.clearTimeout(timeoutId);
+  });
+}
+
+
+
 function persistScenario() {
+  syncActiveDomainState();
+
   const payload = buildScenarioPayload();
 
-  updateSaveStatus("saving", "Guardando…");
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(payload),
+  );
 
   if (!scenarioDatabaseRef) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    updateSaveStatus("saved", "Guardado ✓");
+    updateSaveStatus(
+      "saved",
+      "Guardado local ✓",
+    );
+
     return;
   }
 
-  if (!isApplyingRemoteScenario) {
-    set(scenarioDatabaseRef, payload)
-      .then(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-        updateSaveStatus("saved", "Guardado ✓");
-      })
-      .catch((error) => {
-        updateSaveStatus("error", "Error al guardar");
-        showNotice("No se pudo guardar el escenario compartido en Firebase.", true);
-        console.error(error);
-      });
+  if (isApplyingRemoteScenario) {
+    return;
   }
+
+  pendingScenarioWrites += 1;
+
+  updateSaveStatus(
+    "saving",
+    "Guardando...",
+  );
+
+  saveScenarioToFirebase(
+    payload,
+    8000,
+  )
+    .then(() => {
+      updateSaveStatus(
+        "saved",
+        "Guardado ✓",
+      );
+    })
+    .catch((error) => {
+      console.warn(
+        "Firebase no respondió. Se conserva el guardado local.",
+        error,
+      );
+
+      updateSaveStatus(
+        "saved",
+        "Guardado local ✓",
+      );
+    })
+    .finally(() => {
+      pendingScenarioWrites = Math.max(
+        0,
+        pendingScenarioWrites - 1,
+      );
+    });
 }
+
 
 
 function applyStoredScenario() {
@@ -2038,6 +3101,34 @@ function toSavedItemsArray(value) {
 
   return [];
 }
+
+
+
+function getScenarioTargetsFromPayload(payload, domainId) {
+  if (!payload || !domainId) {
+    return {};
+  }
+
+  if (payload.domains?.[domainId]?.targets) {
+    return payload.domains[domainId].targets;
+  }
+
+  if (payload[domainId]?.targets) {
+    return payload[domainId].targets;
+  }
+
+  if (
+    domainId === "fpa" &&
+    payload.targets &&
+    !payload.domains
+  ) {
+    return payload.targets;
+  }
+
+  return {};
+}
+
+
 
 function getScenarioItemsFromPayload(payload, domainId) {
   if (!payload) {
@@ -2168,16 +3259,37 @@ function applyScenarioPayload(payload) {
 
   if (payload.domains) {
     Object.keys(payload.domains).forEach((domainId) => {
+      const domain = state.domains[domainId];
+
+      if (!domain) {
+        return;
+      }
+
       const result = applyScenarioItemsToDomain(
         domainId,
         getScenarioItemsFromPayload(payload, domainId),
       );
 
-      console.log(`Escenario aplicado en ${domainId}: ${result.matched}/${result.total}`);
+      const defaultTarget = normalizeTargetValue(
+        domain.meta?.targetMaturity,
+        DEFAULT_TARGET_MATURITY,
+      );
+
+      domain.targets = normalizeDomainTargets(
+        domain.items,
+        getScenarioTargetsFromPayload(payload, domainId),
+        defaultTarget,
+      );
+
+      console.log(
+        `Escenario aplicado en ${domainId}: ${result.matched}/${result.total}`,
+      );
     });
 
     if (payload.activeDomainId && state.domains[payload.activeDomainId]) {
       setActiveDomain(payload.activeDomainId);
+    } else if (state.domains[state.activeDomainId]) {
+      setActiveDomain(state.activeDomainId);
     }
 
     return;
@@ -2186,7 +3298,24 @@ function applyScenarioPayload(payload) {
   const legacyItems = getScenarioItemsFromPayload(payload, "fpa");
   const result = applyScenarioItemsToDomain("fpa", legacyItems);
 
-  console.log(`Escenario antiguo aplicado en FP&A: ${result.matched}/${result.total}`);
+  const fpaDomain = state.domains.fpa;
+
+  if (fpaDomain) {
+    const defaultTarget = normalizeTargetValue(
+      fpaDomain.meta?.targetMaturity,
+      DEFAULT_TARGET_MATURITY,
+    );
+
+    fpaDomain.targets = normalizeDomainTargets(
+      fpaDomain.items,
+      getScenarioTargetsFromPayload(payload, "fpa"),
+      defaultTarget,
+    );
+  }
+
+  console.log(
+    `Escenario antiguo aplicado en FP&A: ${result.matched}/${result.total}`,
+  );
 
   if (state.activeDomainId === "fpa") {
     setActiveDomain("fpa");
@@ -2204,15 +3333,27 @@ function buildScenarioPayload() {
   Object.entries(state.domains).forEach(([domainId, domain]) => {
     domainsPayload[domainId] = {
       meta: domain.meta,
+
+      targets: serializeTargetsForFirebase(
+        domain.items,
+        domain.targets,
+        normalizeTargetValue(
+          domain.meta?.targetMaturity,
+          DEFAULT_TARGET_MATURITY,
+        ),
+      ),
+
       items: domain.items.map((item) => ({
         id: item.id,
         capacidad: item.capacidad,
         subcapacidad: item.subcapacidad,
+
         scores: {
           procesos: item.scores.procesos,
           tecnologia: item.scores.tecnologia,
           organizacion: item.scores.organizacion,
         },
+
         owner: item.owner,
         status: item.status,
         comentario: item.comentario,
@@ -2221,7 +3362,7 @@ function buildScenarioPayload() {
   });
 
   return {
-    version: 2,
+    version: 3,
     activeDomainId: state.activeDomainId,
     updatedAt: new Date().toISOString(),
     domains: domainsPayload,
@@ -2303,11 +3444,22 @@ function exportCsv() {
         Capacidad: item.capacidad,
         Subcapacidad: item.subcapacidad,
         Procesos: item.scores.procesos ?? "",
+        ObjetivoProcesos:
+          metrics.targets.procesos,
+
         Tecnologia: item.scores.tecnologia ?? "",
+        ObjetivoTecnologia:
+          metrics.targets.tecnologia,
+
         Organizacion: item.scores.organizacion ?? "",
+        ObjetivoOrganizacion:
+          metrics.targets.organizacion,
+
         ScoreMedio: metrics.scoreMedio ?? "",
+        ObjetivoMedio: metrics.targetMedio ?? "",
         Nivel: metrics.nivel,
         Gap: metrics.gap ?? "",
+
         Prioridad: metrics.prioridad,
         Oleada: metrics.oleada,
         IniciativaSugerida: item.iniciativaSugerida,
@@ -2430,36 +3582,71 @@ function buildEnhancedPdfReportData() {
 }
 
 function buildPdfSummaryRowsFromItems(items) {
-  const capabilities = unique(items.map((item) => item.capacidad));
-  const targetMaturity = state.meta?.targetMaturity ?? 4;
+  const capabilities = unique(
+    items.map((item) => item.capacidad),
+  );
 
   return capabilities.map((capability) => {
-    const capabilityItems = items.filter((item) => item.capacidad === capability);
-    const calculatedItems = capabilityItems.map((item) => calculate(item));
-    const scoredItems = calculatedItems.filter((metrics) => !metrics.isPending);
+    const capabilityItems = items.filter(
+      (item) => item.capacidad === capability,
+    );
+
+    const calculatedItems =
+      capabilityItems.map(calculate);
+
+    const scoredItems = calculatedItems.filter(
+      (metrics) => !metrics.isPending,
+    );
 
     const procesos = average(
-      capabilityItems.map((item) => item.scores.procesos).filter(Number.isFinite),
+      capabilityItems
+        .map((item) => item.scores.procesos)
+        .filter(Number.isFinite),
     );
 
     const tecnologia = average(
-      capabilityItems.map((item) => item.scores.tecnologia).filter(Number.isFinite),
+      capabilityItems
+        .map((item) => item.scores.tecnologia)
+        .filter(Number.isFinite),
     );
 
     const organizacion = average(
-      capabilityItems.map((item) => item.scores.organizacion).filter(Number.isFinite),
+      capabilityItems
+        .map((item) => item.scores.organizacion)
+        .filter(Number.isFinite),
     );
 
-    const scoreMedio = average(scoredItems.map((metrics) => metrics.scoreMedio));
-    const gap = scoreMedio === null ? null : round2(Math.max(0, targetMaturity - scoreMedio));
+    const scoreMedio = average(
+      scoredItems.map(
+        (metrics) => metrics.scoreMedio,
+      ),
+    );
+
+    const targetMedio = average(
+      scoredItems.map(
+        (metrics) => metrics.targetMedio,
+      ),
+    );
+
+    const gap = average(
+      scoredItems.map(
+        (metrics) => metrics.gap,
+      ),
+    );
+
     const prioridad = priorityFromGap(gap);
+    const targets = getCapabilityTargets(capability);
 
     return {
       capacidad: capability,
       procesos,
+      objetivoProcesos: targets.procesos,
       tecnologia,
+      objetivoTecnologia: targets.tecnologia,
       organizacion,
+      objetivoOrganizacion: targets.organizacion,
       scoreMedio,
+      targetMedio,
       gap,
       prioridad,
       avance: `${scoredItems.length}/${capabilityItems.length}`,
@@ -2570,7 +3757,7 @@ function buildPdfEnhancedCover(data) {
           <strong>${escapeHtml(data.filters)}</strong>
         </div>
         <div>
-          <span>Objetivo de madurez</span>
+          <span>Objetivo base</span>
           <strong>${escapeHtml(String(data.targetMaturity))}</strong>
         </div>
       </div>
@@ -2758,8 +3945,17 @@ function buildPdfEnhancedSummarySection(data) {
         <td class="num">${escapeHtml(formatNumber(row.procesos))}</td>
         <td class="num">${escapeHtml(formatNumber(row.tecnologia))}</td>
         <td class="num">${escapeHtml(formatNumber(row.organizacion))}</td>
-        <td class="num">${escapeHtml(formatNumber(row.scoreMedio))}</td>
-        <td class="num">${escapeHtml(formatNumber(row.gap))}</td>
+        <td class="num">
+          ${escapeHtml(formatNumber(row.scoreMedio))}
+        </td>
+
+        <td class="num">
+          ${escapeHtml(formatNumber(row.targetMedio))}
+        </td>
+
+        <td class="num">
+          ${escapeHtml(formatNumber(row.gap))}
+        </td>
         <td>${escapeHtml(row.prioridad)}</td>
         <td class="num">${escapeHtml(row.avance)}</td>
       </tr>
@@ -2777,13 +3973,14 @@ function buildPdfEnhancedSummarySection(data) {
             <th>Tecnología</th>
             <th>Organización</th>
             <th>Score medio</th>
-            <th>Gap</th>
+            <th>Objetivo medio</th>
+            <th>Gap vs objetivo</th>
             <th>Prioridad</th>
             <th>Avance</th>
           </tr>
         </thead>
         <tbody>
-          ${rows || `<tr><td colspan="8">No hay datos para los filtros actuales.</td></tr>`}
+          ${rows || `<tr><td colspan="9">No hay datos para los filtros actuales.</td></tr>`}
         </tbody>
       </table>
     </section>
@@ -3279,20 +4476,74 @@ function getEnhancedPdfReportStyles() {
 
 
 function buildSummaryRows() {
-  return unique(state.items.map((item) => item.capacidad)).map((capability) => {
-    const items = state.items.filter((item) => item.capacidad === capability);
-    const scored = items.map(calculate).filter((metrics) => !metrics.isPending);
-    const scoreMedio = average(scored.map((metrics) => metrics.scoreMedio));
-    const gap = scoreMedio === null ? null : round2(Math.max(0, state.meta.targetMaturity - scoreMedio));
+  return unique(
+    state.items.map((item) => item.capacidad),
+  ).map((capability) => {
+    const items = state.items.filter(
+      (item) => item.capacidad === capability,
+    );
+
+    const scored = items
+      .map(calculate)
+      .filter((metrics) => !metrics.isPending);
+
+    const scoreMedio = average(
+      scored.map((metrics) => metrics.scoreMedio),
+    );
+
+    const targetMedio = average(
+      scored.map((metrics) => metrics.targetMedio),
+    );
+
+    const gap = average(
+      scored.map((metrics) => metrics.gap),
+    );
+
+    const capabilityTargets =
+      getCapabilityTargets(capability);
+
     return {
       Tipo: "Resumen",
       Capacidad: capability,
       Subcapacidad: "",
-      Procesos: average(items.map((item) => item.scores.procesos).filter(Number.isFinite)) ?? "",
-      Tecnologia: average(items.map((item) => item.scores.tecnologia).filter(Number.isFinite)) ?? "",
-      Organizacion: average(items.map((item) => item.scores.organizacion).filter(Number.isFinite)) ?? "",
+
+      Procesos:
+        average(
+          items
+            .map((item) => item.scores.procesos)
+            .filter(Number.isFinite),
+        ) ?? "",
+
+      ObjetivoProcesos:
+        capabilityTargets.procesos,
+
+      Tecnologia:
+        average(
+          items
+            .map((item) => item.scores.tecnologia)
+            .filter(Number.isFinite),
+        ) ?? "",
+
+      ObjetivoTecnologia:
+        capabilityTargets.tecnologia,
+
+      Organizacion:
+        average(
+          items
+            .map((item) => item.scores.organizacion)
+            .filter(Number.isFinite),
+        ) ?? "",
+
+      ObjetivoOrganizacion:
+        capabilityTargets.organizacion,
+
       ScoreMedio: scoreMedio ?? "",
-      Nivel: scoreMedio === null ? "" : getMaturityLevel(scoreMedio),
+      ObjetivoMedio: targetMedio ?? "",
+      Nivel:
+        scoreMedio === null
+          ? ""
+          : getMaturityLevel(scoreMedio),
+
       Gap: gap ?? "",
       Prioridad: priorityFromGap(gap),
       Oleada: "",
@@ -3303,6 +4554,8 @@ function buildSummaryRows() {
     };
   });
 }
+
+
 
 function toCsv(rows) {
   const headers = Object.keys(rows[0]);
