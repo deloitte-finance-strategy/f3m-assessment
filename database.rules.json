@@ -1,0 +1,59 @@
+{
+  "rules": {
+    "scenarios": {
+      "$scenarioId": {
+        ".read": "$scenarioId.length >= 20",
+        ".write": "$scenarioId.length >= 20",
+        ".validate": "newData.hasChildren(['version', 'updatedAt', 'domains'])",
+
+        "version": { ".validate": "newData.isNumber()" },
+        "updatedAt": { ".validate": "newData.isString() && newData.val().length <= 40" },
+        "activeDomainId": { ".validate": "newData.isString() && newData.val().length <= 64" },
+
+        "domains": {
+          "$domainId": {
+            "meta": {
+              "$campoMeta": {
+                ".validate": "(newData.isString() && newData.val().length <= 200) || newData.isNumber()"
+              }
+            },
+
+            "targets": {
+              "$indiceTarget": {
+                "capacidad": { ".validate": "newData.isString() && newData.val().length <= 200" },
+                "procesos": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" },
+                "tecnologia": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" },
+                "organizacion": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" },
+                "$otroTarget": { ".validate": false }
+              }
+            },
+
+            "items": {
+              "$indice": {
+                "id": { ".validate": "newData.isString() && newData.val().length <= 120" },
+                "capacidad": { ".validate": "newData.isString() && newData.val().length <= 200" },
+                "subcapacidad": { ".validate": "newData.isString() && newData.val().length <= 300" },
+                "owner": { ".validate": "newData.isString() && newData.val().length <= 120" },
+                "status": { ".validate": "newData.isString() && newData.val().length <= 40" },
+                "comentario": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+
+                "scores": {
+                  "procesos": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" },
+                  "tecnologia": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" },
+                  "organizacion": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" },
+                  "$otroScore": { ".validate": false }
+                },
+
+                "$otroCampoItem": { ".validate": false }
+              }
+            },
+
+            "$otroCampoDominio": { ".validate": false }
+          }
+        },
+
+        "$otroCampoRaiz": { ".validate": false }
+      }
+    }
+  }
+}

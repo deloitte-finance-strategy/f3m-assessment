@@ -455,6 +455,7 @@ function cacheElements() {
     "exportCsvButton",
     "exportPdfButton", // NUEVO: botón de exportación PDF
     "resetButton",
+    "createScenarioButton",
     "scenarioFileInput",
     "dashboardDomainTitle",
   ].forEach((id) => {
@@ -483,6 +484,7 @@ function bindGlobalEvents() {
   els.exportCsvButton.addEventListener("click", exportCsv);
   els.exportPdfButton.addEventListener("click", exportPdfReport); // NUEVO: genera informe imprimible/PDF
   els.resetButton.addEventListener("click", resetScenario);
+  els.createScenarioButton?.addEventListener("click", createSharedScenario);
   els.heatmapExpandToggle?.addEventListener("click", handleHeatmapExpandToggleAll);
   setupActiveTabObserver(); // NUEVO: marca automáticamente la pestaña activa según la sección visible
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
@@ -4621,15 +4623,47 @@ function getScenarioIdFromUrl() {
 
   const cleanScenarioId = rawScenarioId.trim();
 
-  // Permitimos letras, números, guiones y guiones bajos para evitar rutas raras en Firebase
-  const isValidScenarioId = /^[a-zA-Z0-9_-]{6,120}$/.test(cleanScenarioId);
+  // Permitimos letras, números, guiones y guiones bajos para evitar rutas raras en Firebase.
+  // El mínimo es 20 caracteres: el enlace es la única credencial del escenario, así que un id
+  // corto o inventado a mano sería adivinable y expondría el assessment completo.
+  const isValidScenarioId = /^[a-zA-Z0-9_-]{20,120}$/.test(cleanScenarioId);
 
   if (!isValidScenarioId) {
-    console.warn("Scenario ID inválido. Se usará modo local:", cleanScenarioId);
+    console.warn(
+      "Scenario ID inválido (mínimo 20 caracteres, solo letras, números, '-' y '_'). Se usará modo local:",
+      cleanScenarioId,
+    );
     return null;
   }
 
   return cleanScenarioId;
+}
+
+
+// Genera un identificador aleatorio de 128 bits. No usamos Math.random porque es predecible
+// y aquí el identificador es lo único que protege el escenario.
+function createScenarioId() {
+  const uuid = crypto.randomUUID();
+  return `f3m-${uuid}`;
+}
+
+
+function createSharedScenario() {
+  const nuevoId = createScenarioId();
+
+  const confirmado = window.confirm(
+    "Se creará un escenario compartido con los datos actuales.\n\n" +
+      "Cualquier persona con el enlace podrá verlo y editarlo, sin contraseña. " +
+      "Trátalo como una credencial.\n\n¿Continuar?",
+  );
+
+  if (!confirmado) {
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  url.searchParams.set("scenario", nuevoId);
+  window.location.assign(url.toString());
 }
 
 
