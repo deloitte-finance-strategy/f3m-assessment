@@ -57,12 +57,29 @@ button {
   cursor: pointer;
 }
 
+/* Anillo de foco.
+
+   Era rgba(134,188,37,.35), o sea 1,23:1 sobre blanco: practicamente invisible.
+   WCAG 2.2 pide 3:1 para el indicador de foco. El verde oscuro da 6,02 sobre
+   blanco y 5,6 sobre la superficie de la app; sobre la cabecera negra se queda
+   en 3,03, asi que alli se usa el verde de marca, que da 8,03. */
+:root {
+  --focus-ring: var(--green-dark);
+}
+
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-a:focus-visible {
-  outline: 3px solid rgba(134, 188, 37, 0.35);
+textarea:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+.app-header {
+  --focus-ring: var(--green);
 }
 
 .app-header {
@@ -1097,11 +1114,11 @@ display: none;
   --score-text: #0f5132;
 }
 
-.score-select:focus {
+.score-select:focus-visible {
   border-color: var(--green);
   border-left-color: var(--score-accent);
-  box-shadow: 0 0 0 3px rgba(134, 188, 37, 0.12);
-  outline: none;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 
@@ -1291,7 +1308,7 @@ display: none;
 }
 
 .assessment-card summary:focus-visible {
-  outline: 3px solid rgba(134, 188, 37, 0.28);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -1706,7 +1723,7 @@ font-size: 0.92rem;
 .heatmap-toggle:focus-visible,
 .heatmap-expand-toggle:focus-visible {
   border-color: var(--green);
-  outline: 3px solid rgba(134, 188, 37, 0.2);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -1949,12 +1966,12 @@ border-color: #eef0ed;
 
 
 /* Foco de campos editables */
-.roadmap-owner:focus,
-.roadmap-status:focus,
-.roadmap-table textarea:focus {
+.roadmap-owner:focus-visible,
+.roadmap-status:focus-visible,
+.roadmap-table textarea:focus-visible {
   border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(134, 188, 37, 0.14);
-  outline: none;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 
@@ -2058,9 +2075,11 @@ border-color: #eef0ed;
   color: var(--red);
 }
 
+/* #c87900 sobre #fff0d3 daba 3,01:1, por debajo del 4,5 exigido para texto
+   pequeno. Este llega a 5,67. */
 .priority-badge.media {
   background: #fff0d3;
-  color: var(--amber);
+  color: #8a5200;
 }
 
 .priority-badge.baja {
@@ -2068,9 +2087,10 @@ border-color: #eef0ed;
   color: var(--green-dark);
 }
 
+/* El gris neutro daba 2,79:1 sobre su propio fondo. Este llega a 5,16. */
 .priority-badge.pendiente {
   background: #ecefed;
-  color: var(--neutral);
+  color: #5c665e;
 }
 
 .level-badge {
@@ -2226,7 +2246,7 @@ border-color: #eef0ed;
 
 .scoring-criteria-button:focus-visible {
   border-color: var(--green);
-  outline: 3px solid rgba(134, 188, 37, 0.22);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -2333,7 +2353,7 @@ border-color: #eef0ed;
 
 .modal-close-button:focus-visible {
   border-color: var(--green);
-  outline: 3px solid rgba(134, 188, 37, 0.22);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -2927,10 +2947,10 @@ height: 100% !important;
   border-color: rgba(134, 188, 37, 0.75);
 }
 
-.capability-target-select:focus {
+.capability-target-select:focus-visible {
   border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(134, 188, 37, 0.14);
-  outline: none;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 
