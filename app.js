@@ -549,6 +549,9 @@ function cacheElements() {
     "exportCsvButton",
     "exportPdfButton", // NUEVO: botón de exportación PDF
     "resetButton",
+    "scenarioMenuButton",
+    "scenarioMenu",
+    "scenarioMenuState",
     "createScenarioButton",
     "copyScenarioLinkButton",
     "leaveScenarioButton",
@@ -591,6 +594,7 @@ function bindGlobalEvents() {
   els.editorNameButton?.addEventListener("click", pedirNombreEditor);
   els.heatmapExpandToggle?.addEventListener("click", handleHeatmapExpandToggleAll);
   els.loadNoticeClose?.addEventListener("click", ocultarAviso);
+  setupMenuDeEscenario();
   setupVistas();
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
@@ -1274,6 +1278,62 @@ function setupDomainSwitcher() {
       console.error(error);
     }
   });
+}
+
+
+/**
+ * La cabecera tenia nueve botones en fila, cuatro de ellos hablando de JSON.
+ *
+ * Todo lo que no es exportar para el cliente pasa a un menu: son acciones que
+ * se usan una vez por sesion, no en cada momento, y ahi caben con una linea que
+ * explique que hacen.
+ */
+function setupMenuDeEscenario() {
+  if (!els.scenarioMenuButton || !els.scenarioMenu) {
+    return;
+  }
+
+  const abrir = (abierto) => {
+    els.scenarioMenu.hidden = !abierto;
+    els.scenarioMenuButton.setAttribute("aria-expanded", String(abierto));
+  };
+
+  els.scenarioMenuButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    abrir(els.scenarioMenu.hidden);
+  });
+
+  // Elegir una opcion cierra el menu antes de que se abra su dialogo.
+  els.scenarioMenu.addEventListener("click", (event) => {
+    if (event.target.closest(".header-menu-item")) {
+      abrir(false);
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!els.scenarioMenu.hidden && !event.target.closest(".header-menu")) {
+      abrir(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !els.scenarioMenu.hidden) {
+      abrir(false);
+      els.scenarioMenuButton.focus();
+    }
+  });
+}
+
+
+/** Deja claro en el menu sobre que se esta trabajando. */
+function actualizarEstadoDelMenu() {
+  if (!els.scenarioMenuState) {
+    return;
+  }
+
+  els.scenarioMenuState.textContent = scenarioId
+    ? getScenarioShortLabel()
+    : "Copia de este navegador";
 }
 
 
@@ -6174,6 +6234,8 @@ function showScenarioModeNotice() {
   if (els.leaveScenarioButton) {
     els.leaveScenarioButton.hidden = false;
   }
+
+  actualizarEstadoDelMenu();
 
   if (els.createScenarioButton) {
     // Ya se esta en uno: crear otro desde aqui solo confunde.

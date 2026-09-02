@@ -14,92 +14,71 @@
           <h1>F3M Assessment</h1>
           <p class="header-copy">Diagnóstico preliminar de madurez por subcapacidad, palanca y roadmap sugerido.</p>
         </div>
-        <div class="header-actions" aria-label="Acciones de escenario">
-          <div class="header-action-group header-action-group-primary">
-            <button
-              class="primary-button"
-              id="exportPdfButton"
-              type="button"
-            >
-              Exportar PDF
-            </button>
-
-            <button
-              class="header-secondary-action"
-              id="exportCsvButton"
-              type="button"
-            >
-              Exportar CSV
-            </button>
-          </div>
-
-          <div
-            class="header-action-group header-action-group-technical"
-            aria-label="Gestión del escenario"
-          >
-            <button
-              class="header-technical-action"
-              id="importJsonButton"
-              type="button"
-            >
-              Importar JSON
-            </button>
-
-            <button
-              class="header-technical-action"
-              id="exportJsonButton"
-              type="button"
-            >
-              Exportar JSON
-            </button>
-
-            <button
-              class="header-technical-action"
-              id="createScenarioButton"
-              type="button"
-              title="Genera un enlace compartido con un identificador aleatorio"
-            >
-              Crear escenario compartido
-            </button>
-
-            <button
-              class="header-technical-action"
-              id="copyScenarioLinkButton"
-              type="button"
-              title="Copia el enlace de este escenario al portapapeles"
-              hidden
-            >
-              Copiar enlace
-            </button>
-
-            <button
-              class="header-technical-action"
-              id="leaveScenarioButton"
-              type="button"
-              title="Vuelve a la copia de este navegador, sin tocar el escenario compartido"
-              hidden
-            >
-              Salir del escenario
-            </button>
-
-            <button
-              class="header-technical-action"
-              id="editorNameButton"
-              type="button"
-              title="Nombre con el que se atribuyen tus cambios"
-              hidden
-            >
-              Poner mi nombre
-            </button>
-          </div>
-
-          <button
-            class="danger-ghost-button header-reset-action"
-            id="resetButton"
-            type="button"
-          >
-            Restaurar base
+        <div class="header-actions">
+          <button class="primary-button" id="exportPdfButton" type="button">
+            Exportar PDF
           </button>
+
+          <button class="header-secondary-action" id="exportCsvButton" type="button">
+            Exportar CSV
+          </button>
+
+          <div class="header-menu">
+            <button
+              class="header-menu-button"
+              id="scenarioMenuButton"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="scenarioMenu"
+            >
+              Escenario
+              <span class="header-menu-caret" aria-hidden="true"></span>
+            </button>
+
+            <div class="header-menu-panel" id="scenarioMenu" role="menu" hidden>
+              <p class="header-menu-title" id="scenarioMenuState">Copia de este navegador</p>
+
+              <button class="header-menu-item" id="createScenarioButton" type="button" role="menuitem">
+                Crear escenario compartido
+                <span>Genera un enlace para trabajar en equipo</span>
+              </button>
+
+              <button class="header-menu-item" id="copyScenarioLinkButton" type="button" role="menuitem" hidden>
+                Copiar enlace
+                <span>Trátalo como una credencial</span>
+              </button>
+
+              <button class="header-menu-item" id="editorNameButton" type="button" role="menuitem" hidden>
+                Poner mi nombre
+                <span>Así se atribuyen tus cambios</span>
+              </button>
+
+              <button class="header-menu-item" id="leaveScenarioButton" type="button" role="menuitem" hidden>
+                Salir del escenario
+                <span>Vuelve a la copia de este navegador</span>
+              </button>
+
+              <hr class="header-menu-separator">
+
+              <button class="header-menu-item" id="exportJsonButton" type="button" role="menuitem">
+                Guardar una copia
+                <span>Descarga el trabajo en un archivo</span>
+              </button>
+
+              <button class="header-menu-item" id="importJsonButton" type="button" role="menuitem">
+                Abrir una copia
+                <span>Sustituye los datos por los del archivo</span>
+              </button>
+
+              <hr class="header-menu-separator">
+
+              <button class="header-menu-item header-menu-item-danger" id="resetButton" type="button" role="menuitem">
+                Restaurar base
+                <span>Borra el trabajo de este navegador</span>
+              </button>
+            </div>
+          </div>
 
           <input
             id="scenarioFileInput"
