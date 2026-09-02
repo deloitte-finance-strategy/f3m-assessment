@@ -2329,6 +2329,163 @@ border-color: #eef0ed;
 
 
 /* ==================================================
+   DIALOGO DE CONFIRMACION
+   ==================================================
+   Sustituye a window.confirm y window.prompt, que ensenan el origen de la
+   pagina y no se pueden disenar. */
+
+.dialog-modal {
+  width: min(540px, 100%);
+  max-height: min(86vh, 640px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 22px 24px 6px;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  color: #202622;
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.dialog-header .eyebrow {
+  margin-bottom: 4px;
+}
+
+.dialog-header .eyebrow[hidden] {
+  display: none;
+}
+
+.dialog-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: #4f5952;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+/* Las acciones que no se pueden deshacer se anuncian antes de leerlas. */
+.dialog-peligro .dialog-icon {
+  background: #fde7e3;
+  color: var(--red);
+}
+
+.dialog-peligro .dialog-confirm {
+  background: var(--red);
+  color: #ffffff;
+}
+
+.dialog-peligro .dialog-confirm:hover:not(:disabled) {
+  background: #a02a22;
+}
+
+.dialog-body {
+  padding: 8px 24px 4px;
+}
+
+.dialog-message p {
+  margin: 0 0 10px;
+  color: #3a433d;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.dialog-message p:last-child {
+  margin-bottom: 0;
+}
+
+.dialog-field {
+  display: grid;
+  gap: 5px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.dialog-field[hidden] {
+  display: none;
+}
+
+.dialog-field input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 24px 22px;
+}
+
+.dialog-actions-spacer {
+  flex: 1 1 auto;
+}
+
+.dialog-secondary {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--green-dark);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.dialog-secondary:hover {
+  border-style: solid;
+  border-color: var(--green);
+  background: #f3f8ea;
+}
+
+.dialog-secondary[hidden] {
+  display: none;
+}
+
+.dialog-cancel {
+  border: 1px solid var(--line);
+}
+
+.dialog-cancel:hover {
+  border-color: #b9c1b5;
+  background: var(--surface-muted);
+}
+
+.dialog-confirm:disabled {
+  background: #e0e4dd;
+  color: #8a9189;
+  cursor: not-allowed;
+}
+
+
+/* ==================================================
    MODAL DE CRITERIOS F3M
    ================================================== */
 
@@ -3160,6 +3317,15 @@ height: 100% !important;
   .criteria-panel,
   .ai-modal-content {
     padding: 18px;
+  }
+
+  .dialog-actions {
+    flex-wrap: wrap;
+  }
+
+  .dialog-actions .secondary-button,
+  .dialog-actions .primary-button {
+    flex: 1 1 auto;
   }
 
   .criteria-checklist {

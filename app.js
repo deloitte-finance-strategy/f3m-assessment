@@ -500,6 +500,17 @@ function cacheElements() {
     "aiModalCases",
     "aiModalAdvanced",
     "aiModalSource",
+    "dialogModal",
+    "dialogIcon",
+    "dialogEyebrow",
+    "dialogTitle",
+    "dialogMessage",
+    "dialogFieldWrap",
+    "dialogFieldLabel",
+    "dialogField",
+    "dialogSecondary",
+    "dialogCancel",
+    "dialogConfirm",
     "scoringCriteriaModal", // NUEVO: modal de criterios F3M
     "closeScoringCriteriaModalButton", // NUEVO: botón cerrar modal
     "saveStatus", // NUEVO: indicador visual de guardado
@@ -973,7 +984,8 @@ function setInitialLoading(isLoading) {
 function updateModalOpenState() {
   const hasOpenModal =
     !els.scoringCriteriaModal?.hidden ||
-    !els.aiInitiativeModal?.hidden;
+    !els.aiInitiativeModal?.hidden ||
+    !els.dialogModal?.hidden;
 
   document.body.classList.toggle("modal-open", hasOpenModal);
 }
@@ -2246,12 +2258,21 @@ function handleCapabilityTargetChange(event) {
 
 
 
-function resetCapabilityTargets() {
-  const confirmed = window.confirm(
-    "¿Quieres restaurar a 4 todos los objetivos del dominio actual?",
-  );
+async function resetCapabilityTargets() {
+  const dominio = DOMAINS[state.activeDomainId]?.label || "este dominio";
 
-  if (!confirmed) {
+  const confirmado = await abrirDialogo({
+    eyebrow: "Ambición de madurez",
+    titulo: `Restaurar los objetivos de ${dominio}`,
+    parrafos: [
+      "Todos los objetivos de Procesos, Tecnología y Organización de este dominio volverán al nivel 4.",
+      "Cambia los gaps, las prioridades y las oleadas de sus subcapacidades. Si el escenario es compartido, lo verá todo el equipo.",
+    ],
+    tono: "peligro",
+    confirmar: "Restaurar objetivos",
+  });
+
+  if (!confirmado) {
     return;
   }
 
@@ -5455,6 +5476,170 @@ function resetScenario() {
 }
 
 
+/**
+ * Dialogo propio, en sustitucion de window.confirm y window.prompt.
+ *
+ * Los dialogos nativos ensenan el origen de la pagina ("127.0.0.1:8777 dice:"),
+ * no se pueden disenar y desentonan delante de un cliente. Ademas no permiten
+ * exigir una confirmacion proporcional al riesgo ni ofrecer una accion
+ * alternativa como "exportar antes de borrar".
+ *
+ * Devuelve false si se cancela; true si se confirma; y el texto del campo
+ * cuando se ha pedido uno.
+ */
+let cerrarDialogoActual = null;
+
+function abrirDialogo({
+  eyebrow = "",
+  titulo,
+  parrafos = [],
+  tono = "neutro",
+  confirmar = "Continuar",
+  cancelar = "Cancelar",
+  campo = null,
+  confirmacionEscrita = null,
+  accionSecundaria = null,
+}) {
+  return new Promise((resolve) => {
+    const disparador = document.activeElement;
+
+    els.dialogEyebrow.textContent = eyebrow;
+    els.dialogEyebrow.hidden = !eyebrow;
+    els.dialogTitle.textContent = titulo;
+    els.dialogIcon.textContent = tono === "peligro" ? "!" : "?";
+
+    els.dialogMessage.innerHTML = parrafos
+      .map((texto) => `<p>${escapeHtml(texto)}</p>`)
+      .join("");
+
+    els.dialogModal.className = `modal-backdrop dialog-${tono}`;
+    els.dialogConfirm.textContent = confirmar;
+    els.dialogCancel.textContent = cancelar;
+
+    // Campo de texto: sirve tanto para pedir un dato como para exigir que se
+    // escriba una palabra antes de dejar confirmar.
+    const pideTexto = Boolean(campo) || Boolean(confirmacionEscrita);
+
+    els.dialogFieldWrap.hidden = !pideTexto;
+    els.dialogField.value = campo?.valor || "";
+    els.dialogField.maxLength = campo?.maxLength || 120;
+    els.dialogField.placeholder = campo?.placeholder || "";
+    els.dialogFieldLabel.textContent =
+      campo?.etiqueta ||
+      (confirmacionEscrita ? `Escribe ${confirmacionEscrita} para confirmar` : "");
+
+    els.dialogSecondary.hidden = !accionSecundaria;
+    els.dialogSecondary.textContent = accionSecundaria?.texto || "";
+
+    const validar = () => {
+      if (!confirmacionEscrita) {
+        return;
+      }
+
+      els.dialogConfirm.disabled =
+        els.dialogField.value.trim().toUpperCase() !==
+        confirmacionEscrita.toUpperCase();
+    };
+
+    els.dialogConfirm.disabled = Boolean(confirmacionEscrita);
+    validar();
+
+    const alConfirmar = () => terminar(campo ? els.dialogField.value : true);
+    const alCancelar = () => terminar(false);
+
+    const alPulsarTecla = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        alCancelar();
+        return;
+      }
+
+      if (event.key === "Enter" && pideTexto && !els.dialogConfirm.disabled) {
+        event.preventDefault();
+        alConfirmar();
+        return;
+      }
+
+      if (event.key === "Tab") {
+        atraparFoco(event, els.dialogModal);
+      }
+    };
+
+    const alPulsarFondo = (event) => {
+      // Un clic fuera no puede cancelar algo destructivo por accidente.
+      if (event.target === els.dialogModal && tono !== "peligro") {
+        alCancelar();
+      }
+    };
+
+    const alPulsarSecundaria = () => accionSecundaria?.alHacerClic();
+
+    function terminar(resultado) {
+      els.dialogModal.hidden = true;
+      els.dialogConfirm.removeEventListener("click", alConfirmar);
+      els.dialogCancel.removeEventListener("click", alCancelar);
+      els.dialogSecondary.removeEventListener("click", alPulsarSecundaria);
+      els.dialogField.removeEventListener("input", validar);
+      els.dialogModal.removeEventListener("click", alPulsarFondo);
+      document.removeEventListener("keydown", alPulsarTecla, true);
+
+      cerrarDialogoActual = null;
+      updateModalOpenState();
+
+      if (disparador?.isConnected) {
+        disparador.focus();
+      }
+
+      resolve(resultado);
+    }
+
+    cerrarDialogoActual = alCancelar;
+
+    els.dialogConfirm.addEventListener("click", alConfirmar);
+    els.dialogCancel.addEventListener("click", alCancelar);
+    els.dialogSecondary.addEventListener("click", alPulsarSecundaria);
+    els.dialogField.addEventListener("input", validar);
+    els.dialogModal.addEventListener("click", alPulsarFondo);
+    document.addEventListener("keydown", alPulsarTecla, true);
+
+    els.dialogModal.hidden = false;
+    updateModalOpenState();
+
+    // El foco entra en el dialogo: al campo si lo hay, y si no a Cancelar, que
+    // es la opcion segura.
+    if (pideTexto) {
+      els.dialogField.focus();
+      els.dialogField.select();
+    } else {
+      els.dialogCancel.focus();
+    }
+  });
+}
+
+
+/** Mantiene el tabulador dentro del modal mientras esta abierto. */
+function atraparFoco(event, contenedor) {
+  const focusables = [...contenedor.querySelectorAll(
+    'button:not([disabled]):not([hidden]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+  )].filter((el) => el.offsetParent !== null);
+
+  if (!focusables.length) {
+    return;
+  }
+
+  const primero = focusables[0];
+  const ultimo = focusables[focusables.length - 1];
+
+  if (event.shiftKey && document.activeElement === primero) {
+    event.preventDefault();
+    ultimo.focus();
+  } else if (!event.shiftKey && document.activeElement === ultimo) {
+    event.preventDefault();
+    primero.focus();
+  }
+}
+
+
 const ICONO_POR_TIPO = {
   exito: "✓",
   info: "i",
@@ -5542,14 +5727,18 @@ function createScenarioId() {
 }
 
 
-function createSharedScenario() {
+async function createSharedScenario() {
   const nuevoId = createScenarioId();
 
-  const confirmado = window.confirm(
-    "Se creará un escenario compartido con los datos actuales.\n\n" +
-      "Cualquier persona con el enlace podrá verlo y editarlo, sin contraseña. " +
-      "Trátalo como una credencial.\n\n¿Continuar?",
-  );
+  const confirmado = await abrirDialogo({
+    eyebrow: "Escenario compartido",
+    titulo: "Crear un escenario compartido",
+    parrafos: [
+      "Se creará un escenario nuevo con los datos que tienes ahora, y pasarás a trabajar sobre él.",
+      "Cualquiera con el enlace podrá verlo y editarlo, sin contraseña. El enlace es la única credencial: trátalo como tal y no lo publiques en documentos ni tickets.",
+    ],
+    confirmar: "Crear escenario",
+  });
 
   if (!confirmado) {
     return;
@@ -5641,13 +5830,23 @@ function setNombreEditor(nombre) {
 }
 
 
-function pedirNombreEditor() {
-  const nombre = window.prompt(
-    "¿Con qué nombre quieres que aparezcan tus cambios para el resto del equipo?",
-    getNombreEditor(),
-  );
+async function pedirNombreEditor() {
+  const nombre = await abrirDialogo({
+    eyebrow: "Atribución de cambios",
+    titulo: "Tu nombre en este escenario",
+    parrafos: [
+      "Así aparecerás en la columna Último cambio del Roadmap cuando edites algo. Solo se guarda en este navegador.",
+    ],
+    campo: {
+      etiqueta: "Nombre",
+      valor: getNombreEditor(),
+      placeholder: "Nombre y apellido",
+      maxLength: 60,
+    },
+    confirmar: "Guardar nombre",
+  });
 
-  if (nombre === null) {
+  if (nombre === false) {
     return; // Cancelado: no tocamos nada
   }
 
