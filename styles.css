@@ -3045,3 +3045,39 @@ height: 100% !important;
       repeat(3, minmax(90px, 110px));
   }
 }
+
+/* Autoría de cambios (identidad anónima de Firebase) */
+
+.roadmap-authorship {
+  white-space: nowrap;
+}
+
+.authorship-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.authorship-mine {
+  border-color: var(--green);
+  background: rgba(134, 188, 37, 0.12);
+  color: var(--green-dark);
+}
+
+.authorship-date {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.75rem;
+}
+
+/* Resalta el botón mientras no se haya puesto nombre: sin él, los cambios
+   se atribuyen como "Sin nombre" y la trazabilidad pierde valor. */
+.header-technical-action.sin-nombre {
+  border-color: var(--amber);
+  color: #f0c078;
+}
