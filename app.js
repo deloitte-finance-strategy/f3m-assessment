@@ -284,8 +284,48 @@ async function loadDomainData(domainId) {
   return state.domains[domainId];
 }
 
+/**
+ * Carga los nueve dominios sin que uno estropee a los demas.
+ *
+ * Con Promise.all, un solo JSON inaccesible hacia caer init() entero y la
+ * herramienta mostraba "no se pudo cargar el JSON de datos" aunque los otros
+ * ocho dominios estuvieran perfectos.
+ */
 async function loadCoreDomains() {
-  await Promise.all(Object.keys(DOMAINS).map((domainId) => loadDomainData(domainId)));
+  const ids = Object.keys(DOMAINS);
+
+  const resultados = await Promise.allSettled(
+    ids.map((domainId) => loadDomainData(domainId)),
+  );
+
+  const fallidos = ids.filter((_, i) => resultados[i].status === "rejected");
+
+  resultados.forEach((resultado, i) => {
+    if (resultado.status === "rejected") {
+      console.error(`No se pudo cargar el dominio ${ids[i]}.`, resultado.reason);
+    }
+  });
+
+  return {
+    cargados: ids.filter((id) => state.domains[id]),
+    fallidos,
+  };
+}
+
+
+/** Deja sin usar los botones de los dominios que no han podido cargarse. */
+function marcarDominiosNoDisponibles(fallidos) {
+  fallidos.forEach((domainId) => {
+    const boton = document.querySelector(`[data-domain-id="${CSS.escape(domainId)}"]`);
+
+    if (!boton) {
+      return;
+    }
+
+    boton.disabled = true;
+    boton.classList.add("is-disabled");
+    boton.title = "Este dominio no se ha podido cargar. Recarga la página para volver a intentarlo.";
+  });
 }
 
 
@@ -412,12 +452,41 @@ async function init() {
   showScenarioModeNotice();
 
 
-    try {
-        await loadCoreDomains();
-        setActiveDomain(DEFAULT_DOMAIN_ID);
+  try {
+    const { cargados, fallidos } = await loadCoreDomains();
 
-      /* La copia local se carga siempre, también en escenarios compartidos */
-      applyStoredScenario();
+    // Ningún dominio disponible: casi siempre es que se ha abierto el archivo
+    // con file:// en vez de servirlo, que es lo único que el usuario puede
+    // arreglar por su cuenta.
+    if (!cargados.length) {
+      showNotice(
+        "No se han podido cargar los datos del assessment. Si has abierto el archivo directamente, "
+          + "ábrelo a través de un servidor local: en esta carpeta, ejecuta "
+          + "python -m http.server 8000 y entra en http://localhost:8000/.",
+        true,
+      );
+
+      return;
+    }
+
+    if (fallidos.length) {
+      marcarDominiosNoDisponibles(fallidos);
+
+      const nombres = fallidos.map((id) => DOMAINS[id]?.label || id).join(", ");
+
+      showNotice(
+        `No se han podido cargar estos dominios: ${nombres}. El resto funciona con normalidad; `
+          + "recarga la página para volver a intentarlo.",
+        true,
+      );
+    }
+
+    setActiveDomain(
+      state.domains[DEFAULT_DOMAIN_ID] ? DEFAULT_DOMAIN_ID : cargados[0],
+    );
+
+    /* La copia local se carga siempre, también en escenarios compartidos */
+    applyStoredScenario();
 
     // Antes de sincronizar: así el primer cambio ya sale atribuido.
     await inicializarIdentidad();
@@ -427,10 +496,16 @@ async function init() {
     populateCapacityFilter();
     renderAll();
   } catch (error) {
+    // Hasta aquí solo se llega por un fallo inesperado: los dominios y la
+    // sincronizacion ya se gestionan por su cuenta. Antes cualquier error,
+    // incluido el almacenamiento bloqueado, se explicaba como si fuera un
+    // problema de servidor local.
     showNotice(
-      "No se pudo cargar el JSON de datos. Abre esta carpeta con un servidor local simple, por ejemplo: python -m http.server 8000, y entra en http://localhost:8000/.",
+      "La herramienta no ha podido arrancar del todo. Recarga la página; si vuelve a ocurrir, "
+        + "avisa al equipo que la mantiene.",
       true,
     );
+
     console.error(error);
   } finally {
     setInitialLoading(false); // NUEVO: oculta el estado de carga al terminar, incluso si hay error
@@ -2573,7 +2648,7 @@ function renderRoadmap() {
   // Repintar la tabla borra los campos editables. Si alguien esta escribiendo
   // un comentario en ese momento, su texto desaparece sin aviso: los campos
   // solo guardaban al perder el foco. Se anota lo que hay en curso para
-  // devolverlo despues.
+  // devolverlo después.
   const edicionEnCurso = capturarEdicionDeRoadmap();
 
   const roadmapItems = getVisibleItems(); // Roadmap respeta filtros activos
@@ -2732,11 +2807,11 @@ function capturarEdicionDeRoadmap() {
 
 
 /**
- * Devuelve el foco, el texto y la posicion del cursor tras repintar.
+ * Devuelve el foco, el texto y la posición del cursor tras repintar.
  *
- * Se restaura el valor que habia en pantalla y no el del estado: si el repintado
+ * Se restaura el valor que había en pantalla y no el del estado: si el repintado
  * viene de un cambio remoto, lo que estaba escribiendo esta persona no puede
- * perderse por el camino. El guardado diferido lo envia poco despues.
+ * perderse por el camino. El guardado diferido lo envía poco después.
  */
 function restaurarEdicionDeRoadmap(edicion) {
   if (!edicion) {
@@ -2880,8 +2955,8 @@ function handleRoadmapFieldChange(event) {
   cancelarGuardadoDiferido(item.id, campo);
 
   // maxlength solo frena lo que teclea el usuario. Un valor que llegue de un
-  // escenario importado puede superar el limite y hacer que Firebase rechace la
-  // escritura entera, asi que se recorta tambien aqui.
+  // escenario importado puede superar el límite y hacer que Firebase rechace la
+  // escritura entera, así que se recorta también aquí.
   const valor = recortarAlLimite(campo, elemento.value);
 
   if (valor !== elemento.value) {
@@ -2997,8 +3072,64 @@ function unique(values) {
 
 
 
+/**
+ * El almacenamiento del navegador puede fallar y no es motivo para caerse.
+ *
+ * Lanza excepcion si la cuota esta llena, si el navegador tiene bloqueado el
+ * almacenamiento por politica o en algunas ventanas privadas. Antes la
+ * escritura iba sin proteger y por delante de la de Firebase: al superar la
+ * cuota, el cambio no llegaba a ninguno de los dos sitios.
+ */
+let avisoDeAlmacenamientoMostrado = false;
+
+function leerAlmacenamiento(clave) {
+  try {
+    return window.localStorage.getItem(clave);
+  } catch (error) {
+    console.warn("No se pudo leer del almacenamiento del navegador.", error);
+    return null;
+  }
+}
+
+
+function escribirAlmacenamiento(clave, valor) {
+  try {
+    window.localStorage.setItem(clave, valor);
+    return true;
+  } catch (error) {
+    console.warn("No se pudo escribir en el almacenamiento del navegador.", error);
+
+    if (!avisoDeAlmacenamientoMostrado) {
+      avisoDeAlmacenamientoMostrado = true;
+
+      showNotice(
+        "Este navegador no está guardando la copia local del escenario, probablemente por falta de " +
+          "espacio o por su configuración de privacidad. " +
+          (scenarioDatabaseRef
+            ? "Los cambios siguen enviándose al escenario compartido."
+            : "Exporta el escenario en JSON si no quieres perder el trabajo al cerrar."),
+        true,
+      );
+    }
+
+    return false;
+  }
+}
+
+
+function borrarDeAlmacenamiento(clave) {
+  try {
+    window.localStorage.removeItem(clave);
+    return true;
+  } catch (error) {
+    console.warn("No se pudo borrar del almacenamiento del navegador.", error);
+    return false;
+  }
+}
+
+
 function getStoredScenario() {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = leerAlmacenamiento(STORAGE_KEY);
 
   if (!stored) {
     return null;
@@ -3060,7 +3191,7 @@ async function initializeSharedScenario() {
       const initialPayload =
         localScenario || buildScenarioPayload();
 
-      localStorage.setItem(
+      escribirAlmacenamiento(
         STORAGE_KEY,
         JSON.stringify(initialPayload),
       );
@@ -3100,7 +3231,7 @@ async function initializeSharedScenario() {
     try {
       applyScenarioPayload(remoteScenario);
 
-      localStorage.setItem(
+      escribirAlmacenamiento(
         STORAGE_KEY,
         JSON.stringify(remoteScenario),
       );
@@ -3207,7 +3338,7 @@ function aplicarEscenarioRemoto(remoteScenario) {
 
     applyScenarioPayload(remoteScenario);
 
-    localStorage.setItem(
+    escribirAlmacenamiento(
       STORAGE_KEY,
       JSON.stringify(remoteScenario),
     );
@@ -3319,7 +3450,7 @@ function persistGranularChange(rutas) {
   syncActiveDomainState();
 
   // La copia local sigue guardándose entera: es una caché, no la fuente de verdad.
-  localStorage.setItem(
+  escribirAlmacenamiento(
     STORAGE_KEY,
     JSON.stringify(buildScenarioPayload()),
   );
@@ -3423,7 +3554,7 @@ function persistScenario() {
 
   const payload = buildScenarioPayload();
 
-  localStorage.setItem(
+  escribirAlmacenamiento(
     STORAGE_KEY,
     JSON.stringify(payload),
   );
@@ -3481,7 +3612,7 @@ function persistScenario() {
 
 
 function applyStoredScenario() {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = leerAlmacenamiento(STORAGE_KEY);
 
   if (!stored) {
     return;
@@ -3704,7 +3835,7 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
 /**
  * Vuelca un escenario guardado sobre los datos cargados.
  *
- * Devuelve cuantas subcapacidades ha reconocido: sin ese dato, una importacion
+ * Devuelve cuántas subcapacidades ha reconocido: sin ese dato, una importación
  * que no casaba con nada terminaba igualmente en "Escenario importado
  * correctamente".
  */
@@ -3852,11 +3983,11 @@ function buildScenarioPayload() {
 
 
 /**
- * Importar es la accion mas destructiva de la herramienta.
+ * Importar es la acción más destructiva de la herramienta.
  *
- * En un escenario compartido escribe el payload completo, asi que reemplaza los
+ * En un escenario compartido escribe el payload completo, así que reemplaza los
  * nueve dominios para todo el mundo. Antes lo hacia sin preguntar y, si el
- * archivo no casaba con nada, informaba igualmente de que todo habia ido bien.
+ * archivo no casaba con nada, informaba igualmente de que todo había ido bien.
  */
 function importScenario(event) {
   const file = event.target.files?.[0];
@@ -3908,7 +4039,7 @@ function importScenario(event) {
         return;
       }
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
+      escribirAlmacenamiento(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
 
       populateCapacityFilter();
       renderAll();
@@ -5162,7 +5293,7 @@ function resetScenario() {
     return; // NUEVO: si el usuario cancela, no se borra nada
   }
 
-  localStorage.removeItem(STORAGE_KEY);
+  borrarDeAlmacenamiento(STORAGE_KEY);
   window.location.reload();
 }
 
@@ -5292,7 +5423,7 @@ async function inicializarIdentidad() {
 
 
 function getNombreEditor() {
-  return (localStorage.getItem(NOMBRE_STORAGE_KEY) || "").trim();
+  return (leerAlmacenamiento(NOMBRE_STORAGE_KEY) || "").trim();
 }
 
 
@@ -5300,9 +5431,9 @@ function setNombreEditor(nombre) {
   const limpio = (nombre || "").trim().slice(0, 60);
 
   if (limpio) {
-    localStorage.setItem(NOMBRE_STORAGE_KEY, limpio);
+    escribirAlmacenamiento(NOMBRE_STORAGE_KEY, limpio);
   } else {
-    localStorage.removeItem(NOMBRE_STORAGE_KEY);
+    borrarDeAlmacenamiento(NOMBRE_STORAGE_KEY);
   }
 
   if (usuarioActual) {
