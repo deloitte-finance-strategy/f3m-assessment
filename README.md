@@ -20,7 +20,7 @@ raíz del repositorio.
    http://localhost:8000/
    ```
 
-Si `python` no está disponible en tu equipo, puedes usar cualquier servidor estático equivalente. El navegador necesita servir la carpeta para poder leer `data/fpa_assessment.json`.
+Si `python` no está disponible en tu equipo, puedes usar cualquier servidor estático equivalente. El navegador necesita servir la carpeta para poder leer los JSON de `data/domains/`.
 
 ## Qué permite hacer
 

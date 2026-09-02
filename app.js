@@ -38,11 +38,8 @@ console.log("Firebase conectado correctamente:", firebaseConfig.projectId);
 const scenarioId = getScenarioIdFromUrl();
 const scenarioDatabaseRef = scenarioId ? ref(firebaseDatabase, `scenarios/${scenarioId}`) : null;
 
-console.log("Modo escenario compartido:", scenarioId || "modo local sin scenario");
+console.log("Modo escenario compartido:", scenarioId ? "escenario compartido" : "modo local sin scenario");
 
-
-
-const DATA_URL = "data/fpa_assessment.json";
 
 
 const DEFAULT_DOMAIN_ID = "fpa";
@@ -122,21 +119,46 @@ const DOMAINS = {
 const STORAGE_KEY = "f3m-fpa-assessment-scenario";
 
 
+// Identidad de palanca. Estos tres colores solo significan una cosa: de que
+// palanca estamos hablando. No deben usarse para nada mas.
+const COLOR_DE_PALANCA = {
+  procesos: "#86BC25",
+  tecnologia: "#ED8B00",
+  organizacion: "#012169",
+};
+
+
+// Semantica de interfaz. Son otra familia y otro significado, aunque el acento
+// de marca comparta el verde de Procesos por decision de identidad visual.
+// El acento de marca comparte valor con el verde de Procesos, pero no es lo
+// mismo: aqui significa "Deloitte", no "palanca de Procesos". Se nombra aparte
+// para que se pueda cambiar uno sin arrastrar el otro.
+const COLOR_DE_MARCA = "#86BC25";
+
+
+const COLOR_DE_PRIORIDAD = {
+  Alta: "#bb3128",
+  Media: "#c87900",
+  Baja: "#3e6f11",
+  Pendiente: "#8a9189",
+};
+
+
 const LEVERS = [
   {
     key: "procesos",
     label: "Procesos",
-    color: "#86BC25",
+    color: COLOR_DE_PALANCA.procesos,
   },
   {
     key: "tecnologia",
     label: "Tecnología",
-    color: "#ED8B00",
+    color: COLOR_DE_PALANCA.tecnologia,
   },
   {
     key: "organizacion",
     label: "Organización",
-    color: "#012169",
+    color: COLOR_DE_PALANCA.organizacion,
   },
 ];
 
@@ -150,51 +172,12 @@ const PRIORITY_ORDER = {
 const STATUS_OPTIONS = ["No iniciado", "En curso", "Completado", "Bloqueado"];
 
 
-const AI_INITIATIVES_BY_CAPABILITY = {
-  "Presupuestos y previsiones": {
-    subcapacidad: "1.1-1.4",
-    cases:
-      "Desarrollo de flujos de trabajo guiados para la elaboración de presupuestos; generación de previsiones bajo demanda y modelización de escenarios; asignación presupuestaria asistida por IA",
-    advanced:
-      "Planificación driver-based, rolling forecast, escenarios automatizados y workflows colaborativos",
-    source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
-  },
-
-  "Informes de gestión del rendimiento": {
-    subcapacidad: "2.1-2.4",
-    cases:
-      "Reporting de gestión de real frente a plan con generación de comentarios; análisis de desviaciones por cuenta y generación de explicaciones inteligentes; plataforma FinanceAI Insights",
-    advanced:
-      "Reporting automatizado con commentary, insights, alertas y explicación de desviaciones",
-    source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
-  },
-
-  "Evaluación business case": {
-    subcapacidad: "3.1-3.4",
-    cases:
-      "Resumen y evaluación automatizada de propuestas de proyectos; generación de recomendaciones a nivel de proyecto",
-    advanced:
-      "Scoring de iniciativas, priorización dinámica y seguimiento de beneficios",
-    source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
-  },
-
-  "Información y apoyo a la toma de decisiones": {
-    subcapacidad: "4.1-4.4",
-    cases:
-      "Realización de análisis e investigaciones y generación de insights bajo demanda; acceso generalizado a los datos; búsqueda y acceso a información en toda la organización",
-    advanced:
-      "Decision intelligence, insights predictivos y autoservicio gobernado",
-    source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
-  },
-
-  "Planificación largo plazo": {
-    subcapacidad: "5.1-5.4",
-    cases:
-      "Generación de estrategias de inversión; identificación de patrones para predecir el rendimiento financiero futuro; planificación integrada del negocio",
-    advanced:
-      "Planificación estratégica continua, simulación avanzada y asignación dinámica de recursos",
-    source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
-  },
+// Límites de longitud de los campos editables del Roadmap. Tienen que coincidir
+// con los de database.rules.json: si el texto los supera, Firebase rechaza la
+// escritura entera y el cambio se pierde. Es preferible impedir escribirlo.
+const LIMITES_DE_TEXTO = {
+  owner: 120,
+  comentario: 2000,
 };
 
 
@@ -215,6 +198,12 @@ let capabilityRadarCharts = {
 
 
 const expandedHeatmapCapabilities = new Set(); // NUEVO: mantiene abiertas las capacidades desplegadas del heatmap entre renders
+
+// Que tarjetas tienen desplegado "Ver detalle". Cada repintado de la lista las
+// reconstruye desde la plantilla, con el detalle cerrado: quien abria los
+// niveles de madurez para decidir entre un 3 y un 4 se los encontraba cerrados
+// justo despues de puntuar.
+const tarjetasConDetalleAbierto = new Set();
 
 
 let isApplyingRemoteScenario = false; // NUEVO: evita guardar de vuelta mientras estamos cargando datos remotos
@@ -275,8 +264,48 @@ async function loadDomainData(domainId) {
   return state.domains[domainId];
 }
 
+/**
+ * Carga los nueve dominios sin que uno estropee a los demas.
+ *
+ * Con Promise.all, un solo JSON inaccesible hacia caer init() entero y la
+ * herramienta mostraba "no se pudo cargar el JSON de datos" aunque los otros
+ * ocho dominios estuvieran perfectos.
+ */
 async function loadCoreDomains() {
-  await Promise.all(Object.keys(DOMAINS).map((domainId) => loadDomainData(domainId)));
+  const ids = Object.keys(DOMAINS);
+
+  const resultados = await Promise.allSettled(
+    ids.map((domainId) => loadDomainData(domainId)),
+  );
+
+  const fallidos = ids.filter((_, i) => resultados[i].status === "rejected");
+
+  resultados.forEach((resultado, i) => {
+    if (resultado.status === "rejected") {
+      console.error(`No se pudo cargar el dominio ${ids[i]}.`, resultado.reason);
+    }
+  });
+
+  return {
+    cargados: ids.filter((id) => state.domains[id]),
+    fallidos,
+  };
+}
+
+
+/** Deja sin usar los botones de los dominios que no han podido cargarse. */
+function marcarDominiosNoDisponibles(fallidos) {
+  fallidos.forEach((domainId) => {
+    const boton = document.querySelector(`[data-domain-id="${CSS.escape(domainId)}"]`);
+
+    if (!boton) {
+      return;
+    }
+
+    boton.disabled = true;
+    boton.classList.add("is-disabled");
+    boton.title = "Este dominio no se ha podido cargar. Recarga la página para volver a intentarlo.";
+  });
 }
 
 
@@ -403,12 +432,41 @@ async function init() {
   showScenarioModeNotice();
 
 
-    try {
-        await loadCoreDomains();
-        setActiveDomain(DEFAULT_DOMAIN_ID);
+  try {
+    const { cargados, fallidos } = await loadCoreDomains();
 
-      /* La copia local se carga siempre, también en escenarios compartidos */
-      applyStoredScenario();
+    // Ningún dominio disponible: casi siempre es que se ha abierto el archivo
+    // con file:// en vez de servirlo, que es lo único que el usuario puede
+    // arreglar por su cuenta.
+    if (!cargados.length) {
+      showNotice(
+        "No se han podido cargar los datos del assessment. Si has abierto el archivo directamente, "
+          + "ábrelo a través de un servidor local: en esta carpeta, ejecuta "
+          + "python -m http.server 8000 y entra en http://localhost:8000/.",
+        "error",
+      );
+
+      return;
+    }
+
+    if (fallidos.length) {
+      marcarDominiosNoDisponibles(fallidos);
+
+      const nombres = fallidos.map((id) => DOMAINS[id]?.label || id).join(", ");
+
+      showNotice(
+        `No se han podido cargar estos dominios: ${nombres}. El resto funciona con normalidad; `
+          + "recarga la página para volver a intentarlo.",
+        "aviso",
+      );
+    }
+
+    setActiveDomain(
+      state.domains[DEFAULT_DOMAIN_ID] ? DEFAULT_DOMAIN_ID : cargados[0],
+    );
+
+    /* La copia local se carga siempre, también en escenarios compartidos */
+    applyStoredScenario();
 
     // Antes de sincronizar: así el primer cambio ya sale atribuido.
     await inicializarIdentidad();
@@ -418,10 +476,16 @@ async function init() {
     populateCapacityFilter();
     renderAll();
   } catch (error) {
+    // Hasta aquí solo se llega por un fallo inesperado: los dominios y la
+    // sincronizacion ya se gestionan por su cuenta. Antes cualquier error,
+    // incluido el almacenamiento bloqueado, se explicaba como si fuera un
+    // problema de servidor local.
     showNotice(
-      "No se pudo cargar el JSON de datos. Abre esta carpeta con un servidor local simple, por ejemplo: python -m http.server 8000, y entra en http://localhost:8000/.",
-      true,
+      "La herramienta no ha podido arrancar del todo. Recarga la página; si vuelve a ocurrir, "
+        + "avisa al equipo que la mantiene.",
+      "error",
     );
+
     console.error(error);
   } finally {
     setInitialLoading(false); // NUEVO: oculta el estado de carga al terminar, incluso si hay error
@@ -432,9 +496,13 @@ async function init() {
 function cacheElements() {
   [
     "loadNotice",
+    "loadNoticeText",
+    "loadNoticeIcon",
+    "loadNoticeClose",
     "initialLoadingState", // NUEVO: estado visual de carga inicial
     "sourceNote",
     "kpiGrid",
+    "dashboardHeadline",
     "priorityBars",
     "leverBars",
     "summaryTable",
@@ -444,9 +512,6 @@ function cacheElements() {
     "capacityFilter",
     "priorityFilter",
     "searchInput",
-    "activeFilters",
-    "activeFiltersText",
-    "clearFiltersButton",
     "capabilityTargetsPanel",
     "assessmentList",
     "heatmapTable",
@@ -461,8 +526,22 @@ function cacheElements() {
     "aiModalCases",
     "aiModalAdvanced",
     "aiModalSource",
+    "dialogModal",
+    "dialogIcon",
+    "dialogEyebrow",
+    "dialogTitle",
+    "dialogMessage",
+    "dialogFieldWrap",
+    "dialogFieldLabel",
+    "dialogField",
+    "dialogSecondary",
+    "dialogCancel",
+    "dialogConfirm",
     "scoringCriteriaModal", // NUEVO: modal de criterios F3M
     "closeScoringCriteriaModalButton", // NUEVO: botón cerrar modal
+    "criteriaSubcapability",
+    "criteriaSubcapabilityTitle",
+    "criteriaSubcapabilityLevels",
     "saveStatus", // NUEVO: indicador visual de guardado
     "backToTopButton",
     "importJsonButton",
@@ -470,8 +549,12 @@ function cacheElements() {
     "exportCsvButton",
     "exportPdfButton", // NUEVO: botón de exportación PDF
     "resetButton",
+    "scenarioMenuButton",
+    "scenarioMenu",
+    "scenarioMenuState",
     "createScenarioButton",
     "copyScenarioLinkButton",
+    "leaveScenarioButton",
     "editorNameButton",
     "scenarioFileInput",
     "dashboardDomainTitle",
@@ -483,18 +566,22 @@ function cacheElements() {
 function bindGlobalEvents() {
   els.capacityFilter.addEventListener("change", renderAll);
   els.priorityFilter.addEventListener("change", renderAll);
-  els.searchInput.addEventListener("input", renderAll);
-  els.clearFiltersButton?.addEventListener("click",clearActiveFilters,);
+  els.searchInput.addEventListener("input", handleSearchInput);
 
   document.addEventListener("click", (event) => {
-  const clearButton = event.target.closest("[data-clear-filters]");
+    const clearButton = event.target.closest("[data-clear-filters]");
 
-  if (!clearButton) {
-    return;
-  }
+    if (clearButton) {
+      clearActiveFilters();
+      return;
+    }
 
-  clearActiveFilters();
-});
+    const removeButton = event.target.closest("[data-remove-filter]");
+
+    if (removeButton) {
+      removeActiveFilter(removeButton.dataset.removeFilter);
+    }
+  });
   els.importJsonButton.addEventListener("click", () => els.scenarioFileInput.click());
   els.scenarioFileInput.addEventListener("change", importScenario);
   els.exportJsonButton.addEventListener("click", exportScenarioJson);
@@ -503,9 +590,12 @@ function bindGlobalEvents() {
   els.resetButton.addEventListener("click", resetScenario);
   els.createScenarioButton?.addEventListener("click", createSharedScenario);
   els.copyScenarioLinkButton?.addEventListener("click", copyScenarioLink);
+  els.leaveScenarioButton?.addEventListener("click", salirDelEscenario);
   els.editorNameButton?.addEventListener("click", pedirNombreEditor);
   els.heatmapExpandToggle?.addEventListener("click", handleHeatmapExpandToggleAll);
-  setupActiveTabObserver(); // NUEVO: marca automáticamente la pestaña activa según la sección visible
+  els.loadNoticeClose?.addEventListener("click", ocultarAviso);
+  setupMenuDeEscenario();
+  setupVistas();
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
   setupDomainSwitcher();
@@ -526,27 +616,6 @@ function createDefaultTargets(items, defaultTarget = DEFAULT_TARGET_MATURITY) {
   });
 
   return targets;
-}
-
-
-
-function toFirebaseSafeKey(value) {
-  const text = String(value || "").trim();
-
-  if (!text) {
-    return "capability";
-  }
-
-  let decodedText = text;
-
-  try {
-    decodedText = decodeURIComponent(text);
-  } catch (error) {
-    decodedText = text;
-  }
-
-  return encodeURIComponent(decodedText)
-    .replace(/\./g, "%2E");
 }
 
 
@@ -768,9 +837,12 @@ function normalizeItem(item) {
       tecnologia: toScore(item.scores?.tecnologia),
       organizacion: toScore(item.scores?.organizacion),
     },
-    owner: item.owner || "",
+    owner: recortarAlLimite("owner", item.owner || ""),
     status: item.status || "No iniciado",
-    comentario: item.comentario || item.comentariosHallazgos || "",
+    comentario: recortarAlLimite(
+      "comentario",
+      item.comentario || item.comentariosHallazgos || "",
+    ),
   };
 }
 
@@ -897,41 +969,83 @@ function round2(value) {
 }
 
 
-function setupActiveTabObserver() {
-  const tabLinks = [...document.querySelectorAll(".tabs a")]; // MODIFICADO: obtiene los links de navegación
-  const sections = tabLinks
-    .map((link) => document.querySelector(link.getAttribute("href")))
-    .filter(Boolean); // MODIFICADO: evita errores si alguna sección no existe
+const VISTAS = ["dashboard", "assessment", "heatmap", "roadmap"];
 
-  if (!tabLinks.length || !sections.length) {
+let vistaActiva = "dashboard";
+
+
+/**
+ * Las cuatro pestanas eran anclas dentro de una sola pagina de casi 10.000 px:
+ * pulsar "Roadmap" hacia un scroll de ocho pantallas, no cambiaba de vista.
+ * Ademas obligaba a repintar las cuatro secciones en cada cambio, estuvieran o
+ * no a la vista.
+ *
+ * Ahora solo se pinta y se muestra la seccion activa. El enlace directo
+ * (#roadmap) se sigue respetando, y sin JavaScript las cuatro quedan visibles,
+ * que es el comportamiento anterior.
+ */
+function setupVistas() {
+  const enlaces = [...document.querySelectorAll(".tabs a")];
+
+  if (!enlaces.length) {
     return;
   }
 
-  const setActiveTab = (sectionId) => {
-    tabLinks.forEach((link) => {
-      const isActive = link.getAttribute("href") === `#${sectionId}`;
-      link.classList.toggle("active", isActive);
+  enlaces.forEach((enlace) => {
+    enlace.addEventListener("click", (event) => {
+      event.preventDefault();
+      mostrarVista(enlace.getAttribute("href").slice(1));
     });
-  };
+  });
 
-  const updateActiveTab = () => {
-    const scrollPosition = window.scrollY + 82; // MODIFICADO: compensa header/tabs sticky
+  // Alguien puede llegar con un enlace directo, o usar atras y adelante.
+  window.addEventListener("hashchange", () => {
+    mostrarVista(vistaDesdeLaUrl(), { actualizarUrl: false });
+  });
 
-    let currentSectionId = sections[0].id;
+  mostrarVista(vistaDesdeLaUrl(), { actualizarUrl: false, desplazar: false });
+}
 
-    sections.forEach((section) => {
-      if (section.offsetTop <= scrollPosition) {
-        currentSectionId = section.id;
-      }
-    });
 
-    setActiveTab(currentSectionId);
-  };
+function vistaDesdeLaUrl() {
+  const id = window.location.hash.slice(1);
 
-  window.addEventListener("scroll", updateActiveTab, { passive: true }); // MODIFICADO: actualiza al hacer scroll
-  window.addEventListener("resize", updateActiveTab); // MODIFICADO: recalcula si cambia el tamaño de pantalla
+  return VISTAS.includes(id) ? id : "dashboard";
+}
 
-  updateActiveTab(); // MODIFICADO: estado inicial al cargar
+
+function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
+  if (!VISTAS.includes(id)) {
+    return;
+  }
+
+  vistaActiva = id;
+
+  VISTAS.forEach((vista) => {
+    const seccion = document.getElementById(vista);
+
+    if (seccion) {
+      seccion.hidden = vista !== id;
+    }
+  });
+
+  document.querySelectorAll(".tabs a").forEach((enlace) => {
+    const esActiva = enlace.getAttribute("href") === `#${id}`;
+
+    enlace.classList.toggle("active", esActiva);
+    enlace.setAttribute("aria-current", esActiva ? "page" : "false");
+  });
+
+  if (actualizarUrl) {
+    // replaceState y no el hash directo: cambiar el hash provocaria un salto.
+    window.history.replaceState(null, "", `#${id}`);
+  }
+
+  renderAll();
+
+  if (desplazar) {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
 }
 
 
@@ -947,7 +1061,8 @@ function setInitialLoading(isLoading) {
 function updateModalOpenState() {
   const hasOpenModal =
     !els.scoringCriteriaModal?.hidden ||
-    !els.aiInitiativeModal?.hidden;
+    !els.aiInitiativeModal?.hidden ||
+    !els.dialogModal?.hidden;
 
   document.body.classList.toggle("modal-open", hasOpenModal);
 }
@@ -965,7 +1080,7 @@ function setupScoringCriteriaModal() {
       }
 
       scoringCriteriaTrigger = button;
-      openScoringCriteriaModal();
+      openScoringCriteriaModal(button.closest(".assessment-card")?.dataset.id);
   });
 
   els.closeScoringCriteriaModalButton?.addEventListener("click", closeScoringCriteriaModal);
@@ -977,23 +1092,96 @@ function setupScoringCriteriaModal() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !els.scoringCriteriaModal.hidden) {
+    if (els.scoringCriteriaModal.hidden) {
+      return;
+    }
+
+    if (event.key === "Escape") {
       closeScoringCriteriaModal();
+      return;
+    }
+
+    // Sin esto el tabulador se escapaba al contenido de detras, que sigue ahi.
+    if (event.key === "Tab") {
+      atraparFoco(event, els.scoringCriteriaModal);
     }
   });
 
-  els.scoringCriteriaModal.querySelectorAll(".criteria-tab").forEach((tab) => {
+  const tabs = [...els.scoringCriteriaModal.querySelectorAll(".criteria-tab")];
+
+  tabs.forEach((tab, indice) => {
     tab.addEventListener("click", () => {
       activateScoringCriteriaTab(tab.dataset.criteriaTab);
+    });
+
+    // Un grupo de pestanas se recorre con las flechas, no con el tabulador.
+    tab.addEventListener("keydown", (event) => {
+      const salto = { ArrowRight: 1, ArrowLeft: -1, Home: -indice, End: tabs.length - 1 - indice }[
+        event.key
+      ];
+
+      if (salto === undefined) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const siguiente = tabs[(indice + salto + tabs.length) % tabs.length];
+
+      activateScoringCriteriaTab(siguiente.dataset.criteriaTab);
+      siguiente.focus();
     });
   });
 }
 
-function openScoringCriteriaModal() {
+/**
+ * Abre la guia de evaluacion con los niveles de la subcapacidad que se esta
+ * puntuando.
+ *
+ * El modal ensenaba la misma rubrica generica para las 152 subcapacidades de los
+ * nueve dominios. Justo cuando hay que decidir si algo es un 3 o un 4, lo que
+ * hace falta es la descripcion de esa subcapacidad, que hasta ahora vivia en
+ * otro sitio: la lista de niveles de la tarjeta.
+ */
+function openScoringCriteriaModal(itemId) {
+  pintarNivelesDeLaSubcapacidad(itemId);
+
   els.scoringCriteriaModal.hidden = false;
   activateScoringCriteriaTab("procesos");
   els.closeScoringCriteriaModalButton?.focus();
   updateModalOpenState();
+}
+
+
+function pintarNivelesDeLaSubcapacidad(itemId) {
+  const item = state.items.find((entrada) => entrada.id === itemId);
+  const niveles = Object.entries(item?.maturity || {});
+
+  if (!item || !niveles.length) {
+    els.criteriaSubcapability.hidden = true;
+    return;
+  }
+
+  const metrics = calculate(item);
+  const nivelActual = getMaturityLevelNumber(metrics.scoreMedio);
+
+  els.criteriaSubcapabilityTitle.textContent = item.subcapacidad;
+
+  els.criteriaSubcapabilityLevels.innerHTML = niveles
+    .map(([nivel, texto]) => {
+      const esActual = Number(nivel) === nivelActual;
+
+      return `
+        <li class="${esActual ? "is-current-level" : ""}">
+          <strong>Nivel ${escapeHtml(nivel)}</strong>
+          <span>${escapeHtml(texto)}</span>
+          ${esActual ? '<em class="current-level-label">Nivel actual</em>' : ""}
+        </li>
+      `;
+    })
+    .join("");
+
+  els.criteriaSubcapability.hidden = false;
 }
 
 function closeScoringCriteriaModal() {
@@ -1012,6 +1200,7 @@ function activateScoringCriteriaTab(tabKey) {
     const isActive = tab.dataset.criteriaTab === tabKey;
     tab.classList.toggle("active", isActive);
     tab.setAttribute("aria-selected", String(isActive));
+    tab.tabIndex = isActive ? 0 : -1;
   });
 
   els.scoringCriteriaModal.querySelectorAll(".criteria-panel").forEach((panel) => {
@@ -1045,8 +1234,17 @@ function setupAiInitiativeModal() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !els.aiInitiativeModal.hidden) {
+    if (els.aiInitiativeModal.hidden) {
+      return;
+    }
+
+    if (event.key === "Escape") {
       closeAiInitiativeModal();
+      return;
+    }
+
+    if (event.key === "Tab") {
+      atraparFoco(event, els.aiInitiativeModal);
     }
   });
 }
@@ -1076,10 +1274,66 @@ function setupDomainSwitcher() {
     try {
       await switchDomain(domainId);
     } catch (error) {
-      showNotice(`No se pudo cambiar al dominio ${domainId}.`, true);
+      showNotice(`No se ha podido abrir el dominio ${DOMAINS[domainId]?.label || domainId}. Recarga la página e inténtalo de nuevo.`, "error");
       console.error(error);
     }
   });
+}
+
+
+/**
+ * La cabecera tenia nueve botones en fila, cuatro de ellos hablando de JSON.
+ *
+ * Todo lo que no es exportar para el cliente pasa a un menu: son acciones que
+ * se usan una vez por sesion, no en cada momento, y ahi caben con una linea que
+ * explique que hacen.
+ */
+function setupMenuDeEscenario() {
+  if (!els.scenarioMenuButton || !els.scenarioMenu) {
+    return;
+  }
+
+  const abrir = (abierto) => {
+    els.scenarioMenu.hidden = !abierto;
+    els.scenarioMenuButton.setAttribute("aria-expanded", String(abierto));
+  };
+
+  els.scenarioMenuButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    abrir(els.scenarioMenu.hidden);
+  });
+
+  // Elegir una opcion cierra el menu antes de que se abra su dialogo.
+  els.scenarioMenu.addEventListener("click", (event) => {
+    if (event.target.closest(".header-menu-item")) {
+      abrir(false);
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!els.scenarioMenu.hidden && !event.target.closest(".header-menu")) {
+      abrir(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !els.scenarioMenu.hidden) {
+      abrir(false);
+      els.scenarioMenuButton.focus();
+    }
+  });
+}
+
+
+/** Deja claro en el menu sobre que se esta trabajando. */
+function actualizarEstadoDelMenu() {
+  if (!els.scenarioMenuState) {
+    return;
+  }
+
+  els.scenarioMenuState.textContent = scenarioId
+    ? getScenarioShortLabel()
+    : "Copia de este navegador";
 }
 
 
@@ -1117,22 +1371,17 @@ function setupBackToTopButton() {
 }
 
 
+/**
+ * Datos de IA de una subcapacidad, si los trae.
+ *
+ * Habia un respaldo por nombre de capacidad con los casos de FP&A. Nunca se
+ * usaba: las 152 subcapacidades traen su propio bloque ai desde el Excel, y para
+ * los otros ocho dominios los nombres de capacidad no coincidian de todas
+ * formas.
+ */
 function getAiDataForItem(item) {
   if (item?.ai?.cases || item?.ai?.advanced) {
     return item.ai;
-  }
-
-  const capabilityFallback = typeof AI_INITIATIVES_BY_CAPABILITY !== "undefined"
-    ? AI_INITIATIVES_BY_CAPABILITY[item.capacidad]
-    : null;
-
-  if (capabilityFallback) {
-    return {
-      subcapacidad: capabilityFallback.subcapacidad || item.subcapacidad,
-      cases: capabilityFallback.cases || "",
-      advanced: capabilityFallback.advanced || "",
-      source: capabilityFallback.source || "",
-    };
   }
 
   return null;
@@ -1142,14 +1391,14 @@ function openAiInitiativeModal(itemId) {
   const item = state.items.find((entry) => entry.id === itemId);
 
   if (!item) {
-    showNotice("No se encontró la subcapacidad asociada a esta iniciativa IA.", true);
+    showNotice("No se ha encontrado la subcapacidad asociada a esta iniciativa de IA.", "error");
     return;
   }
 
   const aiData = getAiDataForItem(item);
 
   if (!aiData) {
-    showNotice("No hay iniciativa IA asociada a esta subcapacidad.", true);
+    showNotice("Esta subcapacidad no tiene ninguna iniciativa de IA asociada.", "info");
     return;
   }
 
@@ -1177,6 +1426,52 @@ function closeAiInitiativeModal() {
 
 
 
+/**
+ * Cuantas subcapacidades tiene puntuadas cada dominio.
+ *
+ * En un encargo multidominio es la pregunta constante: por donde vamos. El
+ * conmutador ensenaba nueve botones iguales y el unico contador que habia,
+ * el de la pestana Assessment, solo hablaba del dominio abierto.
+ *
+ * Se cuentan las que tienen alguna palanca informada, sin pasar por calculate:
+ * los objetivos son los del dominio activo y darian gaps equivocados para los
+ * demas.
+ */
+function actualizarAvanceDeDominios() {
+  Object.entries(DOMAINS).forEach(([domainId]) => {
+    const boton = document.querySelector(`[data-domain-id="${CSS.escape(domainId)}"]`);
+    const dominio = state.domains[domainId];
+
+    if (!boton || !dominio) {
+      return;
+    }
+
+    const total = dominio.items.length;
+
+    const puntuadas = dominio.items.filter((item) =>
+      LEVERS.some((lever) => Number.isFinite(item.scores[lever.key])),
+    ).length;
+
+    let contador = boton.querySelector(".domain-progress");
+
+    if (!contador) {
+      contador = document.createElement("span");
+      contador.className = "domain-progress";
+      boton.appendChild(contador);
+    }
+
+    contador.textContent = `${puntuadas}/${total}`;
+    contador.classList.toggle("sin-empezar", puntuadas === 0);
+    contador.classList.toggle("completo", puntuadas === total && total > 0);
+
+    boton.title =
+      puntuadas === 0
+        ? "Sin empezar"
+        : `${puntuadas} de ${total} subcapacidades puntuadas`;
+  });
+}
+
+
 function updateNavigationBadges() {
   if (!els.assessmentTabBadge || !els.roadmapTabBadge || !state.items.length) {
     return;
@@ -1188,29 +1483,68 @@ function updateNavigationBadges() {
   const highPriorityCount = metrics.filter((entry) => entry.prioridad === "Alta").length;
 
   els.assessmentTabBadge.textContent = `${scoredCount}/${totalCount}`;
+  els.assessmentTabBadge.title =
+    `${scoredCount} de ${totalCount} subcapacidades puntuadas en este dominio. ` +
+    "No depende de los filtros activos.";
+
   els.roadmapTabBadge.textContent = `${highPriorityCount} Alta`;
+  els.roadmapTabBadge.title =
+    `${highPriorityCount} subcapacidades de prioridad alta en este dominio. ` +
+    "No depende de los filtros activos.";
 
   els.roadmapTabBadge.classList.toggle("tab-badge-alert", highPriorityCount > 0);
 }
 
 
 
-function renderAll() {
+function renderAll(opciones = {}) {
   if (!state.items.length) {
     return;
   }
 
-  els.sourceNote.textContent =
-    `Fuente: ${state.meta.sourceFile} · ` +
-    `Objetivo de madurez ${state.meta.targetMaturity}`;
+  const ambito = getScopeSummary();
+
+  els.sourceNote.textContent = [
+    `${ambito.total} subcapacidades en ${unique(state.items.map((item) => item.capacidad)).length} capacidades`,
+    describirObjetivos(),
+    ambito.hayFiltros
+      ? `Mostrando ${ambito.visibles} de ${ambito.total} por los filtros activos`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  els.sourceNote.classList.toggle("has-scope-filter", ambito.hayFiltros);
 
   updateActiveFiltersUi();
-  renderDashboard();
-  renderCapabilityTargets();
-  renderAssessments();
-  renderHeatmap();
-  renderRoadmap();
+
+  // Solo se pinta lo que se esta viendo. Las otras tres secciones estan
+  // ocultas: repintarlas era trabajo tirado en cada cambio de score.
+  if (vistaActiva === "dashboard") {
+    renderDashboard();
+  }
+
+  if (vistaActiva === "assessment") {
+    renderCapabilityTargets();
+
+    // Al puntuar no hace falta reconstruir la lista entera: basta con refrescar
+    // la tarjeta tocada, que es lo que evita perder el foco y el detalle abierto.
+    if (!opciones.saltarAssessments) {
+      renderAssessments();
+    }
+  }
+
+  if (vistaActiva === "heatmap") {
+    renderHeatmap();
+  }
+
+  if (vistaActiva === "roadmap") {
+    renderRoadmap();
+  }
+
+  // Los badges miden el dominio entero, asi que se actualizan siempre.
   updateNavigationBadges();
+  actualizarAvanceDeDominios();
 }
 
 
@@ -1236,66 +1570,198 @@ function populateCapacityFilter() {
 }
 
 
+/**
+ * Que filtros hay puestos ahora mismo, con lo necesario para quitarlos uno a uno.
+ */
+function getActiveFilters() {
+  const filtros = [];
+
+  if (els.capacityFilter.value && els.capacityFilter.value !== "all") {
+    filtros.push({
+      clave: "capacidad",
+      etiqueta: "Capacidad",
+      valor:
+        els.capacityFilter.options[els.capacityFilter.selectedIndex]?.textContent?.trim() ||
+        els.capacityFilter.value,
+    });
+  }
+
+  if (els.priorityFilter.value && els.priorityFilter.value !== "all") {
+    filtros.push({
+      clave: "prioridad",
+      etiqueta: "Prioridad",
+      valor: els.priorityFilter.value,
+    });
+  }
+
+  const busqueda = els.searchInput.value.trim();
+
+  if (busqueda) {
+    filtros.push({
+      clave: "busqueda",
+      etiqueta: "Búsqueda",
+      valor: busqueda,
+    });
+  }
+
+  return filtros;
+}
+
+
+/**
+ * Pinta los filtros activos en las tres vistas.
+ *
+ * Antes solo aparecia un "2 filtros activos" en el Assessment, con el detalle
+ * escondido en un title: habia que pasar el raton para saber que se estaba
+ * filtrando. Y el Heatmap, que tambien filtra, no decia nada. Ahora cada filtro
+ * es un chip con su valor y su aspa para quitarlo suelto.
+ */
 function updateActiveFiltersUi() {
-  if (
-    !els.activeFilters ||
-    !els.activeFiltersText ||
-    !els.clearFiltersButton
-  ) {
+  const contenedores = document.querySelectorAll("[data-active-filters]");
+
+  if (!contenedores.length) {
     return;
   }
 
-  const activeFilters = [];
+  const filtros = getActiveFilters();
 
-  if (
-    els.capacityFilter.value &&
-    els.capacityFilter.value !== "all"
-  ) {
-    const capacityLabel =
-      els.capacityFilter.options[
-        els.capacityFilter.selectedIndex
-      ]?.textContent || els.capacityFilter.value;
+  const html = filtros.length
+    ? `
+      <span class="active-filters-label">Filtrando por</span>
 
-    activeFilters.push(`Capacidad: ${capacityLabel}`);
-  }
+      ${filtros
+        .map(
+          (filtro) => `
+            <span class="filter-chip">
+              <span class="filter-chip-label">${escapeHtml(filtro.etiqueta)}:</span>
+              <span class="filter-chip-value">${escapeHtml(filtro.valor)}</span>
 
-  if (
-    els.priorityFilter.value &&
-    els.priorityFilter.value !== "all"
-  ) {
-    activeFilters.push(`Prioridad: ${els.priorityFilter.value}`);
-  }
+              <button
+                class="filter-chip-remove"
+                type="button"
+                data-remove-filter="${escapeAttr(filtro.clave)}"
+                aria-label="${escapeAttr(`Quitar el filtro ${filtro.etiqueta}: ${filtro.valor}`)}"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </span>
+          `,
+        )
+        .join("")}
 
-  const searchQuery = els.searchInput.value.trim();
+      <button class="clear-filters-button" type="button" data-clear-filters>
+        Limpiar todos
+      </button>
+    `
+    : "";
 
-  if (searchQuery) {
-    activeFilters.push(`Búsqueda: ${searchQuery}`);
-  }
+  contenedores.forEach((contenedor) => {
+    contenedor.hidden = !filtros.length;
+    contenedor.innerHTML = html;
+  });
+}
 
-  const filterCount = activeFilters.length;
 
-  els.activeFilters.hidden = filterCount === 0;
-
-  if (filterCount === 0) {
-    els.activeFiltersText.textContent = "Sin filtros activos";
+/** Quita un solo filtro sin tocar los demas. */
+function removeActiveFilter(clave) {
+  if (clave === "capacidad") {
+    els.capacityFilter.value = "all";
+  } else if (clave === "prioridad") {
+    els.priorityFilter.value = "all";
+  } else if (clave === "busqueda") {
+    window.clearTimeout(temporizadorDeBusqueda);
+    els.searchInput.value = "";
+  } else {
     return;
   }
 
-  els.activeFiltersText.textContent =
-    filterCount === 1
-      ? "1 filtro activo"
-      : `${filterCount} filtros activos`;
+  renderAll();
+}
 
-  els.activeFilters.title = activeFilters.join(" · ");
+
+// Cada pulsacion lanzaba un renderAll completo, radares de Chart.js incluidos:
+// escribir ocho letras costaba 235 ms de trabajo bloqueante y se notaba al
+// teclear. Con una pausa corta, ocho pulsaciones son un solo repintado.
+const BUSQUEDA_DIFERIDA_MS = 200;
+
+let temporizadorDeBusqueda = null;
+
+
+function handleSearchInput() {
+  window.clearTimeout(temporizadorDeBusqueda);
+
+  temporizadorDeBusqueda = window.setTimeout(() => {
+    renderAll();
+  }, BUSQUEDA_DIFERIDA_MS);
 }
 
 
 function clearActiveFilters() {
+  window.clearTimeout(temporizadorDeBusqueda);
+
   els.capacityFilter.value = "all";
   els.priorityFilter.value = "all";
   els.searchInput.value = "";
 
   renderAll();
+}
+
+
+/**
+ * Las subcapacidades sobre las que trabaja TODA la herramienta.
+ *
+ * Antes convivían dos ámbitos: Dashboard, resumen, radares y CSV calculaban
+ * sobre state.items, mientras que Heatmap, Roadmap y el PDF lo hacían sobre las
+ * filtradas. Con un filtro puesto, el KPI decía "7 de prioridad alta" y el
+ * Roadmap enseñaba 2 — y el PDF exportado no coincidía con el Dashboard que el
+ * cliente acababa de ver en pantalla.
+ *
+ * Ahora hay un único ámbito. getVisibleItems() se mantiene como alias para no
+ * tocar las llamadas existentes.
+ */
+function getScopedItems() {
+  return getVisibleItems();
+}
+
+
+/**
+ * Resume el objetivo de madurez del dominio en una frase honesta.
+ *
+ * La cabecera afirmaba "Objetivo de madurez 4" leyendo meta.targetMaturity, un
+ * valor unico del JSON. Pero el objetivo se configura por capacidad y por
+ * palanca en el panel que hay justo debajo, asi que en cuanto alguien tocaba
+ * uno, la cabecera mentia.
+ */
+function describirObjetivos() {
+  const valores = unique(
+    state.items.flatMap((item) => {
+      const objetivos = getCapabilityTargets(item.capacidad);
+      return LEVERS.map((lever) => objetivos[lever.key]);
+    }),
+  ).sort((a, b) => a - b);
+
+  if (!valores.length) {
+    return null;
+  }
+
+  if (valores.length === 1) {
+    return `Objetivo de madurez ${valores[0]}`;
+  }
+
+  return `Objetivos entre ${valores[0]} y ${valores[valores.length - 1]}`;
+}
+
+
+/** Si hay filtros activos, cuántas subcapacidades quedan dentro y fuera. */
+function getScopeSummary() {
+  const total = state.items.length;
+  const visibles = getScopedItems().length;
+
+  return {
+    total,
+    visibles,
+    hayFiltros: visibles !== total,
+  };
 }
 
 
@@ -1325,7 +1791,8 @@ function getVisibleItems() {
 }
 
 function renderDashboard() {
-  const metrics = state.items.map((item) => ({ item, metrics: calculate(item) }));
+  const items = getScopedItems();
+  const metrics = items.map((item) => ({ item, metrics: calculate(item) }));
   const scored = metrics.filter((entry) => !entry.metrics.isPending);
   const scoreGlobal = average(scored.map((entry) => entry.metrics.scoreMedio));
   const gapMedio = average(scored.map((entry) => entry.metrics.gap));
@@ -1349,8 +1816,10 @@ els.kpiGrid.innerHTML = [
   ),
   kpiCard(
     "Subcapacidades puntuadas",
-    `${scored.length}/${state.items.length}`,
-    `${Math.round((scored.length / state.items.length) * 100)}% de avance`,
+    `${scored.length}/${items.length}`,
+    items.length
+      ? `${Math.round((scored.length / items.length) * 100)}% de avance`
+      : "Sin subcapacidades en la vista",
     "progress",
   ),
   kpiCard(
@@ -1362,10 +1831,83 @@ els.kpiGrid.innerHTML = [
 ].join("");
 
 
+  renderTitularesEjecutivos(items, metrics);
   renderPriorityBars(metrics);
   renderLeverBars();
   renderSummaryTable();
   renderCapabilityRadar(); // NUEVO: actualiza radar al recalcular dashboard
+}
+
+
+/**
+ * Los tres titulares que resumen el dominio en una frase.
+ *
+ * Todo esto estaba calculado y repartido entre cuatro KPIs, dos graficos de
+ * barras, una tabla y tres radares: habia que deducirlo. Para explicar el
+ * dominio en dos minutos hace falta poder leerlo.
+ */
+function renderTitularesEjecutivos(items, metrics) {
+  if (!els.dashboardHeadline) {
+    return;
+  }
+
+  const evaluadas = metrics.filter((entrada) => !entrada.metrics.isPending);
+
+  if (!evaluadas.length) {
+    els.dashboardHeadline.hidden = false;
+    els.dashboardHeadline.textContent =
+      "Todavía no hay ninguna subcapacidad puntuada: empieza por la pestaña Assessment.";
+    return;
+  }
+
+  const titulares = [];
+
+  // Capacidad con mayor brecha
+  const porCapacidad = unique(items.map((item) => item.capacidad))
+    .map((capacidad) => ({
+      capacidad,
+      gap: average(
+        evaluadas
+          .filter((entrada) => entrada.item.capacidad === capacidad)
+          .map((entrada) => entrada.metrics.gap),
+      ),
+    }))
+    .filter((fila) => Number.isFinite(fila.gap))
+    .sort((a, b) => b.gap - a.gap);
+
+  if (porCapacidad.length) {
+    titulares.push(
+      `Mayor brecha: ${porCapacidad[0].capacidad} (gap ${formatNumber(porCapacidad[0].gap)})`,
+    );
+  }
+
+  // Palanca mas floja del dominio
+  const porPalanca = LEVERS.map((lever) => ({
+    label: lever.label,
+    media: average(
+      items.map((item) => item.scores[lever.key]).filter(Number.isFinite),
+    ),
+  }))
+    .filter((fila) => Number.isFinite(fila.media))
+    .sort((a, b) => a.media - b.media);
+
+  if (porPalanca.length) {
+    titulares.push(
+      `Palanca más débil: ${porPalanca[0].label} (${formatNumber(porPalanca[0].media)})`,
+    );
+  }
+
+  // Lo que queda por evaluar
+  const pendientes = metrics.length - evaluadas.length;
+
+  titulares.push(
+    pendientes
+      ? `Quedan ${pendientes} subcapacidades por evaluar`
+      : "Todas las subcapacidades están evaluadas",
+  );
+
+  els.dashboardHeadline.hidden = false;
+  els.dashboardHeadline.textContent = titulares.join(" · ");
 }
 
 
@@ -1396,9 +1938,11 @@ function renderPriorityBars(entries) {
 
 
 function renderLeverBars() {
+  const items = getScopedItems();
+
   const rows = LEVERS.map((lever) => {
     const avg = average(
-      state.items
+      items
         .map((item) => item.scores[lever.key])
         .filter((value) => Number.isFinite(value)),
     );
@@ -1430,12 +1974,14 @@ function barRow(label, value, width, color) {
 
 
 function renderSummaryTable() {
+  const scopedItems = getScopedItems();
+
   const capacities = unique(
-    state.items.map((item) => item.capacidad),
+    scopedItems.map((item) => item.capacidad),
   );
 
   const rows = capacities.map((capability) => {
-    const items = state.items.filter(
+    const items = scopedItems.filter(
       (item) => item.capacidad === capability,
     );
 
@@ -1561,7 +2107,7 @@ function renderCapabilityRadar() {
     label: "Procesos",
     values: radarData.procesos,
     targetValues: radarData.objetivoProcesos,
-    color: "#86BC25",
+    color: COLOR_DE_PALANCA.procesos,
     backgroundColor: "rgba(134, 188, 37, 0.24)",
     radarData,
   });
@@ -1572,7 +2118,7 @@ function renderCapabilityRadar() {
     label: "Tecnología",
     values: radarData.tecnologia,
     targetValues: radarData.objetivoTecnologia,
-    color: "#ED8B00",
+    color: COLOR_DE_PALANCA.tecnologia,
     backgroundColor: "rgba(237, 139, 0, 0.22)",
     radarData,
   });
@@ -1583,7 +2129,7 @@ function renderCapabilityRadar() {
     label: "Organización",
     values: radarData.organizacion,
     targetValues: radarData.objetivoOrganizacion,
-    color: "#012169",
+    color: COLOR_DE_PALANCA.organizacion,
     backgroundColor: "rgba(1, 33, 105, 0.18)",
     radarData,
   });
@@ -1647,6 +2193,7 @@ function renderSingleCapabilityRadar({
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: false,
 
     layout: {
       padding: 4,
@@ -1922,27 +2469,44 @@ function renderCapabilityTargets() {
     })
     .join("");
 
+  const objetivoBase = normalizeTargetValue(
+    state.meta?.targetMaturity,
+    DEFAULT_TARGET_MATURITY,
+  );
+
+  // El panel es configuracion, no evaluacion: arranca plegado para no dejar
+  // quince selectores por delante de la primera subcapacidad. Si ya estaba
+  // desplegado, se respeta.
+  const estabaDesplegado = Boolean(
+    els.capabilityTargetsPanel.querySelector(".capability-targets-details")?.open,
+  );
+
   els.capabilityTargetsPanel.innerHTML = `
-    <div class="capability-targets-header">
-      <div>
-        <p class="eyebrow">Ambición de madurez</p>
+    <details class="capability-targets-details" ${estabaDesplegado ? "open" : ""}>
+      <summary class="capability-targets-header">
+        <div>
+          <p class="eyebrow">Ambición de madurez</p>
 
-        <h3>Objetivos por capacidad y palanca</h3>
+          <h3>Objetivos por capacidad y palanca</h3>
 
-        <p class="small-note">
-          Define el nivel objetivo de Procesos, Tecnología y Organización.
-          Si no se modifica, se utiliza el nivel 4.
-        </p>
+          <p class="small-note">
+            ${escapeHtml(describirObjetivos() || "")}. Define el nivel objetivo de
+            Procesos, Tecnología y Organización de cada capacidad.
+          </p>
+        </div>
+
+        <span class="capability-targets-toggle" aria-hidden="true"></span>
+      </summary>
+
+      <div class="capability-targets-actions">
+        <button
+          class="secondary-button reset-targets-button"
+          type="button"
+          data-reset-capability-targets
+        >
+          Restaurar objetivos al nivel ${objetivoBase}
+        </button>
       </div>
-
-      <button
-        class="secondary-button reset-targets-button"
-        type="button"
-        data-reset-capability-targets
-      >
-        Restaurar objetivos a 4
-      </button>
-    </div>
 
     <div class="capability-targets-table">
       <div class="capability-targets-columns" aria-hidden="true">
@@ -1961,7 +2525,10 @@ function renderCapabilityTargets() {
         ${rows}
       </div>
     </div>
+    </details>
   `;
+
+
 
   els.capabilityTargetsPanel
     .querySelectorAll(".capability-target-select")
@@ -2063,12 +2630,21 @@ function handleCapabilityTargetChange(event) {
 
 
 
-function resetCapabilityTargets() {
-  const confirmed = window.confirm(
-    "¿Quieres restaurar a 4 todos los objetivos del dominio actual?",
-  );
+async function resetCapabilityTargets() {
+  const dominio = DOMAINS[state.activeDomainId]?.label || "este dominio";
 
-  if (!confirmed) {
+  const confirmado = await abrirDialogo({
+    eyebrow: "Ambición de madurez",
+    titulo: `Restaurar los objetivos de ${dominio}`,
+    parrafos: [
+      `Todos los objetivos de Procesos, Tecnología y Organización de este dominio volverán al nivel ${normalizeTargetValue(state.meta?.targetMaturity, DEFAULT_TARGET_MATURITY)}.`,
+      "Cambia los gaps, las prioridades y las oleadas de sus subcapacidades. Si el escenario es compartido, lo verá todo el equipo.",
+    ],
+    tono: "peligro",
+    confirmar: "Restaurar objetivos",
+  });
+
+  if (!confirmado) {
     return;
   }
 
@@ -2078,9 +2654,11 @@ function resetCapabilityTargets() {
     return;
   }
 
+  // El nivel del dominio, no un 4 fijo: si algun dominio declarase otro
+  // objetivo base, el boton prometia una cosa y hacia otra.
   const defaultTargets = createDefaultTargets(
     state.items,
-    DEFAULT_TARGET_MATURITY,
+    normalizeTargetValue(state.meta?.targetMaturity, DEFAULT_TARGET_MATURITY),
   );
 
   activeDomain.targets = defaultTargets;
@@ -2090,13 +2668,18 @@ function resetCapabilityTargets() {
   persistTargetsDelDominioActivo();
 
   showNotice(
-    "Los objetivos del dominio actual se han restaurado a nivel 4.",
+    `Los objetivos de ${dominio} han vuelto al nivel ${normalizeTargetValue(
+      state.meta?.targetMaturity,
+      DEFAULT_TARGET_MATURITY,
+    )}.`,
+    "exito",
   );
 }
 
 
 function renderAssessments() {
   const items = getVisibleItems();
+  const foco = capturarFocoDeAssessment();
 
   if (!items.length) {
     els.assessmentList.innerHTML = buildFilteredEmptyState();
@@ -2151,10 +2734,22 @@ function renderAssessments() {
     const summaryText = fragment.querySelector(".detail-summary-text");
 
     if (details && summaryText) {
+      details.open = tarjetasConDetalleAbierto.has(item.id);
+
+      summaryText.textContent = details.open
+        ? "Ocultar detalle de evaluación"
+        : "Ver detalle de evaluación";
+
       details.addEventListener("toggle", () => {
         summaryText.textContent = details.open
           ? "Ocultar detalle de evaluación"
           : "Ver detalle de evaluación";
+
+        if (details.open) {
+          tarjetasConDetalleAbierto.add(item.id);
+        } else {
+          tarjetasConDetalleAbierto.delete(item.id);
+        }
       });
     }
 
@@ -2165,6 +2760,37 @@ function renderAssessments() {
   els.assessmentList.querySelectorAll(".score-select").forEach((select) => {
     select.addEventListener("change", handleScoreChange);
   });
+
+  restaurarFocoDeAssessment(foco);
+}
+
+
+/** Que selector de score tiene el foco, para devolverselo tras repintar. */
+function capturarFocoDeAssessment() {
+  const activo = document.activeElement;
+
+  if (!activo || !els.assessmentList?.contains(activo)) {
+    return null;
+  }
+
+  if (!activo.classList.contains("score-select")) {
+    return null;
+  }
+
+  return { id: activo.dataset.id, palanca: activo.dataset.lever };
+}
+
+
+function restaurarFocoDeAssessment(foco) {
+  if (!foco) {
+    return;
+  }
+
+  els.assessmentList
+    .querySelector(
+      `.score-select[data-id="${CSS.escape(foco.id)}"][data-lever="${CSS.escape(foco.palanca)}"]`,
+    )
+    ?.focus();
 }
 
 
@@ -2261,13 +2887,73 @@ function handleScoreChange(event) {
   const leverKey = event.target.dataset.lever;
   const score = toScore(event.target.value);
 
+  // Con un filtro de prioridad puesto, puntuar puede sacar la subcapacidad de
+  // la lista. Solo en ese caso hay que reconstruirla.
+  const visiblesAntes = getVisibleItems().map((entry) => entry.id).join("|");
+
   item.scores[leverKey] = score;
 
   syncActiveDomainState();
 
-  renderAll();
+  const visiblesDespues = getVisibleItems().map((entry) => entry.id).join("|");
+  const mismaLista = visiblesAntes === visiblesDespues;
+
+  renderAll({ saltarAssessments: mismaLista });
+
+  if (mismaLista) {
+    actualizarTarjetaDeAssessment(item);
+  }
 
   persistItemChange(item.id, `scores/${leverKey}`, score);
+}
+
+
+/**
+ * Refresca una sola tarjeta en su sitio.
+ *
+ * Reconstruir la lista entera cerraba todos los detalles abiertos y mandaba el
+ * foco al body: con teclado habia que volver a tabular desde el principio
+ * despues de cada puntuacion.
+ */
+function actualizarTarjetaDeAssessment(item) {
+  const card = els.assessmentList.querySelector(
+    `.assessment-card[data-id="${CSS.escape(item.id)}"]`,
+  );
+
+  if (!card) {
+    return;
+  }
+
+  const metrics = calculate(item);
+
+  card.querySelector(".score-result").innerHTML = scoreResult(metrics);
+
+  // El color del borde de cada selector depende de su valor.
+  card.querySelectorAll(".score-select").forEach((select) => {
+    select.className = `score-select ${getScoreSelectClass(
+      item.scores[select.dataset.lever],
+    )}`;
+  });
+
+  // Y el nivel de madurez resaltado cambia con el score medio.
+  const nivelActual = getMaturityLevelNumber(metrics.scoreMedio);
+
+  card.querySelectorAll(".maturity-list li").forEach((li, indice) => {
+    const esActual = indice + 1 === nivelActual;
+
+    li.classList.toggle("is-current-level", esActual);
+
+    const etiqueta = li.querySelector(".current-level-label");
+
+    if (esActual && !etiqueta) {
+      const nueva = document.createElement("strong");
+      nueva.className = "current-level-label";
+      nueva.textContent = "Nivel actual";
+      li.appendChild(nueva);
+    } else if (!esActual && etiqueta) {
+      etiqueta.remove();
+    }
+  });
 }
 
 
@@ -2504,6 +3190,12 @@ function getWaveShortLabel(wave) {
 
 
 function renderRoadmap() {
+  // Repintar la tabla borra los campos editables. Si alguien esta escribiendo
+  // un comentario en ese momento, su texto desaparece sin aviso: los campos
+  // solo guardaban al perder el foco. Se anota lo que hay en curso para
+  // devolverlo después.
+  const edicionEnCurso = capturarEdicionDeRoadmap();
+
   const roadmapItems = getVisibleItems(); // Roadmap respeta filtros activos
 
   const rows = roadmapItems
@@ -2525,14 +3217,21 @@ function renderRoadmap() {
         <td>${priorityBadge(metrics.prioridad)}</td>
         <td>${escapeHtml(item.iniciativaSugerida)}</td>
         <td>
-          <button
-            class="roadmap-ai-button"
-            type="button"
-            data-id="${escapeAttr(item.id)}"
-            aria-label="Ver iniciativa IA para ${escapeAttr(item.subcapacidad)}"
-          >
-            IA
-          </button>
+          ${
+            // Sin datos, el boton abria un aviso y nada mas: mejor no ofrecerlo.
+            getAiDataForItem(item)
+              ? `
+                <button
+                  class="roadmap-ai-button"
+                  type="button"
+                  data-id="${escapeAttr(item.id)}"
+                  aria-label="${escapeAttr(`Ver la iniciativa de IA de ${item.subcapacidad}`)}"
+                >
+                  IA
+                </button>
+              `
+              : `<span class="small-note">-</span>`
+          }
         </td>
 
         <td class="roadmap-wave-cell">
@@ -2550,7 +3249,9 @@ function renderRoadmap() {
             class="inline-input roadmap-owner"
             data-id="${escapeAttr(item.id)}"
             value="${escapeAttr(item.owner)}"
-            placeholder="Owner"
+            maxlength="${LIMITES_DE_TEXTO.owner}"
+            placeholder="Responsable"
+            aria-label="${escapeAttr(`Responsable de ${item.subcapacidad}`)}"
           >
         </td>
         <td>${statusSelect(item)}</td>
@@ -2558,8 +3259,11 @@ function renderRoadmap() {
           <textarea
             class="roadmap-comment"
             data-id="${escapeAttr(item.id)}"
+            maxlength="${LIMITES_DE_TEXTO.comentario}"
             placeholder="Comentarios"
+            aria-label="${escapeAttr(`Comentarios de ${item.subcapacidad}`)}"
           >${escapeHtml(item.comentario)}</textarea>
+          ${contadorDeComentario(item)}
         </td>
         <td class="roadmap-authorship">${celdaDeAutoria(item)}</td>
       </tr>
@@ -2576,7 +3280,7 @@ function renderRoadmap() {
         <th>Iniciativa sugerida</th>
         <th>IA</th>
         <th>Oleada</th>
-        <th>Owner</th>
+        <th>Responsable</th>
         <th>Estado</th>
         <th>Comentarios</th>
         <th>Último cambio</th>
@@ -2595,6 +3299,7 @@ function renderRoadmap() {
 
   els.roadmapTable.querySelectorAll(".roadmap-owner").forEach((input) => {
   input.addEventListener("change", handleRoadmapFieldChange);
+  input.addEventListener("input", handleRoadmapFieldInput);
 });
 
 els.roadmapTable.querySelectorAll(".roadmap-status").forEach((select) => {
@@ -2603,8 +3308,86 @@ els.roadmapTable.querySelectorAll(".roadmap-status").forEach((select) => {
 
 els.roadmapTable.querySelectorAll(".roadmap-comment").forEach((textarea) => {
   textarea.addEventListener("change", handleRoadmapFieldChange);
+  textarea.addEventListener("input", actualizarContadorDeComentario);
+  textarea.addEventListener("input", handleRoadmapFieldInput);
 });
 
+  restaurarEdicionDeRoadmap(edicionEnCurso);
+}
+
+
+/** A que campo de la subcapacidad corresponde un control del Roadmap. */
+function campoDeRoadmap(elemento) {
+  if (elemento.classList.contains("roadmap-owner")) return "owner";
+  if (elemento.classList.contains("roadmap-status")) return "status";
+  if (elemento.classList.contains("roadmap-comment")) return "comentario";
+
+  return null;
+}
+
+
+const CLASE_POR_CAMPO = {
+  owner: "roadmap-owner",
+  status: "roadmap-status",
+  comentario: "roadmap-comment",
+};
+
+
+/** Que se esta editando ahora mismo en el Roadmap, si es que hay algo. */
+function capturarEdicionDeRoadmap() {
+  const activo = document.activeElement;
+
+  if (!activo || !els.roadmapTable?.contains(activo)) {
+    return null;
+  }
+
+  const campo = campoDeRoadmap(activo);
+
+  if (!campo || !activo.dataset.id) {
+    return null;
+  }
+
+  return {
+    id: activo.dataset.id,
+    campo,
+    valor: activo.value,
+    // Los <select> no tienen cursor de texto.
+    inicio: activo.selectionStart ?? null,
+    fin: activo.selectionEnd ?? null,
+  };
+}
+
+
+/**
+ * Devuelve el foco, el texto y la posición del cursor tras repintar.
+ *
+ * Se restaura el valor que había en pantalla y no el del estado: si el repintado
+ * viene de un cambio remoto, lo que estaba escribiendo esta persona no puede
+ * perderse por el camino. El guardado diferido lo envía poco después.
+ */
+function restaurarEdicionDeRoadmap(edicion) {
+  if (!edicion) {
+    return;
+  }
+
+  const destino = els.roadmapTable.querySelector(
+    `.${CLASE_POR_CAMPO[edicion.campo]}[data-id="${CSS.escape(edicion.id)}"]`,
+  );
+
+  if (!destino) {
+    return;
+  }
+
+  destino.value = edicion.valor;
+  destino.focus();
+
+  if (edicion.inicio !== null && typeof destino.setSelectionRange === "function") {
+    try {
+      destino.setSelectionRange(edicion.inicio, edicion.fin);
+    } catch (error) {
+      // Algunos tipos de campo no admiten seleccion; no es motivo de fallo.
+    }
+  }
 }
 
 
@@ -2641,36 +3424,153 @@ function celdaDeAutoria(item) {
 }
 
 
+/**
+ * Cuánto queda de comentario, visible solo al acercarse al límite.
+ *
+ * Sin esto, pasarse de los 2.000 caracteres que admiten las reglas hacía que
+ * Firebase rechazara la escritura sin que se notara.
+ */
+function contadorDeComentario(item) {
+  const usados = (item.comentario || "").length;
+  const limite = LIMITES_DE_TEXTO.comentario;
+
+  if (usados < limite * 0.9) {
+    return "";
+  }
+
+  return `
+    <span class="roadmap-comment-count" aria-hidden="true">
+      ${usados} / ${limite}
+    </span>
+  `;
+}
+
+
 function statusSelect(item) {
   return `
-    <select class="inline-input roadmap-status" data-id="${escapeAttr(item.id)}">
+    <select
+      class="inline-input roadmap-status"
+      data-id="${escapeAttr(item.id)}"
+      aria-label="${escapeAttr(`Estado de ${item.subcapacidad}`)}"
+    >
       ${STATUS_OPTIONS.map((status) => `<option value="${escapeAttr(status)}" ${item.status === status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
     </select>
   `;
 }
 
+/** Mantiene visible cuánto queda de comentario mientras se escribe. */
+function actualizarContadorDeComentario(event) {
+  const textarea = event.currentTarget;
+  const celda = textarea.closest("td");
+
+  if (!celda) {
+    return;
+  }
+
+  const limite = LIMITES_DE_TEXTO.comentario;
+  const usados = textarea.value.length;
+  let contador = celda.querySelector(".roadmap-comment-count");
+
+  if (usados < limite * 0.9) {
+    contador?.remove();
+    return;
+  }
+
+  if (!contador) {
+    contador = document.createElement("span");
+    contador.className = "roadmap-comment-count";
+    contador.setAttribute("aria-hidden", "true");
+    celda.appendChild(contador);
+  }
+
+  contador.textContent = `${usados} / ${limite}`;
+  contador.classList.toggle("is-at-limit", usados >= limite);
+}
+
+
+// Cuanto se espera desde la ultima pulsacion antes de guardar. Con "change" a
+// secas, un texto sin terminar de escribir no llegaba a guardarse nunca.
+const GUARDADO_DIFERIDO_MS = 600;
+
+const guardadosPendientes = new Map();
+
+
 function handleRoadmapFieldChange(event) {
-  const item = state.items.find((entry) => entry.id === event.target.dataset.id);
+  const elemento = event.target;
+  const item = state.items.find((entry) => entry.id === elemento.dataset.id);
+  const campo = campoDeRoadmap(elemento);
 
-  if (!item) {
+  if (!item || !campo) {
     return;
   }
 
-  const campo = event.target.classList.contains("roadmap-owner")
-    ? "owner"
-    : event.target.classList.contains("roadmap-status")
-      ? "status"
-      : event.target.classList.contains("roadmap-comment")
-        ? "comentario"
-        : null;
+  cancelarGuardadoDiferido(item.id, campo);
 
-  if (!campo) {
+  // maxlength solo frena lo que teclea el usuario. Un valor que llegue de un
+  // escenario importado puede superar el límite y hacer que Firebase rechace la
+  // escritura entera, así que se recorta también aquí.
+  const valor = recortarAlLimite(campo, elemento.value);
+
+  if (valor !== elemento.value) {
+    elemento.value = valor;
+  }
+
+  guardarCampoDeRoadmap(item, campo, valor);
+}
+
+
+/** Mientras se escribe: se guarda solo, sin esperar a perder el foco. */
+function handleRoadmapFieldInput(event) {
+  const elemento = event.target;
+  const item = state.items.find((entry) => entry.id === elemento.dataset.id);
+  const campo = campoDeRoadmap(elemento);
+
+  if (!item || !campo) {
     return;
   }
 
-  item[campo] = event.target.value;
+  const clave = `${item.id}:${campo}`;
 
-  persistItemChange(item.id, campo, event.target.value);
+  window.clearTimeout(guardadosPendientes.get(clave));
+
+  guardadosPendientes.set(
+    clave,
+    window.setTimeout(() => {
+      guardadosPendientes.delete(clave);
+      guardarCampoDeRoadmap(item, campo, recortarAlLimite(campo, elemento.value));
+    }, GUARDADO_DIFERIDO_MS),
+  );
+}
+
+
+function cancelarGuardadoDiferido(itemId, campo) {
+  const clave = `${itemId}:${campo}`;
+
+  window.clearTimeout(guardadosPendientes.get(clave));
+  guardadosPendientes.delete(clave);
+}
+
+
+/** Guarda un campo del Roadmap, si de verdad ha cambiado. */
+function guardarCampoDeRoadmap(item, campo, valor) {
+  // Sin esta comprobacion, salir de un campo que no se ha tocado provocaba una
+  // escritura completa en localStorage y otra en Firebase.
+  if (item[campo] === valor) {
+    return;
+  }
+
+  item[campo] = valor;
+
+  persistItemChange(item.id, campo, valor);
+}
+
+
+/** Recorta un campo de texto al límite que admiten las reglas de Firebase. */
+function recortarAlLimite(campo, valor) {
+  const limite = LIMITES_DE_TEXTO[campo];
+  const texto = String(valor ?? "");
+
+  return limite ? texto.slice(0, limite) : texto;
 }
 
 function heatScoreCell(value) {
@@ -2694,10 +3594,7 @@ function priorityBadge(priority) {
 }
 
 function priorityColor(priority) {
-  if (priority === "Alta") return "#bb3128";
-  if (priority === "Media") return "#c87900";
-  if (priority === "Baja") return "#3e6f11";
-  return "#8a9189";
+  return COLOR_DE_PRIORIDAD[priority] || COLOR_DE_PRIORIDAD.Pendiente;
 }
 
 function priorityFromGap(gap) {
@@ -2724,8 +3621,64 @@ function unique(values) {
 
 
 
+/**
+ * El almacenamiento del navegador puede fallar y no es motivo para caerse.
+ *
+ * Lanza excepcion si la cuota esta llena, si el navegador tiene bloqueado el
+ * almacenamiento por politica o en algunas ventanas privadas. Antes la
+ * escritura iba sin proteger y por delante de la de Firebase: al superar la
+ * cuota, el cambio no llegaba a ninguno de los dos sitios.
+ */
+let avisoDeAlmacenamientoMostrado = false;
+
+function leerAlmacenamiento(clave) {
+  try {
+    return window.localStorage.getItem(clave);
+  } catch (error) {
+    console.warn("No se pudo leer del almacenamiento del navegador.", error);
+    return null;
+  }
+}
+
+
+function escribirAlmacenamiento(clave, valor) {
+  try {
+    window.localStorage.setItem(clave, valor);
+    return true;
+  } catch (error) {
+    console.warn("No se pudo escribir en el almacenamiento del navegador.", error);
+
+    if (!avisoDeAlmacenamientoMostrado) {
+      avisoDeAlmacenamientoMostrado = true;
+
+      showNotice(
+        "Este navegador no está guardando la copia local del escenario, probablemente por falta de " +
+          "espacio o por su configuración de privacidad. " +
+          (scenarioDatabaseRef
+            ? "Los cambios siguen enviándose al escenario compartido."
+            : "Exporta el escenario en JSON si no quieres perder el trabajo al cerrar."),
+        "aviso",
+      );
+    }
+
+    return false;
+  }
+}
+
+
+function borrarDeAlmacenamiento(clave) {
+  try {
+    window.localStorage.removeItem(clave);
+    return true;
+  } catch (error) {
+    console.warn("No se pudo borrar del almacenamiento del navegador.", error);
+    return false;
+  }
+}
+
+
 function getStoredScenario() {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = leerAlmacenamiento(STORAGE_KEY);
 
   if (!stored) {
     return null;
@@ -2787,7 +3740,7 @@ async function initializeSharedScenario() {
       const initialPayload =
         localScenario || buildScenarioPayload();
 
-      localStorage.setItem(
+      escribirAlmacenamiento(
         STORAGE_KEY,
         JSON.stringify(initialPayload),
       );
@@ -2807,9 +3760,10 @@ async function initializeSharedScenario() {
           error,
         );
 
-        updateSaveStatus(
-          "saved",
-          "Guardado local ✓",
+        marcarFalloDeSincronia(
+          "No se ha creado el escenario compartido",
+          "Tus datos están guardados en este navegador, pero el escenario compartido no ha llegado a crearse: " +
+            "quien abra el enlace no verá nada. Comprueba la conexión y vuelve a intentarlo.",
         );
       }
 
@@ -2826,7 +3780,7 @@ async function initializeSharedScenario() {
     try {
       applyScenarioPayload(remoteScenario);
 
-      localStorage.setItem(
+      escribirAlmacenamiento(
         STORAGE_KEY,
         JSON.stringify(remoteScenario),
       );
@@ -2852,14 +3806,16 @@ async function initializeSharedScenario() {
       error,
     );
 
-    updateSaveStatus(
-      "saved",
-      "Guardado local ✓",
+    marcarFalloDeSincronia(
+      "Sin conexión con el escenario compartido",
+      "No se ha podido conectar con el escenario compartido. Estás trabajando sobre la copia de este navegador " +
+        "y tus cambios no le llegan al resto del equipo. Si vas a trabajar así, exporta una copia antes de cerrar.",
     );
 
     showNotice(
-      "No se pudo sincronizar con Firebase. Los cambios se mantienen guardados en este navegador.",
-      true,
+      "No se ha podido conectar con el escenario compartido. Tus cambios se guardan en este navegador, "
+        + "pero el resto del equipo no los ve.",
+      "aviso",
     );
   }
 }
@@ -2896,9 +3852,10 @@ function subscribeToSharedScenario() {
         error,
       );
 
-      updateSaveStatus(
-        "saved",
-        "Guardado local ✓",
+      marcarFalloDeSincronia(
+        "Se ha perdido la conexión",
+        "Se ha perdido la conexión con el escenario compartido. Tus cambios se siguen guardando en este navegador, " +
+          "pero no le llegan al resto del equipo. Recarga la página cuando vuelvas a tener conexión.",
       );
     },
   );
@@ -2931,7 +3888,7 @@ function aplicarEscenarioRemoto(remoteScenario) {
 
     applyScenarioPayload(remoteScenario);
 
-    localStorage.setItem(
+    escribirAlmacenamiento(
       STORAGE_KEY,
       JSON.stringify(remoteScenario),
     );
@@ -2947,8 +3904,9 @@ function aplicarEscenarioRemoto(remoteScenario) {
     );
 
     showNotice(
-      "No se pudo aplicar el escenario remoto.",
-      true,
+      "Ha llegado un cambio del escenario compartido que no se ha podido aplicar. Recarga la página "
+        + "para ponerte al día.",
+      "error",
     );
   } finally {
     isApplyingRemoteScenario = false;
@@ -2957,7 +3915,7 @@ function aplicarEscenarioRemoto(remoteScenario) {
 
 
 
-function updateSaveStatus(status, message) {
+function updateSaveStatus(status, message, detalle = "") {
   if (!els.saveStatus) {
     return;
   }
@@ -2965,6 +3923,26 @@ function updateSaveStatus(status, message) {
   els.saveStatus.hidden = false;
   els.saveStatus.className = `save-status ${status || ""}`.trim();
   els.saveStatus.textContent = message;
+
+  // El detalle explica qué ha pasado, qué implica y qué puede hacer el usuario.
+  // No cabe en el chip, así que va al tooltip.
+  if (detalle) {
+    els.saveStatus.title = detalle;
+  } else {
+    els.saveStatus.removeAttribute("title");
+  }
+}
+
+
+/**
+ * Un guardado que falla no puede parecerse a uno que funciona.
+ *
+ * Antes todos los caminos de error terminaban en "Guardado local ✓" y en verde:
+ * con la conexión caída o con las reglas rechazando un campo, el consultor creía
+ * que el escenario estaba sincronizado cuando no lo estaba.
+ */
+function marcarFalloDeSincronia(mensaje, detalle) {
+  updateSaveStatus("error", mensaje, detalle);
 }
 
 
@@ -3023,7 +4001,7 @@ function persistGranularChange(rutas) {
   syncActiveDomainState();
 
   // La copia local sigue guardándose entera: es una caché, no la fuente de verdad.
-  localStorage.setItem(
+  escribirAlmacenamiento(
     STORAGE_KEY,
     JSON.stringify(buildScenarioPayload()),
   );
@@ -3055,7 +4033,11 @@ function persistGranularChange(rutas) {
         error,
       );
 
-      updateSaveStatus("saved", "Guardado local ✓");
+      marcarFalloDeSincronia(
+        "El último cambio no se ha compartido",
+        "El cambio está guardado en este navegador, pero no se ha podido enviar al escenario compartido y el resto " +
+          "del equipo no lo ve. Comprueba la conexión y vuelve a hacer el cambio.",
+      );
     })
     .finally(() => {
       pendingScenarioWrites = Math.max(0, pendingScenarioWrites - 1);
@@ -3123,7 +4105,7 @@ function persistScenario() {
 
   const payload = buildScenarioPayload();
 
-  localStorage.setItem(
+  escribirAlmacenamiento(
     STORAGE_KEY,
     JSON.stringify(payload),
   );
@@ -3164,9 +4146,10 @@ function persistScenario() {
         error,
       );
 
-      updateSaveStatus(
-        "saved",
-        "Guardado local ✓",
+      marcarFalloDeSincronia(
+        "Los cambios no se han compartido",
+        "Los cambios están guardados en este navegador, pero no se han podido enviar al escenario compartido. " +
+          "Comprueba la conexión y vuelve a intentarlo.",
       );
     })
     .finally(() => {
@@ -3180,7 +4163,7 @@ function persistScenario() {
 
 
 function applyStoredScenario() {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = leerAlmacenamiento(STORAGE_KEY);
 
   if (!stored) {
     return;
@@ -3378,7 +4361,7 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
     const comentario = getSavedField(savedItem, ["comentario", "Comentarios", "Comentarios / hallazgos", "comments"]);
 
     if (owner !== undefined) {
-      item.owner = owner;
+      item.owner = recortarAlLimite("owner", owner);
     }
 
     if (status !== undefined) {
@@ -3386,7 +4369,7 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
     }
 
     if (comentario !== undefined) {
-      item.comentario = comentario;
+      item.comentario = recortarAlLimite("comentario", comentario);
     }
 
     if (savedItem.lastEditedBy) {
@@ -3400,9 +4383,18 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
   };
 }
 
+/**
+ * Vuelca un escenario guardado sobre los datos cargados.
+ *
+ * Devuelve cuántas subcapacidades ha reconocido: sin ese dato, una importación
+ * que no casaba con nada terminaba igualmente en "Escenario importado
+ * correctamente".
+ */
 function applyScenarioPayload(payload) {
+  const resultado = { aplicadas: 0, total: 0, dominios: 0 };
+
   if (!payload) {
-    return;
+    return resultado;
   }
 
   if (payload.domains) {
@@ -3429,6 +4421,10 @@ function applyScenarioPayload(payload) {
         defaultTarget,
       );
 
+      resultado.aplicadas += result.matched;
+      resultado.total += result.total;
+      resultado.dominios += 1;
+
       console.log(
         `Escenario aplicado en ${domainId}: ${result.matched}/${result.total}`,
       );
@@ -3440,7 +4436,7 @@ function applyScenarioPayload(payload) {
       setActiveDomain(state.activeDomainId);
     }
 
-    return;
+    return resultado;
   }
 
   const legacyItems = getScenarioItemsFromPayload(payload, "fpa");
@@ -3461,6 +4457,10 @@ function applyScenarioPayload(payload) {
     );
   }
 
+  resultado.aplicadas = result.matched;
+  resultado.total = result.total;
+  resultado.dominios = 1;
+
   console.log(
     `Escenario antiguo aplicado en FP&A: ${result.matched}/${result.total}`,
   );
@@ -3468,6 +4468,8 @@ function applyScenarioPayload(payload) {
   if (state.activeDomainId === "fpa") {
     setActiveDomain("fpa");
   }
+
+  return resultado;
 }
 
 
@@ -3531,30 +4533,94 @@ function buildScenarioPayload() {
 
 
 
-function importScenario(event) {
+/**
+ * Importar es la acción más destructiva de la herramienta.
+ *
+ * En un escenario compartido escribe el payload completo, así que reemplaza los
+ * nueve dominios para todo el mundo. Antes lo hacia sin preguntar y, si el
+ * archivo no casaba con nada, informaba igualmente de que todo había ido bien.
+ */
+async function importScenario(event) {
   const file = event.target.files?.[0];
 
   if (!file) {
     return;
   }
 
+  if (scenarioDatabaseRef) {
+    const confirmado = await abrirDialogo({
+      eyebrow: "Acción irreversible",
+      titulo: "Sustituir el escenario compartido",
+      parrafos: [
+        `Vas a reemplazar el contenido del escenario compartido con el del archivo ${file.name}.`,
+        "Afecta a los nueve dominios y a todas las personas que trabajen con este enlace: sus puntuaciones, comentarios y estados quedarán reemplazados por los del archivo.",
+        "No se puede deshacer. Si quieres conservar lo que hay ahora, expórtalo antes con el botón de abajo.",
+      ],
+      tono: "peligro",
+      confirmar: "Sustituir el escenario",
+      confirmacionEscrita: "SUSTITUIR",
+      accionSecundaria: {
+        texto: "Exportar JSON antes",
+        alHacerClic: exportScenarioJson,
+      },
+    });
+
+    if (!confirmado) {
+      event.target.value = "";
+      return;
+    }
+  }
+
   const reader = new FileReader();
+
+  reader.onerror = () => {
+    showNotice(
+      "No se ha podido leer el archivo. Comprueba que sigue disponible y vuelve a intentarlo.",
+      "error",
+    );
+
+    event.target.value = "";
+  };
 
   reader.onload = () => {
     try {
       const payload = JSON.parse(reader.result);
+      const resultado = applyScenarioPayload(payload);
 
-      applyScenarioPayload(payload);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
+      if (!resultado.aplicadas) {
+        showNotice(
+          "El archivo se ha leído, pero ninguna de sus subcapacidades coincide con las de esta " +
+            "herramienta, así que no se ha cambiado nada. Comprueba que es un escenario exportado " +
+            "desde F3M Assessment.",
+          "aviso",
+        );
+
+        return;
+      }
+
+      escribirAlmacenamiento(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
 
       populateCapacityFilter();
       renderAll();
       persistScenario();
 
-      showNotice("Escenario importado correctamente.");
-      updateSaveStatus("saved", "Guardado ✓");
+      const parciales =
+        resultado.aplicadas < resultado.total
+          ? ` ${resultado.total - resultado.aplicadas} del archivo no corresponden a ninguna subcapacidad y se han ignorado.`
+          : "";
+
+      showNotice(
+        `Escenario importado: ${resultado.aplicadas} subcapacidades actualizadas en ` +
+          `${resultado.dominios} ${resultado.dominios === 1 ? "dominio" : "dominios"}.${parciales}`,
+        "exito",
+      );
     } catch (error) {
-      showNotice("El archivo no parece un escenario válido para este MVP.", true);
+      showNotice(
+        "El archivo no se ha podido leer como escenario. Tiene que ser un JSON exportado con " +
+          "Exportar JSON desde esta misma herramienta.",
+        "error",
+      );
+
       console.error(error);
     } finally {
       event.target.value = "";
@@ -3596,7 +4662,7 @@ function exportScenarioJson() {
 
 function exportCsv() {
   const summaryRows = buildSummaryRows();
-  const roadmapRows = state.items
+  const roadmapRows = getScopedItems()
     .map((item) => {
       const metrics = calculate(item);
       return {
@@ -3641,14 +4707,16 @@ function exportCsv() {
 
 
 function exportPdfReport() {
+  // La ventana se abre en el mismo gesto del clic: si se abriera despues, el
+  // navegador la bloquearia por emergente.
   const reportWindow = window.open("", "_blank");
 
   if (!reportWindow) {
-    showNotice("El navegador ha bloqueado la ventana del informe. Permite pop-ups para exportar el PDF.", true);
+    showNotice("El navegador ha bloqueado la ventana del informe. Permite las ventanas emergentes de esta página y vuelve a pulsar Exportar PDF.", "aviso");
     return;
   }
 
-  const reportData = buildEnhancedPdfReportData();
+  const reportData = conElDashboardVisible(buildEnhancedPdfReportData);
   const reportHtml = buildEnhancedPdfReportHtml(reportData);
 
   reportWindow.document.open();
@@ -3680,6 +4748,33 @@ function exportPdfReport() {
       reportWindow.print();
     });
   }, 900);
+}
+
+
+/**
+ * Ejecuta algo con el Dashboard a la vista y lo deja como estaba.
+ *
+ * El informe incorpora los radares capturados del canvas, y un canvas oculto no
+ * tiene tamano: si se exporta desde el Roadmap sin haber pasado por el
+ * Dashboard, las imagenes saldrian en blanco.
+ */
+function conElDashboardVisible(accion) {
+  const seccion = document.getElementById("dashboard");
+  const estabaOculto = seccion?.hidden;
+
+  if (estabaOculto) {
+    seccion.hidden = false;
+  }
+
+  renderDashboard();
+
+  try {
+    return accion();
+  } finally {
+    if (estabaOculto) {
+      seccion.hidden = true;
+    }
+  }
 }
 
 
@@ -3723,7 +4818,8 @@ function buildEnhancedPdfReportData() {
     domainLabel: activeDomain.label,
     domainTitle: activeDomain.title,
     generatedAt: new Date().toLocaleString("es-ES"),
-    scenarioLabel: scenarioId || "Modo local",
+    // Nunca el identificador completo: este informe se envía al cliente.
+    scenarioLabel: getScenarioShortLabel(),
     sourceFile: state.meta?.sourceFile || "-",
     targetMaturity: state.meta?.targetMaturity || "-",
     filters: getPdfActiveFiltersLabel(),
@@ -3909,7 +5005,7 @@ function buildPdfEnhancedCover(data) {
           <strong>${escapeHtml(data.generatedAt)}</strong>
         </div>
         <div>
-          <span>Escenario</span>
+          <span>Origen de los datos</span>
           <strong>${escapeHtml(data.scenarioLabel)}</strong>
         </div>
         <div>
@@ -4016,9 +5112,9 @@ function buildPdfLeverBars(data) {
   );
 
   const rows = [
-    ["Procesos", procesos, "#86BC25"],
-    ["Tecnología", tecnologia, "#ED8B00"],
-    ["Organización", organizacion, "#012169"],
+    ["Procesos", procesos, COLOR_DE_PALANCA.procesos],
+    ["Tecnología", tecnologia, COLOR_DE_PALANCA.tecnologia],
+    ["Organización", organizacion, COLOR_DE_PALANCA.organizacion],
   ];
 
   return rows
@@ -4043,19 +5139,16 @@ function buildPdfBarRow(label, value, maxValue, color, displayValue = value) {
 }
 
 function getPdfPriorityColor(priority) {
-  if (priority === "Alta") return "#BB3128";
-  if (priority === "Media") return "#ED8B00";
-  if (priority === "Baja") return "#86BC25";
-  return "#737A74";
+  return priorityColor(priority);
 }
 
 
 
 function buildPdfEnhancedRadarSection(data) {
   const radarCards = [
-    { title: "Procesos", image: data.radarImages.procesos, color: "#86BC25" },
-    { title: "Tecnología", image: data.radarImages.tecnologia, color: "#ED8B00" },
-    { title: "Organización", image: data.radarImages.organizacion, color: "#012169" },
+    { title: "Procesos", image: data.radarImages.procesos, color: COLOR_DE_PALANCA.procesos },
+    { title: "Tecnología", image: data.radarImages.tecnologia, color: COLOR_DE_PALANCA.tecnologia },
+    { title: "Organización", image: data.radarImages.organizacion, color: COLOR_DE_PALANCA.organizacion },
   ]
     .map((radar) => `
       <article class="pdf-radar-card">
@@ -4269,7 +5362,7 @@ function buildPdfEnhancedRoadmapSection(data) {
             <th>Prioridad</th>
             <th>Oleada</th>
             <th>Iniciativa sugerida</th>
-            <th>Owner</th>
+            <th>Responsable</th>
             <th>Estado</th>
           </tr>
         </thead>
@@ -4361,13 +5454,13 @@ function getEnhancedPdfReportStyles() {
       width: 110px;
       height: 9px;
       margin-bottom: 26px;
-      background: #86BC25;
+      background: ${COLOR_DE_MARCA};
       border-radius: 999px;
     }
 
     .pdf-eyebrow {
       margin: 0 0 10px;
-      color: #86BC25;
+      color: ${COLOR_DE_MARCA};
       font-size: 10.5pt;
       font-weight: 900;
       letter-spacing: 0.08em;
@@ -4384,7 +5477,7 @@ function getEnhancedPdfReportStyles() {
     h2 {
       margin: 0 0 14px;
       padding-bottom: 8px;
-      border-bottom: 3px solid #86BC25;
+      border-bottom: 3px solid ${COLOR_DE_MARCA};
       font-size: 18pt;
     }
 
@@ -4636,10 +5729,12 @@ function getEnhancedPdfReportStyles() {
 
 
 function buildSummaryRows() {
+  const scopedItems = getScopedItems();
+
   return unique(
-    state.items.map((item) => item.capacidad),
+    scopedItems.map((item) => item.capacidad),
   ).map((capability) => {
-    const items = state.items.filter(
+    const items = scopedItems.filter(
       (item) => item.capacidad === capability,
     );
 
@@ -4717,19 +5812,38 @@ function buildSummaryRows() {
 
 
 
+// Excel con configuración regional española espera punto y coma, no coma: con
+// comas volcaba todas las columnas en una sola celda. csvEscape ya entrecomilla
+// los campos que contienen ";", así que el separador es seguro.
+const CSV_SEPARATOR = ";";
+
+// Marca de orden de bytes. Sin ella Excel abre el archivo como ANSI y
+// "Tecnología" llega ilegible.
+const CSV_BOM = "\uFEFF";
+
 function toCsv(rows) {
+  if (!rows.length) {
+    return "";
+  }
+
   const headers = Object.keys(rows[0]);
-  const csvRows = [headers.join(",")];
+  const csvRows = [headers.join(CSV_SEPARATOR)];
+
   rows.forEach((row) => {
-    csvRows.push(headers.map((header) => csvEscape(row[header])).join(","));
+    csvRows.push(
+      headers.map((header) => csvEscape(row[header])).join(CSV_SEPARATOR),
+    );
   });
-  return csvRows.join("\n");
+
+  // Fin de línea CRLF: es lo que espera Excel.
+  return CSV_BOM + csvRows.join("\r\n");
 }
 
 function csvEscape(value) {
   const text = String(value ?? "");
-  return /[",\n;]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  return /[",\r\n;]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
+
 
 function downloadFile(filename, content, type) {
   const blob = new Blob([content], { type });
@@ -4744,41 +5858,276 @@ function downloadFile(filename, content, type) {
 }
 
 
-function resetScenario() {
-  // El efecto real depende del modo: en local se pierde todo, y en un escenario
-  // compartido los datos vuelven a bajar de Firebase enseguida.
-  const mensaje = scenarioId
-    ? "Estás en un escenario compartido.\n\n" +
-      "Al restaurar se borrará la copia de este navegador, pero los datos volverán " +
-      "a descargarse del escenario compartido, así que en la práctica no cambiará nada.\n\n" +
-      "Para volver de verdad a los datos base, abre la herramienta sin el parámetro " +
-      "'?scenario=' en la dirección.\n\n¿Continuar de todos modos?"
-    : "Se borrarán TODAS las puntuaciones, comentarios y estados guardados en este " +
-      "navegador, de todos los dominios.\n\n" +
-      "Esta acción no se puede deshacer y estos datos no están guardados en ningún " +
-      "otro sitio. Si quieres conservarlos, cancela y pulsa antes 'Exportar JSON'.\n\n" +
-      "¿Seguro que quieres restaurar la base?";
+/**
+ * "Restaurar base" borra la copia de este navegador.
+ *
+ * En modo local eso es toda la evaluacion, de los nueve dominios, sin copia en
+ * ningun otro sitio y sin forma de recuperarla. Era un solo clic sobre un
+ * confirm del navegador con "Aceptar" a un tabulador de distancia, asi que
+ * ahora hay que escribir la palabra y se ofrece exportar antes, ahi mismo.
+ *
+ * En un escenario compartido el efecto es otro: los datos vuelven a bajar de
+ * Firebase enseguida, asi que en la practica no cambia nada.
+ */
+async function resetScenario() {
+  if (scenarioId) {
+    const seguir = await abrirDialogo({
+      eyebrow: "Escenario compartido",
+      titulo: "Restaurar la copia de este navegador",
+      parrafos: [
+        "Estás trabajando en un escenario compartido, así que esto no borra el escenario: solo la copia local, que se volverá a descargar al recargar la pagina.",
+        "En la práctica no cambiará nada. Para volver de verdad a los datos base, abre la herramienta sin el parámetro ?scenario= en la dirección.",
+      ],
+      confirmar: "Restaurar de todos modos",
+    });
 
-  const confirmed = window.confirm(mensaje); // NUEVO: pide confirmación antes de borrar datos locales
+    if (!seguir) {
+      return;
+    }
 
-  if (!confirmed) {
-    return; // NUEVO: si el usuario cancela, no se borra nada
+    borrarDeAlmacenamiento(STORAGE_KEY);
+    window.location.reload();
+    return;
   }
 
-  localStorage.removeItem(STORAGE_KEY);
+  const confirmado = await abrirDialogo({
+    eyebrow: "Acción irreversible",
+    titulo: "Borrar toda la evaluación de este navegador",
+    parrafos: [
+      "Se borrarán todas las puntuaciones, comentarios, responsables y estados de los nueve dominios.",
+      "Estos datos solo existen en este navegador: no hay copia en ningún otro sitio y no se pueden recuperar.",
+      "Si quieres conservarlos, expórtalos antes con el botón de abajo.",
+    ],
+    tono: "peligro",
+    confirmar: "Borrar la evaluación",
+    confirmacionEscrita: "BORRAR",
+    accionSecundaria: {
+      texto: "Exportar JSON antes",
+      alHacerClic: exportScenarioJson,
+    },
+  });
+
+  if (!confirmado) {
+    return;
+  }
+
+  borrarDeAlmacenamiento(STORAGE_KEY);
   window.location.reload();
 }
 
 
-function showNotice(message, persistent = false) {
-  els.loadNotice.textContent = message;
-  els.loadNotice.hidden = false;
-  if (persistent) return;
-  window.setTimeout(() => {
-    if (els.loadNotice.textContent === message) {
-      els.loadNotice.hidden = true;
+/**
+ * Dialogo propio, en sustitucion de window.confirm y window.prompt.
+ *
+ * Los dialogos nativos ensenan el origen de la pagina ("127.0.0.1:8777 dice:"),
+ * no se pueden disenar y desentonan delante de un cliente. Ademas no permiten
+ * exigir una confirmacion proporcional al riesgo ni ofrecer una accion
+ * alternativa como "exportar antes de borrar".
+ *
+ * Devuelve false si se cancela; true si se confirma; y el texto del campo
+ * cuando se ha pedido uno.
+ */
+let cerrarDialogoActual = null;
+
+function abrirDialogo({
+  eyebrow = "",
+  titulo,
+  parrafos = [],
+  tono = "neutro",
+  confirmar = "Continuar",
+  cancelar = "Cancelar",
+  campo = null,
+  confirmacionEscrita = null,
+  accionSecundaria = null,
+}) {
+  return new Promise((resolve) => {
+    const disparador = document.activeElement;
+
+    els.dialogEyebrow.textContent = eyebrow;
+    els.dialogEyebrow.hidden = !eyebrow;
+    els.dialogTitle.textContent = titulo;
+    els.dialogIcon.textContent = tono === "peligro" ? "!" : "?";
+
+    els.dialogMessage.innerHTML = parrafos
+      .map((texto) => `<p>${escapeHtml(texto)}</p>`)
+      .join("");
+
+    els.dialogModal.className = `modal-backdrop dialog-${tono}`;
+    els.dialogConfirm.textContent = confirmar;
+    els.dialogCancel.textContent = cancelar;
+
+    // Campo de texto: sirve tanto para pedir un dato como para exigir que se
+    // escriba una palabra antes de dejar confirmar.
+    const pideTexto = Boolean(campo) || Boolean(confirmacionEscrita);
+
+    els.dialogFieldWrap.hidden = !pideTexto;
+    els.dialogField.value = campo?.valor || "";
+    els.dialogField.maxLength = campo?.maxLength || 120;
+    els.dialogField.placeholder = campo?.placeholder || "";
+    els.dialogFieldLabel.textContent =
+      campo?.etiqueta ||
+      (confirmacionEscrita ? `Escribe ${confirmacionEscrita} para confirmar` : "");
+
+    els.dialogSecondary.hidden = !accionSecundaria;
+    els.dialogSecondary.textContent = accionSecundaria?.texto || "";
+
+    const validar = () => {
+      if (!confirmacionEscrita) {
+        return;
+      }
+
+      els.dialogConfirm.disabled =
+        els.dialogField.value.trim().toUpperCase() !==
+        confirmacionEscrita.toUpperCase();
+    };
+
+    els.dialogConfirm.disabled = Boolean(confirmacionEscrita);
+    validar();
+
+    const alConfirmar = () => terminar(campo ? els.dialogField.value : true);
+    const alCancelar = () => terminar(false);
+
+    const alPulsarTecla = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        alCancelar();
+        return;
+      }
+
+      if (event.key === "Enter" && pideTexto && !els.dialogConfirm.disabled) {
+        event.preventDefault();
+        alConfirmar();
+        return;
+      }
+
+      if (event.key === "Tab") {
+        atraparFoco(event, els.dialogModal);
+      }
+    };
+
+    const alPulsarFondo = (event) => {
+      // Un clic fuera no puede cancelar algo destructivo por accidente.
+      if (event.target === els.dialogModal && tono !== "peligro") {
+        alCancelar();
+      }
+    };
+
+    const alPulsarSecundaria = () => accionSecundaria?.alHacerClic();
+
+    function terminar(resultado) {
+      els.dialogModal.hidden = true;
+      els.dialogConfirm.removeEventListener("click", alConfirmar);
+      els.dialogCancel.removeEventListener("click", alCancelar);
+      els.dialogSecondary.removeEventListener("click", alPulsarSecundaria);
+      els.dialogField.removeEventListener("input", validar);
+      els.dialogModal.removeEventListener("click", alPulsarFondo);
+      document.removeEventListener("keydown", alPulsarTecla, true);
+
+      cerrarDialogoActual = null;
+      updateModalOpenState();
+
+      if (disparador?.isConnected) {
+        disparador.focus();
+      }
+
+      resolve(resultado);
     }
+
+    cerrarDialogoActual = alCancelar;
+
+    els.dialogConfirm.addEventListener("click", alConfirmar);
+    els.dialogCancel.addEventListener("click", alCancelar);
+    els.dialogSecondary.addEventListener("click", alPulsarSecundaria);
+    els.dialogField.addEventListener("input", validar);
+    els.dialogModal.addEventListener("click", alPulsarFondo);
+    document.addEventListener("keydown", alPulsarTecla, true);
+
+    els.dialogModal.hidden = false;
+    updateModalOpenState();
+
+    // El foco entra en el dialogo: al campo si lo hay, y si no a Cancelar, que
+    // es la opcion segura.
+    if (pideTexto) {
+      els.dialogField.focus();
+      els.dialogField.select();
+    } else {
+      els.dialogCancel.focus();
+    }
+  });
+}
+
+
+/** Mantiene el tabulador dentro del modal mientras esta abierto. */
+function atraparFoco(event, contenedor) {
+  const focusables = [...contenedor.querySelectorAll(
+    'button:not([disabled]):not([hidden]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+  )].filter((el) => el.offsetParent !== null);
+
+  if (!focusables.length) {
+    return;
+  }
+
+  const primero = focusables[0];
+  const ultimo = focusables[focusables.length - 1];
+
+  if (event.shiftKey && document.activeElement === primero) {
+    event.preventDefault();
+    ultimo.focus();
+  } else if (!event.shiftKey && document.activeElement === ultimo) {
+    event.preventDefault();
+    primero.focus();
+  }
+}
+
+
+const ICONO_POR_TIPO = {
+  exito: "✓",
+  info: "i",
+  aviso: "!",
+  error: "!",
+};
+
+let temporizadorDeAviso = null;
+
+
+/**
+ * Muestra un aviso donde se pueda leer y con el tono que le corresponde.
+ *
+ * Antes el aviso vivia dentro de <main>, a la altura 0 de una pagina de casi
+ * 10.000 px: cualquier mensaje lanzado desde el Roadmap era invisible. Y usaba
+ * el mismo amarillo de advertencia tanto para "Escenario importado" como para
+ * "No se pudo aplicar el escenario remoto".
+ */
+function showNotice(message, tipo = "info", persistente = null) {
+  if (!els.loadNotice) {
+    return;
+  }
+
+  // Los errores y las advertencias no se van solos: quien esta en una sesion
+  // con cliente no puede perderselos por mirar a otro lado siete segundos.
+  const seQueda =
+    persistente === null ? tipo === "error" || tipo === "aviso" : persistente;
+
+  els.loadNoticeText.textContent = message;
+  els.loadNoticeIcon.textContent = ICONO_POR_TIPO[tipo] || ICONO_POR_TIPO.info;
+  els.loadNotice.className = `notice notice-${tipo}`;
+  els.loadNotice.hidden = false;
+
+  window.clearTimeout(temporizadorDeAviso);
+
+  if (seQueda) {
+    return;
+  }
+
+  temporizadorDeAviso = window.setTimeout(() => {
+    els.loadNotice.hidden = true;
   }, 7000);
+}
+
+
+function ocultarAviso() {
+  window.clearTimeout(temporizadorDeAviso);
+  els.loadNotice.hidden = true;
 }
 
 
@@ -4818,14 +6167,18 @@ function createScenarioId() {
 }
 
 
-function createSharedScenario() {
+async function createSharedScenario() {
   const nuevoId = createScenarioId();
 
-  const confirmado = window.confirm(
-    "Se creará un escenario compartido con los datos actuales.\n\n" +
-      "Cualquier persona con el enlace podrá verlo y editarlo, sin contraseña. " +
-      "Trátalo como una credencial.\n\n¿Continuar?",
-  );
+  const confirmado = await abrirDialogo({
+    eyebrow: "Escenario compartido",
+    titulo: "Crear un escenario compartido",
+    parrafos: [
+      "Se creará un escenario nuevo con los datos que tienes ahora, y pasarás a trabajar sobre él.",
+      "Cualquiera con el enlace podrá verlo y editarlo, sin contraseña. El enlace es la única credencial: trátalo como tal y no lo publiques en documentos ni tickets.",
+    ],
+    confirmar: "Crear escenario",
+  });
 
   if (!confirmado) {
     return;
@@ -4833,6 +6186,37 @@ function createSharedScenario() {
 
   const url = new URL(window.location.href);
   url.searchParams.set("scenario", nuevoId);
+  window.location.assign(url.toString());
+}
+
+
+/**
+ * Se podia entrar en un escenario compartido con un boton, pero no salir.
+ *
+ * Habia que editar la direccion a mano y quitar el parametro. "Restaurar base"
+ * no servia, y su propio mensaje lo explicaba en cinco lineas.
+ */
+async function salirDelEscenario() {
+  const confirmado = await abrirDialogo({
+    eyebrow: "Escenario compartido",
+    titulo: "Salir del escenario compartido",
+    parrafos: [
+      "Volverás a trabajar sobre la copia de este navegador. El escenario compartido no se toca: sigue ahí y puedes volver con su enlace.",
+      "Copia el enlace antes de salir si no lo tienes guardado en otro sitio.",
+    ],
+    confirmar: "Salir del escenario",
+    accionSecundaria: {
+      texto: "Copiar enlace antes",
+      alHacerClic: copyScenarioLink,
+    },
+  });
+
+  if (!confirmado) {
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  url.searchParams.delete("scenario");
   window.location.assign(url.toString());
 }
 
@@ -4847,9 +6231,24 @@ function showScenarioModeNotice() {
     els.copyScenarioLinkButton.hidden = false;
   }
 
+  if (els.leaveScenarioButton) {
+    els.leaveScenarioButton.hidden = false;
+  }
+
+  actualizarEstadoDelMenu();
+
+  if (els.createScenarioButton) {
+    // Ya se esta en uno: crear otro desde aqui solo confunde.
+    els.createScenarioButton.hidden = true;
+  }
+
+  // Antes se imprimía el identificador completo, que es la credencial del
+  // escenario: quedaba a la vista en cualquier pantalla compartida.
   showNotice(
-    `Escenario compartido activo: ${scenarioId}. Los cambios se guardan automáticamente y se sincronizan con cualquier navegador que use este mismo enlace.`,
-  ); // MODIFICADO: el mensaje refleja que Firebase ya guarda y sincroniza datos
+    "Escenario compartido activo. Los cambios se guardan solos y los ve cualquiera que abra este mismo enlace. " +
+      "Usa el botón Copiar enlace para compartirlo.",
+    "info",
+  );
 
 }
 
@@ -4892,7 +6291,7 @@ async function inicializarIdentidad() {
 
 
 function getNombreEditor() {
-  return (localStorage.getItem(NOMBRE_STORAGE_KEY) || "").trim();
+  return (leerAlmacenamiento(NOMBRE_STORAGE_KEY) || "").trim();
 }
 
 
@@ -4900,9 +6299,9 @@ function setNombreEditor(nombre) {
   const limpio = (nombre || "").trim().slice(0, 60);
 
   if (limpio) {
-    localStorage.setItem(NOMBRE_STORAGE_KEY, limpio);
+    escribirAlmacenamiento(NOMBRE_STORAGE_KEY, limpio);
   } else {
-    localStorage.removeItem(NOMBRE_STORAGE_KEY);
+    borrarDeAlmacenamiento(NOMBRE_STORAGE_KEY);
   }
 
   if (usuarioActual) {
@@ -4913,13 +6312,23 @@ function setNombreEditor(nombre) {
 }
 
 
-function pedirNombreEditor() {
-  const nombre = window.prompt(
-    "¿Con qué nombre quieres que aparezcan tus cambios para el resto del equipo?",
-    getNombreEditor(),
-  );
+async function pedirNombreEditor() {
+  const nombre = await abrirDialogo({
+    eyebrow: "Atribución de cambios",
+    titulo: "Tu nombre en este escenario",
+    parrafos: [
+      "Así aparecerás en la columna Último cambio del Roadmap cuando edites algo. Solo se guarda en este navegador.",
+    ],
+    campo: {
+      etiqueta: "Nombre",
+      valor: getNombreEditor(),
+      placeholder: "Nombre y apellido",
+      maxLength: 60,
+    },
+    confirmar: "Guardar nombre",
+  });
 
-  if (nombre === null) {
+  if (nombre === false) {
     return; // Cancelado: no tocamos nada
   }
 
@@ -4962,6 +6371,23 @@ function marcaDeAutoria() {
 }
 
 
+/**
+ * Forma abreviada del identificador, para enseñarla sin comprometerlo.
+ *
+ * El enlace es la única credencial del escenario, así que el identificador
+ * completo no puede aparecer ni en pantalla compartida ni en un PDF que se
+ * envía al cliente. Cuatro caracteres bastan para distinguir dos escenarios
+ * abiertos a la vez y no permiten reconstruir el enlace.
+ */
+function getScenarioShortLabel() {
+  if (!scenarioId) {
+    return "Modo local";
+  }
+
+  return `Escenario compartido · …${scenarioId.slice(-4)}`;
+}
+
+
 function getScenarioShareUrl() {
   // Construimos la URL a partir del id y no de location.href para no arrastrar
   // otros parámetros que hubiera en la barra de direcciones.
@@ -4980,14 +6406,15 @@ async function copyScenarioLink() {
     await navigator.clipboard.writeText(url);
 
     showNotice(
-      "Enlace copiado. Trátalo como una credencial: cualquier persona que lo tenga puede ver y editar este escenario.",
+      "Enlace copiado. Trátalo como una credencial: cualquiera que lo tenga puede ver y editar este escenario.",
+      "exito",
     );
   } catch (error) {
     console.warn("No se pudo copiar al portapapeles.", error);
 
     showNotice(
-      `No se pudo copiar automáticamente. Copia este enlace a mano: ${url}`,
-      true,
+      `No se ha podido copiar solo. Copia este enlace a mano: ${url}`,
+      "aviso",
     );
   }
 }

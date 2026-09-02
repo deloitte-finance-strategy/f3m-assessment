@@ -6,6 +6,14 @@
   --ink: #161a18;
   --muted: #5c665e;
   --line: #d9dfd4;
+  /* Identidad de palanca. Estos tres colores significan una sola cosa: de que
+     palanca se habla. No deben usarse para ningun otro significado. */
+  --lever-procesos: #86bc25;
+  --lever-tecnologia: #ed8b00;
+  --lever-organizacion: #012169;
+
+  /* Semantica de interfaz. Otra familia y otro significado, aunque el acento de
+     marca comparta el verde de Procesos por identidad visual de Deloitte. */
   --green: #86bc25;
   --green-dark: #3e6f11;
   --teal: #007c89;
@@ -13,6 +21,7 @@
   --red: #bb3128;
   --blue: #255e91;
   --neutral: #8a9189;
+  --graphite: #4f5952;
   --shadow: 0 12px 30px rgba(22, 26, 24, 0.08);
   --radius: 8px;
 }
@@ -23,7 +32,6 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 48px;
 }
 
 body {
@@ -57,12 +65,29 @@ button {
   cursor: pointer;
 }
 
+/* Anillo de foco.
+
+   Era rgba(134,188,37,.35), o sea 1,23:1 sobre blanco: practicamente invisible.
+   WCAG 2.2 pide 3:1 para el indicador de foco. El verde oscuro da 6,02 sobre
+   blanco y 5,6 sobre la superficie de la app; sobre la cabecera negra se queda
+   en 3,03, asi que alli se usa el verde de marca, que da 8,03. */
+:root {
+  --focus-ring: var(--green-dark);
+}
+
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-a:focus-visible {
-  outline: 3px solid rgba(134, 188, 37, 0.35);
+textarea:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+.app-header {
+  --focus-ring: var(--green);
 }
 
 .app-header {
@@ -136,101 +161,110 @@ h4 {
   flex-wrap: wrap;
 }
 
-.header-action-group {
+/* Menu de escenario. La cabecera tenia nueve botones en fila, cuatro hablando
+   de JSON; ahora solo quedan fuera las dos exportaciones que se usan delante
+   del cliente. */
+.header-menu {
+  position: relative;
+}
+
+.header-menu-button {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-}
-
-.header-action-group-technical {
-  padding-left: 12px;
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-
-.header-secondary-action {
+  gap: 7px;
   min-height: 40px;
   padding: 0 14px;
-  border: 1px solid rgba(134, 188, 37, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 6px;
-  background: rgba(134, 188, 37, 0.1);
-  color: #ffffff;
+  background: transparent;
+  color: #e6ebe6;
   font-weight: 750;
   white-space: nowrap;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease,
-    transform 150ms ease;
 }
 
-.header-secondary-action:hover {
-  border-color: var(--green);
-  background: rgba(134, 188, 37, 0.2);
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-
-.header-technical-action {
-  min-height: 36px;
-  padding: 0 11px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 6px;
-  background: transparent;
-  color: #d9dfda;
-  font-size: 0.82rem;
-  font-weight: 700;
-  white-space: nowrap;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease;
-}
-
-.header-technical-action:hover {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.08);
+.header-menu-button:hover,
+.header-menu-button[aria-expanded="true"] {
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
 }
 
+.header-menu-caret::before {
+  content: "▾";
+  font-size: 0.72rem;
+  line-height: 1;
+}
 
-.header-reset-action {
-  min-height: 36px;
-  padding: 0 11px;
-  border: 1px solid transparent;
-  border-radius: 6px;
+.header-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 7px);
+  z-index: 70;
+  width: 292px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.26);
+}
+
+.header-menu-panel[hidden] {
+  display: none;
+}
+
+.header-menu-title {
+  margin: 0;
+  padding: 7px 10px 9px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.header-menu-item {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 7px;
   background: transparent;
-  color: #c9ceca;
-  font-size: 0.8rem;
-  font-weight: 700;
-  white-space: nowrap;
-  opacity: 0.78;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease,
-    opacity 150ms ease;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-align: left;
 }
 
-.header-reset-action:hover {
-  border-color: rgba(187, 49, 40, 0.55);
-  background: rgba(187, 49, 40, 0.1);
-  color: #ffe5e1;
-  opacity: 1;
+.header-menu-item[hidden] {
+  display: none;
 }
 
-.danger-ghost-button {
-opacity: 0.82;
+.header-menu-item span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 450;
+  line-height: 1.35;
 }
 
-.danger-ghost-button:hover {
-opacity: 1;
-border-color: rgba(187, 49, 40, 0.55);
-color: #ffe5e1;
+.header-menu-item:hover {
+  background: var(--surface-muted);
 }
 
+.header-menu-item-danger {
+  color: var(--red);
+}
 
+.header-menu-item-danger:hover {
+  background: #fdf1ee;
+}
+
+.header-menu-separator {
+  margin: 6px 8px;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
 
 .save-status {
   position: fixed;
@@ -238,19 +272,22 @@ color: #ffe5e1;
   bottom: 18px;
   z-index: 80;
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   min-height: 40px;
   max-width: min(360px, calc(100% - 36px));
-  padding: 0 14px;
+  padding: 9px 14px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  /* Radio menor que la píldora original: los mensajes de error ocupan dos
+     líneas y una píldora de 999px se deforma al crecer en alto. */
+  border-radius: 12px;
   background: #ffffff;
   color: var(--ink);
   font-size: 0.84rem;
   font-weight: 800;
+  line-height: 1.3;
   box-shadow: 0 10px 26px rgba(22, 26, 24, 0.16);
-  white-space: nowrap;
+  text-wrap: pretty;
   transition:
     background-color 150ms ease,
     border-color 150ms ease,
@@ -264,6 +301,7 @@ color: #ffe5e1;
 }
 
 .save-status::before {
+  margin-top: 4px;
   width: 9px;
   height: 9px;
   border-radius: 50%;
@@ -314,8 +352,7 @@ color: #ffe5e1;
 
 
 .primary-button,
-.secondary-button,
-.ghost-button {
+.secondary-button {
   min-height: 40px;
   padding: 0 14px;
   border-radius: 6px;
@@ -340,12 +377,6 @@ transform: translateY(-1px);
 .secondary-button {
   background: #ffffff;
   color: #10140e;
-}
-
-.ghost-button {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
 }
 
 .app-shell {
@@ -445,6 +476,10 @@ transform: translateY(-1px);
   padding-top: 28px;
 }
 
+.section-block[hidden] {
+  display: none;
+}
+
 
 .section-heading {
   display: flex;
@@ -493,13 +528,113 @@ transform: translateY(-1px);
   font-size: 0.88rem;
 }
 
+/* Aviso del sistema.
+
+   Vivia dentro de <main>, o sea a la altura 0 de una pagina de casi 10.000 px:
+   cualquier mensaje lanzado con la vista en el Roadmap era invisible. Ahora es
+   fijo, va justo bajo las pestanas y distingue exito de error. */
 .notice {
-  margin-top: 18px;
-  padding: 14px 16px;
-  border: 1px solid #edc66b;
-  border-radius: var(--radius);
-  background: #fff7df;
-  color: #5b4310;
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  z-index: 90;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: min(640px, calc(100% - 32px));
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 14px 34px rgba(22, 26, 24, 0.18);
+  transform: translateX(-50%);
+}
+
+.notice[hidden] {
+  display: none;
+}
+
+.notice-text {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.notice-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.notice-close {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  margin: -2px -2px 0 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.notice-close:hover {
+  border-color: var(--line);
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+/* Un icono y un color por tono: antes el mismo amarillo de advertencia servia
+   para "Escenario importado" y para "No se pudo aplicar el escenario remoto". */
+.notice-exito {
+  border-left-color: var(--green);
+  background: #f6fbee;
+}
+
+.notice-exito .notice-icon {
+  background: var(--green-dark);
+}
+
+.notice-info {
+  border-left-color: var(--blue);
+  background: #f4f8fb;
+}
+
+.notice-info .notice-icon {
+  background: var(--blue);
+}
+
+.notice-aviso {
+  border-left-color: var(--amber);
+  background: #fff8e8;
+}
+
+.notice-aviso .notice-icon {
+  background: #8a5200;
+}
+
+.notice-error {
+  border-left-color: var(--red);
+  background: #fdf1ee;
+}
+
+.notice-error .notice-icon {
+  background: var(--red);
 }
 
 
@@ -638,6 +773,26 @@ display: none;
 
 
 
+/* La lectura de dos minutos: lo que hay que poder decir sin interpretar
+   graficos. Estaba todo calculado, pero repartido entre KPIs, barras, tabla y
+   radares. */
+.dashboard-headline {
+  margin: 14px 0 0;
+  padding: 12px 15px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--green);
+  border-radius: 8px;
+  background: var(--surface);
+  color: #2a302c;
+  font-size: 0.94rem;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.dashboard-headline[hidden] {
+  display: none;
+}
+
 .split-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -755,20 +910,83 @@ display: none;
   bottom: 0;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
   min-height: 38px;
-  padding: 4px 6px 4px 10px;
+  padding: 4px 6px;
   border: 1px solid rgba(134, 188, 37, 0.45);
-  border-radius: 6px;
+  border-radius: 8px;
   background: #f7faef;
   color: var(--green-dark);
   font-size: 0.78rem;
   font-weight: 750;
-  white-space: nowrap;
+}
+
+/* En Heatmap y Roadmap no hay barra de filtros al lado: el bloque va en linea. */
+.active-filters-block {
+  position: static;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 8px 10px;
 }
 
 .active-filters[hidden] {
   display: none;
+}
+
+.active-filters-label {
+  padding-left: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 320px;
+  padding: 3px 3px 3px 9px;
+  border: 1px solid rgba(134, 188, 37, 0.5);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #2f3732;
+  font-size: 0.78rem;
+}
+
+.filter-chip-label {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.filter-chip-value {
+  overflow: hidden;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: #4f5952;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.filter-chip-remove:hover {
+  background: #e0e6da;
+  color: var(--ink);
 }
 
 .clear-filters-button {
@@ -930,11 +1148,11 @@ display: none;
   --score-text: #0f5132;
 }
 
-.score-select:focus {
+.score-select:focus-visible {
   border-color: var(--green);
   border-left-color: var(--score-accent);
-  box-shadow: 0 0 0 3px rgba(134, 188, 37, 0.12);
-  outline: none;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 
@@ -1058,19 +1276,6 @@ display: none;
 
 
 
-.metric-line {
-  display: flex;
-  gap: 7px;
-  align-items: baseline;
-  color: var(--muted);
-  font-size: 0.84rem;
-}
-
-.metric-line strong {
-  color: var(--ink);
-  font-size: 1.05rem;
-}
-
 .assessment-card details {
   margin-top: 14px;
   border-top: 1px solid var(--line);
@@ -1124,7 +1329,7 @@ display: none;
 }
 
 .assessment-card summary:focus-visible {
-  outline: 3px solid rgba(134, 188, 37, 0.28);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -1256,10 +1461,24 @@ display: none;
 }
 
 
+/* La tabla desplaza dentro de su caja, no arrastrando la pagina entera: es lo
+   que permite dejar fijos el encabezado y la primera columna. El alto se ajusta
+   al hueco disponible para que quepa una tabla larga sin ocupar dos pantallas. */
+/* Sin relleno: las filas asomaban por encima del encabezado fijo al desplazar,
+   porque el hueco del panel es transparente y el contenido pasa por debajo. */
+.table-wrap.panel {
+  padding: 0;
+}
+
+.table-wrap > .panel-heading {
+  margin: 0;
+  padding: 16px 16px 12px;
+}
+
 .table-wrap {
 position: relative;
-overflow-x: auto;
-overflow-y: hidden;
+max-height: calc(100vh - 210px);
+overflow: auto;
 -webkit-overflow-scrolling: touch;
 scrollbar-width: thin;
 scrollbar-color: rgba(134, 188, 37, 0.65) #edf1e8;
@@ -1299,6 +1518,11 @@ border-radius: 999px;
   color: #3a433d;
 }
 
+#summaryTable tbody td:first-child,
+.roadmap-table tbody td:first-child {
+  background: var(--surface);
+}
+
 #summaryTable tbody tr {
   transition: background-color 140ms ease;
 }
@@ -1334,16 +1558,22 @@ border-radius: 999px;
 
 
 #sourceNote {
-  max-width: none;
+  max-width: 420px;
   flex: 0 0 auto;
   font-size: 0.78rem;
-  white-space: nowrap;
+}
+
+/* Cuando el Dashboard no está mostrando el dominio entero hay que verlo. */
+#sourceNote.has-scope-filter {
+  color: #8a5a00;
+  font-weight: 750;
 }
 
 
 .data-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 860px;
   font-size: 0.9rem;
 }
@@ -1356,13 +1586,44 @@ border-radius: 999px;
   vertical-align: top;
 }
 
-.data-table th {
-  position: static; /* MODIFICADO: evita que la cabecera se solape con las filas al hacer scroll */
+/* El encabezado se queda arriba al desplazar: con 20 o 25 filas se perdia de
+   vista de que columna era cada numero. */
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
   background: #f7f9f4;
   color: #323a35;
   font-size: 0.74rem;
   font-weight: 850;
   text-transform: uppercase;
+}
+
+/* Y la primera columna se queda a la izquierda al desplazar en horizontal: el
+   Roadmap tiene once columnas y desborda ya a 1280 px, asi que al mirar el
+   estado o los comentarios se perdia de vista a que subcapacidad pertenecian. */
+.data-table th:first-child,
+.data-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+}
+
+.data-table thead th:first-child {
+  z-index: 4;
+}
+
+/* Las celdas fijas necesitan fondo opaco y una linea que marque el corte. */
+.data-table td:first-child::after,
+.data-table th:first-child::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+  content: "";
 }
 
 .data-table td.number,
@@ -1378,7 +1639,7 @@ border-radius: 999px;
 
 
 
-.heatmap-capability-row {
+.heatmap-capability-row td {
   border-top: 2px solid var(--line);
 }
 
@@ -1396,6 +1657,7 @@ border-radius: 999px;
 .heatmap-capability-row td:first-child {
   min-width: 220px;
   border-left: 3px solid var(--green);
+  background: #f4f7f1;
 }
 
 .heatmap-capability-row strong {
@@ -1534,7 +1796,7 @@ font-size: 0.92rem;
 .heatmap-toggle:focus-visible,
 .heatmap-expand-toggle:focus-visible {
   border-color: var(--green);
-  outline: 3px solid rgba(134, 188, 37, 0.2);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -1583,6 +1845,12 @@ border-color: #eef0ed;
   width: 100%;
   min-width: 1080px;
   table-layout: fixed;
+}
+
+/* Sin colapsar, el borde inferior del encabezado se dibuja en cada celda. */
+.roadmap-table thead th,
+#summaryTable thead th {
+  box-shadow: inset 0 -2px 0 var(--line);
 }
 
 .roadmap-table th,
@@ -1635,14 +1903,14 @@ border-color: #eef0ed;
 /* Capacidad */
 .roadmap-table th:nth-child(1),
 .roadmap-table td:nth-child(1) {
-  width: 11%;
+  width: 10%;
   min-width: 0;
 }
 
 /* Subcapacidad */
 .roadmap-table th:nth-child(2),
 .roadmap-table td:nth-child(2) {
-  width: 14%;
+  width: 13%;
   min-width: 0;
 }
 
@@ -1665,14 +1933,14 @@ border-color: #eef0ed;
 /* Iniciativa sugerida */
 .roadmap-table th:nth-child(5),
 .roadmap-table td:nth-child(5) {
-  width: 23%;
+  width: 21%;
   min-width: 0;
 }
 
 /* IA */
 .roadmap-table th:nth-child(6),
 .roadmap-table td:nth-child(6) {
-  width: 5%;
+  width: 4%;
   min-width: 50px;
   text-align: center;
 }
@@ -1680,7 +1948,7 @@ border-color: #eef0ed;
 /* Oleada */
 .roadmap-table th:nth-child(7),
 .roadmap-table td:nth-child(7) {
-  width: 6%;
+  width: 5%;
   min-width: 52px;
   text-align: center;
 }
@@ -1695,14 +1963,22 @@ border-color: #eef0ed;
 /* Estado */
 .roadmap-table th:nth-child(9),
 .roadmap-table td:nth-child(9) {
-  width: 9%;
+  width: 8%;
   min-width: 0;
 }
 
 /* Comentarios */
 .roadmap-table th:nth-child(10),
 .roadmap-table td:nth-child(10) {
-  width: 13%;
+  width: 12%;
+  min-width: 0;
+}
+
+/* Ultimo cambio. Faltaba: las diez anteriores sumaban el 100% y esta se
+   quedaba a cero, con el encabezado partido letra a letra. */
+.roadmap-table th:nth-child(11),
+.roadmap-table td:nth-child(11) {
+  width: 8%;
   min-width: 0;
 }
 
@@ -1713,15 +1989,17 @@ border-color: #eef0ed;
   text-align: center;
 }
 
-.roadmap-wave {
+/* La oleada no es una palanca: en azul competia con Organizacion, y encima sin
+   etiqueta que lo aclarase. En grafito ya no se confunde con nada. */
+.status-chip.roadmap-wave {
   justify-content: center;
   min-width: 32px;
   min-height: 32px;
   padding: 0 8px;
-  border: 1px solid rgba(37, 94, 145, 0.2);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: #eef2f5;
-  color: var(--blue);
+  background: var(--surface-muted);
+  color: var(--graphite);
   font-size: 0.82rem;
   font-weight: 900;
   line-height: 1;
@@ -1760,13 +2038,29 @@ border-color: #eef0ed;
   line-height: 1.35;
 }
 
+/* Cuánto queda de comentario: solo aparece cerca del límite de Firebase */
+.roadmap-comment-count {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.roadmap-comment-count.is-at-limit {
+  color: var(--red);
+}
+
+
 /* Foco de campos editables */
-.roadmap-owner:focus,
-.roadmap-status:focus,
-.roadmap-table textarea:focus {
+.roadmap-owner:focus-visible,
+.roadmap-status:focus-visible,
+.roadmap-table textarea:focus-visible {
   border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(134, 188, 37, 0.14);
-  outline: none;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 
@@ -1870,9 +2164,11 @@ border-color: #eef0ed;
   color: var(--red);
 }
 
+/* #c87900 sobre #fff0d3 daba 3,01:1, por debajo del 4,5 exigido para texto
+   pequeno. Este llega a 5,67. */
 .priority-badge.media {
   background: #fff0d3;
-  color: var(--amber);
+  color: #8a5200;
 }
 
 .priority-badge.baja {
@@ -1880,9 +2176,10 @@ border-color: #eef0ed;
   color: var(--green-dark);
 }
 
+/* El gris neutro daba 2,79:1 sobre su propio fondo. Este llega a 5,16. */
 .priority-badge.pendiente {
   background: #ecefed;
-  color: var(--neutral);
+  color: #5c665e;
 }
 
 .level-badge {
@@ -1943,16 +2240,6 @@ border-color: #eef0ed;
   background: #d9edc3;
   color: #315d11;
 }
-
-.empty-state {
-  padding: 28px;
-  border: 1px dashed var(--line);
-  border-radius: var(--radius);
-  background: #ffffff;
-  color: var(--muted);
-  text-align: center;
-}
-
 
 .filtered-empty-state {
   display: grid;
@@ -2038,7 +2325,7 @@ border-color: #eef0ed;
 
 .scoring-criteria-button:focus-visible {
   border-color: var(--green);
-  outline: 3px solid rgba(134, 188, 37, 0.22);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -2145,14 +2432,219 @@ border-color: #eef0ed;
 
 .modal-close-button:focus-visible {
   border-color: var(--green);
-  outline: 3px solid rgba(134, 188, 37, 0.22);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+
+/* ==================================================
+   DIALOGO DE CONFIRMACION
+   ==================================================
+   Sustituye a window.confirm y window.prompt, que ensenan el origen de la
+   pagina y no se pueden disenar. */
+
+.dialog-modal {
+  width: min(540px, 100%);
+  max-height: min(86vh, 640px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 22px 24px 6px;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  color: #202622;
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.dialog-header .eyebrow {
+  margin-bottom: 4px;
+}
+
+.dialog-header .eyebrow[hidden] {
+  display: none;
+}
+
+.dialog-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: #4f5952;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+/* Las acciones que no se pueden deshacer se anuncian antes de leerlas. */
+.dialog-peligro .dialog-icon {
+  background: #fde7e3;
+  color: var(--red);
+}
+
+.dialog-peligro .dialog-confirm {
+  background: var(--red);
+  color: #ffffff;
+}
+
+.dialog-peligro .dialog-confirm:hover:not(:disabled) {
+  background: #a02a22;
+}
+
+.dialog-body {
+  padding: 8px 24px 4px;
+}
+
+.dialog-message p {
+  margin: 0 0 10px;
+  color: #3a433d;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.dialog-message p:last-child {
+  margin-bottom: 0;
+}
+
+.dialog-field {
+  display: grid;
+  gap: 5px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.dialog-field[hidden] {
+  display: none;
+}
+
+.dialog-field input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 24px 22px;
+}
+
+.dialog-actions-spacer {
+  flex: 1 1 auto;
+}
+
+.dialog-secondary {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--green-dark);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.dialog-secondary:hover {
+  border-style: solid;
+  border-color: var(--green);
+  background: #f3f8ea;
+}
+
+.dialog-secondary[hidden] {
+  display: none;
+}
+
+.dialog-cancel {
+  border: 1px solid var(--line);
+}
+
+.dialog-cancel:hover {
+  border-color: #b9c1b5;
+  background: var(--surface-muted);
+}
+
+.dialog-confirm:disabled {
+  background: #e0e4dd;
+  color: #8a9189;
+  cursor: not-allowed;
 }
 
 
 /* ==================================================
    MODAL DE CRITERIOS F3M
    ================================================== */
+
+/* Los niveles de la subcapacidad concreta, antes de la rubrica generica: es lo
+   que se necesita para decidir entre un 3 y un 4. */
+.criteria-subcapability {
+  padding: 18px 24px 4px;
+}
+
+.criteria-subcapability[hidden] {
+  display: none;
+}
+
+.criteria-subcapability h3 {
+  margin: 0 0 12px;
+  color: #202622;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.criteria-item-levels li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+
+.criteria-item-levels li strong {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.criteria-item-levels li.is-current-level {
+  border-color: rgba(37, 94, 145, 0.3);
+  border-left-color: var(--blue);
+  background: rgba(37, 94, 145, 0.04);
+}
+
+.criteria-item-levels .current-level-label {
+  grid-column: 2;
+  font-style: normal;
+}
+
+.criteria-generic-note {
+  margin: -6px 0 12px;
+}
 
 .criteria-tabs {
   position: sticky;
@@ -2347,15 +2839,15 @@ display: inline-block;
 }
 
 .radar-dot-processes {
-background: #86BC25; /* Deloitte Green */
+background: var(--lever-procesos);
 }
 
 .radar-dot-technology {
-background: #ED8B00; /* Deloitte Orange */
+background: var(--lever-tecnologia);
 }
 
 .radar-dot-organization {
-background: #012169; /* Deloitte Blue 6 */
+background: var(--lever-organizacion);
 }
 
 .radar-chart-wrap {
@@ -2476,6 +2968,39 @@ height: 100% !important;
 }
 
 
+/* Avance de cada dominio: en un encargo multidominio es la pregunta constante. */
+.domain-progress {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 18px;
+  margin-left: 7px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.domain-progress.sin-empezar {
+  background: transparent;
+  color: #949c94;
+}
+
+.domain-progress.completo {
+  background: #e8f4df;
+  color: var(--green-dark);
+}
+
+.domain-button.active .domain-progress {
+  background: rgba(255, 255, 255, 0.82);
+  color: #10140e;
+}
+
 .domain-button:not(:disabled):hover {
   border-color: var(--green);
   background: #f3f8ea;
@@ -2571,12 +3096,53 @@ height: 100% !important;
   justify-content: space-between;
   gap: 24px;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--line);
   background: linear-gradient(
     180deg,
     #f8faf5 0%,
     #ffffff 100%
   );
+  cursor: pointer;
+  list-style: none;
+}
+
+.capability-targets-header::-webkit-details-marker {
+  display: none;
+}
+
+.capability-targets-details[open] .capability-targets-header {
+  border-bottom: 1px solid var(--line);
+}
+
+.capability-targets-header:hover {
+  background: #f4f8ee;
+}
+
+.capability-targets-header:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+
+.capability-targets-toggle {
+  flex: 0 0 auto;
+  align-self: center;
+  color: var(--green-dark);
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: transform 150ms ease;
+}
+
+.capability-targets-toggle::before {
+  content: "›";
+}
+
+.capability-targets-details[open] .capability-targets-toggle {
+  transform: rotate(90deg);
+}
+
+.capability-targets-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px 20px 0;
 }
 
 .capability-targets-header h3 {
@@ -2652,15 +3218,15 @@ height: 100% !important;
 }
 
 .target-column-procesos::before {
-  background: var(--green);
+  background: var(--lever-procesos);
 }
 
 .target-column-tecnologia::before {
-  background: #ed8b00;
+  background: var(--lever-tecnologia);
 }
 
 .target-column-organizacion::before {
-  background: #012169;
+  background: var(--lever-organizacion);
 }
 
 .capability-targets-rows {
@@ -2724,25 +3290,25 @@ height: 100% !important;
 }
 
 .capability-target-select.target-procesos {
-  border-left-color: var(--green);
+  border-left-color: var(--lever-procesos);
 }
 
 .capability-target-select.target-tecnologia {
-  border-left-color: #ed8b00;
+  border-left-color: var(--lever-tecnologia);
 }
 
 .capability-target-select.target-organizacion {
-  border-left-color: #012169;
+  border-left-color: var(--lever-organizacion);
 }
 
 .capability-target-select:hover {
   border-color: rgba(134, 188, 37, 0.75);
 }
 
-.capability-target-select:focus {
+.capability-target-select:focus-visible {
   border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(134, 188, 37, 0.14);
-  outline: none;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 
@@ -2819,7 +3385,6 @@ height: 100% !important;
 
   #sourceNote {
   max-width: 100%;
-  white-space: normal;
   }
 
 
@@ -2948,10 +3513,13 @@ height: 100% !important;
     bottom: 14px;
     max-width: calc(100% - 28px);
     min-height: 38px;
-    padding: 0 12px;
-    overflow: hidden;
+    padding: 8px 12px;
     font-size: 0.8rem;
-    text-overflow: ellipsis;
+  }
+
+  .notice {
+    top: 58px;
+    width: calc(100% - 24px);
   }
 
   .modal-backdrop {
@@ -2980,6 +3548,15 @@ height: 100% !important;
   .criteria-panel,
   .ai-modal-content {
     padding: 18px;
+  }
+
+  .dialog-actions {
+    flex-wrap: wrap;
+  }
+
+  .dialog-actions .secondary-button,
+  .dialog-actions .primary-button {
+    flex: 1 1 auto;
   }
 
   .criteria-checklist {

@@ -39,11 +39,12 @@ Dependencias externas por CDN, sin bundler:
 - **Chart.js 4.5.0** desde cdnjs (`index.html:554`) — radares por capacidad.
 - **Firebase Realtime Database 12.15.0** importado desde `gstatic.com` (`app.js:1-9`).
 
-### Código muerto — no dejarse engañar
+### De dónde salen los datos
 
-`DATA_URL = "data/fpa_assessment.json"` (`app.js:39`) y el archivo `data/fpa_assessment.json` son
-restos de la versión anterior, cuando solo existía el dominio FP&A. **No se usan.** Los datos reales
-salen de `DOMAINS[].dataUrl` → `data/domains/*.json`.
+Los datos salen de `DOMAINS[].dataUrl` → `data/domains/*.json`, un archivo por dominio.
+
+(Hasta hace poco quedaban aquí una constante `DATA_URL` y un `data/fpa_assessment.json` sueltos, de
+cuando solo existía FP&A. Ya no están.)
 
 ## Reglas de negocio F3M
 

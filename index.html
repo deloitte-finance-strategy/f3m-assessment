@@ -14,82 +14,71 @@
           <h1>F3M Assessment</h1>
           <p class="header-copy">Diagnóstico preliminar de madurez por subcapacidad, palanca y roadmap sugerido.</p>
         </div>
-        <div class="header-actions" aria-label="Acciones de escenario">
-          <div class="header-action-group header-action-group-primary">
-            <button
-              class="primary-button"
-              id="exportPdfButton"
-              type="button"
-            >
-              Exportar PDF
-            </button>
-
-            <button
-              class="header-secondary-action"
-              id="exportCsvButton"
-              type="button"
-            >
-              Exportar CSV
-            </button>
-          </div>
-
-          <div
-            class="header-action-group header-action-group-technical"
-            aria-label="Gestión del escenario"
-          >
-            <button
-              class="header-technical-action"
-              id="importJsonButton"
-              type="button"
-            >
-              Importar JSON
-            </button>
-
-            <button
-              class="header-technical-action"
-              id="exportJsonButton"
-              type="button"
-            >
-              Exportar JSON
-            </button>
-
-            <button
-              class="header-technical-action"
-              id="createScenarioButton"
-              type="button"
-              title="Genera un enlace compartido con un identificador aleatorio"
-            >
-              Crear escenario compartido
-            </button>
-
-            <button
-              class="header-technical-action"
-              id="copyScenarioLinkButton"
-              type="button"
-              title="Copia el enlace de este escenario al portapapeles"
-              hidden
-            >
-              Copiar enlace
-            </button>
-
-            <button
-              class="header-technical-action"
-              id="editorNameButton"
-              type="button"
-              title="Nombre con el que se atribuyen tus cambios"
-              hidden
-            >
-              Poner mi nombre
-            </button>
-          </div>
-
-          <button
-            class="danger-ghost-button header-reset-action"
-            id="resetButton"
-            type="button"
-          >
-            Restaurar base
+        <div class="header-actions">
+          <button class="primary-button" id="exportPdfButton" type="button">
+            Exportar PDF
           </button>
+
+          <button class="header-secondary-action" id="exportCsvButton" type="button">
+            Exportar CSV
+          </button>
+
+          <div class="header-menu">
+            <button
+              class="header-menu-button"
+              id="scenarioMenuButton"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="scenarioMenu"
+            >
+              Escenario
+              <span class="header-menu-caret" aria-hidden="true"></span>
+            </button>
+
+            <div class="header-menu-panel" id="scenarioMenu" role="menu" hidden>
+              <p class="header-menu-title" id="scenarioMenuState">Copia de este navegador</p>
+
+              <button class="header-menu-item" id="createScenarioButton" type="button" role="menuitem">
+                Crear escenario compartido
+                <span>Genera un enlace para trabajar en equipo</span>
+              </button>
+
+              <button class="header-menu-item" id="copyScenarioLinkButton" type="button" role="menuitem" hidden>
+                Copiar enlace
+                <span>Trátalo como una credencial</span>
+              </button>
+
+              <button class="header-menu-item" id="editorNameButton" type="button" role="menuitem" hidden>
+                Poner mi nombre
+                <span>Así se atribuyen tus cambios</span>
+              </button>
+
+              <button class="header-menu-item" id="leaveScenarioButton" type="button" role="menuitem" hidden>
+                Salir del escenario
+                <span>Vuelve a la copia de este navegador</span>
+              </button>
+
+              <hr class="header-menu-separator">
+
+              <button class="header-menu-item" id="exportJsonButton" type="button" role="menuitem">
+                Guardar una copia
+                <span>Descarga el trabajo en un archivo</span>
+              </button>
+
+              <button class="header-menu-item" id="importJsonButton" type="button" role="menuitem">
+                Abrir una copia
+                <span>Sustituye los datos por los del archivo</span>
+              </button>
+
+              <hr class="header-menu-separator">
+
+              <button class="header-menu-item header-menu-item-danger" id="resetButton" type="button" role="menuitem">
+                Restaurar base
+                <span>Borra el trabajo de este navegador</span>
+              </button>
+            </div>
+          </div>
 
           <input
             id="scenarioFileInput"
@@ -102,7 +91,6 @@
     </header>
 
     <main class="app-shell">
-      <section class="notice" id="loadNotice" hidden></section>
 
 
 <section class="domain-switcher" aria-label="Navegación de dominios F3M">
@@ -178,7 +166,7 @@
 
 
       <nav class="tabs" aria-label="Secciones del assessment">
-        <a href="#dashboard">Dashboard</a>
+        <a href="#dashboard" aria-current="page">Dashboard</a>
         <a href="#assessment">
           Assessment
           <span class="tab-badge" id="assessmentTabBadge">0/0</span>
@@ -200,6 +188,8 @@
         </div>
 
         <div class="kpi-grid" id="kpiGrid"></div>
+
+        <p class="dashboard-headline" id="dashboardHeadline" hidden></p>
 
         <div class="split-grid">
           <div class="panel">
@@ -276,17 +266,7 @@
     </div>
 
     <div class="assessment-controls">
-      <div class="active-filters" id="activeFilters" hidden>
-        <span id="activeFiltersText">Sin filtros activos</span>
-
-        <button
-          class="clear-filters-button"
-          id="clearFiltersButton"
-          type="button"
-        >
-          Limpiar filtros
-        </button>
-      </div>
+      <div class="active-filters" data-active-filters hidden></div>
 
       <div class="filters">
         <label>
@@ -323,7 +303,6 @@
     ></div>
 
     <div class="assessment-list" id="assessmentList"></div>
-  </section>
 </section>
 
 
@@ -336,6 +315,8 @@
     </div>
     <p class="small-note">Vista agrupada por capacidad. Usa “Ver subcapacidades” para desplegar el detalle.</p>
   </div>
+
+  <div class="active-filters active-filters-block" data-active-filters hidden></div>
 
   <div class="heatmap-legend panel"> <!-- NUEVO: leyenda visual del heatmap -->
     
@@ -371,8 +352,10 @@
             <p class="eyebrow">Roadmap</p>
             <h2>Iniciativas sugeridas</h2>
           </div>
-          <p class="small-note">El Roadmap respeta los filtros activos de capacidad, prioridad y búsqueda.</p>
+          <p class="small-note">Ordenado por prioridad y gap. Respeta los filtros del Assessment.</p>
         </div>
+
+        <div class="active-filters active-filters-block" data-active-filters hidden></div>
         <div class="table-wrap panel">
           <table class="data-table roadmap-table" id="roadmapTable"></table>
         </div>
@@ -391,6 +374,26 @@
       <span aria-hidden="true">↑</span>
       <span>Volver arriba</span>
     </button>
+
+    <div
+      class="notice"
+      id="loadNotice"
+      role="status"
+      aria-live="polite"
+      hidden
+    >
+      <span class="notice-icon" id="loadNoticeIcon" aria-hidden="true"></span>
+      <p class="notice-text" id="loadNoticeText"></p>
+
+      <button
+        class="notice-close"
+        id="loadNoticeClose"
+        type="button"
+        aria-label="Cerrar aviso"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
 
     <div
       class="save-status"
@@ -459,32 +462,84 @@
     </template>
 
 
+    <div
+      class="modal-backdrop"
+      id="dialogModal"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="dialogTitle"
+      aria-describedby="dialogMessage"
+      hidden
+    >
+      <div class="dialog-modal" role="document">
+        <div class="dialog-header">
+          <span class="dialog-icon" id="dialogIcon" aria-hidden="true"></span>
+
+          <div>
+            <p class="eyebrow" id="dialogEyebrow"></p>
+            <h2 id="dialogTitle"></h2>
+          </div>
+        </div>
+
+        <div class="dialog-body">
+          <div class="dialog-message" id="dialogMessage"></div>
+
+          <label class="dialog-field" id="dialogFieldWrap" hidden>
+            <span id="dialogFieldLabel"></span>
+            <input id="dialogField" type="text" autocomplete="off">
+          </label>
+        </div>
+
+        <div class="dialog-actions">
+          <button class="dialog-secondary" id="dialogSecondary" type="button" hidden></button>
+
+          <span class="dialog-actions-spacer"></span>
+
+          <button class="secondary-button dialog-cancel" id="dialogCancel" type="button">
+            Cancelar
+          </button>
+
+          <button class="primary-button dialog-confirm" id="dialogConfirm" type="button">
+            Continuar
+          </button>
+        </div>
+      </div>
+    </div>
+
+
     <div class="modal-backdrop" id="scoringCriteriaModal" role="dialog" aria-modal="true" aria-labelledby="scoringCriteriaTitle" hidden>
   <div class="criteria-modal" role="document">
     <div class="criteria-modal-header">
       <div>
         <p class="eyebrow">Guía de evaluación</p>
-        <h2 id="scoringCriteriaTitle">Criterios F3M de scoring</h2>
+        <h2 id="scoringCriteriaTitle">Cómo puntuar esta subcapacidad</h2>
       </div>
       <button class="modal-close-button" id="closeScoringCriteriaModalButton" type="button" aria-label="Cerrar criterios de scoring">
         ×
       </button>
     </div>
 
+    <section class="criteria-subcapability" id="criteriaSubcapability" hidden>
+      <p class="eyebrow">Niveles de esta subcapacidad</p>
+      <h3 id="criteriaSubcapabilityTitle"></h3>
+      <ol class="criteria-levels criteria-item-levels" id="criteriaSubcapabilityLevels"></ol>
+    </section>
+
     <div class="criteria-tabs" role="tablist" aria-label="Criterios por palanca">
-      <button class="criteria-tab active" type="button" role="tab" data-criteria-tab="procesos" aria-selected="true">
+      <button class="criteria-tab active" type="button" role="tab" id="criteriaTab-procesos" aria-controls="criteriaPanel-procesos" data-criteria-tab="procesos" aria-selected="true" tabindex="0">
         Procesos
       </button>
-      <button class="criteria-tab" type="button" role="tab" data-criteria-tab="tecnologia" aria-selected="false">
+      <button class="criteria-tab" type="button" role="tab" id="criteriaTab-tecnologia" aria-controls="criteriaPanel-tecnologia" data-criteria-tab="tecnologia" aria-selected="false" tabindex="-1">
         Tecnología
       </button>
-      <button class="criteria-tab" type="button" role="tab" data-criteria-tab="organizacion" aria-selected="false">
+      <button class="criteria-tab" type="button" role="tab" id="criteriaTab-organizacion" aria-controls="criteriaPanel-organizacion" data-criteria-tab="organizacion" aria-selected="false" tabindex="-1">
         Organización
       </button>
     </div>
 
-    <div class="criteria-panel active" data-criteria-panel="procesos">
+    <div class="criteria-panel active" role="tabpanel" id="criteriaPanel-procesos" aria-labelledby="criteriaTab-procesos" tabindex="0" data-criteria-panel="procesos">
       <h3>Procesos</h3>
+      <p class="small-note criteria-generic-note">Rúbrica general de la palanca, común a todos los dominios.</p>
       <ol class="criteria-levels">
         <li><strong>Nivel 1 - Inicial:</strong> No existe proceso formal o es ad hoc</li>
         <li><strong>Nivel 2 - Estructurado:</strong> Proceso parcial o inconsistente</li>
@@ -502,8 +557,9 @@
       </ul>
     </div>
 
-    <div class="criteria-panel" data-criteria-panel="tecnologia">
+    <div class="criteria-panel" role="tabpanel" id="criteriaPanel-tecnologia" aria-labelledby="criteriaTab-tecnologia" tabindex="0" data-criteria-panel="tecnologia">
       <h3>Tecnología</h3>
+      <p class="small-note criteria-generic-note">Rúbrica general de la palanca, común a todos los dominios.</p>
       <ol class="criteria-levels">
         <li><strong>Nivel 1 - Inicial:</strong> Excel/manual</li>
         <li><strong>Nivel 2 - Estructurado:</strong> Herramientas parciales</li>
@@ -521,8 +577,9 @@
       </ul>
     </div>
 
-    <div class="criteria-panel" data-criteria-panel="organizacion">
+    <div class="criteria-panel" role="tabpanel" id="criteriaPanel-organizacion" aria-labelledby="criteriaTab-organizacion" tabindex="0" data-criteria-panel="organizacion">
       <h3>Organización</h3>
+      <p class="small-note criteria-generic-note">Rúbrica general de la palanca, común a todos los dominios.</p>
       <ol class="criteria-levels">
         <li><strong>Nivel 1 - Inicial:</strong> Roles no claros</li>
         <li><strong>Nivel 2 - Estructurado:</strong> Roles parciales</li>
