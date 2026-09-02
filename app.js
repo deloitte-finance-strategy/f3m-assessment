@@ -456,6 +456,7 @@ function cacheElements() {
     "exportPdfButton", // NUEVO: botón de exportación PDF
     "resetButton",
     "createScenarioButton",
+    "copyScenarioLinkButton",
     "scenarioFileInput",
     "dashboardDomainTitle",
   ].forEach((id) => {
@@ -485,6 +486,7 @@ function bindGlobalEvents() {
   els.exportPdfButton.addEventListener("click", exportPdfReport); // NUEVO: genera informe imprimible/PDF
   els.resetButton.addEventListener("click", resetScenario);
   els.createScenarioButton?.addEventListener("click", createSharedScenario);
+  els.copyScenarioLinkButton?.addEventListener("click", copyScenarioLink);
   els.heatmapExpandToggle?.addEventListener("click", handleHeatmapExpandToggleAll);
   setupActiveTabObserver(); // NUEVO: marca automáticamente la pestaña activa según la sección visible
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
@@ -4587,9 +4589,21 @@ function downloadFile(filename, content, type) {
 
 
 function resetScenario() {
-  const confirmed = window.confirm(
-    "¿Seguro que quieres restaurar la base? Se perderán los cambios guardados localmente en este navegador.",
-  ); // NUEVO: pide confirmación antes de borrar datos locales
+  // El efecto real depende del modo: en local se pierde todo, y en un escenario
+  // compartido los datos vuelven a bajar de Firebase enseguida.
+  const mensaje = scenarioId
+    ? "Estás en un escenario compartido.\n\n" +
+      "Al restaurar se borrará la copia de este navegador, pero los datos volverán " +
+      "a descargarse del escenario compartido, así que en la práctica no cambiará nada.\n\n" +
+      "Para volver de verdad a los datos base, abre la herramienta sin el parámetro " +
+      "'?scenario=' en la dirección.\n\n¿Continuar de todos modos?"
+    : "Se borrarán TODAS las puntuaciones, comentarios y estados guardados en este " +
+      "navegador, de todos los dominios.\n\n" +
+      "Esta acción no se puede deshacer y estos datos no están guardados en ningún " +
+      "otro sitio. Si quieres conservarlos, cancela y pulsa antes 'Exportar JSON'.\n\n" +
+      "¿Seguro que quieres restaurar la base?";
+
+  const confirmed = window.confirm(mensaje); // NUEVO: pide confirmación antes de borrar datos locales
 
   if (!confirmed) {
     return; // NUEVO: si el usuario cancela, no se borra nada
@@ -4672,10 +4686,46 @@ function showScenarioModeNotice() {
     return;
   }
 
+  // Los identificadores son aleatorios y largos, así que copiarlos a mano no es viable.
+  if (els.copyScenarioLinkButton) {
+    els.copyScenarioLinkButton.hidden = false;
+  }
+
   showNotice(
     `Escenario compartido activo: ${scenarioId}. Los cambios se guardan automáticamente y se sincronizan con cualquier navegador que use este mismo enlace.`,
   ); // MODIFICADO: el mensaje refleja que Firebase ya guarda y sincroniza datos
 
+}
+
+
+function getScenarioShareUrl() {
+  // Construimos la URL a partir del id y no de location.href para no arrastrar
+  // otros parámetros que hubiera en la barra de direcciones.
+  return `${window.location.origin}${window.location.pathname}?scenario=${scenarioId}`;
+}
+
+
+async function copyScenarioLink() {
+  if (!scenarioId) {
+    return;
+  }
+
+  const url = getScenarioShareUrl();
+
+  try {
+    await navigator.clipboard.writeText(url);
+
+    showNotice(
+      "Enlace copiado. Trátalo como una credencial: cualquier persona que lo tenga puede ver y editar este escenario.",
+    );
+  } catch (error) {
+    console.warn("No se pudo copiar al portapapeles.", error);
+
+    showNotice(
+      `No se pudo copiar automáticamente. Copia este enlace a mano: ${url}`,
+      true,
+    );
+  }
 }
 
 
