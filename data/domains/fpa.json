@@ -20,9 +20,9 @@
         "5": "Modelo rolling, ágil y orientado a escenarios, con gobierno colaborativo, alertas tempranas y capacidad de replanificación dinámica."
       },
       "scores": {
-        "procesos": 2,
-        "tecnologia": 4,
-        "organizacion": 3
+        "procesos": null,
+        "tecnologia": null,
+        "organizacion": null
       },
       "preguntas": [
         "¿Existe calendario formal de presupuesto y forecast?",
