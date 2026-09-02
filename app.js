@@ -2247,27 +2247,44 @@ function renderCapabilityTargets() {
     })
     .join("");
 
+  const objetivoBase = normalizeTargetValue(
+    state.meta?.targetMaturity,
+    DEFAULT_TARGET_MATURITY,
+  );
+
+  // El panel es configuracion, no evaluacion: arranca plegado para no dejar
+  // quince selectores por delante de la primera subcapacidad. Si ya estaba
+  // desplegado, se respeta.
+  const estabaDesplegado = Boolean(
+    els.capabilityTargetsPanel.querySelector(".capability-targets-details")?.open,
+  );
+
   els.capabilityTargetsPanel.innerHTML = `
-    <div class="capability-targets-header">
-      <div>
-        <p class="eyebrow">Ambición de madurez</p>
+    <details class="capability-targets-details" ${estabaDesplegado ? "open" : ""}>
+      <summary class="capability-targets-header">
+        <div>
+          <p class="eyebrow">Ambición de madurez</p>
 
-        <h3>Objetivos por capacidad y palanca</h3>
+          <h3>Objetivos por capacidad y palanca</h3>
 
-        <p class="small-note">
-          Define el nivel objetivo de Procesos, Tecnología y Organización.
-          Si no se modifica, se utiliza el nivel 4.
-        </p>
+          <p class="small-note">
+            ${escapeHtml(describirObjetivos() || "")}. Define el nivel objetivo de
+            Procesos, Tecnología y Organización de cada capacidad.
+          </p>
+        </div>
+
+        <span class="capability-targets-toggle" aria-hidden="true"></span>
+      </summary>
+
+      <div class="capability-targets-actions">
+        <button
+          class="secondary-button reset-targets-button"
+          type="button"
+          data-reset-capability-targets
+        >
+          Restaurar objetivos al nivel ${objetivoBase}
+        </button>
       </div>
-
-      <button
-        class="secondary-button reset-targets-button"
-        type="button"
-        data-reset-capability-targets
-      >
-        Restaurar objetivos a 4
-      </button>
-    </div>
 
     <div class="capability-targets-table">
       <div class="capability-targets-columns" aria-hidden="true">
@@ -2286,7 +2303,10 @@ function renderCapabilityTargets() {
         ${rows}
       </div>
     </div>
+    </details>
   `;
+
+
 
   els.capabilityTargetsPanel
     .querySelectorAll(".capability-target-select")
@@ -2395,7 +2415,7 @@ async function resetCapabilityTargets() {
     eyebrow: "Ambición de madurez",
     titulo: `Restaurar los objetivos de ${dominio}`,
     parrafos: [
-      "Todos los objetivos de Procesos, Tecnología y Organización de este dominio volverán al nivel 4.",
+      `Todos los objetivos de Procesos, Tecnología y Organización de este dominio volverán al nivel ${normalizeTargetValue(state.meta?.targetMaturity, DEFAULT_TARGET_MATURITY)}.`,
       "Cambia los gaps, las prioridades y las oleadas de sus subcapacidades. Si el escenario es compartido, lo verá todo el equipo.",
     ],
     tono: "peligro",
@@ -2412,9 +2432,11 @@ async function resetCapabilityTargets() {
     return;
   }
 
+  // El nivel del dominio, no un 4 fijo: si algun dominio declarase otro
+  // objetivo base, el boton prometia una cosa y hacia otra.
   const defaultTargets = createDefaultTargets(
     state.items,
-    DEFAULT_TARGET_MATURITY,
+    normalizeTargetValue(state.meta?.targetMaturity, DEFAULT_TARGET_MATURITY),
   );
 
   activeDomain.targets = defaultTargets;
@@ -2424,7 +2446,10 @@ async function resetCapabilityTargets() {
   persistTargetsDelDominioActivo();
 
   showNotice(
-    "Los objetivos del dominio actual se han restaurado a nivel 4.",
+    `Los objetivos de ${dominio} han vuelto al nivel ${normalizeTargetValue(
+      state.meta?.targetMaturity,
+      DEFAULT_TARGET_MATURITY,
+    )}.`,
     "exito",
   );
 }

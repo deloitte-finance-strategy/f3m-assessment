@@ -3019,12 +3019,53 @@ height: 100% !important;
   justify-content: space-between;
   gap: 24px;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--line);
   background: linear-gradient(
     180deg,
     #f8faf5 0%,
     #ffffff 100%
   );
+  cursor: pointer;
+  list-style: none;
+}
+
+.capability-targets-header::-webkit-details-marker {
+  display: none;
+}
+
+.capability-targets-details[open] .capability-targets-header {
+  border-bottom: 1px solid var(--line);
+}
+
+.capability-targets-header:hover {
+  background: #f4f8ee;
+}
+
+.capability-targets-header:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+
+.capability-targets-toggle {
+  flex: 0 0 auto;
+  align-self: center;
+  color: var(--green-dark);
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: transform 150ms ease;
+}
+
+.capability-targets-toggle::before {
+  content: "›";
+}
+
+.capability-targets-details[open] .capability-targets-toggle {
+  transform: rotate(90deg);
+}
+
+.capability-targets-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px 20px 0;
 }
 
 .capability-targets-header h3 {
