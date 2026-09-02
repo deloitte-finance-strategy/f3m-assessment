@@ -1277,6 +1277,52 @@ function closeAiInitiativeModal() {
 
 
 
+/**
+ * Cuantas subcapacidades tiene puntuadas cada dominio.
+ *
+ * En un encargo multidominio es la pregunta constante: por donde vamos. El
+ * conmutador ensenaba nueve botones iguales y el unico contador que habia,
+ * el de la pestana Assessment, solo hablaba del dominio abierto.
+ *
+ * Se cuentan las que tienen alguna palanca informada, sin pasar por calculate:
+ * los objetivos son los del dominio activo y darian gaps equivocados para los
+ * demas.
+ */
+function actualizarAvanceDeDominios() {
+  Object.entries(DOMAINS).forEach(([domainId]) => {
+    const boton = document.querySelector(`[data-domain-id="${CSS.escape(domainId)}"]`);
+    const dominio = state.domains[domainId];
+
+    if (!boton || !dominio) {
+      return;
+    }
+
+    const total = dominio.items.length;
+
+    const puntuadas = dominio.items.filter((item) =>
+      LEVERS.some((lever) => Number.isFinite(item.scores[lever.key])),
+    ).length;
+
+    let contador = boton.querySelector(".domain-progress");
+
+    if (!contador) {
+      contador = document.createElement("span");
+      contador.className = "domain-progress";
+      boton.appendChild(contador);
+    }
+
+    contador.textContent = `${puntuadas}/${total}`;
+    contador.classList.toggle("sin-empezar", puntuadas === 0);
+    contador.classList.toggle("completo", puntuadas === total && total > 0);
+
+    boton.title =
+      puntuadas === 0
+        ? "Sin empezar"
+        : `${puntuadas} de ${total} subcapacidades puntuadas`;
+  });
+}
+
+
 function updateNavigationBadges() {
   if (!els.assessmentTabBadge || !els.roadmapTabBadge || !state.items.length) {
     return;
@@ -1349,6 +1395,7 @@ function renderAll(opciones = {}) {
 
   // Los badges miden el dominio entero, asi que se actualizan siempre.
   updateNavigationBadges();
+  actualizarAvanceDeDominios();
 }
 
 

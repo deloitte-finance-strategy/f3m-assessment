@@ -2891,6 +2891,39 @@ height: 100% !important;
 }
 
 
+/* Avance de cada dominio: en un encargo multidominio es la pregunta constante. */
+.domain-progress {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 18px;
+  margin-left: 7px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.domain-progress.sin-empezar {
+  background: transparent;
+  color: #949c94;
+}
+
+.domain-progress.completo {
+  background: #e8f4df;
+  color: var(--green-dark);
+}
+
+.domain-button.active .domain-progress {
+  background: rgba(255, 255, 255, 0.82);
+  color: #10140e;
+}
+
 .domain-button:not(:disabled):hover {
   border-color: var(--green);
   background: #f3f8ea;
