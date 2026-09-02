@@ -5,6 +5,7 @@ import {
   ref,
   get,
   set,
+  update,
   onValue,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
@@ -213,6 +214,7 @@ const expandedHeatmapCapabilities = new Set(); // NUEVO: mantiene abiertas las c
 
 let isApplyingRemoteScenario = false; // NUEVO: evita guardar de vuelta mientras estamos cargando datos remotos
 let pendingScenarioWrites = 0;
+let snapshotRemotoPendiente = null; // Snapshot que llegó mientras guardábamos, para aplicarlo después
 
 let scoringCriteriaTrigger = null;
 let aiInitiativeTrigger = null;
@@ -2041,7 +2043,7 @@ function handleCapabilityTargetChange(event) {
   syncActiveDomainState();
 
   renderAll();
-  persistScenario();
+  persistTargetsDelDominioActivo();
 }
 
 
@@ -2070,7 +2072,7 @@ function resetCapabilityTargets() {
   state.targets = activeDomain.targets;
 
   renderAll();
-  persistScenario();
+  persistTargetsDelDominioActivo();
 
   showNotice(
     "Los objetivos del dominio actual se han restaurado a nivel 4.",
@@ -2249,7 +2251,10 @@ function handleScoreChange(event) {
   syncActiveDomainState();
 
   renderAll();
-  persistScenario();
+
+  persistGranularChange({
+    [rutaDeItem(item.id, `scores/${leverKey}`)]: score,
+  });
 }
 
 
@@ -2598,10 +2603,28 @@ function statusSelect(item) {
 
 function handleRoadmapFieldChange(event) {
   const item = state.items.find((entry) => entry.id === event.target.dataset.id);
-  if (event.target.classList.contains("roadmap-owner")) item.owner = event.target.value;
-  if (event.target.classList.contains("roadmap-status")) item.status = event.target.value;
-  if (event.target.classList.contains("roadmap-comment")) item.comentario = event.target.value;
-  persistScenario();
+
+  if (!item) {
+    return;
+  }
+
+  const campo = event.target.classList.contains("roadmap-owner")
+    ? "owner"
+    : event.target.classList.contains("roadmap-status")
+      ? "status"
+      : event.target.classList.contains("roadmap-comment")
+        ? "comentario"
+        : null;
+
+  if (!campo) {
+    return;
+  }
+
+  item[campo] = event.target.value;
+
+  persistGranularChange({
+    [rutaDeItem(item.id, campo)]: event.target.value,
+  });
 }
 
 function heatScoreCell(value) {
@@ -2674,22 +2697,10 @@ function getStoredScenario() {
   }
 }
 
-function getScenarioTimestamp(payload) {
-  const timestamp = Date.parse(
-    payload?.updatedAt || "",
-  );
-
-  return Number.isFinite(timestamp)
-    ? timestamp
-    : 0;
-}
-
-function isScenarioNewer(candidate, reference) {
-  return (
-    getScenarioTimestamp(candidate) >
-    getScenarioTimestamp(reference)
-  );
-}
+// getScenarioTimestamp / isScenarioNewer se han retirado: comparar marcas de tiempo
+// para decidir qué versión gana dejó de tener sentido al escribir por rutas
+// concretas. Además los relojes de cada equipo no son fiables, así que la
+// comparación descartaba cambios ajenos de forma arbitraria.
 
 function readScenarioFromFirebase(timeoutMs = 8000) {
   const firebaseRead = get(scenarioDatabaseRef);
@@ -2760,48 +2771,10 @@ async function initializeSharedScenario() {
       return;
     }
 
-    if (
-      localScenario &&
-      isScenarioNewer(
-        localScenario,
-        remoteScenario,
-      )
-    ) {
-      isApplyingRemoteScenario = true;
-
-      try {
-        applyScenarioPayload(localScenario);
-        populateCapacityFilter();
-        renderAll();
-      } finally {
-        isApplyingRemoteScenario = false;
-      }
-
-      try {
-        await saveScenarioToFirebase(
-          localScenario,
-        );
-
-        updateSaveStatus(
-          "saved",
-          "Sincronizado ✓",
-        );
-      } catch (error) {
-        console.warn(
-          "La versión local es más reciente, pero no se pudo enviar a Firebase.",
-          error,
-        );
-
-        updateSaveStatus(
-          "saved",
-          "Guardado local ✓",
-        );
-      }
-
-      subscribeToSharedScenario();
-      return;
-    }
-
+    // En un escenario compartido la fuente de verdad es Firebase. Antes, si la
+    // copia local parecía más reciente, se subía entera y eso borraba los cambios
+    // que otras personas hubieran hecho mientras tanto. Ahora se aplica siempre lo
+    // remoto: cada edición propia ya sube al instante por su ruta concreta.
     isApplyingRemoteScenario = true;
 
     try {
@@ -2861,54 +2834,15 @@ function subscribeToSharedScenario() {
         return;
       }
 
+      // Mientras hay una escritura nuestra en vuelo, el snapshot puede ser
+      // anterior a nuestro cambio y provocaría un parpadeo. Antes se descartaba
+      // y se perdía para siempre; ahora se aparca y se aplica al terminar.
       if (pendingScenarioWrites > 0) {
+        snapshotRemotoPendiente = remoteScenario;
         return;
       }
 
-      const localScenario = getStoredScenario();
-
-      if (
-        localScenario &&
-        isScenarioNewer(
-          localScenario,
-          remoteScenario,
-        )
-      ) {
-        return;
-      }
-
-      try {
-        isApplyingRemoteScenario = true;
-
-        applyScenarioPayload(
-          remoteScenario,
-        );
-
-        localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify(remoteScenario),
-        );
-
-        populateCapacityFilter();
-        renderAll();
-
-        updateSaveStatus(
-          "saved",
-          "Sincronizado ✓",
-        );
-      } catch (error) {
-        console.error(
-          "No se pudo aplicar el escenario remoto.",
-          error,
-        );
-
-        showNotice(
-          "No se pudo aplicar el escenario remoto.",
-          true,
-        );
-      } finally {
-        isApplyingRemoteScenario = false;
-      }
+      aplicarEscenarioRemoto(remoteScenario);
     },
     (error) => {
       console.warn(
@@ -2922,6 +2856,57 @@ function subscribeToSharedScenario() {
       );
     },
   );
+}
+
+
+/**
+ * Aplica un snapshot que llegó mientras guardábamos.
+ *
+ * Antes se comparaban marcas de tiempo para decidir si valía la pena aplicarlo,
+ * pero como cada edición local ponía `updatedAt` a "ahora", los cambios de otras
+ * personas quedaban sistemáticamente descartados. En un escenario compartido la
+ * fuente de verdad es Firebase, así que se aplica siempre.
+ */
+function aplicarSnapshotPendiente() {
+  if (pendingScenarioWrites > 0 || !snapshotRemotoPendiente) {
+    return;
+  }
+
+  const pendiente = snapshotRemotoPendiente;
+  snapshotRemotoPendiente = null;
+
+  aplicarEscenarioRemoto(pendiente);
+}
+
+
+function aplicarEscenarioRemoto(remoteScenario) {
+  try {
+    isApplyingRemoteScenario = true;
+
+    applyScenarioPayload(remoteScenario);
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(remoteScenario),
+    );
+
+    populateCapacityFilter();
+    renderAll();
+
+    updateSaveStatus("saved", "Sincronizado ✓");
+  } catch (error) {
+    console.error(
+      "No se pudo aplicar el escenario remoto.",
+      error,
+    );
+
+    showNotice(
+      "No se pudo aplicar el escenario remoto.",
+      true,
+    );
+  } finally {
+    isApplyingRemoteScenario = false;
+  }
 }
 
 
@@ -2976,6 +2961,94 @@ function saveScenarioToFirebase(
   });
 }
 
+
+
+/**
+ * Guarda solo las rutas que han cambiado, en lugar del escenario completo.
+ *
+ * Escribir el payload entero hacía que dos personas editando dominios distintos
+ * se borrasen el trabajo mutuamente: la última en guardar sobrescribía todo.
+ * Con rutas concretas, dos cambios sobre campos distintos ya no colisionan.
+ *
+ * `rutas` usa claves relativas al escenario, por ejemplo:
+ *   { "domains/fpa/items/fpa-1-2/scores/procesos": 3 }
+ */
+function persistGranularChange(rutas) {
+  syncActiveDomainState();
+
+  // La copia local sigue guardándose entera: es una caché, no la fuente de verdad.
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(buildScenarioPayload()),
+  );
+
+  if (!scenarioDatabaseRef) {
+    updateSaveStatus("saved", "Guardado local ✓");
+    return;
+  }
+
+  if (isApplyingRemoteScenario) {
+    return;
+  }
+
+  pendingScenarioWrites += 1;
+  updateSaveStatus("saving", "Guardando...");
+
+  const carga = {
+    ...rutas,
+    updatedAt: new Date().toISOString(),
+  };
+
+  update(scenarioDatabaseRef, carga)
+    .then(() => {
+      updateSaveStatus("saved", "Guardado ✓");
+    })
+    .catch((error) => {
+      console.warn(
+        "No se pudo guardar el cambio en Firebase. Se conserva la copia local.",
+        error,
+      );
+
+      updateSaveStatus("saved", "Guardado local ✓");
+    })
+    .finally(() => {
+      pendingScenarioWrites = Math.max(0, pendingScenarioWrites - 1);
+      aplicarSnapshotPendiente();
+    });
+}
+
+
+/** Ruta de un campo de subcapacidad dentro del escenario. */
+function rutaDeItem(itemId, campo) {
+  return `domains/${state.activeDomainId}/items/${itemId}/${campo}`;
+}
+
+
+/**
+ * Objetivos del dominio activo, en el formato que se guarda en Firebase.
+ *
+ * Los objetivos se escriben por dominio y no por capacidad porque la clave sería
+ * el nombre de la capacidad, que puede contener caracteres que Firebase no admite
+ * en una ruta. Aun así el alcance es mucho menor que reescribir todo el escenario.
+ */
+function persistTargetsDelDominioActivo() {
+  const activeDomain = state.domains[state.activeDomainId];
+
+  if (!activeDomain) {
+    return;
+  }
+
+  persistGranularChange({
+    [`domains/${state.activeDomainId}/targets`]: serializeTargetsForFirebase(
+      activeDomain.items,
+      activeDomain.targets,
+      normalizeTargetValue(
+        activeDomain.meta?.targetMaturity,
+        DEFAULT_TARGET_MATURITY,
+      ),
+    ),
+  });
+}
 
 
 function persistScenario() {
@@ -3347,21 +3420,29 @@ function buildScenarioPayload() {
         ),
       ),
 
-      items: domain.items.map((item) => ({
-        id: item.id,
-        capacidad: item.capacidad,
-        subcapacidad: item.subcapacidad,
+      // Indexamos por id y no por posición: las escrituras granulares apuntan a
+      // rutas como items/fpa-1-2/scores/procesos, que deben seguir siendo válidas
+      // aunque más adelante se añadan o reordenen subcapacidades.
+      items: Object.fromEntries(
+        domain.items.map((item) => [
+          item.id,
+          {
+            id: item.id,
+            capacidad: item.capacidad,
+            subcapacidad: item.subcapacidad,
 
-        scores: {
-          procesos: item.scores.procesos,
-          tecnologia: item.scores.tecnologia,
-          organizacion: item.scores.organizacion,
-        },
+            scores: {
+              procesos: item.scores.procesos,
+              tecnologia: item.scores.tecnologia,
+              organizacion: item.scores.organizacion,
+            },
 
-        owner: item.owner,
-        status: item.status,
-        comentario: item.comentario,
-      })),
+            owner: item.owner,
+            status: item.status,
+            comentario: item.comentario,
+          },
+        ]),
+      ),
     };
   });
 
