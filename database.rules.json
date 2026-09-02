@@ -44,6 +44,13 @@
                   "$otroScore": { ".validate": false }
                 },
 
+                "lastEditedBy": {
+                  "uid": { ".validate": "newData.isString() && newData.val().length <= 128" },
+                  "nombre": { ".validate": "newData.isString() && newData.val().length <= 60" },
+                  "at": { ".validate": "newData.isString() && newData.val().length <= 40" },
+                  "$otroCampoAutoria": { ".validate": false }
+                },
+
                 "$otroCampoItem": { ".validate": false }
               }
             },

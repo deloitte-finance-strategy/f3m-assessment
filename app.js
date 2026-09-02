@@ -8,6 +8,10 @@ import {
   update,
   onValue,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+import {
+  getAuth,
+  signInAnonymously,
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 // Configuración de Firebase del proyecto fpa-assessment-mvp
 const firebaseConfig = {
@@ -24,6 +28,7 @@ const firebaseConfig = {
 // Inicialización de Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 const firebaseDatabase = getDatabase(firebaseApp);
+const firebaseAuth = getAuth(firebaseApp);
 
 console.log("Firebase conectado correctamente:", firebaseConfig.projectId);
 
@@ -216,6 +221,12 @@ let isApplyingRemoteScenario = false; // NUEVO: evita guardar de vuelta mientras
 let pendingScenarioWrites = 0;
 let snapshotRemotoPendiente = null; // Snapshot que llegó mientras guardábamos, para aplicarlo después
 
+const NOMBRE_STORAGE_KEY = "f3m-nombre-editor";
+
+// Identidad de quien edita. Queda a null si la autenticación no está disponible:
+// la app debe seguir funcionando aunque Anonymous Auth no esté activado en la consola.
+let usuarioActual = null;
+
 let scoringCriteriaTrigger = null;
 let aiInitiativeTrigger = null;
 
@@ -399,6 +410,8 @@ async function init() {
       /* La copia local se carga siempre, también en escenarios compartidos */
       applyStoredScenario();
 
+    // Antes de sincronizar: así el primer cambio ya sale atribuido.
+    await inicializarIdentidad();
 
     await initializeSharedScenario();
 
@@ -459,6 +472,7 @@ function cacheElements() {
     "resetButton",
     "createScenarioButton",
     "copyScenarioLinkButton",
+    "editorNameButton",
     "scenarioFileInput",
     "dashboardDomainTitle",
   ].forEach((id) => {
@@ -489,6 +503,7 @@ function bindGlobalEvents() {
   els.resetButton.addEventListener("click", resetScenario);
   els.createScenarioButton?.addEventListener("click", createSharedScenario);
   els.copyScenarioLinkButton?.addEventListener("click", copyScenarioLink);
+  els.editorNameButton?.addEventListener("click", pedirNombreEditor);
   els.heatmapExpandToggle?.addEventListener("click", handleHeatmapExpandToggleAll);
   setupActiveTabObserver(); // NUEVO: marca automáticamente la pestaña activa según la sección visible
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
@@ -2252,9 +2267,7 @@ function handleScoreChange(event) {
 
   renderAll();
 
-  persistGranularChange({
-    [rutaDeItem(item.id, `scores/${leverKey}`)]: score,
-  });
+  persistItemChange(item.id, `scores/${leverKey}`, score);
 }
 
 
@@ -2548,6 +2561,7 @@ function renderRoadmap() {
             placeholder="Comentarios"
           >${escapeHtml(item.comentario)}</textarea>
         </td>
+        <td class="roadmap-authorship">${celdaDeAutoria(item)}</td>
       </tr>
     `)
     .join("");
@@ -2565,12 +2579,13 @@ function renderRoadmap() {
         <th>Owner</th>
         <th>Estado</th>
         <th>Comentarios</th>
+        <th>Último cambio</th>
       </tr>
     </thead>
     <tbody>
       ${rows || `
         <tr>
-          <td colspan="10" class="table-empty-cell">
+          <td colspan="11" class="table-empty-cell">
             ${buildFilteredEmptyState()}
           </td>
         </tr>
@@ -2590,6 +2605,39 @@ els.roadmapTable.querySelectorAll(".roadmap-comment").forEach((textarea) => {
   textarea.addEventListener("change", handleRoadmapFieldChange);
 });
 
+}
+
+
+/** Quién tocó por última vez esta subcapacidad, si consta. */
+function celdaDeAutoria(item) {
+  const autoria = item.lastEditedBy;
+
+  if (!autoria || !autoria.nombre) {
+    return `<span class="small-note">-</span>`;
+  }
+
+  const cuando = Date.parse(autoria.at || "");
+
+  const fecha = Number.isFinite(cuando)
+    ? new Date(cuando).toLocaleString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
+
+  const esMio = usuarioActual && autoria.uid === usuarioActual.uid;
+
+  return `
+    <span
+      class="authorship-chip${esMio ? " authorship-mine" : ""}"
+      title="${escapeAttr(fecha ? `${autoria.nombre} · ${fecha}` : autoria.nombre)}"
+    >
+      ${escapeHtml(esMio ? "Tú" : autoria.nombre)}
+    </span>
+    ${fecha ? `<span class="small-note authorship-date">${escapeHtml(fecha)}</span>` : ""}
+  `;
 }
 
 
@@ -2622,9 +2670,7 @@ function handleRoadmapFieldChange(event) {
 
   item[campo] = event.target.value;
 
-  persistGranularChange({
-    [rutaDeItem(item.id, campo)]: event.target.value,
-  });
+  persistItemChange(item.id, campo, event.target.value);
 }
 
 function heatScoreCell(value) {
@@ -3025,6 +3071,27 @@ function rutaDeItem(itemId, campo) {
 
 
 /**
+ * Cambio sobre una subcapacidad, acompañado de quién lo hizo.
+ *
+ * La autoría va en la misma escritura que el dato: si fueran dos escrituras
+ * separadas, una podría fallar y dejar el cambio atribuido a quien no fue.
+ */
+function persistItemChange(itemId, campo, valor) {
+  const rutas = {
+    [rutaDeItem(itemId, campo)]: valor,
+  };
+
+  const autoria = marcaDeAutoria();
+
+  if (autoria) {
+    rutas[rutaDeItem(itemId, "lastEditedBy")] = autoria;
+  }
+
+  persistGranularChange(rutas);
+}
+
+
+/**
  * Objetivos del dominio activo, en el formato que se guarda en Firebase.
  *
  * Los objetivos se escriben por dominio y no por capacidad porque la clave sería
@@ -3321,6 +3388,10 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
     if (comentario !== undefined) {
       item.comentario = comentario;
     }
+
+    if (savedItem.lastEditedBy) {
+      item.lastEditedBy = savedItem.lastEditedBy;
+    }
   });
 
   return {
@@ -3440,6 +3511,10 @@ function buildScenarioPayload() {
             owner: item.owner,
             status: item.status,
             comentario: item.comentario,
+
+            // Se conserva para que una escritura completa (importar, restaurar)
+            // no borre la autoría registrada por las escrituras granulares.
+            ...(item.lastEditedBy ? { lastEditedBy: item.lastEditedBy } : {}),
           },
         ]),
       ),
@@ -4776,6 +4851,114 @@ function showScenarioModeNotice() {
     `Escenario compartido activo: ${scenarioId}. Los cambios se guardan automáticamente y se sincronizan con cualquier navegador que use este mismo enlace.`,
   ); // MODIFICADO: el mensaje refleja que Firebase ya guarda y sincroniza datos
 
+}
+
+
+/**
+ * Autentica de forma anónima para tener un identificador estable de quien edita.
+ *
+ * "Anónima" quiere decir sin pedir credenciales: Firebase asigna un uid propio a
+ * cada navegador. Sirve para atribuir cambios y, más adelante, para exigir
+ * `auth != null` en las reglas.
+ *
+ * Si falla (por ejemplo si Anonymous Auth no está habilitado en la consola) se
+ * continúa sin identidad. Es preferible perder la atribución a que la
+ * herramienta deje de funcionar por un ajuste que no está en este repositorio.
+ */
+async function inicializarIdentidad() {
+  if (!scenarioDatabaseRef) {
+    return;
+  }
+
+  try {
+    const credencial = await signInAnonymously(firebaseAuth);
+
+    usuarioActual = {
+      uid: credencial.user.uid,
+      nombre: getNombreEditor(),
+    };
+  } catch (error) {
+    console.warn(
+      "No se pudo autenticar de forma anónima. Se continúa sin identidad; " +
+        "revisa que Anonymous Auth esté habilitado en la consola de Firebase.",
+      error,
+    );
+
+    usuarioActual = null;
+  }
+
+  actualizarIndicadorDeIdentidad();
+}
+
+
+function getNombreEditor() {
+  return (localStorage.getItem(NOMBRE_STORAGE_KEY) || "").trim();
+}
+
+
+function setNombreEditor(nombre) {
+  const limpio = (nombre || "").trim().slice(0, 60);
+
+  if (limpio) {
+    localStorage.setItem(NOMBRE_STORAGE_KEY, limpio);
+  } else {
+    localStorage.removeItem(NOMBRE_STORAGE_KEY);
+  }
+
+  if (usuarioActual) {
+    usuarioActual.nombre = limpio;
+  }
+
+  actualizarIndicadorDeIdentidad();
+}
+
+
+function pedirNombreEditor() {
+  const nombre = window.prompt(
+    "¿Con qué nombre quieres que aparezcan tus cambios para el resto del equipo?",
+    getNombreEditor(),
+  );
+
+  if (nombre === null) {
+    return; // Cancelado: no tocamos nada
+  }
+
+  setNombreEditor(nombre);
+  renderAll();
+}
+
+
+function actualizarIndicadorDeIdentidad() {
+  const boton = els.editorNameButton;
+
+  if (!boton) {
+    return;
+  }
+
+  // Solo tiene sentido en un escenario compartido: en modo local no hay a quién atribuir.
+  boton.hidden = !scenarioDatabaseRef;
+
+  const nombre = getNombreEditor();
+
+  boton.textContent = nombre
+    ? `Editas como: ${nombre}`
+    : "Poner mi nombre";
+
+  boton.classList.toggle("sin-nombre", !nombre);
+}
+
+
+/** Datos de atribución que acompañan a cada cambio, si hay identidad disponible. */
+function marcaDeAutoria() {
+  if (!usuarioActual) {
+    return null;
+  }
+
+  return {
+    uid: usuarioActual.uid,
+    nombre: usuarioActual.nombre || "Sin nombre",
+    at: new Date().toISOString(),
+  };
 }
 
 
