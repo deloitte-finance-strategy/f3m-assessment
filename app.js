@@ -522,7 +522,7 @@ function cacheElements() {
 function bindGlobalEvents() {
   els.capacityFilter.addEventListener("change", renderAll);
   els.priorityFilter.addEventListener("change", renderAll);
-  els.searchInput.addEventListener("input", renderAll);
+  els.searchInput.addEventListener("input", handleSearchInput);
 
   document.addEventListener("click", (event) => {
     const clearButton = event.target.closest("[data-clear-filters]");
@@ -1379,6 +1379,7 @@ function removeActiveFilter(clave) {
   } else if (clave === "prioridad") {
     els.priorityFilter.value = "all";
   } else if (clave === "busqueda") {
+    window.clearTimeout(temporizadorDeBusqueda);
     els.searchInput.value = "";
   } else {
     return;
@@ -1388,7 +1389,26 @@ function removeActiveFilter(clave) {
 }
 
 
+// Cada pulsacion lanzaba un renderAll completo, radares de Chart.js incluidos:
+// escribir ocho letras costaba 235 ms de trabajo bloqueante y se notaba al
+// teclear. Con una pausa corta, ocho pulsaciones son un solo repintado.
+const BUSQUEDA_DIFERIDA_MS = 200;
+
+let temporizadorDeBusqueda = null;
+
+
+function handleSearchInput() {
+  window.clearTimeout(temporizadorDeBusqueda);
+
+  temporizadorDeBusqueda = window.setTimeout(() => {
+    renderAll();
+  }, BUSQUEDA_DIFERIDA_MS);
+}
+
+
 function clearActiveFilters() {
+  window.clearTimeout(temporizadorDeBusqueda);
+
   els.capacityFilter.value = "all";
   els.priorityFilter.value = "all";
   els.searchInput.value = "";
