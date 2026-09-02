@@ -4894,19 +4894,38 @@ function buildSummaryRows() {
 
 
 
+// Excel con configuración regional española espera punto y coma, no coma: con
+// comas volcaba todas las columnas en una sola celda. csvEscape ya entrecomilla
+// los campos que contienen ";", así que el separador es seguro.
+const CSV_SEPARATOR = ";";
+
+// Marca de orden de bytes. Sin ella Excel abre el archivo como ANSI y
+// "Tecnología" llega ilegible.
+const CSV_BOM = "\uFEFF";
+
 function toCsv(rows) {
+  if (!rows.length) {
+    return "";
+  }
+
   const headers = Object.keys(rows[0]);
-  const csvRows = [headers.join(",")];
+  const csvRows = [headers.join(CSV_SEPARATOR)];
+
   rows.forEach((row) => {
-    csvRows.push(headers.map((header) => csvEscape(row[header])).join(","));
+    csvRows.push(
+      headers.map((header) => csvEscape(row[header])).join(CSV_SEPARATOR),
+    );
   });
-  return csvRows.join("\n");
+
+  // Fin de línea CRLF: es lo que espera Excel.
+  return CSV_BOM + csvRows.join("\r\n");
 }
 
 function csvEscape(value) {
   const text = String(value ?? "");
-  return /[",\n;]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  return /[",\r\n;]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
+
 
 function downloadFile(filename, content, type) {
   const blob = new Blob([content], { type });
