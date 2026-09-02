@@ -1,6 +1,9 @@
-# F3M FP&A Assessment MVP
+# F3M Assessment
 
-Prototipo local para validar el assessment FP&A basado en el Excel `F3M_FP&A_assessment_v0_26062026.xlsx`.
+Herramienta de diagnóstico de madurez financiera según la metodología F3M. Cubre 9 dominios
+(FP&A, Controlling, Transacciones, Finanzas de negocio, Auditoría Interna, Finanzas Estratégicas,
+Relación con Inversores, Tesorería y Fiscal), generados a partir de los Excel `F3M_*.xlsx` de la
+raíz del repositorio.
 
 ## Cómo ejecutarlo
 
@@ -29,9 +32,10 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
 - Exportar un escenario en JSON y reimportarlo más adelante.
 - Exportar resumen y roadmap en CSV.
 
-## Reglas replicadas del Excel
+## Reglas de cálculo
 
-- Objetivo de madurez fijo: `4 - Optimizado`.
+- Objetivo de madurez: configurable **por capacidad y por palanca** desde el panel de objetivos.
+  `4 - Optimizado` es solo el valor por defecto cuando una capacidad no tiene objetivo propio.
 - Score medio: promedio de los scores informados en Procesos, Tecnología y Organización, redondeado a 2 decimales.
 - Nivel resultante:
   - `< 1.5`: `1 - Inicial`
@@ -39,7 +43,13 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
   - `< 3.5`: `3 - Estandarizado`
   - `< 4.5`: `4 - Optimizado`
   - `>= 4.5`: `5 - Avanzado/Referente`
-- Gap: `max(0, 4 - score medio)`.
+- Gap: se calcula **por palanca** como `max(0, objetivo - score)`, y el gap de la subcapacidad es el
+  **promedio de los gaps de las palancas puntuadas**.
+
+  No es `max(0, 4 - score medio)`. Las dos fórmulas divergen en cuanto alguna palanca supera su
+  objetivo: ese exceso se recorta a `0` en vez de compensar a las demás. Ejemplo real con objetivo
+  `4` y scores `[3, 2, 5]` → gap `1.0`, no `0.67`. Como el gap determina prioridad y oleada, la
+  diferencia se propaga al roadmap.
 - Prioridad:
   - `Alta` si gap `>= 2`
   - `Media` si gap `>= 1`
@@ -51,11 +61,23 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
 
 Las subcapacidades sin puntuación se muestran como `Pendiente`, sin prioridad ni oleada artificial.
 
-## Notas del MVP
+## Notas
 
 - No se han creado nuevas capacidades, subcapacidades ni iniciativas.
 - Las iniciativas sugeridas proceden del Excel y no se generan con IA.
-- La app extiende a las 20 subcapacidades la lógica de cálculo que en el Excel inicial solo estaba aplicada completamente a la primera fila de `Assessment`.
+- La app extiende a las 152 subcapacidades de los 9 dominios la lógica de cálculo que en el Excel inicial solo estaba aplicada completamente a la primera fila de `Assessment`.
+
+## Regenerar los datos desde los Excel
+
+Los archivos `data/domains/*.json` se generan desde los `F3M_*.xlsx`. Requiere `openpyxl`:
+
+```powershell
+python scripts/convert_domains.py       # regenera los JSON
+python scripts/check_domains_sync.py    # verifica que los JSON coinciden con los Excel
+```
+
+`check_domains_sync.py` no escribe nada: compara en memoria y devuelve código de salida `1` si
+algún JSON commiteado ha quedado desincronizado de su Excel.
 
 
 ## Uso online
@@ -64,8 +86,42 @@ La herramienta está publicada en:
 
 https://danielnavarrodelgado.github.io/fpa-assessment-mvp/
 
-Para usar un escenario compartido, añadir el parámetro `scenario`:
+### Escenarios compartidos
 
-https://danielnavarrodelgado.github.io/fpa-assessment-mvp/?scenario=fpa-mvp-2026-7e45-4cbb-9d14
+Para crear uno, usa el botón **"Crear escenario compartido"** de la cabecera. Genera un
+identificador aleatorio de 128 bits y te lleva a la URL correspondiente:
 
-Cualquier persona con ese enlace podrá ver y editar el mismo escenario.
+```text
+https://danielnavarrodelgado.github.io/fpa-assessment-mvp/?scenario=<id-generado>
+```
+
+> **El enlace es la credencial.** Cualquier persona que lo tenga puede ver y editar el escenario,
+> sin autenticación. Trátalo como una contraseña: no lo publiques en repositorios, documentos
+> compartidos ni tickets. No inventes identificadores a mano — un ID adivinable expone el
+> assessment completo a cualquiera.
+
+### Escenario de pruebas
+
+Para probar cambios sin tocar escenarios reales:
+
+```text
+?scenario=f3m-d56e5e41-954f-4cc7-9014-82e7ee65bd83
+```
+
+Este identificador sí está publicado a propósito: contiene únicamente los datos base de
+`data/domains/*.json`, sin información de ningún cliente. Precisamente por eso **no debe usarse
+nunca para trabajo real** — cualquiera puede leerlo y sobrescribirlo.
+
+### Rotar un escenario expuesto
+
+Si un identificador se ha filtrado (por ejemplo, publicado en un repositorio o en un correo),
+hay que rotarlo a uno nuevo e impredecible:
+
+```powershell
+python scripts/rotate_scenario.py <id-antiguo>              # muestra qué haría
+python scripts/rotate_scenario.py <id-antiguo> --confirm    # copia y verifica
+```
+
+El script copia el contenido a un id aleatorio de 128 bits y comprueba que la copia es idéntica.
+No borra el original: eso se hace a mano desde la consola de Firebase, una vez confirmado que el
+enlace nuevo funciona.
