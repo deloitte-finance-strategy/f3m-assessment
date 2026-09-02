@@ -2570,6 +2570,12 @@ function getWaveShortLabel(wave) {
 
 
 function renderRoadmap() {
+  // Repintar la tabla borra los campos editables. Si alguien esta escribiendo
+  // un comentario en ese momento, su texto desaparece sin aviso: los campos
+  // solo guardaban al perder el foco. Se anota lo que hay en curso para
+  // devolverlo despues.
+  const edicionEnCurso = capturarEdicionDeRoadmap();
+
   const roadmapItems = getVisibleItems(); // Roadmap respeta filtros activos
 
   const rows = roadmapItems
@@ -2666,6 +2672,7 @@ function renderRoadmap() {
 
   els.roadmapTable.querySelectorAll(".roadmap-owner").forEach((input) => {
   input.addEventListener("change", handleRoadmapFieldChange);
+  input.addEventListener("input", handleRoadmapFieldInput);
 });
 
 els.roadmapTable.querySelectorAll(".roadmap-status").forEach((select) => {
@@ -2675,8 +2682,85 @@ els.roadmapTable.querySelectorAll(".roadmap-status").forEach((select) => {
 els.roadmapTable.querySelectorAll(".roadmap-comment").forEach((textarea) => {
   textarea.addEventListener("change", handleRoadmapFieldChange);
   textarea.addEventListener("input", actualizarContadorDeComentario);
+  textarea.addEventListener("input", handleRoadmapFieldInput);
 });
 
+  restaurarEdicionDeRoadmap(edicionEnCurso);
+}
+
+
+/** A que campo de la subcapacidad corresponde un control del Roadmap. */
+function campoDeRoadmap(elemento) {
+  if (elemento.classList.contains("roadmap-owner")) return "owner";
+  if (elemento.classList.contains("roadmap-status")) return "status";
+  if (elemento.classList.contains("roadmap-comment")) return "comentario";
+
+  return null;
+}
+
+
+const CLASE_POR_CAMPO = {
+  owner: "roadmap-owner",
+  status: "roadmap-status",
+  comentario: "roadmap-comment",
+};
+
+
+/** Que se esta editando ahora mismo en el Roadmap, si es que hay algo. */
+function capturarEdicionDeRoadmap() {
+  const activo = document.activeElement;
+
+  if (!activo || !els.roadmapTable?.contains(activo)) {
+    return null;
+  }
+
+  const campo = campoDeRoadmap(activo);
+
+  if (!campo || !activo.dataset.id) {
+    return null;
+  }
+
+  return {
+    id: activo.dataset.id,
+    campo,
+    valor: activo.value,
+    // Los <select> no tienen cursor de texto.
+    inicio: activo.selectionStart ?? null,
+    fin: activo.selectionEnd ?? null,
+  };
+}
+
+
+/**
+ * Devuelve el foco, el texto y la posicion del cursor tras repintar.
+ *
+ * Se restaura el valor que habia en pantalla y no el del estado: si el repintado
+ * viene de un cambio remoto, lo que estaba escribiendo esta persona no puede
+ * perderse por el camino. El guardado diferido lo envia poco despues.
+ */
+function restaurarEdicionDeRoadmap(edicion) {
+  if (!edicion) {
+    return;
+  }
+
+  const destino = els.roadmapTable.querySelector(
+    `.${CLASE_POR_CAMPO[edicion.campo]}[data-id="${CSS.escape(edicion.id)}"]`,
+  );
+
+  if (!destino) {
+    return;
+  }
+
+  destino.value = edicion.valor;
+  destino.focus();
+
+  if (edicion.inicio !== null && typeof destino.setSelectionRange === "function") {
+    try {
+      destino.setSelectionRange(edicion.inicio, edicion.fin);
+    } catch (error) {
+      // Algunos tipos de campo no admiten seleccion; no es motivo de fallo.
+    }
+  }
 }
 
 
@@ -2777,32 +2861,75 @@ function actualizarContadorDeComentario(event) {
 }
 
 
+// Cuanto se espera desde la ultima pulsacion antes de guardar. Con "change" a
+// secas, un texto sin terminar de escribir no llegaba a guardarse nunca.
+const GUARDADO_DIFERIDO_MS = 600;
+
+const guardadosPendientes = new Map();
+
+
 function handleRoadmapFieldChange(event) {
-  const item = state.items.find((entry) => entry.id === event.target.dataset.id);
+  const elemento = event.target;
+  const item = state.items.find((entry) => entry.id === elemento.dataset.id);
+  const campo = campoDeRoadmap(elemento);
 
-  if (!item) {
+  if (!item || !campo) {
     return;
   }
 
-  const campo = event.target.classList.contains("roadmap-owner")
-    ? "owner"
-    : event.target.classList.contains("roadmap-status")
-      ? "status"
-      : event.target.classList.contains("roadmap-comment")
-        ? "comentario"
-        : null;
-
-  if (!campo) {
-    return;
-  }
+  cancelarGuardadoDiferido(item.id, campo);
 
   // maxlength solo frena lo que teclea el usuario. Un valor que llegue de un
-  // escenario importado puede superar el límite y hacer que Firebase rechace la
-  // escritura entera, así que se recorta también aquí.
-  const valor = recortarAlLimite(campo, event.target.value);
+  // escenario importado puede superar el limite y hacer que Firebase rechace la
+  // escritura entera, asi que se recorta tambien aqui.
+  const valor = recortarAlLimite(campo, elemento.value);
 
-  if (valor !== event.target.value) {
-    event.target.value = valor;
+  if (valor !== elemento.value) {
+    elemento.value = valor;
+  }
+
+  guardarCampoDeRoadmap(item, campo, valor);
+}
+
+
+/** Mientras se escribe: se guarda solo, sin esperar a perder el foco. */
+function handleRoadmapFieldInput(event) {
+  const elemento = event.target;
+  const item = state.items.find((entry) => entry.id === elemento.dataset.id);
+  const campo = campoDeRoadmap(elemento);
+
+  if (!item || !campo) {
+    return;
+  }
+
+  const clave = `${item.id}:${campo}`;
+
+  window.clearTimeout(guardadosPendientes.get(clave));
+
+  guardadosPendientes.set(
+    clave,
+    window.setTimeout(() => {
+      guardadosPendientes.delete(clave);
+      guardarCampoDeRoadmap(item, campo, recortarAlLimite(campo, elemento.value));
+    }, GUARDADO_DIFERIDO_MS),
+  );
+}
+
+
+function cancelarGuardadoDiferido(itemId, campo) {
+  const clave = `${itemId}:${campo}`;
+
+  window.clearTimeout(guardadosPendientes.get(clave));
+  guardadosPendientes.delete(clave);
+}
+
+
+/** Guarda un campo del Roadmap, si de verdad ha cambiado. */
+function guardarCampoDeRoadmap(item, campo, valor) {
+  // Sin esta comprobacion, salir de un campo que no se ha tocado provocaba una
+  // escritura completa en localStorage y otra en Firebase.
+  if (item[campo] === valor) {
+    return;
   }
 
   item[campo] = valor;
