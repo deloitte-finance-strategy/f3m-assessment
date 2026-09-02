@@ -547,6 +547,7 @@ function cacheElements() {
     "resetButton",
     "createScenarioButton",
     "copyScenarioLinkButton",
+    "leaveScenarioButton",
     "editorNameButton",
     "scenarioFileInput",
     "dashboardDomainTitle",
@@ -582,6 +583,7 @@ function bindGlobalEvents() {
   els.resetButton.addEventListener("click", resetScenario);
   els.createScenarioButton?.addEventListener("click", createSharedScenario);
   els.copyScenarioLinkButton?.addEventListener("click", copyScenarioLink);
+  els.leaveScenarioButton?.addEventListener("click", salirDelEscenario);
   els.editorNameButton?.addEventListener("click", pedirNombreEditor);
   els.heatmapExpandToggle?.addEventListener("click", handleHeatmapExpandToggleAll);
   els.loadNoticeClose?.addEventListener("click", ocultarAviso);
@@ -5968,6 +5970,37 @@ async function createSharedScenario() {
 }
 
 
+/**
+ * Se podia entrar en un escenario compartido con un boton, pero no salir.
+ *
+ * Habia que editar la direccion a mano y quitar el parametro. "Restaurar base"
+ * no servia, y su propio mensaje lo explicaba en cinco lineas.
+ */
+async function salirDelEscenario() {
+  const confirmado = await abrirDialogo({
+    eyebrow: "Escenario compartido",
+    titulo: "Salir del escenario compartido",
+    parrafos: [
+      "Volverás a trabajar sobre la copia de este navegador. El escenario compartido no se toca: sigue ahí y puedes volver con su enlace.",
+      "Copia el enlace antes de salir si no lo tienes guardado en otro sitio.",
+    ],
+    confirmar: "Salir del escenario",
+    accionSecundaria: {
+      texto: "Copiar enlace antes",
+      alHacerClic: copyScenarioLink,
+    },
+  });
+
+  if (!confirmado) {
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  url.searchParams.delete("scenario");
+  window.location.assign(url.toString());
+}
+
+
 function showScenarioModeNotice() {
   if (!scenarioId) {
     return;
@@ -5976,6 +6009,15 @@ function showScenarioModeNotice() {
   // Los identificadores son aleatorios y largos, así que copiarlos a mano no es viable.
   if (els.copyScenarioLinkButton) {
     els.copyScenarioLinkButton.hidden = false;
+  }
+
+  if (els.leaveScenarioButton) {
+    els.leaveScenarioButton.hidden = false;
+  }
+
+  if (els.createScenarioButton) {
+    // Ya se esta en uno: crear otro desde aqui solo confunde.
+    els.createScenarioButton.hidden = true;
   }
 
   // Antes se imprimía el identificador completo, que es la credencial del
