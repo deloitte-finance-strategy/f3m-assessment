@@ -194,7 +194,13 @@ def make_id(domain_id, subcapacidad, index):
     return f"{domain_id}-{slug or index + 1}"
 
 
-def convert_domain(config):
+def serialize(payload):
+    """Serialización única, compartida por el conversor y por check_domains_sync."""
+    return json.dumps(payload, ensure_ascii=False, indent=2)
+
+
+def build_payload(config):
+    """Construye el payload de un dominio sin escribir nada en disco."""
     wb = load_workbook(config["source"], data_only=True)
 
     assessment_rows = sheet_rows(wb["Assessment"])
@@ -244,7 +250,7 @@ def convert_domain(config):
 
         items.append(item)
 
-    payload = {
+    return {
         "meta": {
             "domainId": config["domain_id"],
             "domainLabel": config["domain_label"],
@@ -255,12 +261,16 @@ def convert_domain(config):
         "subcapacities": items,
     }
 
+
+def convert_domain(config):
+    payload = build_payload(config)
+
     config["output"].write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
+        serialize(payload),
         encoding="utf-8",
     )
 
-    print(f"OK: {config['output']} -> {len(items)} subcapacidades")
+    print(f"OK: {config['output']} -> {len(payload['subcapacities'])} subcapacidades")
 
 
 def main():
