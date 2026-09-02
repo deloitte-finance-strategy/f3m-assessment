@@ -238,19 +238,22 @@ color: #ffe5e1;
   bottom: 18px;
   z-index: 80;
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   min-height: 40px;
   max-width: min(360px, calc(100% - 36px));
-  padding: 0 14px;
+  padding: 9px 14px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  /* Radio menor que la píldora original: los mensajes de error ocupan dos
+     líneas y una píldora de 999px se deforma al crecer en alto. */
+  border-radius: 12px;
   background: #ffffff;
   color: var(--ink);
   font-size: 0.84rem;
   font-weight: 800;
+  line-height: 1.3;
   box-shadow: 0 10px 26px rgba(22, 26, 24, 0.16);
-  white-space: nowrap;
+  text-wrap: pretty;
   transition:
     background-color 150ms ease,
     border-color 150ms ease,
@@ -264,6 +267,7 @@ color: #ffe5e1;
 }
 
 .save-status::before {
+  margin-top: 4px;
   width: 9px;
   height: 9px;
   border-radius: 50%;
@@ -1760,6 +1764,22 @@ border-color: #eef0ed;
   line-height: 1.35;
 }
 
+/* Cuánto queda de comentario: solo aparece cerca del límite de Firebase */
+.roadmap-comment-count {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.roadmap-comment-count.is-at-limit {
+  color: var(--red);
+}
+
+
 /* Foco de campos editables */
 .roadmap-owner:focus,
 .roadmap-status:focus,
@@ -2948,10 +2968,8 @@ height: 100% !important;
     bottom: 14px;
     max-width: calc(100% - 28px);
     min-height: 38px;
-    padding: 0 12px;
-    overflow: hidden;
+    padding: 8px 12px;
     font-size: 0.8rem;
-    text-overflow: ellipsis;
   }
 
   .modal-backdrop {

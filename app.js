@@ -150,6 +150,15 @@ const PRIORITY_ORDER = {
 const STATUS_OPTIONS = ["No iniciado", "En curso", "Completado", "Bloqueado"];
 
 
+// Límites de longitud de los campos editables del Roadmap. Tienen que coincidir
+// con los de database.rules.json: si el texto los supera, Firebase rechaza la
+// escritura entera y el cambio se pierde. Es preferible impedir escribirlo.
+const LIMITES_DE_TEXTO = {
+  owner: 120,
+  comentario: 2000,
+};
+
+
 const AI_INITIATIVES_BY_CAPABILITY = {
   "Presupuestos y previsiones": {
     subcapacidad: "1.1-1.4",
@@ -768,9 +777,12 @@ function normalizeItem(item) {
       tecnologia: toScore(item.scores?.tecnologia),
       organizacion: toScore(item.scores?.organizacion),
     },
-    owner: item.owner || "",
+    owner: recortarAlLimite("owner", item.owner || ""),
     status: item.status || "No iniciado",
-    comentario: item.comentario || item.comentariosHallazgos || "",
+    comentario: recortarAlLimite(
+      "comentario",
+      item.comentario || item.comentariosHallazgos || "",
+    ),
   };
 }
 
@@ -2550,7 +2562,9 @@ function renderRoadmap() {
             class="inline-input roadmap-owner"
             data-id="${escapeAttr(item.id)}"
             value="${escapeAttr(item.owner)}"
-            placeholder="Owner"
+            maxlength="${LIMITES_DE_TEXTO.owner}"
+            placeholder="Responsable"
+            aria-label="${escapeAttr(`Responsable de ${item.subcapacidad}`)}"
           >
         </td>
         <td>${statusSelect(item)}</td>
@@ -2558,8 +2572,11 @@ function renderRoadmap() {
           <textarea
             class="roadmap-comment"
             data-id="${escapeAttr(item.id)}"
+            maxlength="${LIMITES_DE_TEXTO.comentario}"
             placeholder="Comentarios"
+            aria-label="${escapeAttr(`Comentarios de ${item.subcapacidad}`)}"
           >${escapeHtml(item.comentario)}</textarea>
+          ${contadorDeComentario(item)}
         </td>
         <td class="roadmap-authorship">${celdaDeAutoria(item)}</td>
       </tr>
@@ -2576,7 +2593,7 @@ function renderRoadmap() {
         <th>Iniciativa sugerida</th>
         <th>IA</th>
         <th>Oleada</th>
-        <th>Owner</th>
+        <th>Responsable</th>
         <th>Estado</th>
         <th>Comentarios</th>
         <th>Último cambio</th>
@@ -2603,6 +2620,7 @@ els.roadmapTable.querySelectorAll(".roadmap-status").forEach((select) => {
 
 els.roadmapTable.querySelectorAll(".roadmap-comment").forEach((textarea) => {
   textarea.addEventListener("change", handleRoadmapFieldChange);
+  textarea.addEventListener("input", actualizarContadorDeComentario);
 });
 
 }
@@ -2641,13 +2659,69 @@ function celdaDeAutoria(item) {
 }
 
 
+/**
+ * Cuánto queda de comentario, visible solo al acercarse al límite.
+ *
+ * Sin esto, pasarse de los 2.000 caracteres que admiten las reglas hacía que
+ * Firebase rechazara la escritura sin que se notara.
+ */
+function contadorDeComentario(item) {
+  const usados = (item.comentario || "").length;
+  const limite = LIMITES_DE_TEXTO.comentario;
+
+  if (usados < limite * 0.9) {
+    return "";
+  }
+
+  return `
+    <span class="roadmap-comment-count" aria-hidden="true">
+      ${usados} / ${limite}
+    </span>
+  `;
+}
+
+
 function statusSelect(item) {
   return `
-    <select class="inline-input roadmap-status" data-id="${escapeAttr(item.id)}">
+    <select
+      class="inline-input roadmap-status"
+      data-id="${escapeAttr(item.id)}"
+      aria-label="${escapeAttr(`Estado de ${item.subcapacidad}`)}"
+    >
       ${STATUS_OPTIONS.map((status) => `<option value="${escapeAttr(status)}" ${item.status === status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
     </select>
   `;
 }
+
+/** Mantiene visible cuánto queda de comentario mientras se escribe. */
+function actualizarContadorDeComentario(event) {
+  const textarea = event.currentTarget;
+  const celda = textarea.closest("td");
+
+  if (!celda) {
+    return;
+  }
+
+  const limite = LIMITES_DE_TEXTO.comentario;
+  const usados = textarea.value.length;
+  let contador = celda.querySelector(".roadmap-comment-count");
+
+  if (usados < limite * 0.9) {
+    contador?.remove();
+    return;
+  }
+
+  if (!contador) {
+    contador = document.createElement("span");
+    contador.className = "roadmap-comment-count";
+    contador.setAttribute("aria-hidden", "true");
+    celda.appendChild(contador);
+  }
+
+  contador.textContent = `${usados} / ${limite}`;
+  contador.classList.toggle("is-at-limit", usados >= limite);
+}
+
 
 function handleRoadmapFieldChange(event) {
   const item = state.items.find((entry) => entry.id === event.target.dataset.id);
@@ -2668,9 +2742,27 @@ function handleRoadmapFieldChange(event) {
     return;
   }
 
-  item[campo] = event.target.value;
+  // maxlength solo frena lo que teclea el usuario. Un valor que llegue de un
+  // escenario importado puede superar el límite y hacer que Firebase rechace la
+  // escritura entera, así que se recorta también aquí.
+  const valor = recortarAlLimite(campo, event.target.value);
 
-  persistItemChange(item.id, campo, event.target.value);
+  if (valor !== event.target.value) {
+    event.target.value = valor;
+  }
+
+  item[campo] = valor;
+
+  persistItemChange(item.id, campo, valor);
+}
+
+
+/** Recorta un campo de texto al límite que admiten las reglas de Firebase. */
+function recortarAlLimite(campo, valor) {
+  const limite = LIMITES_DE_TEXTO[campo];
+  const texto = String(valor ?? "");
+
+  return limite ? texto.slice(0, limite) : texto;
 }
 
 function heatScoreCell(value) {
@@ -2807,9 +2899,10 @@ async function initializeSharedScenario() {
           error,
         );
 
-        updateSaveStatus(
-          "saved",
-          "Guardado local ✓",
+        marcarFalloDeSincronia(
+          "No se ha creado el escenario compartido",
+          "Tus datos están guardados en este navegador, pero el escenario compartido no ha llegado a crearse: " +
+            "quien abra el enlace no verá nada. Comprueba la conexión y vuelve a intentarlo.",
         );
       }
 
@@ -2852,9 +2945,10 @@ async function initializeSharedScenario() {
       error,
     );
 
-    updateSaveStatus(
-      "saved",
-      "Guardado local ✓",
+    marcarFalloDeSincronia(
+      "Sin conexión con el escenario compartido",
+      "No se ha podido conectar con el escenario compartido. Estás trabajando sobre la copia de este navegador " +
+        "y tus cambios no le llegan al resto del equipo. Si vas a trabajar así, exporta una copia antes de cerrar.",
     );
 
     showNotice(
@@ -2896,9 +2990,10 @@ function subscribeToSharedScenario() {
         error,
       );
 
-      updateSaveStatus(
-        "saved",
-        "Guardado local ✓",
+      marcarFalloDeSincronia(
+        "Se ha perdido la conexión",
+        "Se ha perdido la conexión con el escenario compartido. Tus cambios se siguen guardando en este navegador, " +
+          "pero no le llegan al resto del equipo. Recarga la página cuando vuelvas a tener conexión.",
       );
     },
   );
@@ -2957,7 +3052,7 @@ function aplicarEscenarioRemoto(remoteScenario) {
 
 
 
-function updateSaveStatus(status, message) {
+function updateSaveStatus(status, message, detalle = "") {
   if (!els.saveStatus) {
     return;
   }
@@ -2965,6 +3060,26 @@ function updateSaveStatus(status, message) {
   els.saveStatus.hidden = false;
   els.saveStatus.className = `save-status ${status || ""}`.trim();
   els.saveStatus.textContent = message;
+
+  // El detalle explica qué ha pasado, qué implica y qué puede hacer el usuario.
+  // No cabe en el chip, así que va al tooltip.
+  if (detalle) {
+    els.saveStatus.title = detalle;
+  } else {
+    els.saveStatus.removeAttribute("title");
+  }
+}
+
+
+/**
+ * Un guardado que falla no puede parecerse a uno que funciona.
+ *
+ * Antes todos los caminos de error terminaban en "Guardado local ✓" y en verde:
+ * con la conexión caída o con las reglas rechazando un campo, el consultor creía
+ * que el escenario estaba sincronizado cuando no lo estaba.
+ */
+function marcarFalloDeSincronia(mensaje, detalle) {
+  updateSaveStatus("error", mensaje, detalle);
 }
 
 
@@ -3055,7 +3170,11 @@ function persistGranularChange(rutas) {
         error,
       );
 
-      updateSaveStatus("saved", "Guardado local ✓");
+      marcarFalloDeSincronia(
+        "El último cambio no se ha compartido",
+        "El cambio está guardado en este navegador, pero no se ha podido enviar al escenario compartido y el resto " +
+          "del equipo no lo ve. Comprueba la conexión y vuelve a hacer el cambio.",
+      );
     })
     .finally(() => {
       pendingScenarioWrites = Math.max(0, pendingScenarioWrites - 1);
@@ -3164,9 +3283,10 @@ function persistScenario() {
         error,
       );
 
-      updateSaveStatus(
-        "saved",
-        "Guardado local ✓",
+      marcarFalloDeSincronia(
+        "Los cambios no se han compartido",
+        "Los cambios están guardados en este navegador, pero no se han podido enviar al escenario compartido. " +
+          "Comprueba la conexión y vuelve a intentarlo.",
       );
     })
     .finally(() => {
@@ -3378,7 +3498,7 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
     const comentario = getSavedField(savedItem, ["comentario", "Comentarios", "Comentarios / hallazgos", "comments"]);
 
     if (owner !== undefined) {
-      item.owner = owner;
+      item.owner = recortarAlLimite("owner", owner);
     }
 
     if (status !== undefined) {
@@ -3386,7 +3506,7 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
     }
 
     if (comentario !== undefined) {
-      item.comentario = comentario;
+      item.comentario = recortarAlLimite("comentario", comentario);
     }
 
     if (savedItem.lastEditedBy) {
@@ -4269,7 +4389,7 @@ function buildPdfEnhancedRoadmapSection(data) {
             <th>Prioridad</th>
             <th>Oleada</th>
             <th>Iniciativa sugerida</th>
-            <th>Owner</th>
+            <th>Responsable</th>
             <th>Estado</th>
           </tr>
         </thead>
