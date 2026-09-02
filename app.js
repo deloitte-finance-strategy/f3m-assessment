@@ -1302,10 +1302,10 @@ function renderAll() {
   const ambito = getScopeSummary();
 
   els.sourceNote.textContent = [
-    `Fuente: ${state.meta.sourceFile}`,
-    `Objetivo de madurez ${state.meta.targetMaturity}`,
+    `${ambito.total} subcapacidades en ${unique(state.items.map((item) => item.capacidad)).length} capacidades`,
+    describirObjetivos(),
     ambito.hayFiltros
-      ? `Mostrando ${ambito.visibles} de ${ambito.total} subcapacidades por los filtros activos`
+      ? `Mostrando ${ambito.visibles} de ${ambito.total} por los filtros activos`
       : null,
   ]
     .filter(Boolean)
@@ -1476,6 +1476,34 @@ function clearActiveFilters() {
  */
 function getScopedItems() {
   return getVisibleItems();
+}
+
+
+/**
+ * Resume el objetivo de madurez del dominio en una frase honesta.
+ *
+ * La cabecera afirmaba "Objetivo de madurez 4" leyendo meta.targetMaturity, un
+ * valor unico del JSON. Pero el objetivo se configura por capacidad y por
+ * palanca en el panel que hay justo debajo, asi que en cuanto alguien tocaba
+ * uno, la cabecera mentia.
+ */
+function describirObjetivos() {
+  const valores = unique(
+    state.items.flatMap((item) => {
+      const objetivos = getCapabilityTargets(item.capacidad);
+      return LEVERS.map((lever) => objetivos[lever.key]);
+    }),
+  ).sort((a, b) => a - b);
+
+  if (!valores.length) {
+    return null;
+  }
+
+  if (valores.length === 1) {
+    return `Objetivo de madurez ${valores[0]}`;
+  }
+
+  return `Objetivos entre ${valores[0]} y ${valores[valores.length - 1]}`;
 }
 
 
