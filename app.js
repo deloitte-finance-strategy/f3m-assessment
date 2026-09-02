@@ -539,6 +539,9 @@ function cacheElements() {
     "dialogConfirm",
     "scoringCriteriaModal", // NUEVO: modal de criterios F3M
     "closeScoringCriteriaModalButton", // NUEVO: botón cerrar modal
+    "criteriaSubcapability",
+    "criteriaSubcapabilityTitle",
+    "criteriaSubcapabilityLevels",
     "saveStatus", // NUEVO: indicador visual de guardado
     "backToTopButton",
     "importJsonButton",
@@ -1073,7 +1076,7 @@ function setupScoringCriteriaModal() {
       }
 
       scoringCriteriaTrigger = button;
-      openScoringCriteriaModal();
+      openScoringCriteriaModal(button.closest(".assessment-card")?.dataset.id);
   });
 
   els.closeScoringCriteriaModalButton?.addEventListener("click", closeScoringCriteriaModal);
@@ -1097,11 +1100,54 @@ function setupScoringCriteriaModal() {
   });
 }
 
-function openScoringCriteriaModal() {
+/**
+ * Abre la guia de evaluacion con los niveles de la subcapacidad que se esta
+ * puntuando.
+ *
+ * El modal ensenaba la misma rubrica generica para las 152 subcapacidades de los
+ * nueve dominios. Justo cuando hay que decidir si algo es un 3 o un 4, lo que
+ * hace falta es la descripcion de esa subcapacidad, que hasta ahora vivia en
+ * otro sitio: la lista de niveles de la tarjeta.
+ */
+function openScoringCriteriaModal(itemId) {
+  pintarNivelesDeLaSubcapacidad(itemId);
+
   els.scoringCriteriaModal.hidden = false;
   activateScoringCriteriaTab("procesos");
   els.closeScoringCriteriaModalButton?.focus();
   updateModalOpenState();
+}
+
+
+function pintarNivelesDeLaSubcapacidad(itemId) {
+  const item = state.items.find((entrada) => entrada.id === itemId);
+  const niveles = Object.entries(item?.maturity || {});
+
+  if (!item || !niveles.length) {
+    els.criteriaSubcapability.hidden = true;
+    return;
+  }
+
+  const metrics = calculate(item);
+  const nivelActual = getMaturityLevelNumber(metrics.scoreMedio);
+
+  els.criteriaSubcapabilityTitle.textContent = item.subcapacidad;
+
+  els.criteriaSubcapabilityLevels.innerHTML = niveles
+    .map(([nivel, texto]) => {
+      const esActual = Number(nivel) === nivelActual;
+
+      return `
+        <li class="${esActual ? "is-current-level" : ""}">
+          <strong>Nivel ${escapeHtml(nivel)}</strong>
+          <span>${escapeHtml(texto)}</span>
+          ${esActual ? '<em class="current-level-label">Nivel actual</em>' : ""}
+        </li>
+      `;
+    })
+    .join("");
+
+  els.criteriaSubcapability.hidden = false;
 }
 
 function closeScoringCriteriaModal() {

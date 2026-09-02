@@ -533,12 +533,18 @@
     <div class="criteria-modal-header">
       <div>
         <p class="eyebrow">Guía de evaluación</p>
-        <h2 id="scoringCriteriaTitle">Criterios F3M de scoring</h2>
+        <h2 id="scoringCriteriaTitle">Cómo puntuar esta subcapacidad</h2>
       </div>
       <button class="modal-close-button" id="closeScoringCriteriaModalButton" type="button" aria-label="Cerrar criterios de scoring">
         ×
       </button>
     </div>
+
+    <section class="criteria-subcapability" id="criteriaSubcapability" hidden>
+      <p class="eyebrow">Niveles de esta subcapacidad</p>
+      <h3 id="criteriaSubcapabilityTitle"></h3>
+      <ol class="criteria-levels criteria-item-levels" id="criteriaSubcapabilityLevels"></ol>
+    </section>
 
     <div class="criteria-tabs" role="tablist" aria-label="Criterios por palanca">
       <button class="criteria-tab active" type="button" role="tab" data-criteria-tab="procesos" aria-selected="true">
@@ -554,6 +560,7 @@
 
     <div class="criteria-panel active" data-criteria-panel="procesos">
       <h3>Procesos</h3>
+      <p class="small-note criteria-generic-note">Rúbrica general de la palanca, común a todos los dominios.</p>
       <ol class="criteria-levels">
         <li><strong>Nivel 1 - Inicial:</strong> No existe proceso formal o es ad hoc</li>
         <li><strong>Nivel 2 - Estructurado:</strong> Proceso parcial o inconsistente</li>
@@ -573,6 +580,7 @@
 
     <div class="criteria-panel" data-criteria-panel="tecnologia">
       <h3>Tecnología</h3>
+      <p class="small-note criteria-generic-note">Rúbrica general de la palanca, común a todos los dominios.</p>
       <ol class="criteria-levels">
         <li><strong>Nivel 1 - Inicial:</strong> Excel/manual</li>
         <li><strong>Nivel 2 - Estructurado:</strong> Herramientas parciales</li>
@@ -592,6 +600,7 @@
 
     <div class="criteria-panel" data-criteria-panel="organizacion">
       <h3>Organización</h3>
+      <p class="small-note criteria-generic-note">Rúbrica general de la palanca, común a todos los dominios.</p>
       <ol class="criteria-levels">
         <li><strong>Nivel 1 - Inicial:</strong> Roles no claros</li>
         <li><strong>Nivel 2 - Estructurado:</strong> Roles parciales</li>
