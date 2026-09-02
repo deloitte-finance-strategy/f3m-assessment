@@ -585,7 +585,7 @@ function bindGlobalEvents() {
   els.editorNameButton?.addEventListener("click", pedirNombreEditor);
   els.heatmapExpandToggle?.addEventListener("click", handleHeatmapExpandToggleAll);
   els.loadNoticeClose?.addEventListener("click", ocultarAviso);
-  setupActiveTabObserver(); // NUEVO: marca automáticamente la pestaña activa según la sección visible
+  setupVistas();
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
   setupDomainSwitcher();
@@ -959,41 +959,83 @@ function round2(value) {
 }
 
 
-function setupActiveTabObserver() {
-  const tabLinks = [...document.querySelectorAll(".tabs a")]; // MODIFICADO: obtiene los links de navegación
-  const sections = tabLinks
-    .map((link) => document.querySelector(link.getAttribute("href")))
-    .filter(Boolean); // MODIFICADO: evita errores si alguna sección no existe
+const VISTAS = ["dashboard", "assessment", "heatmap", "roadmap"];
 
-  if (!tabLinks.length || !sections.length) {
+let vistaActiva = "dashboard";
+
+
+/**
+ * Las cuatro pestanas eran anclas dentro de una sola pagina de casi 10.000 px:
+ * pulsar "Roadmap" hacia un scroll de ocho pantallas, no cambiaba de vista.
+ * Ademas obligaba a repintar las cuatro secciones en cada cambio, estuvieran o
+ * no a la vista.
+ *
+ * Ahora solo se pinta y se muestra la seccion activa. El enlace directo
+ * (#roadmap) se sigue respetando, y sin JavaScript las cuatro quedan visibles,
+ * que es el comportamiento anterior.
+ */
+function setupVistas() {
+  const enlaces = [...document.querySelectorAll(".tabs a")];
+
+  if (!enlaces.length) {
     return;
   }
 
-  const setActiveTab = (sectionId) => {
-    tabLinks.forEach((link) => {
-      const isActive = link.getAttribute("href") === `#${sectionId}`;
-      link.classList.toggle("active", isActive);
+  enlaces.forEach((enlace) => {
+    enlace.addEventListener("click", (event) => {
+      event.preventDefault();
+      mostrarVista(enlace.getAttribute("href").slice(1));
     });
-  };
+  });
 
-  const updateActiveTab = () => {
-    const scrollPosition = window.scrollY + 82; // MODIFICADO: compensa header/tabs sticky
+  // Alguien puede llegar con un enlace directo, o usar atras y adelante.
+  window.addEventListener("hashchange", () => {
+    mostrarVista(vistaDesdeLaUrl(), { actualizarUrl: false });
+  });
 
-    let currentSectionId = sections[0].id;
+  mostrarVista(vistaDesdeLaUrl(), { actualizarUrl: false, desplazar: false });
+}
 
-    sections.forEach((section) => {
-      if (section.offsetTop <= scrollPosition) {
-        currentSectionId = section.id;
-      }
-    });
 
-    setActiveTab(currentSectionId);
-  };
+function vistaDesdeLaUrl() {
+  const id = window.location.hash.slice(1);
 
-  window.addEventListener("scroll", updateActiveTab, { passive: true }); // MODIFICADO: actualiza al hacer scroll
-  window.addEventListener("resize", updateActiveTab); // MODIFICADO: recalcula si cambia el tamaño de pantalla
+  return VISTAS.includes(id) ? id : "dashboard";
+}
 
-  updateActiveTab(); // MODIFICADO: estado inicial al cargar
+
+function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
+  if (!VISTAS.includes(id)) {
+    return;
+  }
+
+  vistaActiva = id;
+
+  VISTAS.forEach((vista) => {
+    const seccion = document.getElementById(vista);
+
+    if (seccion) {
+      seccion.hidden = vista !== id;
+    }
+  });
+
+  document.querySelectorAll(".tabs a").forEach((enlace) => {
+    const esActiva = enlace.getAttribute("href") === `#${id}`;
+
+    enlace.classList.toggle("active", esActiva);
+    enlace.setAttribute("aria-current", esActiva ? "page" : "false");
+  });
+
+  if (actualizarUrl) {
+    // replaceState y no el hash directo: cambiar el hash provocaria un salto.
+    window.history.replaceState(null, "", `#${id}`);
+  }
+
+  renderAll();
+
+  if (desplazar) {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
 }
 
 
@@ -1280,17 +1322,32 @@ function renderAll(opciones = {}) {
   els.sourceNote.classList.toggle("has-scope-filter", ambito.hayFiltros);
 
   updateActiveFiltersUi();
-  renderDashboard();
-  renderCapabilityTargets();
 
-  // Al puntuar no hace falta reconstruir la lista entera: basta con refrescar
-  // la tarjeta tocada, que es lo que evita perder el foco y el detalle abierto.
-  if (!opciones.saltarAssessments) {
-    renderAssessments();
+  // Solo se pinta lo que se esta viendo. Las otras tres secciones estan
+  // ocultas: repintarlas era trabajo tirado en cada cambio de score.
+  if (vistaActiva === "dashboard") {
+    renderDashboard();
   }
 
-  renderHeatmap();
-  renderRoadmap();
+  if (vistaActiva === "assessment") {
+    renderCapabilityTargets();
+
+    // Al puntuar no hace falta reconstruir la lista entera: basta con refrescar
+    // la tarjeta tocada, que es lo que evita perder el foco y el detalle abierto.
+    if (!opciones.saltarAssessments) {
+      renderAssessments();
+    }
+  }
+
+  if (vistaActiva === "heatmap") {
+    renderHeatmap();
+  }
+
+  if (vistaActiva === "roadmap") {
+    renderRoadmap();
+  }
+
+  // Los badges miden el dominio entero, asi que se actualizan siempre.
   updateNavigationBadges();
 }
 
@@ -1867,6 +1924,7 @@ function renderSingleCapabilityRadar({
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: false,
 
     layout: {
       padding: 4,
@@ -4355,6 +4413,8 @@ function exportCsv() {
 
 
 function exportPdfReport() {
+  // La ventana se abre en el mismo gesto del clic: si se abriera despues, el
+  // navegador la bloquearia por emergente.
   const reportWindow = window.open("", "_blank");
 
   if (!reportWindow) {
@@ -4362,7 +4422,7 @@ function exportPdfReport() {
     return;
   }
 
-  const reportData = buildEnhancedPdfReportData();
+  const reportData = conElDashboardVisible(buildEnhancedPdfReportData);
   const reportHtml = buildEnhancedPdfReportHtml(reportData);
 
   reportWindow.document.open();
@@ -4394,6 +4454,33 @@ function exportPdfReport() {
       reportWindow.print();
     });
   }, 900);
+}
+
+
+/**
+ * Ejecuta algo con el Dashboard a la vista y lo deja como estaba.
+ *
+ * El informe incorpora los radares capturados del canvas, y un canvas oculto no
+ * tiene tamano: si se exporta desde el Roadmap sin haber pasado por el
+ * Dashboard, las imagenes saldrian en blanco.
+ */
+function conElDashboardVisible(accion) {
+  const seccion = document.getElementById("dashboard");
+  const estabaOculto = seccion?.hidden;
+
+  if (estabaOculto) {
+    seccion.hidden = false;
+  }
+
+  renderDashboard();
+
+  try {
+    return accion();
+  } finally {
+    if (estabaOculto) {
+      seccion.hidden = true;
+    }
+  }
 }
 
 

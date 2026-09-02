@@ -32,7 +32,6 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 48px;
 }
 
 body {
@@ -466,6 +465,10 @@ transform: translateY(-1px);
 
 .section-block {
   padding-top: 28px;
+}
+
+.section-block[hidden] {
+  display: none;
 }
 
 
