@@ -112,6 +112,36 @@ Este identificador sí está publicado a propósito: contiene únicamente los da
 `data/domains/*.json`, sin información de ningún cliente. Precisamente por eso **no debe usarse
 nunca para trabajo real** — cualquiera puede leerlo y sobrescribirlo.
 
+### Identidad de quien edita
+
+En un escenario compartido la app se autentica de forma anónima contra Firebase: no pide
+credenciales, pero asigna un identificador estable a cada navegador. Sirve para atribuir cada
+cambio, con el botón **"Poner mi nombre"** de la cabecera para elegir cómo apareces ante el resto.
+La columna **"Último cambio"** del Roadmap muestra quién tocó cada subcapacidad por última vez.
+
+Si la autenticación no está disponible, la herramienta sigue funcionando sin atribución. Se
+prefiere perder la trazabilidad a que deje de guardarse.
+
+> **Orden de despliegue.** Las escrituras son atómicas: si las reglas rechazan el campo de autoría,
+> falla también el dato que lo acompaña, y el guardado deja de funcionar sin que se note.
+> Por eso hay que hacerlo en este orden:
+>
+> 1. Publicar `database.rules.json` (ya incluye `lastEditedBy`).
+> 2. Habilitar *Anonymous* en Firebase → *Authentication* → *Sign-in method*.
+> 3. Desplegar el código.
+>
+> Al revés, cada guardado se rechazaría con `Permission denied`.
+
+Cuando todo el equipo use la versión nueva, se puede exigir autenticación en las reglas cambiando
+las dos líneas de `$scenarioId`:
+
+```json
+".read": "auth != null && $scenarioId.length >= 20",
+".write": "auth != null && $scenarioId.length >= 20"
+```
+
+No hacerlo antes: quien siga con la versión anterior dejaría de poder leer y escribir.
+
 ### Rotar un escenario expuesto
 
 Si un identificador se ha filtrado (por ejemplo, publicado en un repositorio o en un correo),
