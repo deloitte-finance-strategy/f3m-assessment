@@ -42,9 +42,6 @@ console.log("Modo escenario compartido:", scenarioId ? "escenario compartido" : 
 
 
 
-const DATA_URL = "data/fpa_assessment.json";
-
-
 const DEFAULT_DOMAIN_ID = "fpa";
 
 const DEFAULT_TARGET_MATURITY = 4;
@@ -156,54 +153,6 @@ const STATUS_OPTIONS = ["No iniciado", "En curso", "Completado", "Bloqueado"];
 const LIMITES_DE_TEXTO = {
   owner: 120,
   comentario: 2000,
-};
-
-
-const AI_INITIATIVES_BY_CAPABILITY = {
-  "Presupuestos y previsiones": {
-    subcapacidad: "1.1-1.4",
-    cases:
-      "Desarrollo de flujos de trabajo guiados para la elaboración de presupuestos; generación de previsiones bajo demanda y modelización de escenarios; asignación presupuestaria asistida por IA",
-    advanced:
-      "Planificación driver-based, rolling forecast, escenarios automatizados y workflows colaborativos",
-    source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
-  },
-
-  "Informes de gestión del rendimiento": {
-    subcapacidad: "2.1-2.4",
-    cases:
-      "Reporting de gestión de real frente a plan con generación de comentarios; análisis de desviaciones por cuenta y generación de explicaciones inteligentes; plataforma FinanceAI Insights",
-    advanced:
-      "Reporting automatizado con commentary, insights, alertas y explicación de desviaciones",
-    source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
-  },
-
-  "Evaluación business case": {
-    subcapacidad: "3.1-3.4",
-    cases:
-      "Resumen y evaluación automatizada de propuestas de proyectos; generación de recomendaciones a nivel de proyecto",
-    advanced:
-      "Scoring de iniciativas, priorización dinámica y seguimiento de beneficios",
-    source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
-  },
-
-  "Información y apoyo a la toma de decisiones": {
-    subcapacidad: "4.1-4.4",
-    cases:
-      "Realización de análisis e investigaciones y generación de insights bajo demanda; acceso generalizado a los datos; búsqueda y acceso a información en toda la organización",
-    advanced:
-      "Decision intelligence, insights predictivos y autoservicio gobernado",
-    source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
-  },
-
-  "Planificación largo plazo": {
-    subcapacidad: "5.1-5.4",
-    cases:
-      "Generación de estrategias de inversión; identificación de patrones para predecir el rendimiento financiero futuro; planificación integrada del negocio",
-    advanced:
-      "Planificación estratégica continua, simulación avanzada y asignación dinámica de recursos",
-    source: "F3M_AI_Mapping_Consolidado_v1.xlsx",
-  },
 };
 
 
@@ -615,27 +564,6 @@ function createDefaultTargets(items, defaultTarget = DEFAULT_TARGET_MATURITY) {
   });
 
   return targets;
-}
-
-
-
-function toFirebaseSafeKey(value) {
-  const text = String(value || "").trim();
-
-  if (!text) {
-    return "capability";
-  }
-
-  let decodedText = text;
-
-  try {
-    decodedText = decodeURIComponent(text);
-  } catch (error) {
-    decodedText = text;
-  }
-
-  return encodeURIComponent(decodedText)
-    .replace(/\./g, "%2E");
 }
 
 
@@ -1209,22 +1137,17 @@ function setupBackToTopButton() {
 }
 
 
+/**
+ * Datos de IA de una subcapacidad, si los trae.
+ *
+ * Habia un respaldo por nombre de capacidad con los casos de FP&A. Nunca se
+ * usaba: las 152 subcapacidades traen su propio bloque ai desde el Excel, y para
+ * los otros ocho dominios los nombres de capacidad no coincidian de todas
+ * formas.
+ */
 function getAiDataForItem(item) {
   if (item?.ai?.cases || item?.ai?.advanced) {
     return item.ai;
-  }
-
-  const capabilityFallback = typeof AI_INITIATIVES_BY_CAPABILITY !== "undefined"
-    ? AI_INITIATIVES_BY_CAPABILITY[item.capacidad]
-    : null;
-
-  if (capabilityFallback) {
-    return {
-      subcapacidad: capabilityFallback.subcapacidad || item.subcapacidad,
-      cases: capabilityFallback.cases || "",
-      advanced: capabilityFallback.advanced || "",
-      source: capabilityFallback.source || "",
-    };
   }
 
   return null;
@@ -2760,14 +2683,21 @@ function renderRoadmap() {
         <td>${priorityBadge(metrics.prioridad)}</td>
         <td>${escapeHtml(item.iniciativaSugerida)}</td>
         <td>
-          <button
-            class="roadmap-ai-button"
-            type="button"
-            data-id="${escapeAttr(item.id)}"
-            aria-label="Ver iniciativa IA para ${escapeAttr(item.subcapacidad)}"
-          >
-            IA
-          </button>
+          ${
+            // Sin datos, el boton abria un aviso y nada mas: mejor no ofrecerlo.
+            getAiDataForItem(item)
+              ? `
+                <button
+                  class="roadmap-ai-button"
+                  type="button"
+                  data-id="${escapeAttr(item.id)}"
+                  aria-label="${escapeAttr(`Ver la iniciativa de IA de ${item.subcapacidad}`)}"
+                >
+                  IA
+                </button>
+              `
+              : `<span class="small-note">-</span>`
+          }
         </td>
 
         <td class="roadmap-wave-cell">

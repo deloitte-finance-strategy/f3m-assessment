@@ -335,8 +335,7 @@ color: #ffe5e1;
 
 
 .primary-button,
-.secondary-button,
-.ghost-button {
+.secondary-button {
   min-height: 40px;
   padding: 0 14px;
   border-radius: 6px;
@@ -361,12 +360,6 @@ transform: translateY(-1px);
 .secondary-button {
   background: #ffffff;
   color: #10140e;
-}
-
-.ghost-button {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
 }
 
 .app-shell {
@@ -1241,19 +1234,6 @@ display: none;
 }
 
 
-
-.metric-line {
-  display: flex;
-  gap: 7px;
-  align-items: baseline;
-  color: var(--muted);
-  font-size: 0.84rem;
-}
-
-.metric-line strong {
-  color: var(--ink);
-  font-size: 1.05rem;
-}
 
 .assessment-card details {
   margin-top: 14px;
@@ -2151,16 +2131,6 @@ border-color: #eef0ed;
   background: #d9edc3;
   color: #315d11;
 }
-
-.empty-state {
-  padding: 28px;
-  border: 1px dashed var(--line);
-  border-radius: var(--radius);
-  background: #ffffff;
-  color: var(--muted);
-  text-align: center;
-}
-
 
 .filtered-empty-state {
   display: grid;
