@@ -547,18 +547,18 @@
     </section>
 
     <div class="criteria-tabs" role="tablist" aria-label="Criterios por palanca">
-      <button class="criteria-tab active" type="button" role="tab" data-criteria-tab="procesos" aria-selected="true">
+      <button class="criteria-tab active" type="button" role="tab" id="criteriaTab-procesos" aria-controls="criteriaPanel-procesos" data-criteria-tab="procesos" aria-selected="true" tabindex="0">
         Procesos
       </button>
-      <button class="criteria-tab" type="button" role="tab" data-criteria-tab="tecnologia" aria-selected="false">
+      <button class="criteria-tab" type="button" role="tab" id="criteriaTab-tecnologia" aria-controls="criteriaPanel-tecnologia" data-criteria-tab="tecnologia" aria-selected="false" tabindex="-1">
         Tecnología
       </button>
-      <button class="criteria-tab" type="button" role="tab" data-criteria-tab="organizacion" aria-selected="false">
+      <button class="criteria-tab" type="button" role="tab" id="criteriaTab-organizacion" aria-controls="criteriaPanel-organizacion" data-criteria-tab="organizacion" aria-selected="false" tabindex="-1">
         Organización
       </button>
     </div>
 
-    <div class="criteria-panel active" data-criteria-panel="procesos">
+    <div class="criteria-panel active" role="tabpanel" id="criteriaPanel-procesos" aria-labelledby="criteriaTab-procesos" tabindex="0" data-criteria-panel="procesos">
       <h3>Procesos</h3>
       <p class="small-note criteria-generic-note">Rúbrica general de la palanca, común a todos los dominios.</p>
       <ol class="criteria-levels">
@@ -578,7 +578,7 @@
       </ul>
     </div>
 
-    <div class="criteria-panel" data-criteria-panel="tecnologia">
+    <div class="criteria-panel" role="tabpanel" id="criteriaPanel-tecnologia" aria-labelledby="criteriaTab-tecnologia" tabindex="0" data-criteria-panel="tecnologia">
       <h3>Tecnología</h3>
       <p class="small-note criteria-generic-note">Rúbrica general de la palanca, común a todos los dominios.</p>
       <ol class="criteria-levels">
@@ -598,7 +598,7 @@
       </ul>
     </div>
 
-    <div class="criteria-panel" data-criteria-panel="organizacion">
+    <div class="criteria-panel" role="tabpanel" id="criteriaPanel-organizacion" aria-labelledby="criteriaTab-organizacion" tabindex="0" data-criteria-panel="organizacion">
       <h3>Organización</h3>
       <p class="small-note criteria-generic-note">Rúbrica general de la palanca, común a todos los dominios.</p>
       <ol class="criteria-levels">

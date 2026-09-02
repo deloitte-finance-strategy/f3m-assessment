@@ -1088,14 +1088,44 @@ function setupScoringCriteriaModal() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !els.scoringCriteriaModal.hidden) {
+    if (els.scoringCriteriaModal.hidden) {
+      return;
+    }
+
+    if (event.key === "Escape") {
       closeScoringCriteriaModal();
+      return;
+    }
+
+    // Sin esto el tabulador se escapaba al contenido de detras, que sigue ahi.
+    if (event.key === "Tab") {
+      atraparFoco(event, els.scoringCriteriaModal);
     }
   });
 
-  els.scoringCriteriaModal.querySelectorAll(".criteria-tab").forEach((tab) => {
+  const tabs = [...els.scoringCriteriaModal.querySelectorAll(".criteria-tab")];
+
+  tabs.forEach((tab, indice) => {
     tab.addEventListener("click", () => {
       activateScoringCriteriaTab(tab.dataset.criteriaTab);
+    });
+
+    // Un grupo de pestanas se recorre con las flechas, no con el tabulador.
+    tab.addEventListener("keydown", (event) => {
+      const salto = { ArrowRight: 1, ArrowLeft: -1, Home: -indice, End: tabs.length - 1 - indice }[
+        event.key
+      ];
+
+      if (salto === undefined) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const siguiente = tabs[(indice + salto + tabs.length) % tabs.length];
+
+      activateScoringCriteriaTab(siguiente.dataset.criteriaTab);
+      siguiente.focus();
     });
   });
 }
@@ -1166,6 +1196,7 @@ function activateScoringCriteriaTab(tabKey) {
     const isActive = tab.dataset.criteriaTab === tabKey;
     tab.classList.toggle("active", isActive);
     tab.setAttribute("aria-selected", String(isActive));
+    tab.tabIndex = isActive ? 0 : -1;
   });
 
   els.scoringCriteriaModal.querySelectorAll(".criteria-panel").forEach((panel) => {
@@ -1199,8 +1230,17 @@ function setupAiInitiativeModal() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !els.aiInitiativeModal.hidden) {
+    if (els.aiInitiativeModal.hidden) {
+      return;
+    }
+
+    if (event.key === "Escape") {
       closeAiInitiativeModal();
+      return;
+    }
+
+    if (event.key === "Tab") {
+      atraparFoco(event, els.aiInitiativeModal);
     }
   });
 }
