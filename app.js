@@ -4166,7 +4166,7 @@ function buildScenarioPayload() {
  * nueve dominios para todo el mundo. Antes lo hacia sin preguntar y, si el
  * archivo no casaba con nada, informaba igualmente de que todo había ido bien.
  */
-function importScenario(event) {
+async function importScenario(event) {
   const file = event.target.files?.[0];
 
   if (!file) {
@@ -4174,14 +4174,22 @@ function importScenario(event) {
   }
 
   if (scenarioDatabaseRef) {
-    const confirmado = window.confirm(
-      "Vas a sustituir el contenido del escenario compartido con el de este archivo.\n\n" +
-        "Afecta a los nueve dominios y a todas las personas que trabajen con este enlace: " +
-        "sus puntuaciones, comentarios y estados quedarán reemplazados por los del archivo. " +
-        "No se puede deshacer.\n\n" +
-        "Si quieres conservar lo que hay ahora, cancela y pulsa antes Exportar JSON.\n\n" +
-        "¿Continuar?",
-    );
+    const confirmado = await abrirDialogo({
+      eyebrow: "Acción irreversible",
+      titulo: "Sustituir el escenario compartido",
+      parrafos: [
+        `Vas a reemplazar el contenido del escenario compartido con el del archivo ${file.name}.`,
+        "Afecta a los nueve dominios y a todas las personas que trabajen con este enlace: sus puntuaciones, comentarios y estados quedarán reemplazados por los del archivo.",
+        "No se puede deshacer. Si quieres conservar lo que hay ahora, expórtalo antes con el botón de abajo.",
+      ],
+      tono: "peligro",
+      confirmar: "Sustituir el escenario",
+      confirmacionEscrita: "SUSTITUIR",
+      accionSecundaria: {
+        texto: "Exportar JSON antes",
+        alHacerClic: exportScenarioJson,
+      },
+    });
 
     if (!confirmado) {
       event.target.value = "";
@@ -5450,25 +5458,57 @@ function downloadFile(filename, content, type) {
 }
 
 
-function resetScenario() {
-  // El efecto real depende del modo: en local se pierde todo, y en un escenario
-  // compartido los datos vuelven a bajar de Firebase enseguida.
-  const mensaje = scenarioId
-    ? "Estás en un escenario compartido.\n\n" +
-      "Al restaurar se borrará la copia de este navegador, pero los datos volverán " +
-      "a descargarse del escenario compartido, así que en la práctica no cambiará nada.\n\n" +
-      "Para volver de verdad a los datos base, abre la herramienta sin el parámetro " +
-      "'?scenario=' en la dirección.\n\n¿Continuar de todos modos?"
-    : "Se borrarán TODAS las puntuaciones, comentarios y estados guardados en este " +
-      "navegador, de todos los dominios.\n\n" +
-      "Esta acción no se puede deshacer y estos datos no están guardados en ningún " +
-      "otro sitio. Si quieres conservarlos, cancela y pulsa antes 'Exportar JSON'.\n\n" +
-      "¿Seguro que quieres restaurar la base?";
+/**
+ * "Restaurar base" borra la copia de este navegador.
+ *
+ * En modo local eso es toda la evaluacion, de los nueve dominios, sin copia en
+ * ningun otro sitio y sin forma de recuperarla. Era un solo clic sobre un
+ * confirm del navegador con "Aceptar" a un tabulador de distancia, asi que
+ * ahora hay que escribir la palabra y se ofrece exportar antes, ahi mismo.
+ *
+ * En un escenario compartido el efecto es otro: los datos vuelven a bajar de
+ * Firebase enseguida, asi que en la practica no cambia nada.
+ */
+async function resetScenario() {
+  if (scenarioId) {
+    const seguir = await abrirDialogo({
+      eyebrow: "Escenario compartido",
+      titulo: "Restaurar la copia de este navegador",
+      parrafos: [
+        "Estás trabajando en un escenario compartido, así que esto no borra el escenario: solo la copia local, que se volverá a descargar al recargar la pagina.",
+        "En la práctica no cambiará nada. Para volver de verdad a los datos base, abre la herramienta sin el parámetro ?scenario= en la dirección.",
+      ],
+      confirmar: "Restaurar de todos modos",
+    });
 
-  const confirmed = window.confirm(mensaje); // NUEVO: pide confirmación antes de borrar datos locales
+    if (!seguir) {
+      return;
+    }
 
-  if (!confirmed) {
-    return; // NUEVO: si el usuario cancela, no se borra nada
+    borrarDeAlmacenamiento(STORAGE_KEY);
+    window.location.reload();
+    return;
+  }
+
+  const confirmado = await abrirDialogo({
+    eyebrow: "Acción irreversible",
+    titulo: "Borrar toda la evaluación de este navegador",
+    parrafos: [
+      "Se borrarán todas las puntuaciones, comentarios, responsables y estados de los nueve dominios.",
+      "Estos datos solo existen en este navegador: no hay copia en ningún otro sitio y no se pueden recuperar.",
+      "Si quieres conservarlos, expórtalos antes con el botón de abajo.",
+    ],
+    tono: "peligro",
+    confirmar: "Borrar la evaluación",
+    confirmacionEscrita: "BORRAR",
+    accionSecundaria: {
+      texto: "Exportar JSON antes",
+      alHacerClic: exportScenarioJson,
+    },
+  });
+
+  if (!confirmado) {
+    return;
   }
 
   borrarDeAlmacenamiento(STORAGE_KEY);
