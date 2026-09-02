@@ -6,6 +6,14 @@
   --ink: #161a18;
   --muted: #5c665e;
   --line: #d9dfd4;
+  /* Identidad de palanca. Estos tres colores significan una sola cosa: de que
+     palanca se habla. No deben usarse para ningun otro significado. */
+  --lever-procesos: #86bc25;
+  --lever-tecnologia: #ed8b00;
+  --lever-organizacion: #012169;
+
+  /* Semantica de interfaz. Otra familia y otro significado, aunque el acento de
+     marca comparta el verde de Procesos por identidad visual de Deloitte. */
   --green: #86bc25;
   --green-dark: #3e6f11;
   --teal: #007c89;
@@ -13,6 +21,7 @@
   --red: #bb3128;
   --blue: #255e91;
   --neutral: #8a9189;
+  --graphite: #4f5952;
   --shadow: 0 12px 30px rgba(22, 26, 24, 0.08);
   --radius: 8px;
 }
@@ -1882,15 +1891,17 @@ border-color: #eef0ed;
   text-align: center;
 }
 
-.roadmap-wave {
+/* La oleada no es una palanca: en azul competia con Organizacion, y encima sin
+   etiqueta que lo aclarase. En grafito ya no se confunde con nada. */
+.status-chip.roadmap-wave {
   justify-content: center;
   min-width: 32px;
   min-height: 32px;
   padding: 0 8px;
-  border: 1px solid rgba(37, 94, 145, 0.2);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: #eef2f5;
-  color: var(--blue);
+  background: var(--surface-muted);
+  color: var(--graphite);
   font-size: 0.82rem;
   font-weight: 900;
   line-height: 1;
@@ -2682,15 +2693,15 @@ display: inline-block;
 }
 
 .radar-dot-processes {
-background: #86BC25; /* Deloitte Green */
+background: var(--lever-procesos);
 }
 
 .radar-dot-technology {
-background: #ED8B00; /* Deloitte Orange */
+background: var(--lever-tecnologia);
 }
 
 .radar-dot-organization {
-background: #012169; /* Deloitte Blue 6 */
+background: var(--lever-organizacion);
 }
 
 .radar-chart-wrap {
@@ -2987,15 +2998,15 @@ height: 100% !important;
 }
 
 .target-column-procesos::before {
-  background: var(--green);
+  background: var(--lever-procesos);
 }
 
 .target-column-tecnologia::before {
-  background: #ed8b00;
+  background: var(--lever-tecnologia);
 }
 
 .target-column-organizacion::before {
-  background: #012169;
+  background: var(--lever-organizacion);
 }
 
 .capability-targets-rows {
@@ -3059,15 +3070,15 @@ height: 100% !important;
 }
 
 .capability-target-select.target-procesos {
-  border-left-color: var(--green);
+  border-left-color: var(--lever-procesos);
 }
 
 .capability-target-select.target-tecnologia {
-  border-left-color: #ed8b00;
+  border-left-color: var(--lever-tecnologia);
 }
 
 .capability-target-select.target-organizacion {
-  border-left-color: #012169;
+  border-left-color: var(--lever-organizacion);
 }
 
 .capability-target-select:hover {

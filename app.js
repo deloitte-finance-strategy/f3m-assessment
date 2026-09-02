@@ -119,21 +119,46 @@ const DOMAINS = {
 const STORAGE_KEY = "f3m-fpa-assessment-scenario";
 
 
+// Identidad de palanca. Estos tres colores solo significan una cosa: de que
+// palanca estamos hablando. No deben usarse para nada mas.
+const COLOR_DE_PALANCA = {
+  procesos: "#86BC25",
+  tecnologia: "#ED8B00",
+  organizacion: "#012169",
+};
+
+
+// Semantica de interfaz. Son otra familia y otro significado, aunque el acento
+// de marca comparta el verde de Procesos por decision de identidad visual.
+// El acento de marca comparte valor con el verde de Procesos, pero no es lo
+// mismo: aqui significa "Deloitte", no "palanca de Procesos". Se nombra aparte
+// para que se pueda cambiar uno sin arrastrar el otro.
+const COLOR_DE_MARCA = "#86BC25";
+
+
+const COLOR_DE_PRIORIDAD = {
+  Alta: "#bb3128",
+  Media: "#c87900",
+  Baja: "#3e6f11",
+  Pendiente: "#8a9189",
+};
+
+
 const LEVERS = [
   {
     key: "procesos",
     label: "Procesos",
-    color: "#86BC25",
+    color: COLOR_DE_PALANCA.procesos,
   },
   {
     key: "tecnologia",
     label: "Tecnología",
-    color: "#ED8B00",
+    color: COLOR_DE_PALANCA.tecnologia,
   },
   {
     key: "organizacion",
     label: "Organización",
-    color: "#012169",
+    color: COLOR_DE_PALANCA.organizacion,
   },
 ];
 
@@ -1756,7 +1781,7 @@ function renderCapabilityRadar() {
     label: "Procesos",
     values: radarData.procesos,
     targetValues: radarData.objetivoProcesos,
-    color: "#86BC25",
+    color: COLOR_DE_PALANCA.procesos,
     backgroundColor: "rgba(134, 188, 37, 0.24)",
     radarData,
   });
@@ -1767,7 +1792,7 @@ function renderCapabilityRadar() {
     label: "Tecnología",
     values: radarData.tecnologia,
     targetValues: radarData.objetivoTecnologia,
-    color: "#ED8B00",
+    color: COLOR_DE_PALANCA.tecnologia,
     backgroundColor: "rgba(237, 139, 0, 0.22)",
     radarData,
   });
@@ -1778,7 +1803,7 @@ function renderCapabilityRadar() {
     label: "Organización",
     values: radarData.organizacion,
     targetValues: radarData.objetivoOrganizacion,
-    color: "#012169",
+    color: COLOR_DE_PALANCA.organizacion,
     backgroundColor: "rgba(1, 33, 105, 0.18)",
     radarData,
   });
@@ -3217,10 +3242,7 @@ function priorityBadge(priority) {
 }
 
 function priorityColor(priority) {
-  if (priority === "Alta") return "#bb3128";
-  if (priority === "Media") return "#c87900";
-  if (priority === "Baja") return "#3e6f11";
-  return "#8a9189";
+  return COLOR_DE_PRIORIDAD[priority] || COLOR_DE_PRIORIDAD.Pendiente;
 }
 
 function priorityFromGap(gap) {
@@ -4709,9 +4731,9 @@ function buildPdfLeverBars(data) {
   );
 
   const rows = [
-    ["Procesos", procesos, "#86BC25"],
-    ["Tecnología", tecnologia, "#ED8B00"],
-    ["Organización", organizacion, "#012169"],
+    ["Procesos", procesos, COLOR_DE_PALANCA.procesos],
+    ["Tecnología", tecnologia, COLOR_DE_PALANCA.tecnologia],
+    ["Organización", organizacion, COLOR_DE_PALANCA.organizacion],
   ];
 
   return rows
@@ -4736,19 +4758,16 @@ function buildPdfBarRow(label, value, maxValue, color, displayValue = value) {
 }
 
 function getPdfPriorityColor(priority) {
-  if (priority === "Alta") return "#BB3128";
-  if (priority === "Media") return "#ED8B00";
-  if (priority === "Baja") return "#86BC25";
-  return "#737A74";
+  return priorityColor(priority);
 }
 
 
 
 function buildPdfEnhancedRadarSection(data) {
   const radarCards = [
-    { title: "Procesos", image: data.radarImages.procesos, color: "#86BC25" },
-    { title: "Tecnología", image: data.radarImages.tecnologia, color: "#ED8B00" },
-    { title: "Organización", image: data.radarImages.organizacion, color: "#012169" },
+    { title: "Procesos", image: data.radarImages.procesos, color: COLOR_DE_PALANCA.procesos },
+    { title: "Tecnología", image: data.radarImages.tecnologia, color: COLOR_DE_PALANCA.tecnologia },
+    { title: "Organización", image: data.radarImages.organizacion, color: COLOR_DE_PALANCA.organizacion },
   ]
     .map((radar) => `
       <article class="pdf-radar-card">
@@ -5054,13 +5073,13 @@ function getEnhancedPdfReportStyles() {
       width: 110px;
       height: 9px;
       margin-bottom: 26px;
-      background: #86BC25;
+      background: ${COLOR_DE_MARCA};
       border-radius: 999px;
     }
 
     .pdf-eyebrow {
       margin: 0 0 10px;
-      color: #86BC25;
+      color: ${COLOR_DE_MARCA};
       font-size: 10.5pt;
       font-weight: 900;
       letter-spacing: 0.08em;
@@ -5077,7 +5096,7 @@ function getEnhancedPdfReportStyles() {
     h2 {
       margin: 0 0 14px;
       padding-bottom: 8px;
-      border-bottom: 3px solid #86BC25;
+      border-bottom: 3px solid ${COLOR_DE_MARCA};
       font-size: 18pt;
     }
 
