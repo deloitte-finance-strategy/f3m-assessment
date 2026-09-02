@@ -3701,9 +3701,18 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
   };
 }
 
+/**
+ * Vuelca un escenario guardado sobre los datos cargados.
+ *
+ * Devuelve cuantas subcapacidades ha reconocido: sin ese dato, una importacion
+ * que no casaba con nada terminaba igualmente en "Escenario importado
+ * correctamente".
+ */
 function applyScenarioPayload(payload) {
+  const resultado = { aplicadas: 0, total: 0, dominios: 0 };
+
   if (!payload) {
-    return;
+    return resultado;
   }
 
   if (payload.domains) {
@@ -3730,6 +3739,10 @@ function applyScenarioPayload(payload) {
         defaultTarget,
       );
 
+      resultado.aplicadas += result.matched;
+      resultado.total += result.total;
+      resultado.dominios += 1;
+
       console.log(
         `Escenario aplicado en ${domainId}: ${result.matched}/${result.total}`,
       );
@@ -3741,7 +3754,7 @@ function applyScenarioPayload(payload) {
       setActiveDomain(state.activeDomainId);
     }
 
-    return;
+    return resultado;
   }
 
   const legacyItems = getScenarioItemsFromPayload(payload, "fpa");
@@ -3762,6 +3775,10 @@ function applyScenarioPayload(payload) {
     );
   }
 
+  resultado.aplicadas = result.matched;
+  resultado.total = result.total;
+  resultado.dominios = 1;
+
   console.log(
     `Escenario antiguo aplicado en FP&A: ${result.matched}/${result.total}`,
   );
@@ -3769,6 +3786,8 @@ function applyScenarioPayload(payload) {
   if (state.activeDomainId === "fpa") {
     setActiveDomain("fpa");
   }
+
+  return resultado;
 }
 
 
@@ -3832,6 +3851,13 @@ function buildScenarioPayload() {
 
 
 
+/**
+ * Importar es la accion mas destructiva de la herramienta.
+ *
+ * En un escenario compartido escribe el payload completo, asi que reemplaza los
+ * nueve dominios para todo el mundo. Antes lo hacia sin preguntar y, si el
+ * archivo no casaba con nada, informaba igualmente de que todo habia ido bien.
+ */
 function importScenario(event) {
   const file = event.target.files?.[0];
 
@@ -3839,23 +3865,71 @@ function importScenario(event) {
     return;
   }
 
+  if (scenarioDatabaseRef) {
+    const confirmado = window.confirm(
+      "Vas a sustituir el contenido del escenario compartido con el de este archivo.\n\n" +
+        "Afecta a los nueve dominios y a todas las personas que trabajen con este enlace: " +
+        "sus puntuaciones, comentarios y estados quedarán reemplazados por los del archivo. " +
+        "No se puede deshacer.\n\n" +
+        "Si quieres conservar lo que hay ahora, cancela y pulsa antes Exportar JSON.\n\n" +
+        "¿Continuar?",
+    );
+
+    if (!confirmado) {
+      event.target.value = "";
+      return;
+    }
+  }
+
   const reader = new FileReader();
+
+  reader.onerror = () => {
+    showNotice(
+      "No se ha podido leer el archivo. Comprueba que sigue disponible y vuelve a intentarlo.",
+      true,
+    );
+
+    event.target.value = "";
+  };
 
   reader.onload = () => {
     try {
       const payload = JSON.parse(reader.result);
+      const resultado = applyScenarioPayload(payload);
 
-      applyScenarioPayload(payload);
+      if (!resultado.aplicadas) {
+        showNotice(
+          "El archivo se ha leído, pero ninguna de sus subcapacidades coincide con las de esta " +
+            "herramienta, así que no se ha cambiado nada. Comprueba que es un escenario exportado " +
+            "desde F3M Assessment.",
+          true,
+        );
+
+        return;
+      }
+
       localStorage.setItem(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
 
       populateCapacityFilter();
       renderAll();
       persistScenario();
 
-      showNotice("Escenario importado correctamente.");
-      updateSaveStatus("saved", "Guardado ✓");
+      const parciales =
+        resultado.aplicadas < resultado.total
+          ? ` ${resultado.total - resultado.aplicadas} del archivo no corresponden a ninguna subcapacidad y se han ignorado.`
+          : "";
+
+      showNotice(
+        `Escenario importado: ${resultado.aplicadas} subcapacidades actualizadas en ` +
+          `${resultado.dominios} ${resultado.dominios === 1 ? "dominio" : "dominios"}.${parciales}`,
+      );
     } catch (error) {
-      showNotice("El archivo no parece un escenario válido para este MVP.", true);
+      showNotice(
+        "El archivo no se ha podido leer como escenario. Tiene que ser un JSON exportado con " +
+          "Exportar JSON desde esta misma herramienta.",
+        true,
+      );
+
       console.error(error);
     } finally {
       event.target.value = "";
