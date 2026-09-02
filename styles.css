@@ -859,20 +859,83 @@ display: none;
   bottom: 0;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
   min-height: 38px;
-  padding: 4px 6px 4px 10px;
+  padding: 4px 6px;
   border: 1px solid rgba(134, 188, 37, 0.45);
-  border-radius: 6px;
+  border-radius: 8px;
   background: #f7faef;
   color: var(--green-dark);
   font-size: 0.78rem;
   font-weight: 750;
-  white-space: nowrap;
+}
+
+/* En Heatmap y Roadmap no hay barra de filtros al lado: el bloque va en linea. */
+.active-filters-block {
+  position: static;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 8px 10px;
 }
 
 .active-filters[hidden] {
   display: none;
+}
+
+.active-filters-label {
+  padding-left: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 320px;
+  padding: 3px 3px 3px 9px;
+  border: 1px solid rgba(134, 188, 37, 0.5);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #2f3732;
+  font-size: 0.78rem;
+}
+
+.filter-chip-label {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.filter-chip-value {
+  overflow: hidden;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: #4f5952;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.filter-chip-remove:hover {
+  background: #e0e6da;
+  color: var(--ink);
 }
 
 .clear-filters-button {

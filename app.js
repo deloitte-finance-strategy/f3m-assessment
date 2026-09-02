@@ -531,9 +531,6 @@ function cacheElements() {
     "capacityFilter",
     "priorityFilter",
     "searchInput",
-    "activeFilters",
-    "activeFiltersText",
-    "clearFiltersButton",
     "capabilityTargetsPanel",
     "assessmentList",
     "heatmapTable",
@@ -571,17 +568,21 @@ function bindGlobalEvents() {
   els.capacityFilter.addEventListener("change", renderAll);
   els.priorityFilter.addEventListener("change", renderAll);
   els.searchInput.addEventListener("input", renderAll);
-  els.clearFiltersButton?.addEventListener("click",clearActiveFilters,);
 
   document.addEventListener("click", (event) => {
-  const clearButton = event.target.closest("[data-clear-filters]");
+    const clearButton = event.target.closest("[data-clear-filters]");
 
-  if (!clearButton) {
-    return;
-  }
+    if (clearButton) {
+      clearActiveFilters();
+      return;
+    }
 
-  clearActiveFilters();
-});
+    const removeButton = event.target.closest("[data-remove-filter]");
+
+    if (removeButton) {
+      removeActiveFilter(removeButton.dataset.removeFilter);
+    }
+  });
   els.importJsonButton.addEventListener("click", () => els.scenarioFileInput.click());
   els.scenarioFileInput.addEventListener("change", importScenario);
   els.exportJsonButton.addEventListener("click", exportScenarioJson);
@@ -1344,57 +1345,111 @@ function populateCapacityFilter() {
 }
 
 
+/**
+ * Que filtros hay puestos ahora mismo, con lo necesario para quitarlos uno a uno.
+ */
+function getActiveFilters() {
+  const filtros = [];
+
+  if (els.capacityFilter.value && els.capacityFilter.value !== "all") {
+    filtros.push({
+      clave: "capacidad",
+      etiqueta: "Capacidad",
+      valor:
+        els.capacityFilter.options[els.capacityFilter.selectedIndex]?.textContent?.trim() ||
+        els.capacityFilter.value,
+    });
+  }
+
+  if (els.priorityFilter.value && els.priorityFilter.value !== "all") {
+    filtros.push({
+      clave: "prioridad",
+      etiqueta: "Prioridad",
+      valor: els.priorityFilter.value,
+    });
+  }
+
+  const busqueda = els.searchInput.value.trim();
+
+  if (busqueda) {
+    filtros.push({
+      clave: "busqueda",
+      etiqueta: "Búsqueda",
+      valor: busqueda,
+    });
+  }
+
+  return filtros;
+}
+
+
+/**
+ * Pinta los filtros activos en las tres vistas.
+ *
+ * Antes solo aparecia un "2 filtros activos" en el Assessment, con el detalle
+ * escondido en un title: habia que pasar el raton para saber que se estaba
+ * filtrando. Y el Heatmap, que tambien filtra, no decia nada. Ahora cada filtro
+ * es un chip con su valor y su aspa para quitarlo suelto.
+ */
 function updateActiveFiltersUi() {
-  if (
-    !els.activeFilters ||
-    !els.activeFiltersText ||
-    !els.clearFiltersButton
-  ) {
+  const contenedores = document.querySelectorAll("[data-active-filters]");
+
+  if (!contenedores.length) {
     return;
   }
 
-  const activeFilters = [];
+  const filtros = getActiveFilters();
 
-  if (
-    els.capacityFilter.value &&
-    els.capacityFilter.value !== "all"
-  ) {
-    const capacityLabel =
-      els.capacityFilter.options[
-        els.capacityFilter.selectedIndex
-      ]?.textContent || els.capacityFilter.value;
+  const html = filtros.length
+    ? `
+      <span class="active-filters-label">Filtrando por</span>
 
-    activeFilters.push(`Capacidad: ${capacityLabel}`);
-  }
+      ${filtros
+        .map(
+          (filtro) => `
+            <span class="filter-chip">
+              <span class="filter-chip-label">${escapeHtml(filtro.etiqueta)}:</span>
+              <span class="filter-chip-value">${escapeHtml(filtro.valor)}</span>
 
-  if (
-    els.priorityFilter.value &&
-    els.priorityFilter.value !== "all"
-  ) {
-    activeFilters.push(`Prioridad: ${els.priorityFilter.value}`);
-  }
+              <button
+                class="filter-chip-remove"
+                type="button"
+                data-remove-filter="${escapeAttr(filtro.clave)}"
+                aria-label="${escapeAttr(`Quitar el filtro ${filtro.etiqueta}: ${filtro.valor}`)}"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </span>
+          `,
+        )
+        .join("")}
 
-  const searchQuery = els.searchInput.value.trim();
+      <button class="clear-filters-button" type="button" data-clear-filters>
+        Limpiar todos
+      </button>
+    `
+    : "";
 
-  if (searchQuery) {
-    activeFilters.push(`Búsqueda: ${searchQuery}`);
-  }
+  contenedores.forEach((contenedor) => {
+    contenedor.hidden = !filtros.length;
+    contenedor.innerHTML = html;
+  });
+}
 
-  const filterCount = activeFilters.length;
 
-  els.activeFilters.hidden = filterCount === 0;
-
-  if (filterCount === 0) {
-    els.activeFiltersText.textContent = "Sin filtros activos";
+/** Quita un solo filtro sin tocar los demas. */
+function removeActiveFilter(clave) {
+  if (clave === "capacidad") {
+    els.capacityFilter.value = "all";
+  } else if (clave === "prioridad") {
+    els.priorityFilter.value = "all";
+  } else if (clave === "busqueda") {
+    els.searchInput.value = "";
+  } else {
     return;
   }
 
-  els.activeFiltersText.textContent =
-    filterCount === 1
-      ? "1 filtro activo"
-      : `${filterCount} filtros activos`;
-
-  els.activeFilters.title = activeFilters.join(" · ");
+  renderAll();
 }
 
 

@@ -275,17 +275,7 @@
     </div>
 
     <div class="assessment-controls">
-      <div class="active-filters" id="activeFilters" hidden>
-        <span id="activeFiltersText">Sin filtros activos</span>
-
-        <button
-          class="clear-filters-button"
-          id="clearFiltersButton"
-          type="button"
-        >
-          Limpiar filtros
-        </button>
-      </div>
+      <div class="active-filters" data-active-filters hidden></div>
 
       <div class="filters">
         <label>
@@ -336,6 +326,8 @@
     <p class="small-note">Vista agrupada por capacidad. Usa “Ver subcapacidades” para desplegar el detalle.</p>
   </div>
 
+  <div class="active-filters active-filters-block" data-active-filters hidden></div>
+
   <div class="heatmap-legend panel"> <!-- NUEVO: leyenda visual del heatmap -->
     
   <div class="legend-heading">
@@ -370,8 +362,10 @@
             <p class="eyebrow">Roadmap</p>
             <h2>Iniciativas sugeridas</h2>
           </div>
-          <p class="small-note">El Roadmap respeta los filtros activos de capacidad, prioridad y búsqueda.</p>
+          <p class="small-note">Ordenado por prioridad y gap. Respeta los filtros del Assessment.</p>
         </div>
+
+        <div class="active-filters active-filters-block" data-active-filters hidden></div>
         <div class="table-wrap panel">
           <table class="data-table roadmap-table" id="roadmapTable"></table>
         </div>
