@@ -174,6 +174,12 @@ let capabilityRadarCharts = {
 
 const expandedHeatmapCapabilities = new Set(); // NUEVO: mantiene abiertas las capacidades desplegadas del heatmap entre renders
 
+// Que tarjetas tienen desplegado "Ver detalle". Cada repintado de la lista las
+// reconstruye desde la plantilla, con el detalle cerrado: quien abria los
+// niveles de madurez para decidir entre un 3 y un 4 se los encontraba cerrados
+// justo despues de puntuar.
+const tarjetasConDetalleAbierto = new Set();
+
 
 let isApplyingRemoteScenario = false; // NUEVO: evita guardar de vuelta mientras estamos cargando datos remotos
 let pendingScenarioWrites = 0;
@@ -1217,7 +1223,7 @@ function updateNavigationBadges() {
 
 
 
-function renderAll() {
+function renderAll(opciones = {}) {
   if (!state.items.length) {
     return;
   }
@@ -1239,7 +1245,13 @@ function renderAll() {
   updateActiveFiltersUi();
   renderDashboard();
   renderCapabilityTargets();
-  renderAssessments();
+
+  // Al puntuar no hace falta reconstruir la lista entera: basta con refrescar
+  // la tarjeta tocada, que es lo que evita perder el foco y el detalle abierto.
+  if (!opciones.saltarAssessments) {
+    renderAssessments();
+  }
+
   renderHeatmap();
   renderRoadmap();
   updateNavigationBadges();
@@ -2249,6 +2261,7 @@ function resetCapabilityTargets() {
 
 function renderAssessments() {
   const items = getVisibleItems();
+  const foco = capturarFocoDeAssessment();
 
   if (!items.length) {
     els.assessmentList.innerHTML = buildFilteredEmptyState();
@@ -2303,10 +2316,22 @@ function renderAssessments() {
     const summaryText = fragment.querySelector(".detail-summary-text");
 
     if (details && summaryText) {
+      details.open = tarjetasConDetalleAbierto.has(item.id);
+
+      summaryText.textContent = details.open
+        ? "Ocultar detalle de evaluación"
+        : "Ver detalle de evaluación";
+
       details.addEventListener("toggle", () => {
         summaryText.textContent = details.open
           ? "Ocultar detalle de evaluación"
           : "Ver detalle de evaluación";
+
+        if (details.open) {
+          tarjetasConDetalleAbierto.add(item.id);
+        } else {
+          tarjetasConDetalleAbierto.delete(item.id);
+        }
       });
     }
 
@@ -2317,6 +2342,37 @@ function renderAssessments() {
   els.assessmentList.querySelectorAll(".score-select").forEach((select) => {
     select.addEventListener("change", handleScoreChange);
   });
+
+  restaurarFocoDeAssessment(foco);
+}
+
+
+/** Que selector de score tiene el foco, para devolverselo tras repintar. */
+function capturarFocoDeAssessment() {
+  const activo = document.activeElement;
+
+  if (!activo || !els.assessmentList?.contains(activo)) {
+    return null;
+  }
+
+  if (!activo.classList.contains("score-select")) {
+    return null;
+  }
+
+  return { id: activo.dataset.id, palanca: activo.dataset.lever };
+}
+
+
+function restaurarFocoDeAssessment(foco) {
+  if (!foco) {
+    return;
+  }
+
+  els.assessmentList
+    .querySelector(
+      `.score-select[data-id="${CSS.escape(foco.id)}"][data-lever="${CSS.escape(foco.palanca)}"]`,
+    )
+    ?.focus();
 }
 
 
@@ -2413,13 +2469,73 @@ function handleScoreChange(event) {
   const leverKey = event.target.dataset.lever;
   const score = toScore(event.target.value);
 
+  // Con un filtro de prioridad puesto, puntuar puede sacar la subcapacidad de
+  // la lista. Solo en ese caso hay que reconstruirla.
+  const visiblesAntes = getVisibleItems().map((entry) => entry.id).join("|");
+
   item.scores[leverKey] = score;
 
   syncActiveDomainState();
 
-  renderAll();
+  const visiblesDespues = getVisibleItems().map((entry) => entry.id).join("|");
+  const mismaLista = visiblesAntes === visiblesDespues;
+
+  renderAll({ saltarAssessments: mismaLista });
+
+  if (mismaLista) {
+    actualizarTarjetaDeAssessment(item);
+  }
 
   persistItemChange(item.id, `scores/${leverKey}`, score);
+}
+
+
+/**
+ * Refresca una sola tarjeta en su sitio.
+ *
+ * Reconstruir la lista entera cerraba todos los detalles abiertos y mandaba el
+ * foco al body: con teclado habia que volver a tabular desde el principio
+ * despues de cada puntuacion.
+ */
+function actualizarTarjetaDeAssessment(item) {
+  const card = els.assessmentList.querySelector(
+    `.assessment-card[data-id="${CSS.escape(item.id)}"]`,
+  );
+
+  if (!card) {
+    return;
+  }
+
+  const metrics = calculate(item);
+
+  card.querySelector(".score-result").innerHTML = scoreResult(metrics);
+
+  // El color del borde de cada selector depende de su valor.
+  card.querySelectorAll(".score-select").forEach((select) => {
+    select.className = `score-select ${getScoreSelectClass(
+      item.scores[select.dataset.lever],
+    )}`;
+  });
+
+  // Y el nivel de madurez resaltado cambia con el score medio.
+  const nivelActual = getMaturityLevelNumber(metrics.scoreMedio);
+
+  card.querySelectorAll(".maturity-list li").forEach((li, indice) => {
+    const esActual = indice + 1 === nivelActual;
+
+    li.classList.toggle("is-current-level", esActual);
+
+    const etiqueta = li.querySelector(".current-level-label");
+
+    if (esActual && !etiqueta) {
+      const nueva = document.createElement("strong");
+      nueva.className = "current-level-label";
+      nueva.textContent = "Nivel actual";
+      li.appendChild(nueva);
+    } else if (!esActual && etiqueta) {
+      etiqueta.remove();
+    }
+  });
 }
 
 
