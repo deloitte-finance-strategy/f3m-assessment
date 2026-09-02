@@ -102,7 +102,6 @@
     </header>
 
     <main class="app-shell">
-      <section class="notice" id="loadNotice" hidden></section>
 
 
 <section class="domain-switcher" aria-label="Navegación de dominios F3M">
@@ -391,6 +390,26 @@
       <span aria-hidden="true">↑</span>
       <span>Volver arriba</span>
     </button>
+
+    <div
+      class="notice"
+      id="loadNotice"
+      role="status"
+      aria-live="polite"
+      hidden
+    >
+      <span class="notice-icon" id="loadNoticeIcon" aria-hidden="true"></span>
+      <p class="notice-text" id="loadNoticeText"></p>
+
+      <button
+        class="notice-close"
+        id="loadNoticeClose"
+        type="button"
+        aria-label="Cerrar aviso"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
 
     <div
       class="save-status"

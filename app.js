@@ -463,7 +463,7 @@ async function init() {
         "No se han podido cargar los datos del assessment. Si has abierto el archivo directamente, "
           + "ábrelo a través de un servidor local: en esta carpeta, ejecuta "
           + "python -m http.server 8000 y entra en http://localhost:8000/.",
-        true,
+        "error",
       );
 
       return;
@@ -477,7 +477,7 @@ async function init() {
       showNotice(
         `No se han podido cargar estos dominios: ${nombres}. El resto funciona con normalidad; `
           + "recarga la página para volver a intentarlo.",
-        true,
+        "aviso",
       );
     }
 
@@ -503,7 +503,7 @@ async function init() {
     showNotice(
       "La herramienta no ha podido arrancar del todo. Recarga la página; si vuelve a ocurrir, "
         + "avisa al equipo que la mantiene.",
-      true,
+      "error",
     );
 
     console.error(error);
@@ -516,6 +516,9 @@ async function init() {
 function cacheElements() {
   [
     "loadNotice",
+    "loadNoticeText",
+    "loadNoticeIcon",
+    "loadNoticeClose",
     "initialLoadingState", // NUEVO: estado visual de carga inicial
     "sourceNote",
     "kpiGrid",
@@ -589,6 +592,7 @@ function bindGlobalEvents() {
   els.copyScenarioLinkButton?.addEventListener("click", copyScenarioLink);
   els.editorNameButton?.addEventListener("click", pedirNombreEditor);
   els.heatmapExpandToggle?.addEventListener("click", handleHeatmapExpandToggleAll);
+  els.loadNoticeClose?.addEventListener("click", ocultarAviso);
   setupActiveTabObserver(); // NUEVO: marca automáticamente la pestaña activa según la sección visible
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
@@ -1163,7 +1167,7 @@ function setupDomainSwitcher() {
     try {
       await switchDomain(domainId);
     } catch (error) {
-      showNotice(`No se pudo cambiar al dominio ${domainId}.`, true);
+      showNotice(`No se ha podido abrir el dominio ${DOMAINS[domainId]?.label || domainId}. Recarga la página e inténtalo de nuevo.`, "error");
       console.error(error);
     }
   });
@@ -1229,14 +1233,14 @@ function openAiInitiativeModal(itemId) {
   const item = state.items.find((entry) => entry.id === itemId);
 
   if (!item) {
-    showNotice("No se encontró la subcapacidad asociada a esta iniciativa IA.", true);
+    showNotice("No se ha encontrado la subcapacidad asociada a esta iniciativa de IA.", "error");
     return;
   }
 
   const aiData = getAiDataForItem(item);
 
   if (!aiData) {
-    showNotice("No hay iniciativa IA asociada a esta subcapacidad.", true);
+    showNotice("Esta subcapacidad no tiene ninguna iniciativa de IA asociada.", "info");
     return;
   }
 
@@ -2232,6 +2236,7 @@ function resetCapabilityTargets() {
 
   showNotice(
     "Los objetivos del dominio actual se han restaurado a nivel 4.",
+    "exito",
   );
 }
 
@@ -3108,7 +3113,7 @@ function escribirAlmacenamiento(clave, valor) {
           (scenarioDatabaseRef
             ? "Los cambios siguen enviándose al escenario compartido."
             : "Exporta el escenario en JSON si no quieres perder el trabajo al cerrar."),
-        true,
+        "aviso",
       );
     }
 
@@ -3264,8 +3269,9 @@ async function initializeSharedScenario() {
     );
 
     showNotice(
-      "No se pudo sincronizar con Firebase. Los cambios se mantienen guardados en este navegador.",
-      true,
+      "No se ha podido conectar con el escenario compartido. Tus cambios se guardan en este navegador, "
+        + "pero el resto del equipo no los ve.",
+      "aviso",
     );
   }
 }
@@ -3354,8 +3360,9 @@ function aplicarEscenarioRemoto(remoteScenario) {
     );
 
     showNotice(
-      "No se pudo aplicar el escenario remoto.",
-      true,
+      "Ha llegado un cambio del escenario compartido que no se ha podido aplicar. Recarga la página "
+        + "para ponerte al día.",
+      "error",
     );
   } finally {
     isApplyingRemoteScenario = false;
@@ -4017,7 +4024,7 @@ function importScenario(event) {
   reader.onerror = () => {
     showNotice(
       "No se ha podido leer el archivo. Comprueba que sigue disponible y vuelve a intentarlo.",
-      true,
+      "error",
     );
 
     event.target.value = "";
@@ -4033,7 +4040,7 @@ function importScenario(event) {
           "El archivo se ha leído, pero ninguna de sus subcapacidades coincide con las de esta " +
             "herramienta, así que no se ha cambiado nada. Comprueba que es un escenario exportado " +
             "desde F3M Assessment.",
-          true,
+          "aviso",
         );
 
         return;
@@ -4053,12 +4060,13 @@ function importScenario(event) {
       showNotice(
         `Escenario importado: ${resultado.aplicadas} subcapacidades actualizadas en ` +
           `${resultado.dominios} ${resultado.dominios === 1 ? "dominio" : "dominios"}.${parciales}`,
+        "exito",
       );
     } catch (error) {
       showNotice(
         "El archivo no se ha podido leer como escenario. Tiene que ser un JSON exportado con " +
           "Exportar JSON desde esta misma herramienta.",
-        true,
+        "error",
       );
 
       console.error(error);
@@ -4150,7 +4158,7 @@ function exportPdfReport() {
   const reportWindow = window.open("", "_blank");
 
   if (!reportWindow) {
-    showNotice("El navegador ha bloqueado la ventana del informe. Permite pop-ups para exportar el PDF.", true);
+    showNotice("El navegador ha bloqueado la ventana del informe. Permite las ventanas emergentes de esta página y vuelve a pulsar Exportar PDF.", "aviso");
     return;
   }
 
@@ -5298,15 +5306,54 @@ function resetScenario() {
 }
 
 
-function showNotice(message, persistent = false) {
-  els.loadNotice.textContent = message;
+const ICONO_POR_TIPO = {
+  exito: "✓",
+  info: "i",
+  aviso: "!",
+  error: "!",
+};
+
+let temporizadorDeAviso = null;
+
+
+/**
+ * Muestra un aviso donde se pueda leer y con el tono que le corresponde.
+ *
+ * Antes el aviso vivia dentro de <main>, a la altura 0 de una pagina de casi
+ * 10.000 px: cualquier mensaje lanzado desde el Roadmap era invisible. Y usaba
+ * el mismo amarillo de advertencia tanto para "Escenario importado" como para
+ * "No se pudo aplicar el escenario remoto".
+ */
+function showNotice(message, tipo = "info", persistente = null) {
+  if (!els.loadNotice) {
+    return;
+  }
+
+  // Los errores y las advertencias no se van solos: quien esta en una sesion
+  // con cliente no puede perderselos por mirar a otro lado siete segundos.
+  const seQueda =
+    persistente === null ? tipo === "error" || tipo === "aviso" : persistente;
+
+  els.loadNoticeText.textContent = message;
+  els.loadNoticeIcon.textContent = ICONO_POR_TIPO[tipo] || ICONO_POR_TIPO.info;
+  els.loadNotice.className = `notice notice-${tipo}`;
   els.loadNotice.hidden = false;
-  if (persistent) return;
-  window.setTimeout(() => {
-    if (els.loadNotice.textContent === message) {
-      els.loadNotice.hidden = true;
-    }
+
+  window.clearTimeout(temporizadorDeAviso);
+
+  if (seQueda) {
+    return;
+  }
+
+  temporizadorDeAviso = window.setTimeout(() => {
+    els.loadNotice.hidden = true;
   }, 7000);
+}
+
+
+function ocultarAviso() {
+  window.clearTimeout(temporizadorDeAviso);
+  els.loadNotice.hidden = true;
 }
 
 
@@ -5380,6 +5427,7 @@ function showScenarioModeNotice() {
   showNotice(
     "Escenario compartido activo. Los cambios se guardan solos y los ve cualquiera que abra este mismo enlace. " +
       "Usa el botón Copiar enlace para compartirlo.",
+    "info",
   );
 
 }
@@ -5528,14 +5576,15 @@ async function copyScenarioLink() {
     await navigator.clipboard.writeText(url);
 
     showNotice(
-      "Enlace copiado. Trátalo como una credencial: cualquier persona que lo tenga puede ver y editar este escenario.",
+      "Enlace copiado. Trátalo como una credencial: cualquiera que lo tenga puede ver y editar este escenario.",
+      "exito",
     );
   } catch (error) {
     console.warn("No se pudo copiar al portapapeles.", error);
 
     showNotice(
-      `No se pudo copiar automáticamente. Copia este enlace a mano: ${url}`,
-      true,
+      `No se ha podido copiar solo. Copia este enlace a mano: ${url}`,
+      "aviso",
     );
   }
 }

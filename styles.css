@@ -497,13 +497,113 @@ transform: translateY(-1px);
   font-size: 0.88rem;
 }
 
+/* Aviso del sistema.
+
+   Vivia dentro de <main>, o sea a la altura 0 de una pagina de casi 10.000 px:
+   cualquier mensaje lanzado con la vista en el Roadmap era invisible. Ahora es
+   fijo, va justo bajo las pestanas y distingue exito de error. */
 .notice {
-  margin-top: 18px;
-  padding: 14px 16px;
-  border: 1px solid #edc66b;
-  border-radius: var(--radius);
-  background: #fff7df;
-  color: #5b4310;
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  z-index: 90;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: min(640px, calc(100% - 32px));
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 14px 34px rgba(22, 26, 24, 0.18);
+  transform: translateX(-50%);
+}
+
+.notice[hidden] {
+  display: none;
+}
+
+.notice-text {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.notice-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.notice-close {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  margin: -2px -2px 0 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.notice-close:hover {
+  border-color: var(--line);
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+/* Un icono y un color por tono: antes el mismo amarillo de advertencia servia
+   para "Escenario importado" y para "No se pudo aplicar el escenario remoto". */
+.notice-exito {
+  border-left-color: var(--green);
+  background: #f6fbee;
+}
+
+.notice-exito .notice-icon {
+  background: var(--green-dark);
+}
+
+.notice-info {
+  border-left-color: var(--blue);
+  background: #f4f8fb;
+}
+
+.notice-info .notice-icon {
+  background: var(--blue);
+}
+
+.notice-aviso {
+  border-left-color: var(--amber);
+  background: #fff8e8;
+}
+
+.notice-aviso .notice-icon {
+  background: #8a5200;
+}
+
+.notice-error {
+  border-left-color: var(--red);
+  background: #fdf1ee;
+}
+
+.notice-error .notice-icon {
+  background: var(--red);
 }
 
 
@@ -2974,6 +3074,11 @@ height: 100% !important;
     min-height: 38px;
     padding: 8px 12px;
     font-size: 0.8rem;
+  }
+
+  .notice {
+    top: 58px;
+    width: calc(100% - 24px);
   }
 
   .modal-backdrop {
