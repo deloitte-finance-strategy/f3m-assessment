@@ -1338,10 +1338,15 @@ border-radius: 999px;
 
 
 #sourceNote {
-  max-width: none;
+  max-width: 420px;
   flex: 0 0 auto;
   font-size: 0.78rem;
-  white-space: nowrap;
+}
+
+/* Cuando el Dashboard no está mostrando el dominio entero hay que verlo. */
+#sourceNote.has-scope-filter {
+  color: #8a5a00;
+  font-weight: 750;
 }
 
 
@@ -2839,7 +2844,6 @@ height: 100% !important;
 
   #sourceNote {
   max-width: 100%;
-  white-space: normal;
   }
 
 

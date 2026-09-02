@@ -1200,7 +1200,14 @@ function updateNavigationBadges() {
   const highPriorityCount = metrics.filter((entry) => entry.prioridad === "Alta").length;
 
   els.assessmentTabBadge.textContent = `${scoredCount}/${totalCount}`;
+  els.assessmentTabBadge.title =
+    `${scoredCount} de ${totalCount} subcapacidades puntuadas en este dominio. ` +
+    "No depende de los filtros activos.";
+
   els.roadmapTabBadge.textContent = `${highPriorityCount} Alta`;
+  els.roadmapTabBadge.title =
+    `${highPriorityCount} subcapacidades de prioridad alta en este dominio. ` +
+    "No depende de los filtros activos.";
 
   els.roadmapTabBadge.classList.toggle("tab-badge-alert", highPriorityCount > 0);
 }
@@ -1212,9 +1219,19 @@ function renderAll() {
     return;
   }
 
-  els.sourceNote.textContent =
-    `Fuente: ${state.meta.sourceFile} · ` +
-    `Objetivo de madurez ${state.meta.targetMaturity}`;
+  const ambito = getScopeSummary();
+
+  els.sourceNote.textContent = [
+    `Fuente: ${state.meta.sourceFile}`,
+    `Objetivo de madurez ${state.meta.targetMaturity}`,
+    ambito.hayFiltros
+      ? `Mostrando ${ambito.visibles} de ${ambito.total} subcapacidades por los filtros activos`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  els.sourceNote.classList.toggle("has-scope-filter", ambito.hayFiltros);
 
   updateActiveFiltersUi();
   renderDashboard();
@@ -1311,6 +1328,36 @@ function clearActiveFilters() {
 }
 
 
+/**
+ * Las subcapacidades sobre las que trabaja TODA la herramienta.
+ *
+ * Antes convivían dos ámbitos: Dashboard, resumen, radares y CSV calculaban
+ * sobre state.items, mientras que Heatmap, Roadmap y el PDF lo hacían sobre las
+ * filtradas. Con un filtro puesto, el KPI decía "7 de prioridad alta" y el
+ * Roadmap enseñaba 2 — y el PDF exportado no coincidía con el Dashboard que el
+ * cliente acababa de ver en pantalla.
+ *
+ * Ahora hay un único ámbito. getVisibleItems() se mantiene como alias para no
+ * tocar las llamadas existentes.
+ */
+function getScopedItems() {
+  return getVisibleItems();
+}
+
+
+/** Si hay filtros activos, cuántas subcapacidades quedan dentro y fuera. */
+function getScopeSummary() {
+  const total = state.items.length;
+  const visibles = getScopedItems().length;
+
+  return {
+    total,
+    visibles,
+    hayFiltros: visibles !== total,
+  };
+}
+
+
 function getVisibleItems() {
   const capacity = els.capacityFilter.value;
   const priority = els.priorityFilter.value;
@@ -1337,7 +1384,8 @@ function getVisibleItems() {
 }
 
 function renderDashboard() {
-  const metrics = state.items.map((item) => ({ item, metrics: calculate(item) }));
+  const items = getScopedItems();
+  const metrics = items.map((item) => ({ item, metrics: calculate(item) }));
   const scored = metrics.filter((entry) => !entry.metrics.isPending);
   const scoreGlobal = average(scored.map((entry) => entry.metrics.scoreMedio));
   const gapMedio = average(scored.map((entry) => entry.metrics.gap));
@@ -1361,8 +1409,10 @@ els.kpiGrid.innerHTML = [
   ),
   kpiCard(
     "Subcapacidades puntuadas",
-    `${scored.length}/${state.items.length}`,
-    `${Math.round((scored.length / state.items.length) * 100)}% de avance`,
+    `${scored.length}/${items.length}`,
+    items.length
+      ? `${Math.round((scored.length / items.length) * 100)}% de avance`
+      : "Sin subcapacidades en la vista",
     "progress",
   ),
   kpiCard(
@@ -1408,9 +1458,11 @@ function renderPriorityBars(entries) {
 
 
 function renderLeverBars() {
+  const items = getScopedItems();
+
   const rows = LEVERS.map((lever) => {
     const avg = average(
-      state.items
+      items
         .map((item) => item.scores[lever.key])
         .filter((value) => Number.isFinite(value)),
     );
@@ -1442,12 +1494,14 @@ function barRow(label, value, width, color) {
 
 
 function renderSummaryTable() {
+  const scopedItems = getScopedItems();
+
   const capacities = unique(
-    state.items.map((item) => item.capacidad),
+    scopedItems.map((item) => item.capacidad),
   );
 
   const rows = capacities.map((capability) => {
-    const items = state.items.filter(
+    const items = scopedItems.filter(
       (item) => item.capacidad === capability,
     );
 
@@ -3716,7 +3770,7 @@ function exportScenarioJson() {
 
 function exportCsv() {
   const summaryRows = buildSummaryRows();
-  const roadmapRows = state.items
+  const roadmapRows = getScopedItems()
     .map((item) => {
       const metrics = calculate(item);
       return {
@@ -4757,10 +4811,12 @@ function getEnhancedPdfReportStyles() {
 
 
 function buildSummaryRows() {
+  const scopedItems = getScopedItems();
+
   return unique(
-    state.items.map((item) => item.capacidad),
+    scopedItems.map((item) => item.capacidad),
   ).map((capability) => {
-    const items = state.items.filter(
+    const items = scopedItems.filter(
       (item) => item.capacidad === capability,
     );
 
