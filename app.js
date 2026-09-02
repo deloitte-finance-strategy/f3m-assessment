@@ -38,7 +38,7 @@ console.log("Firebase conectado correctamente:", firebaseConfig.projectId);
 const scenarioId = getScenarioIdFromUrl();
 const scenarioDatabaseRef = scenarioId ? ref(firebaseDatabase, `scenarios/${scenarioId}`) : null;
 
-console.log("Modo escenario compartido:", scenarioId || "modo local sin scenario");
+console.log("Modo escenario compartido:", scenarioId ? "escenario compartido" : "modo local sin scenario");
 
 
 
@@ -3843,7 +3843,8 @@ function buildEnhancedPdfReportData() {
     domainLabel: activeDomain.label,
     domainTitle: activeDomain.title,
     generatedAt: new Date().toLocaleString("es-ES"),
-    scenarioLabel: scenarioId || "Modo local",
+    // Nunca el identificador completo: este informe se envía al cliente.
+    scenarioLabel: getScenarioShortLabel(),
     sourceFile: state.meta?.sourceFile || "-",
     targetMaturity: state.meta?.targetMaturity || "-",
     filters: getPdfActiveFiltersLabel(),
@@ -4029,7 +4030,7 @@ function buildPdfEnhancedCover(data) {
           <strong>${escapeHtml(data.generatedAt)}</strong>
         </div>
         <div>
-          <span>Escenario</span>
+          <span>Origen de los datos</span>
           <strong>${escapeHtml(data.scenarioLabel)}</strong>
         </div>
         <div>
@@ -4967,9 +4968,12 @@ function showScenarioModeNotice() {
     els.copyScenarioLinkButton.hidden = false;
   }
 
+  // Antes se imprimía el identificador completo, que es la credencial del
+  // escenario: quedaba a la vista en cualquier pantalla compartida.
   showNotice(
-    `Escenario compartido activo: ${scenarioId}. Los cambios se guardan automáticamente y se sincronizan con cualquier navegador que use este mismo enlace.`,
-  ); // MODIFICADO: el mensaje refleja que Firebase ya guarda y sincroniza datos
+    "Escenario compartido activo. Los cambios se guardan solos y los ve cualquiera que abra este mismo enlace. " +
+      "Usa el botón Copiar enlace para compartirlo.",
+  );
 
 }
 
@@ -5079,6 +5083,23 @@ function marcaDeAutoria() {
     nombre: usuarioActual.nombre || "Sin nombre",
     at: new Date().toISOString(),
   };
+}
+
+
+/**
+ * Forma abreviada del identificador, para enseñarla sin comprometerlo.
+ *
+ * El enlace es la única credencial del escenario, así que el identificador
+ * completo no puede aparecer ni en pantalla compartida ni en un PDF que se
+ * envía al cliente. Cuatro caracteres bastan para distinguir dos escenarios
+ * abiertos a la vez y no permiten reconstruir el enlace.
+ */
+function getScenarioShortLabel() {
+  if (!scenarioId) {
+    return "Modo local";
+  }
+
+  return `Escenario compartido · …${scenarioId.slice(-4)}`;
 }
 
 
