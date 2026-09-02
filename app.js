@@ -502,6 +502,7 @@ function cacheElements() {
     "initialLoadingState", // NUEVO: estado visual de carga inicial
     "sourceNote",
     "kpiGrid",
+    "dashboardHeadline",
     "priorityBars",
     "leverBars",
     "summaryTable",
@@ -1684,10 +1685,83 @@ els.kpiGrid.innerHTML = [
 ].join("");
 
 
+  renderTitularesEjecutivos(items, metrics);
   renderPriorityBars(metrics);
   renderLeverBars();
   renderSummaryTable();
   renderCapabilityRadar(); // NUEVO: actualiza radar al recalcular dashboard
+}
+
+
+/**
+ * Los tres titulares que resumen el dominio en una frase.
+ *
+ * Todo esto estaba calculado y repartido entre cuatro KPIs, dos graficos de
+ * barras, una tabla y tres radares: habia que deducirlo. Para explicar el
+ * dominio en dos minutos hace falta poder leerlo.
+ */
+function renderTitularesEjecutivos(items, metrics) {
+  if (!els.dashboardHeadline) {
+    return;
+  }
+
+  const evaluadas = metrics.filter((entrada) => !entrada.metrics.isPending);
+
+  if (!evaluadas.length) {
+    els.dashboardHeadline.hidden = false;
+    els.dashboardHeadline.textContent =
+      "Todavía no hay ninguna subcapacidad puntuada: empieza por la pestaña Assessment.";
+    return;
+  }
+
+  const titulares = [];
+
+  // Capacidad con mayor brecha
+  const porCapacidad = unique(items.map((item) => item.capacidad))
+    .map((capacidad) => ({
+      capacidad,
+      gap: average(
+        evaluadas
+          .filter((entrada) => entrada.item.capacidad === capacidad)
+          .map((entrada) => entrada.metrics.gap),
+      ),
+    }))
+    .filter((fila) => Number.isFinite(fila.gap))
+    .sort((a, b) => b.gap - a.gap);
+
+  if (porCapacidad.length) {
+    titulares.push(
+      `Mayor brecha: ${porCapacidad[0].capacidad} (gap ${formatNumber(porCapacidad[0].gap)})`,
+    );
+  }
+
+  // Palanca mas floja del dominio
+  const porPalanca = LEVERS.map((lever) => ({
+    label: lever.label,
+    media: average(
+      items.map((item) => item.scores[lever.key]).filter(Number.isFinite),
+    ),
+  }))
+    .filter((fila) => Number.isFinite(fila.media))
+    .sort((a, b) => a.media - b.media);
+
+  if (porPalanca.length) {
+    titulares.push(
+      `Palanca más débil: ${porPalanca[0].label} (${formatNumber(porPalanca[0].media)})`,
+    );
+  }
+
+  // Lo que queda por evaluar
+  const pendientes = metrics.length - evaluadas.length;
+
+  titulares.push(
+    pendientes
+      ? `Quedan ${pendientes} subcapacidades por evaluar`
+      : "Todas las subcapacidades están evaluadas",
+  );
+
+  els.dashboardHeadline.hidden = false;
+  els.dashboardHeadline.textContent = titulares.join(" · ");
 }
 
 

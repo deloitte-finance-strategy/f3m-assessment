@@ -764,6 +764,26 @@ display: none;
 
 
 
+/* La lectura de dos minutos: lo que hay que poder decir sin interpretar
+   graficos. Estaba todo calculado, pero repartido entre KPIs, barras, tabla y
+   radares. */
+.dashboard-headline {
+  margin: 14px 0 0;
+  padding: 12px 15px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--green);
+  border-radius: 8px;
+  background: var(--surface);
+  color: #2a302c;
+  font-size: 0.94rem;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.dashboard-headline[hidden] {
+  display: none;
+}
+
 .split-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
