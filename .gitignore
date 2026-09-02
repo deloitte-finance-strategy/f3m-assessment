@@ -1,6 +1,10 @@
 # Dependencias
 node_modules/
 
+# Cachés de Python
+__pycache__/
+*.pyc
+
 # Cachés y runtimes de Codex
 .cache/
 codex-runtimes/
