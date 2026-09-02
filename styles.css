@@ -1432,10 +1432,24 @@ display: none;
 }
 
 
+/* La tabla desplaza dentro de su caja, no arrastrando la pagina entera: es lo
+   que permite dejar fijos el encabezado y la primera columna. El alto se ajusta
+   al hueco disponible para que quepa una tabla larga sin ocupar dos pantallas. */
+/* Sin relleno: las filas asomaban por encima del encabezado fijo al desplazar,
+   porque el hueco del panel es transparente y el contenido pasa por debajo. */
+.table-wrap.panel {
+  padding: 0;
+}
+
+.table-wrap > .panel-heading {
+  margin: 0;
+  padding: 16px 16px 12px;
+}
+
 .table-wrap {
 position: relative;
-overflow-x: auto;
-overflow-y: hidden;
+max-height: calc(100vh - 210px);
+overflow: auto;
 -webkit-overflow-scrolling: touch;
 scrollbar-width: thin;
 scrollbar-color: rgba(134, 188, 37, 0.65) #edf1e8;
@@ -1473,6 +1487,11 @@ border-radius: 999px;
   border-bottom: 2px solid var(--line);
   background: #f1f4ec;
   color: #3a433d;
+}
+
+#summaryTable tbody td:first-child,
+.roadmap-table tbody td:first-child {
+  background: var(--surface);
 }
 
 #summaryTable tbody tr {
@@ -1524,7 +1543,8 @@ border-radius: 999px;
 
 .data-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 860px;
   font-size: 0.9rem;
 }
@@ -1537,13 +1557,44 @@ border-radius: 999px;
   vertical-align: top;
 }
 
-.data-table th {
-  position: static; /* MODIFICADO: evita que la cabecera se solape con las filas al hacer scroll */
+/* El encabezado se queda arriba al desplazar: con 20 o 25 filas se perdia de
+   vista de que columna era cada numero. */
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
   background: #f7f9f4;
   color: #323a35;
   font-size: 0.74rem;
   font-weight: 850;
   text-transform: uppercase;
+}
+
+/* Y la primera columna se queda a la izquierda al desplazar en horizontal: el
+   Roadmap tiene once columnas y desborda ya a 1280 px, asi que al mirar el
+   estado o los comentarios se perdia de vista a que subcapacidad pertenecian. */
+.data-table th:first-child,
+.data-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+}
+
+.data-table thead th:first-child {
+  z-index: 4;
+}
+
+/* Las celdas fijas necesitan fondo opaco y una linea que marque el corte. */
+.data-table td:first-child::after,
+.data-table th:first-child::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+  content: "";
 }
 
 .data-table td.number,
@@ -1559,7 +1610,7 @@ border-radius: 999px;
 
 
 
-.heatmap-capability-row {
+.heatmap-capability-row td {
   border-top: 2px solid var(--line);
 }
 
@@ -1577,6 +1628,7 @@ border-radius: 999px;
 .heatmap-capability-row td:first-child {
   min-width: 220px;
   border-left: 3px solid var(--green);
+  background: #f4f7f1;
 }
 
 .heatmap-capability-row strong {
@@ -1766,6 +1818,12 @@ border-color: #eef0ed;
   table-layout: fixed;
 }
 
+/* Sin colapsar, el borde inferior del encabezado se dibuja en cada celda. */
+.roadmap-table thead th,
+#summaryTable thead th {
+  box-shadow: inset 0 -2px 0 var(--line);
+}
+
 .roadmap-table th,
 .roadmap-table td {
   vertical-align: middle;
@@ -1816,14 +1874,14 @@ border-color: #eef0ed;
 /* Capacidad */
 .roadmap-table th:nth-child(1),
 .roadmap-table td:nth-child(1) {
-  width: 11%;
+  width: 10%;
   min-width: 0;
 }
 
 /* Subcapacidad */
 .roadmap-table th:nth-child(2),
 .roadmap-table td:nth-child(2) {
-  width: 14%;
+  width: 13%;
   min-width: 0;
 }
 
@@ -1846,14 +1904,14 @@ border-color: #eef0ed;
 /* Iniciativa sugerida */
 .roadmap-table th:nth-child(5),
 .roadmap-table td:nth-child(5) {
-  width: 23%;
+  width: 21%;
   min-width: 0;
 }
 
 /* IA */
 .roadmap-table th:nth-child(6),
 .roadmap-table td:nth-child(6) {
-  width: 5%;
+  width: 4%;
   min-width: 50px;
   text-align: center;
 }
@@ -1861,7 +1919,7 @@ border-color: #eef0ed;
 /* Oleada */
 .roadmap-table th:nth-child(7),
 .roadmap-table td:nth-child(7) {
-  width: 6%;
+  width: 5%;
   min-width: 52px;
   text-align: center;
 }
@@ -1876,14 +1934,22 @@ border-color: #eef0ed;
 /* Estado */
 .roadmap-table th:nth-child(9),
 .roadmap-table td:nth-child(9) {
-  width: 9%;
+  width: 8%;
   min-width: 0;
 }
 
 /* Comentarios */
 .roadmap-table th:nth-child(10),
 .roadmap-table td:nth-child(10) {
-  width: 13%;
+  width: 12%;
+  min-width: 0;
+}
+
+/* Ultimo cambio. Faltaba: las diez anteriores sumaban el 100% y esta se
+   quedaba a cero, con el encabezado partido letra a letra. */
+.roadmap-table th:nth-child(11),
+.roadmap-table td:nth-child(11) {
+  width: 8%;
   min-width: 0;
 }
 
