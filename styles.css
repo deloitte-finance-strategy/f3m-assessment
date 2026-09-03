@@ -1578,6 +1578,20 @@ border-radius: 999px;
   transition: background-color 140ms ease;
 }
 
+/*
+  Una capacidad sin evaluar ensena seis guiones seguidos. Con el mismo peso
+  visual que las filas con datos, el ojo tiene que leerlas para descartarlas.
+  Un fondo ligeramente distinto las deja a un lado sin esconderlas: el texto no
+  cambia de color, asi que el contraste se mantiene.
+*/
+#summaryTable tbody tr.is-pending {
+  background: var(--surface-muted);
+}
+
+#summaryTable tbody tr.is-pending:hover {
+  background: #eaeee3;
+}
+
 #summaryTable tbody tr:hover {
   background: #f8faf5;
 }
@@ -1894,8 +1908,38 @@ border-color: #eef0ed;
 /* Tabla Roadmap */
 .roadmap-table {
   width: 100%;
-  min-width: 1080px;
+  /*
+    Once columnas repartidas a partes iguales dejaban la de Gap en 48 px, de los
+    que 24 son relleno: "2,67" no cabia en 24 px y se partia en "2,6" y "7", dos
+    lineas, como si fueran dos numeros. Lo mismo con las cabeceras, que se
+    partian a mitad de palabra —"PRIORIDA/D", "OLEA/DA", "RESPONSAB/LE"— y
+    obligaban a que TODAS midieran dos lineas de alto.
+
+    Con anchos propios para las columnas cortas y una anchura minima que las
+    respete, no se parte nada. Por debajo de ~1360 px la tabla se desplaza en
+    horizontal dentro de su contenedor, que es lo que ese contenedor ya hacia.
+  */
   table-layout: fixed;
+}
+
+/*
+  .table-wrap .data-table fija 980px y gana en especificidad, asi que la anchura
+  minima del roadmap tiene que declararse con el mismo peso. Con 980 las once
+  columnas se quedaban sin sitio: la de Gap en 48 px, de los que 24 son relleno,
+  y "2,67" no cabe en 24 px.
+*/
+.table-wrap .roadmap-table {
+  min-width: 1300px;
+}
+
+/* Una cabecera es una etiqueta: se parte entre palabras o no se parte. */
+.roadmap-table thead th {
+  overflow-wrap: normal;
+}
+
+/* Y un numero no se parte nunca. */
+.roadmap-table td.number {
+  white-space: nowrap;
 }
 
 /* Sin colapsar, el borde inferior del encabezado se dibuja en cada celda. */
@@ -1954,74 +1998,74 @@ border-color: #eef0ed;
 /* Capacidad */
 .roadmap-table th:nth-child(1),
 .roadmap-table td:nth-child(1) {
-  width: 10%;
+  width: 9%;
   min-width: 0;
 }
 
 /* Subcapacidad */
 .roadmap-table th:nth-child(2),
 .roadmap-table td:nth-child(2) {
-  width: 13%;
+  width: 12%;
   min-width: 0;
 }
 
 /* Gap */
 .roadmap-table th:nth-child(3),
 .roadmap-table td:nth-child(3) {
-  width: 4%;
-  min-width: 48px;
+  width: 5%;
+  min-width: 72px;
   text-align: center;
 }
 
 /* Prioridad */
 .roadmap-table th:nth-child(4),
 .roadmap-table td:nth-child(4) {
-  width: 7%;
-  min-width: 70px;
+  width: 8%;
+  min-width: 104px;
   text-align: center;
 }
 
 /* Iniciativa sugerida */
 .roadmap-table th:nth-child(5),
 .roadmap-table td:nth-child(5) {
-  width: 21%;
+  width: 20%;
   min-width: 0;
 }
 
 /* IA */
 .roadmap-table th:nth-child(6),
 .roadmap-table td:nth-child(6) {
-  width: 4%;
-  min-width: 50px;
+  width: 5%;
+  min-width: 62px;
   text-align: center;
 }
 
 /* Oleada */
 .roadmap-table th:nth-child(7),
 .roadmap-table td:nth-child(7) {
-  width: 5%;
-  min-width: 52px;
+  width: 6%;
+  min-width: 78px;
   text-align: center;
 }
 
-/* Owner */
+/* Owner: el ancho que necesita un nombre y un apellido sin recortarse. */
 .roadmap-table th:nth-child(8),
 .roadmap-table td:nth-child(8) {
-  width: 8%;
-  min-width: 0;
+  width: 9%;
+  min-width: 120px;
 }
 
-/* Estado */
+/* Estado: antes el desplegable se leia "No ini" y "En cur". */
 .roadmap-table th:nth-child(9),
 .roadmap-table td:nth-child(9) {
-  width: 8%;
-  min-width: 0;
+  width: 9%;
+  min-width: 118px;
 }
 
 /* Comentarios */
 .roadmap-table th:nth-child(10),
 .roadmap-table td:nth-child(10) {
-  width: 12%;
+  width: 11%;
   min-width: 0;
 }
 
@@ -2029,8 +2073,8 @@ border-color: #eef0ed;
    quedaba a cero, con el encabezado partido letra a letra. */
 .roadmap-table th:nth-child(11),
 .roadmap-table td:nth-child(11) {
-  width: 8%;
-  min-width: 0;
+  width: 6%;
+  min-width: 104px;
 }
 
 

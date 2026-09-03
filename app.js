@@ -2108,7 +2108,7 @@ function barRow(label, value, width, color) {
 function renderSummaryTable() {
   const rows = agregarPorCapacidad(getScopedItems()).map(
     (capacidad) => `
-      <tr>
+      <tr class="${capacidad.evaluadas === 0 ? "is-pending" : ""}">
         <td>${escapeHtml(capacidad.capacidad)}</td>
 
         <td class="number">
@@ -3629,11 +3629,26 @@ function guardarCampoDeRoadmap(item, campo, valor) {
 }
 
 
+/**
+ * Una celda del heatmap. Sin puntuar es un guion, nunca un cero.
+ *
+ * Number(null) es 0, y 0 pasa Number.isFinite. Por eso una capacidad sin
+ * ninguna subcapacidad puntuada se pintaba con un 0 en las cuatro columnas
+ * numericas, y en rojo, porque 0 cae en el tramo mas bajo de la escala.
+ *
+ * Delante de un cliente eso afirma algo que no es cierto: que esa capacidad
+ * esta evaluada y con la peor nota posible, cuando lo que pasa es que todavia
+ * no se ha evaluado. La tabla resumen del Dashboard, con los mismos datos,
+ * enseña un guion. Dos vistas de la misma herramienta decian cosas distintas.
+ */
 function heatScoreCell(value) {
-  const number = Number(value);
+  const sinValor = value === null || value === undefined || value === "";
+  const number = sinValor ? NaN : Number(value);
+
   if (!Number.isFinite(number)) {
     return `<td class="heat-cell heat-blank">-</td>`;
   }
+
   return `<td class="heat-cell heat-${Math.max(1, Math.min(5, Math.round(number)))}">${formatNumber(number)}</td>`;
 }
 
