@@ -3715,3 +3715,31 @@ height: 100% !important;
   border-color: var(--amber);
   color: #f0c078;
 }
+
+/*
+  Quien tiene activado "reducir movimiento" en su sistema lo tiene por un
+  motivo: para algunas personas el desplazamiento suave y las transiciones
+  provocan mareo. Se anulan las transiciones y los desplazamientos animados.
+
+  Los dos indicadores de actividad —el de carga inicial y el del guardado— se
+  dejan girar. Son la unica senal de que algo esta pasando, y congelados
+  parecerian la herramienta rota, que es peor que el movimiento que se queria
+  evitar. Se ralentizan, que es la recomendacion habitual para lo que de verdad
+  informa.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  .loading-spinner,
+  .save-status.saving::before {
+    animation-duration: 2s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

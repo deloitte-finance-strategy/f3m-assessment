@@ -396,13 +396,13 @@ async function switchDomain(domainId) {
 
   if (domainSwitcher) {
     domainSwitcher.scrollIntoView({
-      behavior: "smooth",
+      behavior: comportamientoDeDesplazamiento(),
       block: "start",
     });
   } else {
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+      behavior: comportamientoDeDesplazamiento(),
     });
   }
 }
@@ -1009,6 +1009,20 @@ let vistaActiva = "dashboard";
  * (#roadmap) se sigue respetando, y sin JavaScript las cuatro quedan visibles,
  * que es el comportamiento anterior.
  */
+/**
+ * Como desplazarse: suave, salvo que el sistema pida lo contrario.
+ *
+ * El CSS ya anula las transiciones con prefers-reduced-motion, pero un
+ * scrollTo({ behavior: "smooth" }) escrito en JavaScript no lo mira: hay que
+ * preguntarlo aqui.
+ */
+function comportamientoDeDesplazamiento() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "auto"
+    : "smooth";
+}
+
+
 function setupVistas() {
   const enlaces = [...document.querySelectorAll(".tabs a")];
 
@@ -1425,7 +1439,7 @@ function setupBackToTopButton() {
 
     if (domainSwitcher) {
       domainSwitcher.scrollIntoView({
-        behavior: "smooth",
+        behavior: comportamientoDeDesplazamiento(),
         block: "start",
       });
       return;
@@ -1433,7 +1447,7 @@ function setupBackToTopButton() {
 
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+      behavior: comportamientoDeDesplazamiento(),
     });
   });
 
