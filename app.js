@@ -1025,6 +1025,16 @@ function setupVistas() {
 
   // Alguien puede llegar con un enlace directo, o usar atras y adelante.
   window.addEventListener("hashchange", () => {
+    const ancla = window.location.hash.slice(1);
+
+    // Un ancla que no es una vista —el enlace de saltar al contenido— no debe
+    // cambiar de pestana. vistaDesdeLaUrl() devuelve "dashboard" tanto para un
+    // hash vacio como para uno desconocido, asi que sin esto pulsar "Saltar al
+    // contenido" desde el Roadmap te llevaba al Dashboard.
+    if (ancla && !VISTAS.includes(ancla)) {
+      return;
+    }
+
     mostrarVista(vistaDesdeLaUrl(), { actualizarUrl: false });
   });
 
@@ -1091,7 +1101,12 @@ function setInitialLoading(isLoading) {
  * delante. Los tres modales son hijos directos de <body>, asi que ninguno cae
  * dentro de lo que se marca como inerte.
  */
-const REGIONES_DE_FONDO = [".app-header", ".app-shell", ".back-to-top-button"];
+const REGIONES_DE_FONDO = [
+  ".app-header",
+  ".app-shell",
+  ".back-to-top-button",
+  ".skip-link",
+];
 
 
 /**

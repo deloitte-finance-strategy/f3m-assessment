@@ -390,6 +390,46 @@ transform: translateY(-1px);
   color: #10140e;
 }
 
+/*
+  Salta la cabecera, el conmutador de dominios y las pestanas. Se aparta de la
+  vista con position: absolute y no con display: none, porque lo que no se pinta
+  tampoco se puede enfocar, y entonces el enlace no serviria para nada.
+*/
+.skip-link {
+  /* fixed y no absolute: con absolute el enlace se coloca respecto al documento,
+     asi que si la pagina esta desplazada aparece fuera de la pantalla y no sirve
+     de nada. La herramienta tiene paginas largas y una barra de pestanas
+     pegajosa, asi que entrar por teclado a media pagina es habitual. */
+  position: fixed;
+  left: 8px;
+  top: -100px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  transition: top 120ms ease;
+}
+
+/*
+  :focus y no :focus-visible. En el resto de la interfaz :focus-visible es lo
+  correcto —evita el anillo al hacer clic con el raton—, pero aqui el enlace
+  tiene que aparecer SIEMPRE que reciba el foco: si no se ve, quien lo ha
+  enfocado no sabe que existe ni adonde lleva.
+*/
+.skip-link:focus {
+  top: 0;
+}
+
+/* El destino recibe el foco por programa; no debe dibujar un contorno propio. */
+.app-shell:focus {
+  outline: none;
+}
+
 .app-shell {
   width: min(1440px, calc(100% - 48px));
   margin: 0 auto;
