@@ -55,7 +55,7 @@ const normalizar = (payload) =>
   normalizarEscenarioParaFirebase(payload, targetsFijos);
 
 const primerItem = (payload) =>
-  normalizar(payload).domains.fpa.items[0];
+  Object.values(normalizar(payload).domains.fpa.items)[0];
 
 
 export const casos = [
@@ -311,7 +311,7 @@ export const casos = [
         "dominio",
       );
       t.igual(
-        Object.keys(enviado.domains.fpa.items[0]).sort().join(","),
+        Object.keys(Object.values(enviado.domains.fpa.items)[0]).sort().join(","),
         "capacidad,comentario,id,owner,scores,status,subcapacidad",
         "subcapacidad",
       );
@@ -348,6 +348,64 @@ export const casos = [
 
       t.igual(enviado.version, 3, "version");
       t.igual(enviado.activeDomainId, "fpa", "dominio activo");
+    },
+  },
+  {
+    grupo: "Lo que se envia a Firebase",
+    nombre: "los items se guardan con su id como clave, nunca por posicion",
+    ejecutar: (t) => {
+      // La forma que produce buildScenarioPayload(): indexado por id.
+      const payload = escenarioSano();
+      payload.domains.fpa.items = {
+        "fpa-1-1": { id: "fpa-1-1", capacidad: "C", subcapacidad: "S1" },
+        "fpa-2-3": { id: "fpa-2-3", capacidad: "C", subcapacidad: "S2" },
+      };
+
+      const items = normalizar(payload).domains.fpa.items;
+
+      t.igual(Array.isArray(items), false, "no es una lista");
+      t.igual(
+        Object.keys(items).sort().join(","),
+        "fpa-1-1,fpa-2-3",
+        "las claves son los ids",
+      );
+      t.igual(items["fpa-2-3"].subcapacidad, "S2", "y apuntan a su item");
+    },
+  },
+  {
+    grupo: "Lo que se envia a Firebase",
+    nombre: "una lista de items tambien sale indexada por id",
+    ejecutar: (t) => {
+      // Los escenarios antiguos y los archivos importados traen una lista. La
+      // ruta de una escritura granular es la misma, asi que la clave tambien.
+      const payload = escenarioSano();
+
+      const items = normalizar(payload).domains.fpa.items;
+
+      t.igual(Object.keys(items).join(","), "fpa-1-1", "clave por id");
+      t.igual(items["fpa-1-1"].capacidad, "Presupuestos", "con su contenido");
+    },
+  },
+  {
+    grupo: "Lo que se envia a Firebase",
+    nombre: "un item sin id utilizable se guarda por posicion antes que perderse",
+    ejecutar: (t) => {
+      const payload = escenarioSano();
+      payload.domains.fpa.items = [
+        { id: "fpa-1-1", capacidad: "C", subcapacidad: "S1" },
+        { capacidad: "C", subcapacidad: "sin id" },
+        { id: "con/barra", capacidad: "C", subcapacidad: "id que Firebase rechaza" },
+      ];
+
+      const items = normalizar(payload).domains.fpa.items;
+
+      t.igual(Object.keys(items).sort().join(","), "1,2,fpa-1-1");
+      t.igual(items["1"].subcapacidad, "sin id", "el que no tiene id sigue ahi");
+      t.igual(
+        items["2"].subcapacidad,
+        "id que Firebase rechaza",
+        "y el del id invalido tambien",
+      );
     },
   },
 ];

@@ -341,7 +341,7 @@ export function normalizarEscenarioParaFirebase(payload, serializarTargets) {
     escenario.domains[domainId] = {
       meta: normalizarMeta(dominio.meta),
       targets: serializarTargets(items, dominio.targets, dominio.meta),
-      items: items.map(normalizarItemParaFirebase).filter(Boolean),
+      items: indexarItemsPorId(items),
     };
   });
 
@@ -371,6 +371,52 @@ function normalizarMeta(meta) {
   });
 
   return salida;
+}
+
+
+/** Los caracteres que Firebase no admite dentro de una clave de ruta. */
+const CARACTER_INVALIDO_EN_CLAVE = /[.#$[\]/]/;
+
+
+/**
+ * Con que clave se guarda una subcapacidad.
+ *
+ * Por su id siempre que se pueda, porque las escrituras granulares apuntan a
+ * rutas como domains/fpa/items/fpa-1-2/scores/procesos y solo son validas si la
+ * clave del nodo es ese mismo id.
+ *
+ * Esto devolvia una lista, asi que Firebase guardaba las subcapacidades por
+ * posicion (0, 1, 2...). Cada puntuacion creaba entonces una rama NUEVA en
+ * items/fpa-1-2 en vez de modificar la existente; al recargar, esa rama no
+ * tenia ni id ni capacidad, findMatchingScenarioItem() no la reconocia y el
+ * trabajo se descartaba en silencio. Es el fallo que arregla a posteriori
+ * scripts/migrate_items_to_ids.py, y que se colaba en cada escenario nuevo y en
+ * cada importacion.
+ *
+ * El respaldo por posicion es para un item sin id, o con un id que Firebase no
+ * admite como clave: se guarda donde no llegan las escrituras granulares
+ * —exactamente donde estaban todos hasta ahora— antes que perderlo.
+ */
+function claveDeItem(item, posicion) {
+  const id = String(item?.id ?? "");
+
+  return id && !CARACTER_INVALIDO_EN_CLAVE.test(id) ? id : String(posicion);
+}
+
+
+/** Las subcapacidades listas para Firebase, indexadas por su id. */
+function indexarItemsPorId(items) {
+  const indexados = {};
+
+  items.forEach((item, posicion) => {
+    const normalizado = normalizarItemParaFirebase(item);
+
+    if (normalizado) {
+      indexados[claveDeItem(item, posicion)] = normalizado;
+    }
+  });
+
+  return indexados;
 }
 
 
