@@ -3604,7 +3604,10 @@ async function initializeSharedScenario() {
     isApplyingRemoteScenario = true;
 
     try {
-      applyScenarioPayload(remoteScenario);
+      // Al abrir el enlace si tiene sentido ir al dominio del escenario.
+      applyScenarioPayload(remoteScenario, {
+        seguirDominioDelEscenario: true,
+      });
 
       escribirAlmacenamiento(
         STORAGE_KEY,
@@ -3997,7 +4000,10 @@ function applyStoredScenario() {
 
   try {
     const payload = JSON.parse(stored);
-    applyScenarioPayload(payload);
+    // Al arrancar se vuelve al dominio en el que se estaba trabajando.
+    applyScenarioPayload(payload, {
+      seguirDominioDelEscenario: true,
+    });
   } catch (error) {
     console.warn("No se pudo aplicar el escenario local.", error);
   }
@@ -4222,8 +4228,23 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
  * Devuelve cuántas subcapacidades ha reconocido: sin ese dato, una importación
  * que no casaba con nada terminaba igualmente en "Escenario importado
  * correctamente".
+ *
+ * `seguirDominioDelEscenario` solo debe ser true al CARGAR un escenario: al
+ * abrir un enlace compartido, al restaurar la copia local o al abrir un
+ * archivo. Nunca en una actualizacion en vivo.
+ *
+ * El motivo: el payload lleva un activeDomainId, y las escrituras granulares
+ * —que son las de puntuar— no lo actualizan nunca. Asi que en un escenario
+ * compartido el valor guardado se quedaba en el dominio de la primera
+ * escritura completa. Cada puntuacion volvia por Firebase como snapshot, se
+ * aplicaba, y devolvia a quien estuviera puntuando al dominio de entonces:
+ * puntuar en Tesoreria te dejaba en FP&A.
+ *
+ * Y aunque se actualizara, seguiria estando mal: el dominio que cada persona
+ * mira es suyo, no del escenario. Dos consultores trabajando en dominios
+ * distintos se arrastrarian el uno al otro en cada puntuacion.
  */
-function applyScenarioPayload(payload) {
+function applyScenarioPayload(payload, { seguirDominioDelEscenario = false } = {}) {
   const resultado = { aplicadas: 0, total: 0, dominios: 0 };
 
   if (!payload) {
@@ -4263,10 +4284,18 @@ function applyScenarioPayload(payload) {
       );
     });
 
-    if (payload.activeDomainId && state.domains[payload.activeDomainId]) {
-      setActiveDomain(payload.activeDomainId);
-    } else if (state.domains[state.activeDomainId]) {
-      setActiveDomain(state.activeDomainId);
+    // Se vuelve a fijar el dominio activo en cualquier caso: aplicar el
+    // escenario reasigna domain.targets, y state.targets debe volver a
+    // apuntar al objeto nuevo. Lo que cambia es CUAL, no si se hace.
+    const dominioDestino =
+      seguirDominioDelEscenario &&
+      payload.activeDomainId &&
+      state.domains[payload.activeDomainId]
+        ? payload.activeDomainId
+        : state.activeDomainId;
+
+    if (state.domains[dominioDestino]) {
+      setActiveDomain(dominioDestino);
     }
 
     return resultado;
@@ -4433,7 +4462,9 @@ async function importScenario(event) {
         return;
       }
 
-      const resultado = applyScenarioPayload(payload);
+      const resultado = applyScenarioPayload(payload, {
+        seguirDominioDelEscenario: true,
+      });
 
       if (!resultado.aplicadas) {
         showNotice(
