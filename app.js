@@ -1020,6 +1020,28 @@ function setInitialLoading(isLoading) {
 }
 
 
+/**
+ * Lo que queda detras de un modal abierto.
+ *
+ * Los avisos y el chip de guardado se quedan fuera a proposito: son regiones
+ * live y tienen que poder anunciar un fallo de guardado aunque haya un modal
+ * delante. Los tres modales son hijos directos de <body>, asi que ninguno cae
+ * dentro de lo que se marca como inerte.
+ */
+const REGIONES_DE_FONDO = [".app-header", ".app-shell", ".back-to-top-button"];
+
+
+/**
+ * Deja el fondo inerte mientras hay un modal abierto.
+ *
+ * El foco ya estaba atrapado con atraparFoco(), pero eso solo frena al
+ * tabulador. Con un lector de pantalla, el cursor virtual seguia recorriendo las
+ * 152 subcapacidades de detras como si el modal no existiera, y desde ahi no hay
+ * forma de saber que hay un dialogo esperando una confirmacion.
+ *
+ * atraparFoco() se mantiene: inert no esta en navegadores antiguos y ahi sigue
+ * siendo lo unico que retiene el tabulador.
+ */
 function updateModalOpenState() {
   const hasOpenModal =
     !els.scoringCriteriaModal?.hidden ||
@@ -1027,6 +1049,14 @@ function updateModalOpenState() {
     !els.dialogModal?.hidden;
 
   document.body.classList.toggle("modal-open", hasOpenModal);
+
+  REGIONES_DE_FONDO.forEach((selector) => {
+    const region = document.querySelector(selector);
+
+    if (region) {
+      region.inert = hasOpenModal;
+    }
+  });
 }
 
 function setupScoringCriteriaModal() {
@@ -1149,12 +1179,16 @@ function pintarNivelesDeLaSubcapacidad(itemId) {
 function closeScoringCriteriaModal() {
   els.scoringCriteriaModal.hidden = true;
 
+  // Antes de devolver el foco, no despues: mientras el modal esta abierto el
+  // fondo queda inerte, y un elemento inerte no puede recibir el foco. Los
+  // otros dos modales ya lo hacian en este orden.
+  updateModalOpenState();
+
   if (scoringCriteriaTrigger?.isConnected) {
     scoringCriteriaTrigger.focus();
   }
 
   scoringCriteriaTrigger = null;
-  updateModalOpenState();
 }
 
 function activateScoringCriteriaTab(tabKey) {
