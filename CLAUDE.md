@@ -2,71 +2,110 @@
 
 Guía de trabajo para Claude Code en este repositorio.
 
+> Este archivo no lleva números de línea a propósito. Los que había quedaron obsoletos con el
+> primer cambio y no había forma de notarlo. Se referencia por nombre de archivo y de función.
+
 ## Qué es
 
 App web de diagnóstico de madurez financiera según la metodología F3M. Puntúa las subcapacidades de
 9 dominios financieros en tres palancas (Procesos, Tecnología, Organización) y genera dashboard,
 heatmap y roadmap priorizado.
 
+La usan consultores **delante del cliente**, en talleres y sesiones de scoring. Ese contexto manda:
+un fallo silencioso en una sesión con cliente cuesta más que cualquier deuda técnica.
+
 ## Cómo ejecutarlo
 
 ```powershell
 python -m http.server 8000
-# abrir http://localhost:8000/
 ```
 
-**Hace falta un servidor.** `app.js` se carga como módulo ES y hace `fetch()` de los JSON de datos,
-así que abrir `index.html` con `file://` falla por CORS. El propio código avisa de esto en el
-mensaje de error de `app.js:407`.
+Y abrir `http://localhost:8000/`.
+
+**Hace falta un servidor.** `app.js` se carga como módulo ES y hace `fetch()` del catálogo de
+dominios y de los JSON de datos, así que abrir `index.html` con `file://` falla por CORS. La propia
+app lo dice en su mensaje de error de arranque.
 
 **No hay `npm install`, ni build, ni watch, ni `package.json`.** Se edita el archivo y se recarga el
 navegador. Cualquier servidor estático equivalente sirve.
 
 ## Arquitectura
 
-| Archivo | Rol |
-|---|---|
-| `index.html` | Maquetación completa, `<template>` de la tarjeta de assessment, modales de criterios F3M e iniciativa IA |
-| `app.js` | Toda la lógica — 4.659 líneas en un solo archivo, sin módulos internos |
-| `styles.css` | Estilos |
-| `data/domains/*.json` | Datos del assessment, un archivo por dominio |
+| Archivo | Rol | Líneas |
+|---|---|---|
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 603 |
+| `app.js` | Estado, DOM, Firebase, filtros, render de las cuatro vistas | 5.395 |
+| `styles.css` | Estilos | 3.660 |
+| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 273 |
+| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 407 |
+| `core/presentacion.js` | Escapado, formato de números y colores de marca | 65 |
+| `informe/pdf.js` | El informe PDF: de los datos al HTML imprimible | 790 |
+| `tests/` | Pruebas de `core/`, sin dependencias | 814 |
+| `data/domains.json` | **Fuente única de la lista de dominios** | — |
+| `data/domains/*.json` | Datos del assessment, un archivo por dominio | — |
+| `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
+| `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
 
-Flujo de arranque:
-`init()` (`app.js:386`) → `loadCoreDomains()` → `loadDomainData()` → `initializeSharedScenario()`
-→ `renderAll()`.
+La regla de reparto: **en `core/` no hay DOM, ni Firebase, ni estado global, ni imports.** Todo son
+funciones puras, y por eso se pueden probar sin levantar la aplicación. `app.js` es quien conoce el
+estado y le pasa a `core/` lo que necesita.
+
+Flujo de arranque, en `init()` de `app.js`:
+
+```
+cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScenarioModeNotice()
+  → cargarCatalogoDeDominios()   // data/domains.json + pinta el conmutador
+  → loadCoreDomains()            // Promise.allSettled de los 9 dominios
+  → setActiveDomain("fpa")
+  → applyStoredScenario()        // copia local de localStorage
+  → inicializarIdentidad()       // signInAnonymously, solo si hay ?scenario=
+  → initializeSharedScenario()   // lee Firebase, aplica lo remoto, se suscribe
+  → populateCapacityFilter() → renderAll()
+```
 
 Dependencias externas por CDN, sin bundler:
-- **Chart.js 4.5.0** desde cdnjs (`index.html:554`) — radares por capacidad.
-- **Firebase Realtime Database 12.15.0** importado desde `gstatic.com` (`app.js:1-9`).
 
-### De dónde salen los datos
+- **Chart.js 4.5.0** desde cdnjs (al final de `index.html`) — radares por capacidad.
+- **Firebase Realtime Database 12.15.0** importado desde `gstatic.com` (cabecera de `app.js`).
 
-Los datos salen de `DOMAINS[].dataUrl` → `data/domains/*.json`, un archivo por dominio.
+### Las cuatro pestañas son vistas, no anclas
 
-(Hasta hace poco quedaban aquí una constante `DATA_URL` y un `data/fpa_assessment.json` sueltos, de
-cuando solo existía FP&A. Ya no están.)
+`setupVistas()` muestra **solo la sección activa**; las otras tres están `hidden` y no se pintan.
+`renderAll()` solo repinta la vista visible. El enlace directo (`#roadmap`) se sigue respetando.
+
+Consecuencia práctica: si algo depende de medir un elemento oculto, hay que hacerlo visible primero.
+Es lo que hace `conElDashboardVisible()` para capturar los radares del PDF — un canvas oculto no
+tiene tamaño y saldría en blanco.
+
+### El ámbito de datos es uno solo
+
+`getScopedItems()` es **la única** fuente de subcapacidades para todas las vistas y exportaciones:
+dashboard, resumen, radares, heatmap, roadmap, CSV y PDF. Antes convivían dos ámbitos y el KPI decía
+"7 de prioridad alta" mientras el roadmap enseñaba 2.
+
+No añadir una vista que lea `state.items` directamente.
 
 ## Reglas de negocio F3M
 
-> **El README está desactualizado en esta sección.** Describe un objetivo de madurez fijo de `4` y
-> un gap calculado como `4 - scoreMedio`. Eso ya no es así. La fuente de verdad es el código, que se
-> resume a continuación.
+La fuente de verdad es `core/calculo.js`, y está cubierta por las pruebas. El README coincide.
 
-**Tres palancas** (`LEVERS`, `app.js:119`), con colores de marca Deloitte:
-Procesos `#86BC25` · Tecnología `#ED8B00` · Organización `#012169`.
+**Tres palancas** (`PALANCAS` en `core/calculo.js`), con colores de marca Deloitte en
+`core/presentacion.js`: Procesos `#86BC25` · Tecnología `#ED8B00` · Organización `#012169`.
 
 **Objetivo de madurez**: configurable **por capacidad y por palanca**, vía `getCapabilityTargets()`
-(`app.js:703`). `DEFAULT_TARGET_MATURITY = 4` es solo el valor por defecto cuando una capacidad no
+en `app.js`. `DEFAULT_TARGET_MATURITY = 4` es solo el valor por defecto cuando una capacidad no
 tiene objetivo propio, no una constante fija del modelo.
 
-**Cálculo** (`calculate()`, `app.js:763`):
+**Cálculo** (`calcularMetricas()` en `core/calculo.js`):
+
 - El gap se calcula **por palanca**: `max(0, target - score)`.
 - El gap del ítem es el **promedio de los gaps de las palancas puntuadas**. No es `4 - scoreMedio`.
+  Con objetivo 4 y scores `[3, 2, 5]` el gap es `1,0`, no `0,67`.
 - Solo entran en los promedios las palancas **con score informado**.
-- Si no hay ninguna palanca puntuada, el ítem queda `isPending: true`, con prioridad y oleada
+- Sin ninguna palanca puntuada, el ítem queda `isPending: true`, con prioridad y oleada
   `"Pendiente"`. No se inventan valores para lo no evaluado.
 
-**Nivel resultante** (`getMaturityLevel()`, `app.js:856`), a partir del score medio:
+**Nivel resultante** (`getMaturityLevel()`), a partir del score medio:
 
 | Score | Nivel |
 |---|---|
@@ -76,32 +115,71 @@ tiene objetivo propio, no una constante fija del modelo.
 | `< 4.5` | 4 - Optimizado |
 | `>= 4.5` | 5 - Avanzado/Referente |
 
-**Prioridad** (`priorityFromGap()`, `app.js:2630`): gap `>= 2` → Alta · `>= 1` → Media · resto → Baja.
+**Prioridad** (`priorityFromGap()`): gap `>= 2` → Alta · `>= 1` → Media · resto → Baja.
 
-**Oleada**: Alta → Oleada 1 · Media → Oleada 2 · Baja → Oleada 3.
+**Oleada** (`oleadaDesdePrioridad()`): Alta → Oleada 1 · Media → Oleada 2 · Baja → Oleada 3.
+
+**Agregación por capacidad** (`agregarPorCapacidad()`): una sola función para la tabla resumen, el
+heatmap, el PDF y el CSV. Las medias por palanca usan todas las subcapacidades con esa palanca
+puntuada; score medio, objetivo medio y gap solo las que tienen alguna palanca puntuada.
+
+### Cachés de cálculo
+
+`calculate()` en `app.js` envuelve a `calcularMetricas()` con una caché por ítem, y
+`getCapabilityTargets()` devuelve la misma referencia mientras los objetivos no cambien.
+
+**Ninguna se invalida a mano**: los valores se recalculan siempre y la caché solo decide si
+reutiliza el resultado anterior. Si un score o un objetivo cambia, la comparación falla y se
+recalcula. No hay que acordarse de vaciar nada al tocar el estado.
 
 ## Persistencia y escenarios compartidos
 
-- **Local**: `localStorage`, clave `f3m-fpa-assessment-scenario` (`STORAGE_KEY`, `app.js:116`).
+- **Local**: `localStorage`, clave `f3m-fpa-assessment-scenario` (`STORAGE_KEY`). El nombre de quien
+  edita va aparte, en `f3m-nombre-editor`.
 - **Compartido**: parámetro de URL `?scenario=<id>`. Lee y escribe en `scenarios/<id>` de la
-  Realtime Database. El id se valida contra `/^[a-zA-Z0-9_-]{6,120}$/` (`app.js:4625`) para evitar
-  rutas raras en Firebase.
+  Realtime Database. El id se valida contra `/^[a-zA-Z0-9_-]{20,120}$/` en `getScenarioIdFromUrl()`.
 
 Al tocar el flujo de guardado, tener en cuenta:
-- Todo lo que va a Firebase pasa por `sanitizeScenarioForFirebase()` (`app.js:661`) y
-  `toFirebaseSafeKey()` (`app.js:512`), porque las claves de Firebase no admiten `.` `$` `#` `[` `]` `/`.
-- El flag `isApplyingRemoteScenario` (`app.js:214`) evita que un cambio recibido de Firebase se
-  vuelva a escribir en Firebase. **No eliminarlo** al refactorizar el guardado.
+
+- Todo lo que va a Firebase pasa por `sanitizeScenarioForFirebase()`, que delega en
+  `normalizarEscenarioParaFirebase()` de `core/escenario.js`. **Construye el escenario desde cero**
+  con los campos que las reglas admiten: un campo de más hace que Firebase rechace la escritura
+  entera, no solo ese campo.
+- El flag `isApplyingRemoteScenario` evita que un cambio recibido de Firebase se vuelva a escribir
+  en Firebase. **No eliminarlo** al refactorizar el guardado.
+- `snapshotRemotoPendiente` guarda el snapshot que llega mientras estamos escribiendo, para
+  aplicarlo después en vez de descartarlo.
+- Las escrituras normales son **granulares por ruta** (`persistGranularChange()`), no del payload
+  completo. Las únicas escrituras completas son crear escenario, importar y restaurar.
+- El indicador de guardado tiene un estado `error` real. **Ningún `catch` puede terminar en un
+  mensaje de éxito**: es el fallo que más caro sale en una sesión con cliente.
+
+### El contrato con las reglas de Firebase
+
+`core/escenario.js` es el **espejo en JavaScript de `database.rules.json`**: campos admitidos en
+cada nivel, longitudes máximas, estados válidos y campos de autoría.
+
+**Si se cambia `database.rules.json`, hay que cambiar `core/escenario.js` también.** No hay nada que
+lo compruebe automáticamente.
+
+`revisarEscenario()` revisa un archivo importado **antes** de aplicarlo: lo que no es un escenario
+de esta herramienta no llega a tocar los datos, y lo que se puede arreglar al vuelo se enumera en el
+aviso en vez de corregirse en silencio.
 
 ### Aviso de seguridad — Firebase
 
-La configuración de Firebase está en claro en `app.js:12-22` (`apiKey`, `databaseURL`, `projectId`…).
-En una web app de Firebase esto es **público por diseño** y no constituye un secreto filtrado.
+La configuración de Firebase está en claro en la cabecera de `app.js` (`apiKey`, `databaseURL`,
+`projectId`…). En una web app de Firebase esto es **público por diseño** y no constituye un secreto
+filtrado.
 
-Pero la protección real no está en el código: depende de las **reglas de seguridad de la Realtime
-Database, que no viven en este repositorio**. Si están abiertas, cualquiera con la URL de la base
-—que está en el código público— puede leer y escribir todos los escenarios. Conviene verificarlo en
-la consola de Firebase. No es algo que se arregle tocando este repo.
+Las reglas de seguridad sí están en este repositorio, en `database.rules.json`, y son restrictivas:
+validan campo a campo y rechazan cualquier campo no declarado. Pero **el repositorio no puede
+garantizar qué reglas están desplegadas**: eso se comprueba en la consola de Firebase. Si las reglas
+activas fueran abiertas, cualquiera con la URL de la base —que está en el código público— podría
+leer y escribir todos los escenarios.
+
+El README documenta el orden de despliegue obligatorio (reglas → Anonymous Auth → código) y cómo
+rotar un escenario expuesto.
 
 ## Datos: flujo Excel → JSON
 
@@ -110,43 +188,88 @@ Los 9 archivos `F3M_*.xlsx` de la raíz son la fuente desde la que se generan lo
 escribe `data/domains/*.json`:
 
 ```powershell
-python scripts/convert_domains.py   # requiere openpyxl
+python scripts/convert_domains.py
 ```
 
-Consecuencia práctica: si se editan los JSON a mano, la siguiente ejecución del script sobrescribe
-esos cambios.
-
-La lista de dominios está **duplicada** en `FILES` (dentro del script) y en `DOMAINS` (`app.js:47`).
+Requiere `openpyxl`. Consecuencia práctica: si se editan los JSON a mano, la siguiente ejecución del
+script sobrescribe esos cambios.
 
 ## Añadir un dominio nuevo
 
-Hay que tocar **tres sitios** que no están conectados entre sí:
+**Un solo sitio**: una entrada en `data/domains.json`, con `id`, `label`, `title`, `group`, `source`
+(el Excel) y `dataUrl`. De ahí lo leen `scripts/convert_domains.py` (para saber qué convertir) y
+`app.js` (para las rutas de datos y para pintar el conmutador).
 
-1. `scripts/convert_domains.py` → nueva entrada en `FILES` (`domain_id`, `domain_label`,
-   `domain_title`, `source`, `output`).
-2. `app.js:47` → nueva entrada en `DOMAINS` con `id`, `label`, `title`, `group`, `dataUrl`.
-3. `index.html:89-137` → nuevo `<button class="domain-button" data-domain-id="...">` dentro del
-   `.domain-group` correspondiente.
+Después:
 
-Los tres `group` válidos son: `Transaccionales y operativos`, `Técnicos y especializados`,
-`Estratégicos y de negocio`.
+```powershell
+python scripts/convert_domains.py
+python scripts/check_domains_sync.py
+```
+
+Los tres `group` válidos están en `groups`, dentro del mismo archivo: `Transaccionales y operativos`,
+`Técnicos y especializados`, `Estratégicos y de negocio`.
+
+`check_domains_sync.py` detecta lo que suele fallar: un Excel que no existe, un campo que falta, un
+grupo inventado, un id repetido y un JSON huérfano que el catálogo no menciona.
 
 ## Convenciones
 
-- Trabajo en ramas `feature/<tema>`, PR contra `main` (siguiendo las ramas existentes:
-  `feature/auditoria-interna`, `feature/objetivos-por-capacidad`, …).
+- Trabajo en ramas `feature/<tema>`, PR contra `main`.
+- Mensajes de commit en español, explicando **por qué** además de qué.
+- Los comentarios del código explican decisiones, no mecánica. Los que hay documentan por qué se
+  descartó una alternativa: conviene leerlos antes de "simplificar" algo que parece redundante.
 
 ## Verificación
 
-**No hay tests, ni linter, ni CI.** La comprobación es manual en el navegador:
+### Pruebas automáticas
+
+```powershell
+python scripts/check_domains_sync.py
+```
+
+Verifica el catálogo de dominios y que los 9 JSON coinciden con sus Excel. Código de salida `1` si
+algo falla.
+
+Las reglas de negocio y el contrato de escenario se prueban en `tests/`, sin dependencias:
+
+- **En el navegador**: con el servidor en marcha, abrir `http://localhost:8000/tests/`. Es la forma
+  que funciona en cualquier equipo, sin instalar nada.
+- **Desde la línea de comandos**, si hay Node: `node tests/ejecutar.mjs`. Sale con código `1` si
+  falla algo, listo para CI.
+
+Los dos ejecutan los mismos casos. Al tocar `core/`, ejecutarlas.
+
+### Comprobación manual en el navegador
+
+No hay linter ni CI. El resto se comprueba a mano:
 
 1. `python -m http.server 8000` → `http://localhost:8000/`.
-2. Consola del navegador sin errores (al arrancar debe aparecer el log de conexión a Firebase).
-3. Recorrer las cuatro pestañas:
-   - **Dashboard**: KPIs, barras de prioridad y palanca, y los 3 radares por capacidad.
-   - **Assessment**: cambiar un score y comprobar que se recalculan nivel, gap, prioridad y oleada.
+2. Consola del navegador sin errores (al arrancar aparece el log de conexión a Firebase).
+3. Recorrer las cuatro vistas:
+   - **Dashboard**: KPIs, titulares ejecutivos, barras de prioridad y palanca, y los 3 radares.
+   - **Assessment**: cambiar un score y comprobar que se recalculan nivel, gap, prioridad y oleada,
+     **sin perder el foco ni cerrar los paneles de detalle abiertos**.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos.
-4. Cambiar de dominio con los botones y confirmar que los datos se recargan.
-5. Recargar la página y confirmar que el escenario persiste.
-6. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>`.
+4. Con un filtro puesto, comprobar que **KPIs, tabla, radares, heatmap, roadmap, CSV y PDF dan el
+   mismo recuento**.
+5. Cambiar de dominio y confirmar que los datos se recargan.
+6. Recargar la página y confirmar que el escenario persiste.
+7. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
+   uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
+   guardado se pone **rojo**.
+
+### Comparación A/B, para refactorizaciones
+
+Cuando un cambio no debe alterar ninguna cifra, sirve servir la versión anterior en paralelo y
+comparar:
+
+```powershell
+git archive HEAD | tar -x -C <carpeta-temporal>
+cd <carpeta-temporal>; python -m http.server 8001
+```
+
+Aplicar el mismo patrón de puntuaciones en los dos y comparar tabla resumen, KPIs, heatmap, roadmap
+y CSV. Es lo que se usó para verificar que la unificación de la agregación, las cachés y la
+extracción del informe PDF no cambiaban ningún número.

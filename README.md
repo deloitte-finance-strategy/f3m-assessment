@@ -29,8 +29,9 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
 - Consultar resumen ejecutivo por dominio y por capacidad.
 - Ver heatmap por subcapacidad y palanca.
 - Revisar roadmap ordenado por prioridad y gap.
-- Exportar un escenario en JSON y reimportarlo más adelante.
-- Exportar resumen y roadmap en CSV.
+- Guardar una copia del trabajo en un archivo y volver a abrirla más adelante, desde el menú
+  **Escenario** de la cabecera.
+- Exportar resumen y roadmap en CSV, y un informe completo en PDF.
 
 ## Reglas de cálculo
 
@@ -73,11 +74,27 @@ Los archivos `data/domains/*.json` se generan desde los `F3M_*.xlsx`. Requiere `
 
 ```powershell
 python scripts/convert_domains.py       # regenera los JSON
-python scripts/check_domains_sync.py    # verifica que los JSON coinciden con los Excel
+python scripts/check_domains_sync.py    # verifica el catálogo y los JSON
 ```
 
-`check_domains_sync.py` no escribe nada: compara en memoria y devuelve código de salida `1` si
-algún JSON commiteado ha quedado desincronizado de su Excel.
+`check_domains_sync.py` no escribe nada: compara en memoria y devuelve código de salida `1` si el
+catálogo de dominios está incompleto o si algún JSON commiteado ha quedado desincronizado de su
+Excel.
+
+La lista de dominios vive en **`data/domains.json`**, que es la fuente única: de ahí la leen tanto
+el script de conversión como la aplicación. Añadir un dominio es añadir una entrada ahí y volver a
+ejecutar los dos comandos de arriba.
+
+## Pruebas
+
+Las reglas de cálculo y el contrato de los escenarios se prueban sin instalar nada:
+
+- **En el navegador**: con el servidor en marcha, abre `http://localhost:8000/tests/`.
+- **Desde la línea de comandos**, si tienes Node: `node tests/ejecutar.mjs`.
+
+Los dos ejecutan los mismos casos y cubren gap, prioridad, oleada, nivel de madurez,
+subcapacidades pendientes, agregación por capacidad y lo que se acepta o se rechaza al importar un
+escenario.
 
 
 ## Uso online
@@ -88,7 +105,7 @@ https://danielnavarrodelgado.github.io/fpa-assessment-mvp/
 
 ### Escenarios compartidos
 
-Para crear uno, usa el botón **"Crear escenario compartido"** de la cabecera. Genera un
+Para crear uno, usa **Escenario → "Crear escenario compartido"** en la cabecera. Genera un
 identificador aleatorio de 128 bits y te lleva a la URL correspondiente:
 
 ```text
@@ -99,6 +116,10 @@ https://danielnavarrodelgado.github.io/fpa-assessment-mvp/?scenario=<id-generado
 > sin autenticación. Trátalo como una contraseña: no lo publiques en repositorios, documentos
 > compartidos ni tickets. No inventes identificadores a mano — un ID adivinable expone el
 > assessment completo a cualquiera.
+>
+> Por eso la herramienta no lo enseña entero: ni en pantalla ni en la portada del PDF, que es un
+> documento que se envía al cliente. Para obtener el enlace completo, **Escenario → "Copiar
+> enlace"**.
 
 ### Escenario de pruebas
 
@@ -116,7 +137,7 @@ nunca para trabajo real** — cualquiera puede leerlo y sobrescribirlo.
 
 En un escenario compartido la app se autentica de forma anónima contra Firebase: no pide
 credenciales, pero asigna un identificador estable a cada navegador. Sirve para atribuir cada
-cambio, con el botón **"Poner mi nombre"** de la cabecera para elegir cómo apareces ante el resto.
+cambio, con **Escenario → "Poner mi nombre"** para elegir cómo apareces ante el resto.
 La columna **"Último cambio"** del Roadmap muestra quién tocó cada subcapacidad por última vez.
 
 Si la autenticación no está disponible, la herramienta sigue funcionando sin atribución. Se
