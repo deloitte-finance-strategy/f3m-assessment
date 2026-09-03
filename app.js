@@ -1942,6 +1942,20 @@ function renderTitularesEjecutivos(items, metrics) {
 
   const evaluadas = metrics.filter((entrada) => !entrada.metrics.isPending);
 
+  // "No hay nada puntuado" y "los filtros no dejan ver nada" son dos cosas
+  // distintas, y decir la primera cuando pasa la segunda es afirmar algo falso
+  // delante del cliente: el trabajo esta hecho, solo que fuera del filtro.
+  //
+  // renderAll() ya sale antes si el dominio no tiene subcapacidades, asi que
+  // aqui una lista vacia solo puede venir de un filtro.
+  if (!items.length) {
+    els.dashboardHeadline.hidden = false;
+    els.dashboardHeadline.textContent =
+      `Ninguna de las ${state.items.length} subcapacidades de este dominio pasa los filtros activos. `
+        + "Quita alguno para volver a ver el resumen.";
+    return;
+  }
+
   if (!evaluadas.length) {
     els.dashboardHeadline.hidden = false;
     els.dashboardHeadline.textContent =
@@ -2119,7 +2133,13 @@ function renderSummaryTable() {
     </thead>
 
     <tbody>
-      ${rows.join("")}
+      ${rows.join("") || `
+        <tr>
+          <td colspan="9" class="table-empty-cell">
+            ${buildFilteredEmptyState()}
+          </td>
+        </tr>
+      `}
     </tbody>
   `;
 }
