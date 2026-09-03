@@ -4879,9 +4879,27 @@ function toCsv(rows) {
   return CSV_BOM + csvRows.join("\r\n");
 }
 
+// Excel y LibreOffice tratan como formula cualquier celda que empiece por =, +,
+// - o @. En los campos de texto libre —comentarios, responsable— eso da dos
+// problemas a la vez:
+//
+// - Seguridad: una celda como =HYPERLINK(...) o una llamada DDE se evalua al
+//   abrir el archivo, y estos CSV se abren en el equipo del consultor y se
+//   envian al cliente. En un escenario compartido, cualquiera con el enlace
+//   puede dejar ese comentario.
+// - Presentacion: un comentario que empieza por un guion —"- Falta gobierno"—
+//   se ensena hoy como #NAME? en vez de como el texto que se escribio.
+//
+// El apostrofo delante es la mitigacion habitual: marca la celda como texto y
+// la hoja de calculo no lo muestra. Ningun campo numerico de la exportacion
+// empieza por esos caracteres, asi que no les afecta.
+const INICIO_DE_FORMULA = /^[=+\-@\t\r]/;
+
 function csvEscape(value) {
   const text = String(value ?? "");
-  return /[",\r\n;]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  const seguro = INICIO_DE_FORMULA.test(text) ? `'${text}` : text;
+
+  return /[",\r\n;]/.test(seguro) ? `"${seguro.replace(/"/g, '""')}"` : seguro;
 }
 
 
