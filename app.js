@@ -70,17 +70,9 @@ const firebaseApp = initializeApp(firebaseConfig);
 const firebaseDatabase = getDatabase(firebaseApp);
 const firebaseAuth = getAuth(firebaseApp);
 
-console.log("Firebase conectado correctamente:", firebaseConfig.projectId);
-
-
-
 // Escenario compartido leído desde la URL
 const scenarioId = getScenarioIdFromUrl();
 const scenarioDatabaseRef = scenarioId ? ref(firebaseDatabase, `scenarios/${scenarioId}`) : null;
-
-console.log("Modo escenario compartido:", scenarioId ? "escenario compartido" : "modo local sin scenario");
-
-
 
 const DEFAULT_DOMAIN_ID = "fpa";
 
@@ -4385,9 +4377,15 @@ function applyScenarioPayload(payload, { seguirDominioDelEscenario = false } = {
       resultado.total += result.total;
       resultado.dominios += 1;
 
-      console.log(
-        `Escenario aplicado en ${domainId}: ${result.matched}/${result.total}`,
-      );
+      // Solo se dice algo cuando hay algo que decir: que una subcapacidad del
+      // archivo no case con ninguna de las cargadas es justo lo que hay que
+      // poder ver en la consola durante una sesion.
+      if (result.matched < result.total) {
+        console.warn(
+          `Escenario aplicado en ${domainId}: solo ${result.matched} de ${result.total} ` +
+            "subcapacidades del archivo corresponden a este dominio.",
+        );
+      }
     });
 
     // Se vuelve a fijar el dominio activo en cualquier caso: aplicar el
@@ -4429,9 +4427,12 @@ function applyScenarioPayload(payload, { seguirDominioDelEscenario = false } = {
   resultado.total = result.total;
   resultado.dominios = 1;
 
-  console.log(
-    `Escenario antiguo aplicado en FP&A: ${result.matched}/${result.total}`,
-  );
+  if (result.matched < result.total) {
+    console.warn(
+      `Escenario antiguo aplicado en FP&A: solo ${result.matched} de ${result.total} ` +
+        "subcapacidades del archivo corresponden a este dominio.",
+    );
+  }
 
   if (state.activeDomainId === "fpa") {
     setActiveDomain("fpa");
