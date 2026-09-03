@@ -4151,7 +4151,28 @@ function findMatchingScenarioItem(items, savedItem) {
   ));
 }
 
-function applyScenarioItemsToDomain(domainId, savedItems) {
+/**
+ * Vuelca las subcapacidades guardadas sobre las cargadas.
+ *
+ * `scoresAutoritativos` distingue dos cosas que no son lo mismo:
+ *
+ * - En un escenario de esta herramienta (el de Firebase, la copia local o un
+ *   JSON exportado) el bloque `scores` describe las tres palancas por completo.
+ *   Que falte una significa "sin puntuar", no "no se sabe": Firebase no guarda
+ *   nulos, asi que borrar una puntuacion borra su clave.
+ * - En un archivo de formato antiguo, con columnas planas y sueltas, lo que no
+ *   viene de verdad no se sabe, y no puede borrar lo que ya hay.
+ *
+ * Sin esa distincion, quitar una puntuacion no llegaba a nadie: la clave
+ * desaparecia de Firebase, aqui se leia como undefined y se saltaba. Quien
+ * tuviera la pagina abierta seguia viendo el valor viejo, y en la misma sesion
+ * dos personas veian cifras distintas.
+ */
+function applyScenarioItemsToDomain(
+  domainId,
+  savedItems,
+  { scoresAutoritativos = false } = {},
+) {
   const domain = state.domains[domainId];
 
   if (!domain || !Array.isArray(savedItems)) {
@@ -4172,20 +4193,20 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
 
     matched += 1;
 
-    const procesos = getSavedScore(savedItem, "procesos");
-    const tecnologia = getSavedScore(savedItem, "tecnologia");
-    const organizacion = getSavedScore(savedItem, "organizacion");
+    if (scoresAutoritativos) {
+      const guardados = savedItem.scores || {};
 
-    if (procesos !== undefined) {
-      item.scores.procesos = toScore(procesos);
-    }
+      LEVERS.forEach((lever) => {
+        item.scores[lever.key] = toScore(guardados[lever.key]);
+      });
+    } else {
+      LEVERS.forEach((lever) => {
+        const guardado = getSavedScore(savedItem, lever.key);
 
-    if (tecnologia !== undefined) {
-      item.scores.tecnologia = toScore(tecnologia);
-    }
-
-    if (organizacion !== undefined) {
-      item.scores.organizacion = toScore(organizacion);
+        if (guardado !== undefined) {
+          item.scores[lever.key] = toScore(guardado);
+        }
+      });
     }
 
     const owner = getSavedField(savedItem, ["owner", "Owner"]);
@@ -4262,6 +4283,7 @@ function applyScenarioPayload(payload, { seguirDominioDelEscenario = false } = {
       const result = applyScenarioItemsToDomain(
         domainId,
         getScenarioItemsFromPayload(payload, domainId),
+        { scoresAutoritativos: true },
       );
 
       const defaultTarget = normalizeTargetValue(
