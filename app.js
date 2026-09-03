@@ -2450,6 +2450,8 @@ function renderCapabilityTargets() {
     els.capabilityTargetsPanel.querySelector(".capability-targets-details")?.open,
   );
 
+  const foco = capturarFocoDeObjetivos();
+
   els.capabilityTargetsPanel.innerHTML = `
     <details class="capability-targets-details" ${estabaDesplegado ? "open" : ""}>
       <summary class="capability-targets-header">
@@ -2514,6 +2516,54 @@ function renderCapabilityTargets() {
       "click",
       resetCapabilityTargets,
     );
+
+  restaurarFocoDeObjetivos(foco);
+}
+
+
+/**
+ * Que selector de objetivo tiene el foco, para devolverselo tras repintar.
+ *
+ * Cambiar un objetivo llama a renderAll(), que reconstruye el panel entero: el
+ * <select> que acaba de cambiar desaparece del DOM y el foco cae al <body>. Con
+ * teclado eso obliga a volver a tabular desde el principio de la pagina despues
+ * de CADA ajuste, y el panel tiene quince selectores.
+ *
+ * Se captura y se restaura dentro del render y no en el manejador del cambio
+ * porque el panel tambien se repinta por otros caminos —una puntuacion, un
+ * cambio que llega de Firebase— y el foco se perdia igual en todos ellos.
+ *
+ * Es el mismo patron que ya usan las tarjetas de scoring en
+ * capturarFocoDeAssessment().
+ */
+function capturarFocoDeObjetivos() {
+  const activo = document.activeElement;
+
+  if (!activo || !els.capabilityTargetsPanel?.contains(activo)) {
+    return null;
+  }
+
+  if (!activo.classList.contains("capability-target-select")) {
+    return null;
+  }
+
+  return {
+    capacidad: activo.dataset.capability,
+    palanca: activo.dataset.lever,
+  };
+}
+
+
+function restaurarFocoDeObjetivos(foco) {
+  if (!foco?.capacidad || !foco?.palanca) {
+    return;
+  }
+
+  els.capabilityTargetsPanel
+    .querySelector(
+      `.capability-target-select[data-capability="${CSS.escape(foco.capacidad)}"][data-lever="${CSS.escape(foco.palanca)}"]`,
+    )
+    ?.focus();
 }
 
 function capabilityTargetControl(
