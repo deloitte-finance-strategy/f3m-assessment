@@ -3477,8 +3477,12 @@ height: 100% !important;
     width: 100%;
   }
 
+  /* Las cuatro pestanas no caben en una fila de movil: 518 px de contenido en
+     375 de pantalla. Con overflow-x, "Roadmap" quedaba fuera y nada indicaba
+     que estuviera ahi; habia que arrastrar la fila para descubrirla.
+     Envolviendolas se ven las cuatro y no hace falta ninguna pista. */
   .tabs {
-    overflow-x: auto;
+    flex-wrap: wrap;
   }
 
   .kpi-grid,
