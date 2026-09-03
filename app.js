@@ -13,6 +13,23 @@ import {
   signInAnonymously,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
+// El motor de calculo F3M: reglas de negocio puras, sin DOM ni estado global.
+// Vive aparte para poder probarlo sin levantar la aplicacion (ver tests/).
+import {
+  DEFAULT_TARGET_MATURITY,
+  PALANCAS,
+  agregarPorCapacidad as agregarPorCapacidadCore,
+  average,
+  calcularMetricas,
+  getMaturityLevel,
+  getMaturityLevelNumber,
+  normalizeTargetValue,
+  priorityFromGap,
+  round2,
+  toScore,
+  unique,
+} from "./core/calculo.js";
+
 // Configuración de Firebase del proyecto fpa-assessment-mvp
 const firebaseConfig = {
   apiKey: "AIzaSyAyHWPnALB5regOMmeR3C-vVLDTmh6fEio",
@@ -43,8 +60,6 @@ console.log("Modo escenario compartido:", scenarioId ? "escenario compartido" : 
 
 
 const DEFAULT_DOMAIN_ID = "fpa";
-
-const DEFAULT_TARGET_MATURITY = 4;
 
 
 const DOMAINS = {
@@ -144,23 +159,11 @@ const COLOR_DE_PRIORIDAD = {
 };
 
 
-const LEVERS = [
-  {
-    key: "procesos",
-    label: "Procesos",
-    color: COLOR_DE_PALANCA.procesos,
-  },
-  {
-    key: "tecnologia",
-    label: "Tecnología",
-    color: COLOR_DE_PALANCA.tecnologia,
-  },
-  {
-    key: "organizacion",
-    label: "Organización",
-    color: COLOR_DE_PALANCA.organizacion,
-  },
-];
+// Las palancas las define el motor; aqui solo se les pone el color de marca.
+const LEVERS = PALANCAS.map((palanca) => ({
+  ...palanca,
+  color: COLOR_DE_PALANCA[palanca.key],
+}));
 
 const PRIORITY_ORDER = {
   Alta: 1,
@@ -620,18 +623,6 @@ function createDefaultTargets(items, defaultTarget = DEFAULT_TARGET_MATURITY) {
 
 
 
-function normalizeTargetValue(value, fallback = DEFAULT_TARGET_MATURITY) {
-  const number = Number(value);
-
-  if (Number.isInteger(number) && number >= 1 && number <= 5) {
-    return number;
-  }
-
-  return fallback;
-}
-
-
-
 function normalizeDomainTargets(
   items,
   savedTargets = {},
@@ -868,13 +859,6 @@ function normalizeItem(item) {
   };
 }
 
-function toScore(value) {
-  const number = Number(value);
-  return Number.isInteger(number) && number >= 1 && number <= 5 ? number : null;
-}
-
-
-
 /**
  * Metricas de una subcapacidad.
  *
@@ -919,185 +903,18 @@ function calculate(item) {
 }
 
 
-/** El calculo en si, sin cache: las reglas F3M y nada mas. */
-function calcularMetricas(item, capabilityTargets) {
-  const scoredLevers = LEVERS
-    .map((lever) => {
-      const score = item.scores[lever.key];
-      const target = normalizeTargetValue(
-        capabilityTargets[lever.key],
-        DEFAULT_TARGET_MATURITY,
-      );
-
-      if (!Number.isFinite(score)) {
-        return null;
-      }
-
-      return {
-        lever: lever.key,
-        score,
-        target,
-        gap: round2(
-          Math.max(0, target - score),
-        ),
-      };
-    })
-    .filter(Boolean);
-
-  if (!scoredLevers.length) {
-    return {
-      isPending: true,
-      scoreMedio: null,
-      targetMedio: null,
-      nivel: "",
-      gap: null,
-      gaps: {
-        procesos: null,
-        tecnologia: null,
-        organizacion: null,
-      },
-      targets: capabilityTargets,
-      prioridad: "Pendiente",
-      oleada: "Pendiente",
-    };
-  }
-
-  const scoreMedio = average(
-    scoredLevers.map((entry) => entry.score),
-  );
-
-  const targetMedio = average(
-    scoredLevers.map((entry) => entry.target),
-  );
-
-  const gap = average(
-    scoredLevers.map((entry) => entry.gap),
-  );
-
-  const gaps = {
-    procesos: null,
-    tecnologia: null,
-    organizacion: null,
-  };
-
-  scoredLevers.forEach((entry) => {
-    gaps[entry.lever] = entry.gap;
-  });
-
-  const nivel = getMaturityLevel(scoreMedio);
-  const prioridad = priorityFromGap(gap);
-
-  const oleada =
-    prioridad === "Alta"
-      ? "Oleada 1"
-      : prioridad === "Media"
-        ? "Oleada 2"
-        : "Oleada 3";
-
-  return {
-    isPending: false,
-    scoreMedio,
-    targetMedio,
-    nivel,
-    gap,
-    gaps,
-    targets: capabilityTargets,
-    prioridad,
-    oleada,
-  };
-}
-
-
-
-function getMaturityLevel(score) {
-  if (score < 1.5) return "1 - Inicial";
-  if (score < 2.5) return "2 - Estructurado";
-  if (score < 3.5) return "3 - Estandarizado";
-  if (score < 4.5) return "4 - Optimizado";
-  return "5 - Avanzado/Referente";
-}
-
-
-function getMaturityLevelNumber(score) {
-  if (!Number.isFinite(score)) {
-    return null;
-  }
-
-  return Math.max(1, Math.min(5, Math.round(score)));
-}
-
-
-function round2(value) {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
-}
-
-
-
 /**
- * La agregacion por capacidad, en un unico sitio.
+ * Agregacion por capacidad con el estado de la aplicacion.
  *
- * Estaba escrita cuatro veces —tabla resumen, heatmap, resumen del PDF y filas
- * del CSV— con la misma aritmetica y cuatro formas de salida distintas. Cuatro
- * copias de la misma regla son cuatro sitios donde corregirla, y fue el origen
- * mecanico de que el Dashboard y el Roadmap ensenaran cifras que no cuadraban.
- *
- * Reglas que aplica, y que no cambian respecto a lo que hacian las cuatro:
- * - Las medias por palanca salen de TODAS las subcapacidades con esa palanca
- *   puntuada, aunque el item este pendiente en las otras dos.
- * - Score medio, objetivo medio y gap solo promedian las subcapacidades con
- *   alguna palanca puntuada: lo no evaluado no entra.
- * - La prioridad de la capacidad se deriva del gap agregado, con la misma regla
- *   que la de cada subcapacidad.
+ * La aritmetica esta en el motor; aqui solo se le dice de donde salen las
+ * metricas —de calculate(), con cache— y los objetivos de cada capacidad.
  */
 function agregarPorCapacidad(items) {
-  return unique(
-    items.map((item) => item.capacidad),
-  ).map((capacidad) => {
-    const subcapacidades = items.filter(
-      (item) => item.capacidad === capacidad,
-    );
-
-    const metricas = subcapacidades.map(calculate);
-
-    const puntuadas = metricas.filter(
-      (metrics) => !metrics.isPending,
-    );
-
-    const mediaDePalanca = (clave) =>
-      average(
-        subcapacidades
-          .map((item) => item.scores[clave])
-          .filter(Number.isFinite),
-      );
-
-    const scoreMedio = average(
-      puntuadas.map((metrics) => metrics.scoreMedio),
-    );
-
-    const targetMedio = average(
-      puntuadas.map((metrics) => metrics.targetMedio),
-    );
-
-    const gap = average(
-      puntuadas.map((metrics) => metrics.gap),
-    );
-
-    return {
-      capacidad,
-      items: subcapacidades,
-      metricas,
-      objetivos: getCapabilityTargets(capacidad),
-      procesos: mediaDePalanca("procesos"),
-      tecnologia: mediaDePalanca("tecnologia"),
-      organizacion: mediaDePalanca("organizacion"),
-      scoreMedio,
-      targetMedio,
-      gap,
-      prioridad: priorityFromGap(gap),
-      evaluadas: puntuadas.length,
-      total: subcapacidades.length,
-    };
-  });
+  return agregarPorCapacidadCore(
+    items,
+    calculate,
+    getCapabilityTargets,
+  );
 }
 
 
@@ -3629,29 +3446,10 @@ function priorityColor(priority) {
   return COLOR_DE_PRIORIDAD[priority] || COLOR_DE_PRIORIDAD.Pendiente;
 }
 
-function priorityFromGap(gap) {
-  if (!Number.isFinite(gap)) return "Pendiente";
-  if (gap >= 2) return "Alta";
-  if (gap >= 1) return "Media";
-  return "Baja";
-}
-
-function average(values) {
-  const clean = values.filter((value) => Number.isFinite(value));
-  if (!clean.length) return null;
-  return round2(clean.reduce((sum, value) => sum + value, 0) / clean.length);
-}
-
 function formatNumber(value) {
   if (!Number.isFinite(value)) return "-";
   return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0$/, "").replace(/\.0$/, "");
 }
-
-function unique(values) {
-  return [...new Set(values)];
-}
-
-
 
 /**
  * El almacenamiento del navegador puede fallar y no es motivo para caerse.

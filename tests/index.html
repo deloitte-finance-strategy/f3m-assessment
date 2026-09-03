@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pruebas del motor de calculo · F3M Assessment</title>
+  <style>
+    :root {
+      --verde: #3e6f11;
+      --rojo: #bb3128;
+      --tinta: #12211a;
+      --suave: #5b6b60;
+      --linea: #dfe5e0;
+      --fondo: #f6f8f6;
+    }
+
+    body {
+      margin: 0;
+      padding: 32px 24px 64px;
+      background: var(--fondo);
+      color: var(--tinta);
+      font: 15px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    main { width: min(880px, 100%); margin: 0 auto; }
+
+    h1 { font-size: 22px; margin: 0 0 4px; }
+
+    .intro { color: var(--suave); margin: 0 0 24px; }
+    .intro code {
+      background: #fff;
+      border: 1px solid var(--linea);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 13px;
+    }
+
+    #resultado {
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      font-weight: 600;
+      border: 1px solid var(--linea);
+      background: #fff;
+    }
+    #resultado.ok { border-color: var(--verde); background: #eef6e6; color: var(--verde); }
+    #resultado.ko { border-color: var(--rojo); background: #fdeceb; color: var(--rojo); }
+
+    .grupo {
+      margin: 0 0 6px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--suave);
+    }
+    .grupo:not(:first-of-type) { margin-top: 22px; }
+
+    ul { list-style: none; margin: 0; padding: 0; }
+
+    li {
+      background: #fff;
+      border: 1px solid var(--linea);
+      border-radius: 8px;
+      padding: 9px 13px;
+      margin-bottom: 6px;
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+    }
+    li.ko { border-color: var(--rojo); background: #fdeceb; }
+
+    .marca { font-weight: 700; color: var(--verde); }
+    li.ko .marca { color: var(--rojo); }
+
+    .fallo {
+      margin: 6px 0 0;
+      padding: 8px 12px;
+      background: #fff;
+      border-left: 3px solid var(--rojo);
+      border-radius: 4px;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Pruebas del motor de calculo</h1>
+
+  <p class="intro">
+    Las reglas F3M de <code>core/calculo.js</code>: gap por palanca, prioridad,
+    oleada, nivel de madurez, subcapacidades pendientes y agregacion por
+    capacidad. No tocan el DOM, ni Firebase, ni el estado de la aplicacion.
+  </p>
+
+  <div id="resultado">Ejecutando…</div>
+
+  <div id="detalle"></div>
+</main>
+
+<script type="module">
+  import { casos, ejecutarCasos } from "./casos.js";
+
+  const resultado = ejecutarCasos();
+  const caja = document.getElementById("resultado");
+  const detalle = document.getElementById("detalle");
+
+  caja.className = resultado.fallos.length ? "ko" : "ok";
+  caja.textContent = resultado.fallos.length
+    ? `${resultado.fallos.length} comprobacion(es) fallan de ${resultado.comprobaciones}, en ${resultado.casos} casos.`
+    : `Las ${resultado.comprobaciones} comprobaciones pasan, en ${resultado.casos} casos.`;
+
+  const fallosDe = (caso) =>
+    resultado.fallos.filter(
+      (fallo) => fallo.grupo === caso.grupo && fallo.nombre === caso.nombre,
+    );
+
+  let grupoActual = null;
+
+  casos.forEach((caso) => {
+    if (caso.grupo !== grupoActual) {
+      grupoActual = caso.grupo;
+      const titulo = document.createElement("p");
+      titulo.className = "grupo";
+      titulo.textContent = grupoActual;
+      detalle.append(titulo);
+
+      const lista = document.createElement("ul");
+      lista.dataset.grupo = grupoActual;
+      detalle.append(lista);
+    }
+
+    const lista = detalle.querySelector(`ul[data-grupo="${CSS.escape(grupoActual)}"]`);
+    const fallos = fallosDe(caso);
+    const fila = document.createElement("li");
+
+    if (fallos.length) {
+      fila.className = "ko";
+    }
+
+    const marca = document.createElement("span");
+    marca.className = "marca";
+    marca.textContent = fallos.length ? "FALLA" : "OK";
+
+    const texto = document.createElement("div");
+    texto.textContent = caso.nombre;
+
+    fallos.forEach((fallo) => {
+      const aviso = document.createElement("div");
+      aviso.className = "fallo";
+      aviso.textContent =
+        `${fallo.detalle || "comprobacion"}\n` +
+        `  esperado: ${JSON.stringify(fallo.esperado)}\n` +
+        `  obtenido: ${JSON.stringify(fallo.obtenido)}`;
+      texto.append(aviso);
+    });
+
+    fila.append(marca, texto);
+    lista.append(fila);
+  });
+
+  // Para poder leer el resultado desde fuera sin depender del texto pintado.
+  window.__resultadoDePruebas = resultado;
+</script>
+</body>
+</html>
