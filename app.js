@@ -439,6 +439,7 @@ async function init() {
   bindGlobalEvents();
   setInitialLoading(true); // NUEVO: muestra estado de carga mientras se inicializa la app
   showScenarioModeNotice();
+  avisarDeElementosAusentes();
 
 
   try {
@@ -498,6 +499,15 @@ async function init() {
         "error",
       );
 
+      console.error(error);
+      return;
+    }
+
+    // Si ya sabemos que falta parte de la maquetacion, esa es la explicacion y
+    // no un "fallo inesperado": el error que acaba de saltar es la consecuencia,
+    // no la causa. El mensaje generico taparia el unico que dice que hacer.
+    if (elementosAusentes.length) {
+      avisarDeElementosAusentes();
       console.error(error);
       return;
     }
@@ -589,10 +599,71 @@ function cacheElements() {
   });
 }
 
+/**
+ * Los elementos que app.js esperaba encontrar y no estaban.
+ *
+ * Se llena al enganchar los eventos y se consulta una sola vez, desde init().
+ */
+const elementosAusentes = [];
+
+
+/**
+ * Engancha un evento anotando si el elemento falta, en vez de caerse.
+ *
+ * Nueve de estos enganches accedian directamente a els.<id>. Si el elemento no
+ * estaba, bindGlobalEvents() lanzaba, y se llama FUERA del try de init(), asi
+ * que no lo recogia nadie: la aplicacion se quedaba con el spinner de carga
+ * puesto para siempre, sin mensaje y sin forma de saber por que.
+ *
+ * No es hipotetico. Es lo que pasa si el navegador sirve un index.html de una
+ * version y un app.js de otra, que es justo el motivo por el que app.js se pide
+ * con ?v=: GitHub Pages cachea cada archivo por su cuenta.
+ */
+function enganchar(id, evento, manejador) {
+  const elemento = els[id];
+
+  if (!elemento) {
+    elementosAusentes.push(id);
+    return;
+  }
+
+  elemento.addEventListener(evento, manejador);
+}
+
+
+/**
+ * Si falta parte de la maquetacion, decirlo en vez de quedarse a medias.
+ *
+ * Un boton que no responde es peor que un boton que explica por que: delante de
+ * un cliente, lo primero parece que la herramienta esta rota sin mas.
+ *
+ * Se llama desde init() y no desde bindGlobalEvents() para que el aviso salga
+ * DESPUES de showScenarioModeNotice(), que si no lo taparia en los escenarios
+ * compartidos.
+ */
+function avisarDeElementosAusentes() {
+  if (!elementosAusentes.length) {
+    return;
+  }
+
+  console.error(
+    "Faltan elementos de la maquetacion que app.js esperaba:",
+    elementosAusentes.join(", "),
+  );
+
+  showNotice(
+    "Esta página se ha cargado a medias y algunos botones no van a responder. "
+      + "Suele ser una versión antigua guardada en la caché del navegador: recárgala "
+      + "con Ctrl+F5. Si sigue igual, avisa al equipo que la mantiene.",
+    "error",
+  );
+}
+
+
 function bindGlobalEvents() {
-  els.capacityFilter.addEventListener("change", renderAll);
-  els.priorityFilter.addEventListener("change", renderAll);
-  els.searchInput.addEventListener("input", handleSearchInput);
+  enganchar("capacityFilter", "change", renderAll);
+  enganchar("priorityFilter", "change", renderAll);
+  enganchar("searchInput", "input", handleSearchInput);
 
   document.addEventListener("click", (event) => {
     const clearButton = event.target.closest("[data-clear-filters]");
@@ -608,18 +679,18 @@ function bindGlobalEvents() {
       removeActiveFilter(removeButton.dataset.removeFilter);
     }
   });
-  els.importJsonButton.addEventListener("click", () => els.scenarioFileInput.click());
-  els.scenarioFileInput.addEventListener("change", importScenario);
-  els.exportJsonButton.addEventListener("click", exportScenarioJson);
-  els.exportCsvButton.addEventListener("click", exportCsv);
-  els.exportPdfButton.addEventListener("click", exportPdfReport); // NUEVO: genera informe imprimible/PDF
-  els.resetButton.addEventListener("click", resetScenario);
-  els.createScenarioButton?.addEventListener("click", createSharedScenario);
-  els.copyScenarioLinkButton?.addEventListener("click", copyScenarioLink);
-  els.leaveScenarioButton?.addEventListener("click", salirDelEscenario);
-  els.editorNameButton?.addEventListener("click", pedirNombreEditor);
-  els.heatmapExpandToggle?.addEventListener("click", handleHeatmapExpandToggleAll);
-  els.loadNoticeClose?.addEventListener("click", ocultarAviso);
+  enganchar("importJsonButton", "click", () => els.scenarioFileInput?.click());
+  enganchar("scenarioFileInput", "change", importScenario);
+  enganchar("exportJsonButton", "click", exportScenarioJson);
+  enganchar("exportCsvButton", "click", exportCsv);
+  enganchar("exportPdfButton", "click", exportPdfReport);
+  enganchar("resetButton", "click", resetScenario);
+  enganchar("createScenarioButton", "click", createSharedScenario);
+  enganchar("copyScenarioLinkButton", "click", copyScenarioLink);
+  enganchar("leaveScenarioButton", "click", salirDelEscenario);
+  enganchar("editorNameButton", "click", pedirNombreEditor);
+  enganchar("heatmapExpandToggle", "click", handleHeatmapExpandToggleAll);
+  enganchar("loadNoticeClose", "click", ocultarAviso);
   setupMenuDeEscenario();
   setupVistas();
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
@@ -1052,7 +1123,7 @@ function updateModalOpenState() {
 }
 
 function setupScoringCriteriaModal() {
-  if (!els.scoringCriteriaModal) {
+  if (!els.scoringCriteriaModal || !els.assessmentList) {
     return;
   }
 
@@ -1198,7 +1269,7 @@ function activateScoringCriteriaTab(tabKey) {
 
 
 function setupAiInitiativeModal() {
-  if (!els.aiInitiativeModal) {
+  if (!els.aiInitiativeModal || !els.roadmapTable) {
     return;
   }
 
