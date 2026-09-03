@@ -245,7 +245,8 @@ Los dos ejecutan los mismos casos. Al tocar `core/`, ejecutarlas.
 No hay linter ni CI. El resto se comprueba a mano:
 
 1. `python -m http.server 8000` → `http://localhost:8000/`.
-2. Consola del navegador sin errores (al arrancar aparece el log de conexión a Firebase).
+2. Consola del navegador **en silencio**. Un arranque correcto no imprime nada: lo que aparezca
+   ahí es un `warn` o un `error` de verdad, y hay que mirarlo.
 3. Recorrer las cuatro vistas:
    - **Dashboard**: KPIs, titulares ejecutivos, barras de prioridad y palanca, y los 3 radares.
    - **Assessment**: cambiar un score y comprobar que se recalculan nivel, gap, prioridad y oleada,

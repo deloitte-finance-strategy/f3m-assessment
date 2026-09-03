@@ -13,6 +13,7 @@ import { average } from "../core/calculo.js";
 
 import {
   COLOR_DE_MARCA,
+  COLOR_DE_MARCA_LEGIBLE,
   COLOR_DE_PALANCA,
   escapeAttr,
   escapeHtml,
@@ -362,6 +363,22 @@ function pdfHeatClass(value) {
   return "heat-5";
 }
 
+/**
+ * Cuantas filas se ensenan de cuantas hay.
+ *
+ * Las dos tablas siguientes estan podadas para que el informe siga siendo
+ * legible, pero sus titulos no lo decian: quien recibia el PDF creia estar
+ * viendo el roadmap completo y le salian otras cuentas que en pantalla.
+ */
+function buildPdfRecuento(mostradas, total, singular, plural) {
+  if (total <= mostradas) {
+    return `${total} ${total === 1 ? singular : plural}.`;
+  }
+
+  return `Las ${mostradas} primeras de ${total} ${plural}, ordenadas por prioridad y gap.`;
+}
+
+
 function buildPdfEnhancedPrioritiesSection(data) {
   const rows = data.topPriorities
     .map(({ item, metrics }) => `
@@ -379,6 +396,16 @@ function buildPdfEnhancedPrioritiesSection(data) {
   return `
     <section class="pdf-page">
       <h2>6. Principales prioridades y gaps</h2>
+      <p class="pdf-intro">
+        ${escapeHtml(
+          buildPdfRecuento(
+            data.topPriorities.length,
+            data.topPrioritiesTotal,
+            "subcapacidad puntuada",
+            "subcapacidades puntuadas",
+          ),
+        )}
+      </p>
       <table class="pdf-table">
         <thead>
           <tr>
@@ -418,6 +445,14 @@ function buildPdfEnhancedRoadmapSection(data) {
       <h2>7. Roadmap e iniciativas sugeridas</h2>
       <p class="pdf-intro">
         Roadmap filtrado según la vista actual de la herramienta, priorizado por gap y criticidad.
+        ${escapeHtml(
+          buildPdfRecuento(
+            data.roadmapItems.length,
+            data.roadmapTotal,
+            "subcapacidad",
+            "subcapacidades",
+          ),
+        )}
       </p>
       <table class="pdf-table pdf-roadmap">
         <thead>
@@ -525,7 +560,7 @@ function getEnhancedPdfReportStyles() {
 
     .pdf-eyebrow {
       margin: 0 0 10px;
-      color: ${COLOR_DE_MARCA};
+      color: ${COLOR_DE_MARCA_LEGIBLE};
       font-size: 10.5pt;
       font-weight: 900;
       letter-spacing: 0.08em;
@@ -721,7 +756,7 @@ function getEnhancedPdfReportStyles() {
 
     .heat-blank {
       background: #eef0ed;
-      color: #737a74;
+      color: #4f5952;
     }
 
     .heat-1 {

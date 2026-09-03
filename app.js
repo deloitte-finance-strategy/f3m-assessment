@@ -70,17 +70,9 @@ const firebaseApp = initializeApp(firebaseConfig);
 const firebaseDatabase = getDatabase(firebaseApp);
 const firebaseAuth = getAuth(firebaseApp);
 
-console.log("Firebase conectado correctamente:", firebaseConfig.projectId);
-
-
-
 // Escenario compartido leído desde la URL
 const scenarioId = getScenarioIdFromUrl();
 const scenarioDatabaseRef = scenarioId ? ref(firebaseDatabase, `scenarios/${scenarioId}`) : null;
-
-console.log("Modo escenario compartido:", scenarioId ? "escenario compartido" : "modo local sin scenario");
-
-
 
 const DEFAULT_DOMAIN_ID = "fpa";
 
@@ -447,6 +439,7 @@ async function init() {
   bindGlobalEvents();
   setInitialLoading(true); // NUEVO: muestra estado de carga mientras se inicializa la app
   showScenarioModeNotice();
+  avisarDeElementosAusentes();
 
 
   try {
@@ -506,6 +499,15 @@ async function init() {
         "error",
       );
 
+      console.error(error);
+      return;
+    }
+
+    // Si ya sabemos que falta parte de la maquetacion, esa es la explicacion y
+    // no un "fallo inesperado": el error que acaba de saltar es la consecuencia,
+    // no la causa. El mensaje generico taparia el unico que dice que hacer.
+    if (elementosAusentes.length) {
+      avisarDeElementosAusentes();
       console.error(error);
       return;
     }
@@ -597,10 +599,71 @@ function cacheElements() {
   });
 }
 
+/**
+ * Los elementos que app.js esperaba encontrar y no estaban.
+ *
+ * Se llena al enganchar los eventos y se consulta una sola vez, desde init().
+ */
+const elementosAusentes = [];
+
+
+/**
+ * Engancha un evento anotando si el elemento falta, en vez de caerse.
+ *
+ * Nueve de estos enganches accedian directamente a els.<id>. Si el elemento no
+ * estaba, bindGlobalEvents() lanzaba, y se llama FUERA del try de init(), asi
+ * que no lo recogia nadie: la aplicacion se quedaba con el spinner de carga
+ * puesto para siempre, sin mensaje y sin forma de saber por que.
+ *
+ * No es hipotetico. Es lo que pasa si el navegador sirve un index.html de una
+ * version y un app.js de otra, que es justo el motivo por el que app.js se pide
+ * con ?v=: GitHub Pages cachea cada archivo por su cuenta.
+ */
+function enganchar(id, evento, manejador) {
+  const elemento = els[id];
+
+  if (!elemento) {
+    elementosAusentes.push(id);
+    return;
+  }
+
+  elemento.addEventListener(evento, manejador);
+}
+
+
+/**
+ * Si falta parte de la maquetacion, decirlo en vez de quedarse a medias.
+ *
+ * Un boton que no responde es peor que un boton que explica por que: delante de
+ * un cliente, lo primero parece que la herramienta esta rota sin mas.
+ *
+ * Se llama desde init() y no desde bindGlobalEvents() para que el aviso salga
+ * DESPUES de showScenarioModeNotice(), que si no lo taparia en los escenarios
+ * compartidos.
+ */
+function avisarDeElementosAusentes() {
+  if (!elementosAusentes.length) {
+    return;
+  }
+
+  console.error(
+    "Faltan elementos de la maquetacion que app.js esperaba:",
+    elementosAusentes.join(", "),
+  );
+
+  showNotice(
+    "Esta página se ha cargado a medias y algunos botones no van a responder. "
+      + "Suele ser una versión antigua guardada en la caché del navegador: recárgala "
+      + "con Ctrl+F5. Si sigue igual, avisa al equipo que la mantiene.",
+    "error",
+  );
+}
+
+
 function bindGlobalEvents() {
-  els.capacityFilter.addEventListener("change", renderAll);
-  els.priorityFilter.addEventListener("change", renderAll);
-  els.searchInput.addEventListener("input", handleSearchInput);
+  enganchar("capacityFilter", "change", renderAll);
+  enganchar("priorityFilter", "change", renderAll);
+  enganchar("searchInput", "input", handleSearchInput);
 
   document.addEventListener("click", (event) => {
     const clearButton = event.target.closest("[data-clear-filters]");
@@ -616,18 +679,18 @@ function bindGlobalEvents() {
       removeActiveFilter(removeButton.dataset.removeFilter);
     }
   });
-  els.importJsonButton.addEventListener("click", () => els.scenarioFileInput.click());
-  els.scenarioFileInput.addEventListener("change", importScenario);
-  els.exportJsonButton.addEventListener("click", exportScenarioJson);
-  els.exportCsvButton.addEventListener("click", exportCsv);
-  els.exportPdfButton.addEventListener("click", exportPdfReport); // NUEVO: genera informe imprimible/PDF
-  els.resetButton.addEventListener("click", resetScenario);
-  els.createScenarioButton?.addEventListener("click", createSharedScenario);
-  els.copyScenarioLinkButton?.addEventListener("click", copyScenarioLink);
-  els.leaveScenarioButton?.addEventListener("click", salirDelEscenario);
-  els.editorNameButton?.addEventListener("click", pedirNombreEditor);
-  els.heatmapExpandToggle?.addEventListener("click", handleHeatmapExpandToggleAll);
-  els.loadNoticeClose?.addEventListener("click", ocultarAviso);
+  enganchar("importJsonButton", "click", () => els.scenarioFileInput?.click());
+  enganchar("scenarioFileInput", "change", importScenario);
+  enganchar("exportJsonButton", "click", exportScenarioJson);
+  enganchar("exportCsvButton", "click", exportCsv);
+  enganchar("exportPdfButton", "click", exportPdfReport);
+  enganchar("resetButton", "click", resetScenario);
+  enganchar("createScenarioButton", "click", createSharedScenario);
+  enganchar("copyScenarioLinkButton", "click", copyScenarioLink);
+  enganchar("leaveScenarioButton", "click", salirDelEscenario);
+  enganchar("editorNameButton", "click", pedirNombreEditor);
+  enganchar("heatmapExpandToggle", "click", handleHeatmapExpandToggleAll);
+  enganchar("loadNoticeClose", "click", ocultarAviso);
   setupMenuDeEscenario();
   setupVistas();
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
@@ -1020,6 +1083,28 @@ function setInitialLoading(isLoading) {
 }
 
 
+/**
+ * Lo que queda detras de un modal abierto.
+ *
+ * Los avisos y el chip de guardado se quedan fuera a proposito: son regiones
+ * live y tienen que poder anunciar un fallo de guardado aunque haya un modal
+ * delante. Los tres modales son hijos directos de <body>, asi que ninguno cae
+ * dentro de lo que se marca como inerte.
+ */
+const REGIONES_DE_FONDO = [".app-header", ".app-shell", ".back-to-top-button"];
+
+
+/**
+ * Deja el fondo inerte mientras hay un modal abierto.
+ *
+ * El foco ya estaba atrapado con atraparFoco(), pero eso solo frena al
+ * tabulador. Con un lector de pantalla, el cursor virtual seguia recorriendo las
+ * 152 subcapacidades de detras como si el modal no existiera, y desde ahi no hay
+ * forma de saber que hay un dialogo esperando una confirmacion.
+ *
+ * atraparFoco() se mantiene: inert no esta en navegadores antiguos y ahi sigue
+ * siendo lo unico que retiene el tabulador.
+ */
 function updateModalOpenState() {
   const hasOpenModal =
     !els.scoringCriteriaModal?.hidden ||
@@ -1027,10 +1112,18 @@ function updateModalOpenState() {
     !els.dialogModal?.hidden;
 
   document.body.classList.toggle("modal-open", hasOpenModal);
+
+  REGIONES_DE_FONDO.forEach((selector) => {
+    const region = document.querySelector(selector);
+
+    if (region) {
+      region.inert = hasOpenModal;
+    }
+  });
 }
 
 function setupScoringCriteriaModal() {
-  if (!els.scoringCriteriaModal) {
+  if (!els.scoringCriteriaModal || !els.assessmentList) {
     return;
   }
 
@@ -1149,12 +1242,16 @@ function pintarNivelesDeLaSubcapacidad(itemId) {
 function closeScoringCriteriaModal() {
   els.scoringCriteriaModal.hidden = true;
 
+  // Antes de devolver el foco, no despues: mientras el modal esta abierto el
+  // fondo queda inerte, y un elemento inerte no puede recibir el foco. Los
+  // otros dos modales ya lo hacian en este orden.
+  updateModalOpenState();
+
   if (scoringCriteriaTrigger?.isConnected) {
     scoringCriteriaTrigger.focus();
   }
 
   scoringCriteriaTrigger = null;
-  updateModalOpenState();
 }
 
 function activateScoringCriteriaTab(tabKey) {
@@ -1172,7 +1269,7 @@ function activateScoringCriteriaTab(tabKey) {
 
 
 function setupAiInitiativeModal() {
-  if (!els.aiInitiativeModal) {
+  if (!els.aiInitiativeModal || !els.roadmapTable) {
     return;
   }
 
@@ -2416,6 +2513,8 @@ function renderCapabilityTargets() {
     els.capabilityTargetsPanel.querySelector(".capability-targets-details")?.open,
   );
 
+  const foco = capturarFocoDeObjetivos();
+
   els.capabilityTargetsPanel.innerHTML = `
     <details class="capability-targets-details" ${estabaDesplegado ? "open" : ""}>
       <summary class="capability-targets-header">
@@ -2480,6 +2579,54 @@ function renderCapabilityTargets() {
       "click",
       resetCapabilityTargets,
     );
+
+  restaurarFocoDeObjetivos(foco);
+}
+
+
+/**
+ * Que selector de objetivo tiene el foco, para devolverselo tras repintar.
+ *
+ * Cambiar un objetivo llama a renderAll(), que reconstruye el panel entero: el
+ * <select> que acaba de cambiar desaparece del DOM y el foco cae al <body>. Con
+ * teclado eso obliga a volver a tabular desde el principio de la pagina despues
+ * de CADA ajuste, y el panel tiene quince selectores.
+ *
+ * Se captura y se restaura dentro del render y no en el manejador del cambio
+ * porque el panel tambien se repinta por otros caminos —una puntuacion, un
+ * cambio que llega de Firebase— y el foco se perdia igual en todos ellos.
+ *
+ * Es el mismo patron que ya usan las tarjetas de scoring en
+ * capturarFocoDeAssessment().
+ */
+function capturarFocoDeObjetivos() {
+  const activo = document.activeElement;
+
+  if (!activo || !els.capabilityTargetsPanel?.contains(activo)) {
+    return null;
+  }
+
+  if (!activo.classList.contains("capability-target-select")) {
+    return null;
+  }
+
+  return {
+    capacidad: activo.dataset.capability,
+    palanca: activo.dataset.lever,
+  };
+}
+
+
+function restaurarFocoDeObjetivos(foco) {
+  if (!foco?.capacidad || !foco?.palanca) {
+    return;
+  }
+
+  els.capabilityTargetsPanel
+    .querySelector(
+      `.capability-target-select[data-capability="${CSS.escape(foco.capacidad)}"][data-lever="${CSS.escape(foco.palanca)}"]`,
+    )
+    ?.focus();
 }
 
 function capabilityTargetControl(
@@ -4151,7 +4298,28 @@ function findMatchingScenarioItem(items, savedItem) {
   ));
 }
 
-function applyScenarioItemsToDomain(domainId, savedItems) {
+/**
+ * Vuelca las subcapacidades guardadas sobre las cargadas.
+ *
+ * `scoresAutoritativos` distingue dos cosas que no son lo mismo:
+ *
+ * - En un escenario de esta herramienta (el de Firebase, la copia local o un
+ *   JSON exportado) el bloque `scores` describe las tres palancas por completo.
+ *   Que falte una significa "sin puntuar", no "no se sabe": Firebase no guarda
+ *   nulos, asi que borrar una puntuacion borra su clave.
+ * - En un archivo de formato antiguo, con columnas planas y sueltas, lo que no
+ *   viene de verdad no se sabe, y no puede borrar lo que ya hay.
+ *
+ * Sin esa distincion, quitar una puntuacion no llegaba a nadie: la clave
+ * desaparecia de Firebase, aqui se leia como undefined y se saltaba. Quien
+ * tuviera la pagina abierta seguia viendo el valor viejo, y en la misma sesion
+ * dos personas veian cifras distintas.
+ */
+function applyScenarioItemsToDomain(
+  domainId,
+  savedItems,
+  { scoresAutoritativos = false } = {},
+) {
   const domain = state.domains[domainId];
 
   if (!domain || !Array.isArray(savedItems)) {
@@ -4172,20 +4340,20 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
 
     matched += 1;
 
-    const procesos = getSavedScore(savedItem, "procesos");
-    const tecnologia = getSavedScore(savedItem, "tecnologia");
-    const organizacion = getSavedScore(savedItem, "organizacion");
+    if (scoresAutoritativos) {
+      const guardados = savedItem.scores || {};
 
-    if (procesos !== undefined) {
-      item.scores.procesos = toScore(procesos);
-    }
+      LEVERS.forEach((lever) => {
+        item.scores[lever.key] = toScore(guardados[lever.key]);
+      });
+    } else {
+      LEVERS.forEach((lever) => {
+        const guardado = getSavedScore(savedItem, lever.key);
 
-    if (tecnologia !== undefined) {
-      item.scores.tecnologia = toScore(tecnologia);
-    }
-
-    if (organizacion !== undefined) {
-      item.scores.organizacion = toScore(organizacion);
+        if (guardado !== undefined) {
+          item.scores[lever.key] = toScore(guardado);
+        }
+      });
     }
 
     const owner = getSavedField(savedItem, ["owner", "Owner"]);
@@ -4262,6 +4430,7 @@ function applyScenarioPayload(payload, { seguirDominioDelEscenario = false } = {
       const result = applyScenarioItemsToDomain(
         domainId,
         getScenarioItemsFromPayload(payload, domainId),
+        { scoresAutoritativos: true },
       );
 
       const defaultTarget = normalizeTargetValue(
@@ -4279,9 +4448,15 @@ function applyScenarioPayload(payload, { seguirDominioDelEscenario = false } = {
       resultado.total += result.total;
       resultado.dominios += 1;
 
-      console.log(
-        `Escenario aplicado en ${domainId}: ${result.matched}/${result.total}`,
-      );
+      // Solo se dice algo cuando hay algo que decir: que una subcapacidad del
+      // archivo no case con ninguna de las cargadas es justo lo que hay que
+      // poder ver en la consola durante una sesion.
+      if (result.matched < result.total) {
+        console.warn(
+          `Escenario aplicado en ${domainId}: solo ${result.matched} de ${result.total} ` +
+            "subcapacidades del archivo corresponden a este dominio.",
+        );
+      }
     });
 
     // Se vuelve a fijar el dominio activo en cualquier caso: aplicar el
@@ -4323,9 +4498,12 @@ function applyScenarioPayload(payload, { seguirDominioDelEscenario = false } = {
   resultado.total = result.total;
   resultado.dominios = 1;
 
-  console.log(
-    `Escenario antiguo aplicado en FP&A: ${result.matched}/${result.total}`,
-  );
+  if (result.matched < result.total) {
+    console.warn(
+      `Escenario antiguo aplicado en FP&A: solo ${result.matched} de ${result.total} ` +
+        "subcapacidades del archivo corresponden a este dominio.",
+    );
+  }
 
   if (state.activeDomainId === "fpa") {
     setActiveDomain("fpa");
@@ -4661,6 +4839,11 @@ function conElDashboardVisible(accion) {
 }
 
 
+// Cuantas filas caben en el informe sin que deje de ser legible.
+const PDF_MAX_PRIORIDADES = 10;
+const PDF_MAX_ROADMAP = 15;
+
+
 function buildEnhancedPdfReportData() {
   const visibleItems = getVisibleItems();
   const metrics = visibleItems.map((item) => ({ item, metrics: calculate(item) }));
@@ -4668,7 +4851,10 @@ function buildEnhancedPdfReportData() {
 
   const summaryRows = buildPdfSummaryRowsFromItems(visibleItems);
 
-  const topPriorities = [...metrics]
+  // El informe es ejecutivo: una tabla de 152 filas no se lee. Pero la poda
+  // tiene que verse, porque el titulo decia "Roadmap e iniciativas sugeridas" y
+  // parecia el roadmap entero.
+  const evaluadasOrdenadas = [...metrics]
     .filter((entry) => !entry.metrics.isPending)
     .sort((a, b) => {
       const priorityDiff = PRIORITY_ORDER[a.metrics.prioridad] - PRIORITY_ORDER[b.metrics.prioridad];
@@ -4678,10 +4864,11 @@ function buildEnhancedPdfReportData() {
       }
 
       return (b.metrics.gap || 0) - (a.metrics.gap || 0);
-    })
-    .slice(0, 10);
+    });
 
-  const roadmapItems = [...metrics]
+  const topPriorities = evaluadasOrdenadas.slice(0, PDF_MAX_PRIORIDADES);
+
+  const roadmapOrdenado = [...metrics]
     .sort((a, b) => {
       const priorityDiff = PRIORITY_ORDER[a.metrics.prioridad] - PRIORITY_ORDER[b.metrics.prioridad];
 
@@ -4690,8 +4877,9 @@ function buildEnhancedPdfReportData() {
       }
 
       return (b.metrics.gap || 0) - (a.metrics.gap || 0);
-    })
-    .slice(0, 15);
+    });
+
+  const roadmapItems = roadmapOrdenado.slice(0, PDF_MAX_ROADMAP);
 
   const commentItems = visibleItems.filter((item) => item.comentario?.trim());
   const activeDomain = getActiveDomainConfig();
@@ -4711,7 +4899,9 @@ function buildEnhancedPdfReportData() {
     scored,
     summaryRows,
     topPriorities,
+    topPrioritiesTotal: evaluadasOrdenadas.length,
     roadmapItems,
+    roadmapTotal: roadmapOrdenado.length,
     commentItems,
     scoreGlobal: average(scored.map((entry) => entry.metrics.scoreMedio)),
     gapMedio: average(scored.map((entry) => entry.metrics.gap)),
@@ -4845,9 +5035,27 @@ function toCsv(rows) {
   return CSV_BOM + csvRows.join("\r\n");
 }
 
+// Excel y LibreOffice tratan como formula cualquier celda que empiece por =, +,
+// - o @. En los campos de texto libre —comentarios, responsable— eso da dos
+// problemas a la vez:
+//
+// - Seguridad: una celda como =HYPERLINK(...) o una llamada DDE se evalua al
+//   abrir el archivo, y estos CSV se abren en el equipo del consultor y se
+//   envian al cliente. En un escenario compartido, cualquiera con el enlace
+//   puede dejar ese comentario.
+// - Presentacion: un comentario que empieza por un guion —"- Falta gobierno"—
+//   se ensena hoy como #NAME? en vez de como el texto que se escribio.
+//
+// El apostrofo delante es la mitigacion habitual: marca la celda como texto y
+// la hoja de calculo no lo muestra. Ningun campo numerico de la exportacion
+// empieza por esos caracteres, asi que no les afecta.
+const INICIO_DE_FORMULA = /^[=+\-@\t\r]/;
+
 function csvEscape(value) {
   const text = String(value ?? "");
-  return /[",\r\n;]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  const seguro = INICIO_DE_FORMULA.test(text) ? `'${text}` : text;
+
+  return /[",\r\n;]/.test(seguro) ? `"${seguro.replace(/"/g, '""')}"` : seguro;
 }
 
 
