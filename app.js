@@ -5051,11 +5051,34 @@ function toCsv(rows) {
 // empieza por esos caracteres, asi que no les afecta.
 const INICIO_DE_FORMULA = /^[=+\-@\t\r]/;
 
+// Los numeros, con coma decimal y sin separador de miles.
+//
+// El resto del archivo esta hecho a proposito para Excel en espanol —el punto y
+// coma y la marca de orden de bytes estan aqui por eso—, pero los numeros salian
+// con punto: "3.17". Excel en espanol no lo lee como el numero 3,17, asi que las
+// columnas de score, objetivo y gap llegaban como TEXTO. Quien recibia el CSV no
+// podia sumarlas, ni ordenarlas, ni llevarlas a una tabla dinamica.
+//
+// Sin separador de miles a proposito: un punto de millar volveria a romper la
+// lectura. Con scores del 1 al 5 no se llega ahi, pero no depende de eso.
+const FORMATO_DE_NUMERO_CSV = new Intl.NumberFormat("es-ES", {
+  maximumFractionDigits: 2,
+  useGrouping: false,
+});
+
 function csvEscape(value) {
+  // Un numero se escribe como numero. Y no pasa por la proteccion de formulas,
+  // que es para el texto que escribe la gente: un numero no puede ser una.
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return FORMATO_DE_NUMERO_CSV.format(value);
+  }
+
   const text = String(value ?? "");
   const seguro = INICIO_DE_FORMULA.test(text) ? `'${text}` : text;
 
-  return /[",\r\n;]/.test(seguro) ? `"${seguro.replace(/"/g, '""')}"` : seguro;
+  // La coma ya no obliga a entrecomillar: el separador es el punto y coma, y
+  // entrecomillar "3,17" hacia que Excel volviera a tratarlo como texto.
+  return /["\r\n;]/.test(seguro) ? `"${seguro.replace(/"/g, '""')}"` : seguro;
 }
 
 
