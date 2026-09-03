@@ -4683,6 +4683,11 @@ function conElDashboardVisible(accion) {
 }
 
 
+// Cuantas filas caben en el informe sin que deje de ser legible.
+const PDF_MAX_PRIORIDADES = 10;
+const PDF_MAX_ROADMAP = 15;
+
+
 function buildEnhancedPdfReportData() {
   const visibleItems = getVisibleItems();
   const metrics = visibleItems.map((item) => ({ item, metrics: calculate(item) }));
@@ -4690,7 +4695,10 @@ function buildEnhancedPdfReportData() {
 
   const summaryRows = buildPdfSummaryRowsFromItems(visibleItems);
 
-  const topPriorities = [...metrics]
+  // El informe es ejecutivo: una tabla de 152 filas no se lee. Pero la poda
+  // tiene que verse, porque el titulo decia "Roadmap e iniciativas sugeridas" y
+  // parecia el roadmap entero.
+  const evaluadasOrdenadas = [...metrics]
     .filter((entry) => !entry.metrics.isPending)
     .sort((a, b) => {
       const priorityDiff = PRIORITY_ORDER[a.metrics.prioridad] - PRIORITY_ORDER[b.metrics.prioridad];
@@ -4700,10 +4708,11 @@ function buildEnhancedPdfReportData() {
       }
 
       return (b.metrics.gap || 0) - (a.metrics.gap || 0);
-    })
-    .slice(0, 10);
+    });
 
-  const roadmapItems = [...metrics]
+  const topPriorities = evaluadasOrdenadas.slice(0, PDF_MAX_PRIORIDADES);
+
+  const roadmapOrdenado = [...metrics]
     .sort((a, b) => {
       const priorityDiff = PRIORITY_ORDER[a.metrics.prioridad] - PRIORITY_ORDER[b.metrics.prioridad];
 
@@ -4712,8 +4721,9 @@ function buildEnhancedPdfReportData() {
       }
 
       return (b.metrics.gap || 0) - (a.metrics.gap || 0);
-    })
-    .slice(0, 15);
+    });
+
+  const roadmapItems = roadmapOrdenado.slice(0, PDF_MAX_ROADMAP);
 
   const commentItems = visibleItems.filter((item) => item.comentario?.trim());
   const activeDomain = getActiveDomainConfig();
@@ -4733,7 +4743,9 @@ function buildEnhancedPdfReportData() {
     scored,
     summaryRows,
     topPriorities,
+    topPrioritiesTotal: evaluadasOrdenadas.length,
     roadmapItems,
+    roadmapTotal: roadmapOrdenado.length,
     commentItems,
     scoreGlobal: average(scored.map((entry) => entry.metrics.scoreMedio)),
     gapMedio: average(scored.map((entry) => entry.metrics.gap)),

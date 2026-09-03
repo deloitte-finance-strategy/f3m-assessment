@@ -363,6 +363,22 @@ function pdfHeatClass(value) {
   return "heat-5";
 }
 
+/**
+ * Cuantas filas se ensenan de cuantas hay.
+ *
+ * Las dos tablas siguientes estan podadas para que el informe siga siendo
+ * legible, pero sus titulos no lo decian: quien recibia el PDF creia estar
+ * viendo el roadmap completo y le salian otras cuentas que en pantalla.
+ */
+function buildPdfRecuento(mostradas, total, singular, plural) {
+  if (total <= mostradas) {
+    return `${total} ${total === 1 ? singular : plural}.`;
+  }
+
+  return `Las ${mostradas} primeras de ${total} ${plural}, ordenadas por prioridad y gap.`;
+}
+
+
 function buildPdfEnhancedPrioritiesSection(data) {
   const rows = data.topPriorities
     .map(({ item, metrics }) => `
@@ -380,6 +396,16 @@ function buildPdfEnhancedPrioritiesSection(data) {
   return `
     <section class="pdf-page">
       <h2>6. Principales prioridades y gaps</h2>
+      <p class="pdf-intro">
+        ${escapeHtml(
+          buildPdfRecuento(
+            data.topPriorities.length,
+            data.topPrioritiesTotal,
+            "subcapacidad puntuada",
+            "subcapacidades puntuadas",
+          ),
+        )}
+      </p>
       <table class="pdf-table">
         <thead>
           <tr>
@@ -419,6 +445,14 @@ function buildPdfEnhancedRoadmapSection(data) {
       <h2>7. Roadmap e iniciativas sugeridas</h2>
       <p class="pdf-intro">
         Roadmap filtrado según la vista actual de la herramienta, priorizado por gap y criticidad.
+        ${escapeHtml(
+          buildPdfRecuento(
+            data.roadmapItems.length,
+            data.roadmapTotal,
+            "subcapacidad",
+            "subcapacidades",
+          ),
+        )}
       </p>
       <table class="pdf-table pdf-roadmap">
         <thead>
