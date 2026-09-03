@@ -790,6 +790,20 @@ function sanitizeScenarioForFirebase(payload) {
 
 
 
+/**
+ * Objetivos de una capacidad, devolviendo SIEMPRE la misma referencia mientras
+ * los tres valores no cambien.
+ *
+ * Los valores se recalculan en cada llamada, asi que la funcion sigue siendo
+ * exacta: la cache solo decide si reutiliza el objeto anterior o crea uno
+ * nuevo. Eso permite que calculate() compare objetivos por referencia, sin
+ * construir una firma de texto en cada una de sus llamadas.
+ *
+ * Nadie muta el objeto devuelto: las escrituras van a state.domains[..].targets,
+ * que es el origen, no el resultado.
+ */
+const cacheDeObjetivos = new Map();
+
 function getCapabilityTargets(capability) {
   const defaultTarget = normalizeTargetValue(
     state.meta?.targetMaturity,
@@ -803,28 +817,36 @@ function getCapabilityTargets(capability) {
     activeDomainTargets?.[capability] ||
     state.targets?.[capability];
 
-  if (!capabilityTargets) {
-    return {
-      procesos: defaultTarget,
-      tecnologia: defaultTarget,
-      organizacion: defaultTarget,
-    };
+  const procesos = normalizeTargetValue(
+    capabilityTargets?.procesos,
+    defaultTarget,
+  );
+
+  const tecnologia = normalizeTargetValue(
+    capabilityTargets?.tecnologia,
+    defaultTarget,
+  );
+
+  const organizacion = normalizeTargetValue(
+    capabilityTargets?.organizacion,
+    defaultTarget,
+  );
+
+  const guardados = cacheDeObjetivos.get(capability);
+
+  if (
+    guardados &&
+    guardados.procesos === procesos &&
+    guardados.tecnologia === tecnologia &&
+    guardados.organizacion === organizacion
+  ) {
+    return guardados;
   }
 
-  return {
-    procesos: normalizeTargetValue(
-      capabilityTargets.procesos,
-      defaultTarget,
-    ),
-    tecnologia: normalizeTargetValue(
-      capabilityTargets.tecnologia,
-      defaultTarget,
-    ),
-    organizacion: normalizeTargetValue(
-      capabilityTargets.organizacion,
-      defaultTarget,
-    ),
-  };
+  const objetivos = { procesos, tecnologia, organizacion };
+  cacheDeObjetivos.set(capability, objetivos);
+
+  return objetivos;
 }
 
 
@@ -853,11 +875,52 @@ function toScore(value) {
 
 
 
+/**
+ * Metricas de una subcapacidad.
+ *
+ * El resultado depende solo de los tres scores del item y de los tres
+ * objetivos de su capacidad, asi que se guarda hasta que alguno de esos seis
+ * valores cambia. No hay que invalidar la cache a mano en ningun sitio: si un
+ * score o un objetivo cambia, la comparacion falla y se recalcula.
+ *
+ * Antes se llamaba ocho veces por item y render —una por vista, mas las de
+ * getVisibleItems— repitiendo exactamente el mismo trabajo.
+ */
+const cacheDeCalculo = new WeakMap();
+
 function calculate(item) {
   const capabilityTargets = getCapabilityTargets(
     item.capacidad,
   );
 
+  const guardado = cacheDeCalculo.get(item);
+
+  if (
+    guardado &&
+    guardado.objetivos === capabilityTargets &&
+    guardado.procesos === item.scores.procesos &&
+    guardado.tecnologia === item.scores.tecnologia &&
+    guardado.organizacion === item.scores.organizacion
+  ) {
+    return guardado.metricas;
+  }
+
+  const metricas = calcularMetricas(item, capabilityTargets);
+
+  cacheDeCalculo.set(item, {
+    objetivos: capabilityTargets,
+    procesos: item.scores.procesos,
+    tecnologia: item.scores.tecnologia,
+    organizacion: item.scores.organizacion,
+    metricas,
+  });
+
+  return metricas;
+}
+
+
+/** El calculo en si, sin cache: las reglas F3M y nada mas. */
+function calcularMetricas(item, capabilityTargets) {
   const scoredLevers = LEVERS
     .map((lever) => {
       const score = item.scores[lever.key];
@@ -1834,28 +1897,58 @@ function getScopeSummary() {
 }
 
 
+/**
+ * El texto sobre el que busca el buscador, armado una sola vez por
+ * subcapacidad.
+ *
+ * Sale de campos que vienen del JSON y no se editan nunca, asi que basta con
+ * guardarlo. Antes se recomponia —ocho campos, un toList por preguntas, un join
+ * y un toLowerCase— para cada item y en cada una de las llamadas a
+ * getVisibleItems, incluso cuando el buscador estaba vacio.
+ */
+const cacheDeTextoBuscable = new WeakMap();
+
+function getTextoBuscable(item) {
+  const guardado = cacheDeTextoBuscable.get(item);
+
+  if (guardado !== undefined) {
+    return guardado;
+  }
+
+  const texto = [
+    item.capacidad,
+    item.subcapacidad,
+    getItemObjective(item),
+    getItemQuestions(item).join(" "),
+    getItemEvidenceText(item),
+    item.iniciativaSugerida,
+    item.ai?.cases,
+    item.ai?.advanced,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  cacheDeTextoBuscable.set(item, texto);
+
+  return texto;
+}
+
+
 function getVisibleItems() {
   const capacity = els.capacityFilter.value;
   const priority = els.priorityFilter.value;
   const query = els.searchInput.value.trim().toLowerCase();
 
   return state.items.filter((item) => {
-    const metrics = calculate(item);
-    const matchesCapacity = capacity === "all" || item.capacidad === capacity;
-    const matchesPriority = priority === "all" || metrics.prioridad === priority;
-    const haystack = [
-      item.capacidad,
-      item.subcapacidad,
-      getItemObjective(item),
-      getItemQuestions(item).join(" "),
-      getItemEvidenceText(item),
-      item.iniciativaSugerida,
-      item.ai?.cases,
-      item.ai?.advanced,
-    ]
-      .join(" ")
-      .toLowerCase();
-    return matchesCapacity && matchesPriority && (!query || haystack.includes(query));
+    if (capacity !== "all" && item.capacidad !== capacity) {
+      return false;
+    }
+
+    if (priority !== "all" && calculate(item).prioridad !== priority) {
+      return false;
+    }
+
+    return !query || getTextoBuscable(item).includes(query);
   });
 }
 
