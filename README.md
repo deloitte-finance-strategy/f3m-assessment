@@ -99,9 +99,10 @@ escenario.
 
 ## Uso online
 
-La herramienta está publicada en:
+La herramienta está publicada con GitHub Pages, desde la rama `main` de este mismo repositorio.
+Cada vez que se fusiona algo en `main`, la URL se actualiza sola:
 
-https://danielnavarrodelgado.github.io/fpa-assessment-mvp/
+https://deloitte-finance-strategy.github.io/f3m-assessment/
 
 ### Escenarios compartidos
 
@@ -109,7 +110,7 @@ Para crear uno, usa **Escenario → "Crear escenario compartido"** en la cabecer
 identificador aleatorio de 128 bits y te lleva a la URL correspondiente:
 
 ```text
-https://danielnavarrodelgado.github.io/fpa-assessment-mvp/?scenario=<id-generado>
+https://deloitte-finance-strategy.github.io/f3m-assessment/?scenario=<id-generado>
 ```
 
 > **El enlace es la credencial.** Cualquier persona que lo tenga puede ver y editar el escenario,
