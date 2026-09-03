@@ -4,9 +4,26 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>F3M Assessment</title>
+
+    <!--
+      El icono va en linea y no como archivo: son tres barras ascendentes sobre
+      el azul de marca, y asi no hay ni peticion extra ni un .ico que mantener.
+      Sin el, la pestana salia con el icono gris por defecto y la herramienta no
+      se distinguia del resto cuando se comparte pantalla en una sesion.
+    -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23012169'/%3E%3Crect x='7' y='19' width='5' height='7' rx='1.5' fill='%2386BC25'/%3E%3Crect x='13.5' y='14' width='5' height='12' rx='1.5' fill='%2386BC25'/%3E%3Crect x='20' y='8' width='5' height='18' rx='1.5' fill='%2386BC25'/%3E%3C/svg%3E">
+
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <!--
+      Con teclado habia que pasar 35 controles —exportar, el menu, los nueve
+      dominios, las cuatro pestanas y los filtros— antes de llegar a la primera
+      puntuacion. Este enlace es el primer elemento enfocable de la pagina y
+      solo se ve cuando recibe el foco: para quien usa raton no existe.
+    -->
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
     <header class="app-header">
       <div class="header-inner">
         <div>
@@ -28,7 +45,6 @@
               class="header-menu-button"
               id="scenarioMenuButton"
               type="button"
-              aria-haspopup="true"
               aria-expanded="false"
               aria-controls="scenarioMenu"
             >
@@ -36,44 +52,44 @@
               <span class="header-menu-caret" aria-hidden="true"></span>
             </button>
 
-            <div class="header-menu-panel" id="scenarioMenu" role="menu" hidden>
+            <div class="header-menu-panel" id="scenarioMenu" hidden>
               <p class="header-menu-title" id="scenarioMenuState">Copia de este navegador</p>
 
-              <button class="header-menu-item" id="createScenarioButton" type="button" role="menuitem">
+              <button class="header-menu-item" id="createScenarioButton" type="button">
                 Crear escenario compartido
                 <span>Genera un enlace para trabajar en equipo</span>
               </button>
 
-              <button class="header-menu-item" id="copyScenarioLinkButton" type="button" role="menuitem" hidden>
+              <button class="header-menu-item" id="copyScenarioLinkButton" type="button" hidden>
                 Copiar enlace
                 <span>Trátalo como una credencial</span>
               </button>
 
-              <button class="header-menu-item" id="editorNameButton" type="button" role="menuitem" hidden>
+              <button class="header-menu-item" id="editorNameButton" type="button" hidden>
                 Poner mi nombre
                 <span>Así se atribuyen tus cambios</span>
               </button>
 
-              <button class="header-menu-item" id="leaveScenarioButton" type="button" role="menuitem" hidden>
+              <button class="header-menu-item" id="leaveScenarioButton" type="button" hidden>
                 Salir del escenario
                 <span>Vuelve a la copia de este navegador</span>
               </button>
 
               <hr class="header-menu-separator">
 
-              <button class="header-menu-item" id="exportJsonButton" type="button" role="menuitem">
+              <button class="header-menu-item" id="exportJsonButton" type="button">
                 Guardar una copia
                 <span>Descarga el trabajo en un archivo</span>
               </button>
 
-              <button class="header-menu-item" id="importJsonButton" type="button" role="menuitem">
+              <button class="header-menu-item" id="importJsonButton" type="button">
                 Abrir una copia
                 <span>Sustituye los datos por los del archivo</span>
               </button>
 
               <hr class="header-menu-separator">
 
-              <button class="header-menu-item header-menu-item-danger" id="resetButton" type="button" role="menuitem">
+              <button class="header-menu-item header-menu-item-danger" id="resetButton" type="button">
                 Restaurar base
                 <span>Borra el trabajo de este navegador</span>
               </button>
@@ -90,7 +106,7 @@
       </div>
     </header>
 
-    <main class="app-shell">
+    <main class="app-shell" id="contenido" tabindex="-1">
 
 
 <section class="domain-switcher" aria-label="Navegación de dominios F3M">

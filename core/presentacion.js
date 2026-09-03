@@ -65,11 +65,29 @@ export function escapeAttr(value) {
 }
 
 
-/** Un numero para leer: sin decimales si es entero, "-" si no hay valor. */
+/**
+ * Un numero para leer, en espanol: coma decimal, sin decimales si es entero y
+ * "-" cuando no hay valor.
+ *
+ * La aplicacion esta en espanol y se ensena a clientes espanoles, pero escribia
+ * "3.17" donde se escribe "3,17". Salia asi en los KPIs, la tabla resumen, el
+ * heatmap, el roadmap y el PDF que se entrega.
+ *
+ * De paso desaparece un apano fragil. Antes era toFixed(2) y dos replace: uno
+ * para quitar el cero final de "3.10" y otro para el ".0" de "4.00". Funcionaba,
+ * pero por como estaban escritas las expresiones, no porque el redondeo lo
+ * garantizara. Intl.NumberFormat hace lo mismo sin trucos: recorta a dos
+ * decimales, no deja ceros de relleno y pone la coma.
+ *
+ * El formateador se crea una sola vez: construirlo es caro y esto se llama
+ * cientos de veces por repintado.
+ */
+const FORMATO_DE_NUMERO = new Intl.NumberFormat("es-ES", {
+  maximumFractionDigits: 2,
+});
+
 export function formatNumber(value) {
   if (!Number.isFinite(value)) return "-";
 
-  return Number.isInteger(value)
-    ? String(value)
-    : value.toFixed(2).replace(/0$/, "").replace(/\.0$/, "");
+  return FORMATO_DE_NUMERO.format(value);
 }

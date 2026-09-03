@@ -396,13 +396,13 @@ async function switchDomain(domainId) {
 
   if (domainSwitcher) {
     domainSwitcher.scrollIntoView({
-      behavior: "smooth",
+      behavior: comportamientoDeDesplazamiento(),
       block: "start",
     });
   } else {
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+      behavior: comportamientoDeDesplazamiento(),
     });
   }
 }
@@ -1009,6 +1009,20 @@ let vistaActiva = "dashboard";
  * (#roadmap) se sigue respetando, y sin JavaScript las cuatro quedan visibles,
  * que es el comportamiento anterior.
  */
+/**
+ * Como desplazarse: suave, salvo que el sistema pida lo contrario.
+ *
+ * El CSS ya anula las transiciones con prefers-reduced-motion, pero un
+ * scrollTo({ behavior: "smooth" }) escrito en JavaScript no lo mira: hay que
+ * preguntarlo aqui.
+ */
+function comportamientoDeDesplazamiento() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "auto"
+    : "smooth";
+}
+
+
 function setupVistas() {
   const enlaces = [...document.querySelectorAll(".tabs a")];
 
@@ -1025,6 +1039,16 @@ function setupVistas() {
 
   // Alguien puede llegar con un enlace directo, o usar atras y adelante.
   window.addEventListener("hashchange", () => {
+    const ancla = window.location.hash.slice(1);
+
+    // Un ancla que no es una vista —el enlace de saltar al contenido— no debe
+    // cambiar de pestana. vistaDesdeLaUrl() devuelve "dashboard" tanto para un
+    // hash vacio como para uno desconocido, asi que sin esto pulsar "Saltar al
+    // contenido" desde el Roadmap te llevaba al Dashboard.
+    if (ancla && !VISTAS.includes(ancla)) {
+      return;
+    }
+
     mostrarVista(vistaDesdeLaUrl(), { actualizarUrl: false });
   });
 
@@ -1091,7 +1115,12 @@ function setInitialLoading(isLoading) {
  * delante. Los tres modales son hijos directos de <body>, asi que ninguno cae
  * dentro de lo que se marca como inerte.
  */
-const REGIONES_DE_FONDO = [".app-header", ".app-shell", ".back-to-top-button"];
+const REGIONES_DE_FONDO = [
+  ".app-header",
+  ".app-shell",
+  ".back-to-top-button",
+  ".skip-link",
+];
 
 
 /**
@@ -1410,7 +1439,7 @@ function setupBackToTopButton() {
 
     if (domainSwitcher) {
       domainSwitcher.scrollIntoView({
-        behavior: "smooth",
+        behavior: comportamientoDeDesplazamiento(),
         block: "start",
       });
       return;
@@ -1418,7 +1447,7 @@ function setupBackToTopButton() {
 
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+      behavior: comportamientoDeDesplazamiento(),
     });
   });
 
@@ -1942,6 +1971,20 @@ function renderTitularesEjecutivos(items, metrics) {
 
   const evaluadas = metrics.filter((entrada) => !entrada.metrics.isPending);
 
+  // "No hay nada puntuado" y "los filtros no dejan ver nada" son dos cosas
+  // distintas, y decir la primera cuando pasa la segunda es afirmar algo falso
+  // delante del cliente: el trabajo esta hecho, solo que fuera del filtro.
+  //
+  // renderAll() ya sale antes si el dominio no tiene subcapacidades, asi que
+  // aqui una lista vacia solo puede venir de un filtro.
+  if (!items.length) {
+    els.dashboardHeadline.hidden = false;
+    els.dashboardHeadline.textContent =
+      `Ninguna de las ${state.items.length} subcapacidades de este dominio pasa los filtros activos. `
+        + "Quita alguno para volver a ver el resumen.";
+    return;
+  }
+
   if (!evaluadas.length) {
     els.dashboardHeadline.hidden = false;
     els.dashboardHeadline.textContent =
@@ -2104,22 +2147,30 @@ function renderSummaryTable() {
   );
 
   els.summaryTable.innerHTML = `
+    <caption class="solo-lectores">Resumen por capacidad: medias por palanca, score medio, objetivo, gap y prioridad.</caption>
+
     <thead>
       <tr>
-        <th>Capacidad</th>
-        <th class="number">Procesos</th>
-        <th class="number">Tecnología</th>
-        <th class="number">Organización</th>
-        <th class="number">Score medio</th>
-        <th class="number">Objetivo medio</th>
-        <th class="number">Gap vs objetivo</th>
-        <th>Prioridad</th>
-        <th class="number">Avance</th>
+        <th scope="col">Capacidad</th>
+        <th scope="col" class="number">Procesos</th>
+        <th scope="col" class="number">Tecnología</th>
+        <th scope="col" class="number">Organización</th>
+        <th scope="col" class="number">Score medio</th>
+        <th scope="col" class="number">Objetivo medio</th>
+        <th scope="col" class="number">Gap vs objetivo</th>
+        <th scope="col">Prioridad</th>
+        <th scope="col" class="number">Avance</th>
       </tr>
     </thead>
 
     <tbody>
-      ${rows.join("")}
+      ${rows.join("") || `
+        <tr>
+          <td colspan="9" class="table-empty-cell">
+            ${buildFilteredEmptyState()}
+          </td>
+        </tr>
+      `}
     </tbody>
   `;
 }
@@ -3091,16 +3142,18 @@ function renderHeatmap() {
     .join("");
 
   els.heatmapTable.innerHTML = `
+    <caption class="solo-lectores">Heatmap de madurez por capacidad, desplegable a subcapacidad.</caption>
+
     <thead>
       <tr>
-        <th>Capacidad</th>
-        <th>Subcapacidades</th>
-        <th class="number">Procesos</th>
-        <th class="number">Tecnología</th>
-        <th class="number">Organización</th>
-        <th class="number">Score medio</th>
-        <th class="number">Gap vs objetivo</th>
-        <th>Prioridad</th>
+        <th scope="col">Capacidad</th>
+        <th scope="col">Subcapacidades</th>
+        <th scope="col" class="number">Procesos</th>
+        <th scope="col" class="number">Tecnología</th>
+        <th scope="col" class="number">Organización</th>
+        <th scope="col" class="number">Score medio</th>
+        <th scope="col" class="number">Gap vs objetivo</th>
+        <th scope="col">Prioridad</th>
       </tr>
     </thead>
     <tbody>
@@ -3280,19 +3333,21 @@ function renderRoadmap() {
     .join("");
 
   els.roadmapTable.innerHTML = `
+    <caption class="solo-lectores">Roadmap de iniciativas, ordenado por prioridad y gap, con responsable, estado y comentarios.</caption>
+
     <thead>
       <tr>
-        <th>Capacidad</th>
-        <th>Subcapacidad</th>
-        <th class="number">Gap</th>
-        <th>Prioridad</th>
-        <th>Iniciativa sugerida</th>
-        <th>IA</th>
-        <th>Oleada</th>
-        <th>Responsable</th>
-        <th>Estado</th>
-        <th>Comentarios</th>
-        <th>Último cambio</th>
+        <th scope="col">Capacidad</th>
+        <th scope="col">Subcapacidad</th>
+        <th scope="col" class="number">Gap</th>
+        <th scope="col">Prioridad</th>
+        <th scope="col">Iniciativa sugerida</th>
+        <th scope="col">IA</th>
+        <th scope="col">Oleada</th>
+        <th scope="col">Responsable</th>
+        <th scope="col">Estado</th>
+        <th scope="col">Comentarios</th>
+        <th scope="col">Último cambio</th>
       </tr>
     </thead>
     <tbody>
@@ -5051,11 +5106,34 @@ function toCsv(rows) {
 // empieza por esos caracteres, asi que no les afecta.
 const INICIO_DE_FORMULA = /^[=+\-@\t\r]/;
 
+// Los numeros, con coma decimal y sin separador de miles.
+//
+// El resto del archivo esta hecho a proposito para Excel en espanol —el punto y
+// coma y la marca de orden de bytes estan aqui por eso—, pero los numeros salian
+// con punto: "3.17". Excel en espanol no lo lee como el numero 3,17, asi que las
+// columnas de score, objetivo y gap llegaban como TEXTO. Quien recibia el CSV no
+// podia sumarlas, ni ordenarlas, ni llevarlas a una tabla dinamica.
+//
+// Sin separador de miles a proposito: un punto de millar volveria a romper la
+// lectura. Con scores del 1 al 5 no se llega ahi, pero no depende de eso.
+const FORMATO_DE_NUMERO_CSV = new Intl.NumberFormat("es-ES", {
+  maximumFractionDigits: 2,
+  useGrouping: false,
+});
+
 function csvEscape(value) {
+  // Un numero se escribe como numero. Y no pasa por la proteccion de formulas,
+  // que es para el texto que escribe la gente: un numero no puede ser una.
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return FORMATO_DE_NUMERO_CSV.format(value);
+  }
+
   const text = String(value ?? "");
   const seguro = INICIO_DE_FORMULA.test(text) ? `'${text}` : text;
 
-  return /[",\r\n;]/.test(seguro) ? `"${seguro.replace(/"/g, '""')}"` : seguro;
+  // La coma ya no obliga a entrecomillar: el separador es el punto y coma, y
+  // entrecomillar "3,17" hacia que Excel volviera a tratarlo como texto.
+  return /["\r\n;]/.test(seguro) ? `"${seguro.replace(/"/g, '""')}"` : seguro;
 }
 
 
