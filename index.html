@@ -597,7 +597,19 @@
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
-    <script type="module" src="app.js"></script>
+    <!--
+      El ?v= no es decoracion: index.html y app.js dejaron de ser
+      independientes cuando los botones de dominio pasaron a pintarse desde
+      data/domains.json. Con el HTML nuevo y un app.js viejo en cache, el
+      conmutador de dominios se queda vacio.
+
+      GitHub Pages sirve cada archivo con su propia cache, asi que durante unos
+      minutos tras desplegar puede darse justo esa mezcla. Con la version en la
+      URL, cada index.html pide su app.js y nunca uno anterior.
+
+      AL DESPLEGAR UN CAMBIO EN EL JAVASCRIPT, SUBIR ESTE NUMERO.
+    -->
+    <script type="module" src="app.js?v=4"></script>
   </body>
 </html>
 
