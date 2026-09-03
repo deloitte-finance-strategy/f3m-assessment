@@ -13,6 +13,7 @@ import { average } from "../core/calculo.js";
 
 import {
   COLOR_DE_MARCA,
+  COLOR_DE_MARCA_LEGIBLE,
   COLOR_DE_PALANCA,
   escapeAttr,
   escapeHtml,
@@ -525,7 +526,7 @@ function getEnhancedPdfReportStyles() {
 
     .pdf-eyebrow {
       margin: 0 0 10px;
-      color: ${COLOR_DE_MARCA};
+      color: ${COLOR_DE_MARCA_LEGIBLE};
       font-size: 10.5pt;
       font-weight: 900;
       letter-spacing: 0.08em;
@@ -721,7 +722,7 @@ function getEnhancedPdfReportStyles() {
 
     .heat-blank {
       background: #eef0ed;
-      color: #737a74;
+      color: #4f5952;
     }
 
     .heat-1 {

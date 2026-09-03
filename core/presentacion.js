@@ -27,6 +27,16 @@ export const COLOR_DE_PALANCA = {
 export const COLOR_DE_MARCA = "#86BC25";
 
 
+/**
+ * El verde de marca para texto pequeno sobre fondo claro.
+ *
+ * #86BC25 sobre blanco da 2,27:1, muy por debajo del 4,5:1 que pide WCAG AA. En
+ * el informe eso afectaba al antetitulo de la portada, que es lo primero que lee
+ * el cliente. Este da 6,02:1 y es el mismo verde oscuro que usa la aplicacion.
+ */
+export const COLOR_DE_MARCA_LEGIBLE = "#3E6F11";
+
+
 export const COLOR_DE_PRIORIDAD = {
   Alta: "#bb3128",
   Media: "#c87900",

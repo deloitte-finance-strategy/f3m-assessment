@@ -17,6 +17,9 @@
   --green: #86bc25;
   --green-dark: #3e6f11;
   --teal: #007c89;
+  /* El teal de marca da 4,35:1 sobre el fondo de .level-badge, por debajo
+     del 4,5:1 que pide WCAG AA para texto pequeno. Este da 6,09:1. */
+  --teal-dark: #00636d;
   --amber: #c87900;
   --red: #bb3128;
   --blue: #255e91;
@@ -90,6 +93,10 @@ summary:focus-visible,
   --focus-ring: var(--green);
 }
 
+.app-header .eyebrow {
+  color: var(--green);
+}
+
 .app-header {
   background: #121614;
   color: #ffffff;
@@ -106,9 +113,13 @@ summary:focus-visible,
   padding: 30px 0;
 }
 
+/* El verde de marca sobre fondo claro da 2,27:1, muy lejos del 4,5:1 que pide
+   WCAG AA para texto pequeno, y este texto va a 0,76rem. El verde oscuro da
+   6,02:1. Sobre la cabecera negra manda la regla de .app-header, donde el verde
+   de marca llega a 8:1 y es el que toca. */
 .eyebrow {
   margin: 0 0 6px;
-  color: var(--green);
+  color: var(--green-dark);
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1834,7 +1845,7 @@ border-color: #bfe1ce;
 
 .legend-item.heat-blank {
 background: #eef0ed;
-color: #737a74;
+color: var(--graphite);
 border-color: #eef0ed;
 }
 
@@ -2184,7 +2195,7 @@ border-color: #eef0ed;
 
 .level-badge {
   background: #e9f2f4;
-  color: var(--teal);
+  color: var(--teal-dark);
 }
 
 .status-chip {
@@ -2198,7 +2209,8 @@ border-color: #eef0ed;
 
 .heat-blank {
   background: #eef0ed;
-  color: #737a74;
+  /* #737a74 daba 3,85:1 sobre este fondo; --graphite da 6,29:1. */
+  color: var(--graphite);
 }
 
 .heat-1 {
@@ -2988,7 +3000,8 @@ height: 100% !important;
 
 .domain-progress.sin-empezar {
   background: transparent;
-  color: #949c94;
+  /* Daba 2,82:1. Es el contador de avance del dominio, no decoracion. */
+  color: var(--muted);
 }
 
 .domain-progress.completo {
