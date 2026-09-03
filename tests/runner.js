@@ -8,10 +8,15 @@
 
 import { casos as casosDeCalculo } from "./casos-calculo.js";
 import { casos as casosDeEscenario } from "./casos-escenario.js";
+import { casos as casosDePresentacion } from "./casos-presentacion.js";
 
 
 /** Todos los casos, en el orden en que se quieren leer. */
-export const casos = [...casosDeCalculo, ...casosDeEscenario];
+export const casos = [
+  ...casosDeCalculo,
+  ...casosDeEscenario,
+  ...casosDePresentacion,
+];
 
 
 export function ejecutarCasos(aEjecutar = casos) {
