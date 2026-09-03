@@ -85,73 +85,23 @@ console.log("Modo escenario compartido:", scenarioId ? "escenario compartido" : 
 const DEFAULT_DOMAIN_ID = "fpa";
 
 
-const DOMAINS = {
-  fpa: {
-    id: "fpa",
-    label: "FP&A",
-    title: "Planificación y análisis financiero / FP&A",
-    group: "Estratégicos y de negocio",
-    dataUrl: "data/domains/fpa.json",
-  },
-  controlling: {
-    id: "controlling",
-    label: "Controlling",
-    title: "Controlling",
-    group: "Transaccionales y operativos",
-    dataUrl: "data/domains/controlling.json",
-  },
-  transacciones: {
-    id: "transacciones",
-    label: "Transacciones",
-    title: "Transacciones",
-    group: "Transaccionales y operativos",
-    dataUrl: "data/domains/transacciones.json",
-  },
-  "finanzas-negocio": {
-    id: "finanzas-negocio",
-    label: "Finanzas de negocio",
-    title: "Finanzas de negocio",
-    group: "Estratégicos y de negocio",
-    dataUrl: "data/domains/finanzas-negocio.json",
-  },
-    "auditoria-interna": {
-    id: "auditoria-interna",
-    label: "Auditoría Interna",
-    title: "Auditoría Interna",
-    group: "Técnicos y especializados",
-    dataUrl: "data/domains/auditoria-interna.json",
-  },
-    "finanzas-estrategicas": {
-    id: "finanzas-estrategicas",
-    label: "Finanzas Estratégicas",
-    title: "Finanzas Estratégicas",
-    group: "Estratégicos y de negocio",
-    dataUrl: "data/domains/finanzas-estrategicas.json",
-  },
-    "relacion-inversores": {
-    id: "relacion-inversores",
-    label: "Relación con Inversores",
-    title: "Relación con Inversores",
-    group: "Técnicos y especializados",
-    dataUrl: "data/domains/relacion-inversores.json",
-  },
+/**
+ * La lista de dominios sale de data/domains.json, que es la fuente unica.
+ *
+ * Estaba escrita tres veces —aqui, en scripts/convert_domains.py y en los
+ * botones de index.html— sin nada que detectara el olvido de una de ellas.
+ * Ahora anadir un dominio es anadir una entrada al catalogo, y
+ * scripts/check_domains_sync.py comprueba que no falta nada.
+ *
+ * Se rellena en cargarCatalogoDeDominios(), antes de pedir ningun dato. Es un
+ * objeto mutable y no una constante reasignada para no obligar a que todo el
+ * modulo espere a un await de nivel superior.
+ */
+const DOMAINS = {};
 
-  tesoreria: {
-    id: "tesoreria",
-    label: "Tesorería",
-    title: "Tesorería",
-    group: "Técnicos y especializados",
-    dataUrl: "data/domains/tesoreria.json",
-  },
+const GRUPOS_DE_DOMINIO = [];
 
-  fiscal: {
-    id: "fiscal",
-    label: "Fiscal",
-    title: "Fiscal",
-    group: "Técnicos y especializados",
-    dataUrl: "data/domains/fiscal.json",
-  },
-};
+const CATALOGO_URL = "data/domains.json";
 
 
 const STORAGE_KEY = "f3m-fpa-assessment-scenario";
@@ -217,6 +167,79 @@ let aiInitiativeTrigger = null;
 const els = {};
 
 document.addEventListener("DOMContentLoaded", init);
+
+
+/**
+ * Lee el catalogo de dominios y pinta el conmutador.
+ *
+ * Va antes que cualquier otra carga: sin catalogo no hay ni rutas de datos ni
+ * botones. Si falla, la aplicacion no puede arrancar, y se dice asi.
+ */
+async function cargarCatalogoDeDominios() {
+  const response = await fetch(CATALOGO_URL);
+
+  if (!response.ok) {
+    throw new Error(`No se ha podido leer ${CATALOGO_URL}: ${response.status}`);
+  }
+
+  const catalogo = await response.json();
+
+  (catalogo.domains || []).forEach((dominio) => {
+    DOMAINS[dominio.id] = {
+      id: dominio.id,
+      label: dominio.label,
+      title: dominio.title,
+      group: dominio.group,
+      dataUrl: dominio.dataUrl,
+    };
+  });
+
+  (catalogo.groups || []).forEach((grupo) => {
+    GRUPOS_DE_DOMINIO.push(grupo);
+  });
+
+  renderDomainSwitcher();
+}
+
+
+/** Los botones del conmutador, agrupados como dice el catalogo. */
+function renderDomainSwitcher() {
+  const contenedor = document.querySelector(".domain-groups");
+
+  if (!contenedor) {
+    return;
+  }
+
+  const dominios = Object.values(DOMAINS);
+
+  const grupos = GRUPOS_DE_DOMINIO.length
+    ? GRUPOS_DE_DOMINIO
+    : unique(dominios.map((dominio) => dominio.group));
+
+  contenedor.innerHTML = grupos
+    .map((grupo) => {
+      const botones = dominios
+        .filter((dominio) => dominio.group === grupo)
+        .map(
+          (dominio) => `
+            <button
+              class="domain-button${dominio.id === state.activeDomainId ? " active" : ""}"
+              type="button"
+              data-domain-id="${escapeAttr(dominio.id)}"
+            >${escapeHtml(dominio.label)}</button>
+          `,
+        )
+        .join("");
+
+      return `
+        <div class="domain-group">
+          <span>${escapeHtml(grupo)}</span>
+          ${botones}
+        </div>
+      `;
+    })
+    .join("");
+}
 
 
 async function loadDomainData(domainId) {
@@ -427,6 +450,9 @@ async function init() {
 
 
   try {
+    // Lo primero: sin catalogo no se sabe ni que dominios hay ni de donde salen.
+    await cargarCatalogoDeDominios();
+
     const { cargados, fallidos } = await loadCoreDomains();
 
     // Ningún dominio disponible: casi siempre es que se ha abierto el archivo
@@ -470,6 +496,20 @@ async function init() {
     populateCapacityFilter();
     renderAll();
   } catch (error) {
+    // El catalogo es lo unico sin lo que no se puede empezar, y su fallo mas
+    // probable sigue siendo abrir el archivo con file:// en vez de servirlo.
+    if (!Object.keys(DOMAINS).length) {
+      showNotice(
+        "No se ha podido leer la lista de dominios. Si has abierto el archivo directamente, "
+          + "ábrelo a través de un servidor local: en esta carpeta, ejecuta "
+          + "python -m http.server 8000 y entra en http://localhost:8000/.",
+        "error",
+      );
+
+      console.error(error);
+      return;
+    }
+
     // Hasta aquí solo se llega por un fallo inesperado: los dominios y la
     // sincronizacion ya se gestionan por su cuenta. Antes cualquier error,
     // incluido el almacenamiento bloqueado, se explicaba como si fuera un
