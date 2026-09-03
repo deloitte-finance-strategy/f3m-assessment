@@ -969,6 +969,75 @@ function round2(value) {
 }
 
 
+
+/**
+ * La agregacion por capacidad, en un unico sitio.
+ *
+ * Estaba escrita cuatro veces —tabla resumen, heatmap, resumen del PDF y filas
+ * del CSV— con la misma aritmetica y cuatro formas de salida distintas. Cuatro
+ * copias de la misma regla son cuatro sitios donde corregirla, y fue el origen
+ * mecanico de que el Dashboard y el Roadmap ensenaran cifras que no cuadraban.
+ *
+ * Reglas que aplica, y que no cambian respecto a lo que hacian las cuatro:
+ * - Las medias por palanca salen de TODAS las subcapacidades con esa palanca
+ *   puntuada, aunque el item este pendiente en las otras dos.
+ * - Score medio, objetivo medio y gap solo promedian las subcapacidades con
+ *   alguna palanca puntuada: lo no evaluado no entra.
+ * - La prioridad de la capacidad se deriva del gap agregado, con la misma regla
+ *   que la de cada subcapacidad.
+ */
+function agregarPorCapacidad(items) {
+  return unique(
+    items.map((item) => item.capacidad),
+  ).map((capacidad) => {
+    const subcapacidades = items.filter(
+      (item) => item.capacidad === capacidad,
+    );
+
+    const metricas = subcapacidades.map(calculate);
+
+    const puntuadas = metricas.filter(
+      (metrics) => !metrics.isPending,
+    );
+
+    const mediaDePalanca = (clave) =>
+      average(
+        subcapacidades
+          .map((item) => item.scores[clave])
+          .filter(Number.isFinite),
+      );
+
+    const scoreMedio = average(
+      puntuadas.map((metrics) => metrics.scoreMedio),
+    );
+
+    const targetMedio = average(
+      puntuadas.map((metrics) => metrics.targetMedio),
+    );
+
+    const gap = average(
+      puntuadas.map((metrics) => metrics.gap),
+    );
+
+    return {
+      capacidad,
+      items: subcapacidades,
+      metricas,
+      objetivos: getCapabilityTargets(capacidad),
+      procesos: mediaDePalanca("procesos"),
+      tecnologia: mediaDePalanca("tecnologia"),
+      organizacion: mediaDePalanca("organizacion"),
+      scoreMedio,
+      targetMedio,
+      gap,
+      prioridad: priorityFromGap(gap),
+      evaluadas: puntuadas.length,
+      total: subcapacidades.length,
+    };
+  });
+}
+
+
 const VISTAS = ["dashboard", "assessment", "heatmap", "roadmap"];
 
 let vistaActiva = "dashboard";
@@ -1974,102 +2043,45 @@ function barRow(label, value, width, color) {
 
 
 function renderSummaryTable() {
-  const scopedItems = getScopedItems();
-
-  const capacities = unique(
-    scopedItems.map((item) => item.capacidad),
-  );
-
-  const rows = capacities.map((capability) => {
-    const items = scopedItems.filter(
-      (item) => item.capacidad === capability,
-    );
-
-    const entries = items.map((item) => ({
-      item,
-      metrics: calculate(item),
-    }));
-
-    const scored = entries.filter(
-      (entry) => !entry.metrics.isPending,
-    );
-
-    const scoreMedio = average(
-      scored.map(
-        (entry) => entry.metrics.scoreMedio,
-      ),
-    );
-
-    const targetMedio = average(
-      scored.map(
-        (entry) => entry.metrics.targetMedio,
-      ),
-    );
-
-    const gap = average(
-      scored.map(
-        (entry) => entry.metrics.gap,
-      ),
-    );
-
-    const prioridad = priorityFromGap(gap);
-
-    return `
+  const rows = agregarPorCapacidad(getScopedItems()).map(
+    (capacidad) => `
       <tr>
-        <td>${escapeHtml(capability)}</td>
+        <td>${escapeHtml(capacidad.capacidad)}</td>
 
         <td class="number">
-          ${formatNumber(
-            average(
-              items
-                .map((item) => item.scores.procesos)
-                .filter(Number.isFinite),
-            ),
-          )}
+          ${formatNumber(capacidad.procesos)}
         </td>
 
         <td class="number">
-          ${formatNumber(
-            average(
-              items
-                .map((item) => item.scores.tecnologia)
-                .filter(Number.isFinite),
-            ),
-          )}
+          ${formatNumber(capacidad.tecnologia)}
         </td>
 
         <td class="number">
-          ${formatNumber(
-            average(
-              items
-                .map((item) => item.scores.organizacion)
-                .filter(Number.isFinite),
-            ),
-          )}
+          ${formatNumber(capacidad.organizacion)}
         </td>
 
         <td class="number">
-          ${formatNumber(scoreMedio)}
+          ${formatNumber(capacidad.scoreMedio)}
         </td>
 
         <td class="number">
-          ${formatNumber(targetMedio)}
+          ${formatNumber(capacidad.targetMedio)}
         </td>
 
         <td class="number">
-          ${formatNumber(gap)}
+          ${formatNumber(capacidad.gap)}
         </td>
 
         <td>
-          ${priorityBadge(prioridad)}
+          ${priorityBadge(capacidad.prioridad)}
         </td>
 
         <td class="number">
-          ${scored.length}/${items.length}
+          ${capacidad.evaluadas}/${capacidad.total}
         </td>
       </tr>
-    `;
-  });
+    `,
+  );
 
   els.summaryTable.innerHTML = `
     <thead>
@@ -2958,19 +2970,18 @@ function actualizarTarjetaDeAssessment(item) {
 
 
 function renderHeatmap() {
-  const visibleItems = getVisibleItems();
-  const capabilityRows = buildHeatmapCapabilityRows(visibleItems);
+  const capabilityRows = agregarPorCapacidad(getScopedItems());
 
   const rows = capabilityRows
     .map((entry) => {
-      const isExpanded = expandedHeatmapCapabilities.has(entry.capability);
+      const isExpanded = expandedHeatmapCapabilities.has(entry.capacidad);
 
       const detailRows = entry.items
-        .map((item) => {
-          const metrics = calculate(item);
+        .map((item, indice) => {
+          const metrics = entry.metricas[indice];
 
           return `
-            <tr class="heatmap-detail-row ${isExpanded ? "" : "is-hidden"}" data-capability-detail="${escapeAttr(entry.capability)}">
+            <tr class="heatmap-detail-row ${isExpanded ? "" : "is-hidden"}" data-capability-detail="${escapeAttr(entry.capacidad)}">
               <td class="heatmap-detail-capability">${escapeHtml(item.capacidad)}</td>
               <td>${escapeHtml(item.subcapacidad)}</td>
               ${LEVERS.map((lever) => heatScoreCell(item.scores[lever.key])).join("")}
@@ -2985,13 +2996,13 @@ function renderHeatmap() {
       return `
         <tr class="heatmap-capability-row">
           <td>
-            <strong>${escapeHtml(entry.capability)}</strong>
+            <strong>${escapeHtml(entry.capacidad)}</strong>
           </td>
           <td>
             <button
               class="heatmap-toggle"
               type="button"
-              data-capability-toggle="${escapeAttr(entry.capability)}"
+              data-capability-toggle="${escapeAttr(entry.capacidad)}"
               aria-expanded="${String(isExpanded)}"
             >
               ${isExpanded ? "Ocultar subcapacidades" : `Ver subcapacidades (${entry.items.length})`}
@@ -3043,78 +3054,6 @@ function renderHeatmap() {
 
 
 
-function buildHeatmapCapabilityRows(items) {
-  const capabilities = unique(
-    items.map((item) => item.capacidad),
-  );
-
-  return capabilities.map((capability) => {
-    const capabilityItems = items.filter(
-      (item) => item.capacidad === capability,
-    );
-
-    const calculatedItems = capabilityItems.map(
-      (item) => calculate(item),
-    );
-
-    const scoredItems = calculatedItems.filter(
-      (metrics) => !metrics.isPending,
-    );
-
-    const procesos = average(
-      capabilityItems
-        .map((item) => item.scores.procesos)
-        .filter(Number.isFinite),
-    );
-
-    const tecnologia = average(
-      capabilityItems
-        .map((item) => item.scores.tecnologia)
-        .filter(Number.isFinite),
-    );
-
-    const organizacion = average(
-      capabilityItems
-        .map((item) => item.scores.organizacion)
-        .filter(Number.isFinite),
-    );
-
-    const scoreMedio = average(
-      scoredItems.map(
-        (metrics) => metrics.scoreMedio,
-      ),
-    );
-
-    const targetMedio = average(
-      scoredItems.map(
-        (metrics) => metrics.targetMedio,
-      ),
-    );
-
-    const gap = average(
-      scoredItems.map(
-        (metrics) => metrics.gap,
-      ),
-    );
-
-    const prioridad = priorityFromGap(gap);
-
-    return {
-      capability,
-      items: capabilityItems,
-      procesos,
-      tecnologia,
-      organizacion,
-      scoreMedio,
-      targetMedio,
-      gap,
-      prioridad,
-    };
-  });
-}
-
-
-
 function handleHeatmapToggle(event) {
   const button = event.currentTarget;
   const capability = button.dataset.capabilityToggle;
@@ -3143,8 +3082,8 @@ function handleHeatmapToggle(event) {
 
 
 function handleHeatmapExpandToggleAll() {
-  const capabilityRows = buildHeatmapCapabilityRows(getVisibleItems());
-  const visibleCapabilities = capabilityRows.map((entry) => entry.capability);
+  const capabilityRows = agregarPorCapacidad(getScopedItems());
+  const visibleCapabilities = capabilityRows.map((entry) => entry.capacidad);
 
   if (!visibleCapabilities.length) {
     return;
@@ -3172,7 +3111,7 @@ function updateHeatmapExpandAllButton(capabilityRows) {
     return;
   }
 
-  const visibleCapabilities = capabilityRows.map((entry) => entry.capability);
+  const visibleCapabilities = capabilityRows.map((entry) => entry.capacidad);
   const allExpanded =
     visibleCapabilities.length > 0 &&
     visibleCapabilities.every((capability) => expandedHeatmapCapabilities.has(capability));
@@ -4838,76 +4777,20 @@ function buildEnhancedPdfReportData() {
 }
 
 function buildPdfSummaryRowsFromItems(items) {
-  const capabilities = unique(
-    items.map((item) => item.capacidad),
-  );
-
-  return capabilities.map((capability) => {
-    const capabilityItems = items.filter(
-      (item) => item.capacidad === capability,
-    );
-
-    const calculatedItems =
-      capabilityItems.map(calculate);
-
-    const scoredItems = calculatedItems.filter(
-      (metrics) => !metrics.isPending,
-    );
-
-    const procesos = average(
-      capabilityItems
-        .map((item) => item.scores.procesos)
-        .filter(Number.isFinite),
-    );
-
-    const tecnologia = average(
-      capabilityItems
-        .map((item) => item.scores.tecnologia)
-        .filter(Number.isFinite),
-    );
-
-    const organizacion = average(
-      capabilityItems
-        .map((item) => item.scores.organizacion)
-        .filter(Number.isFinite),
-    );
-
-    const scoreMedio = average(
-      scoredItems.map(
-        (metrics) => metrics.scoreMedio,
-      ),
-    );
-
-    const targetMedio = average(
-      scoredItems.map(
-        (metrics) => metrics.targetMedio,
-      ),
-    );
-
-    const gap = average(
-      scoredItems.map(
-        (metrics) => metrics.gap,
-      ),
-    );
-
-    const prioridad = priorityFromGap(gap);
-    const targets = getCapabilityTargets(capability);
-
-    return {
-      capacidad: capability,
-      procesos,
-      objetivoProcesos: targets.procesos,
-      tecnologia,
-      objetivoTecnologia: targets.tecnologia,
-      organizacion,
-      objetivoOrganizacion: targets.organizacion,
-      scoreMedio,
-      targetMedio,
-      gap,
-      prioridad,
-      avance: `${scoredItems.length}/${capabilityItems.length}`,
-    };
-  });
+  return agregarPorCapacidad(items).map((capacidad) => ({
+    capacidad: capacidad.capacidad,
+    procesos: capacidad.procesos,
+    objetivoProcesos: capacidad.objetivos.procesos,
+    tecnologia: capacidad.tecnologia,
+    objetivoTecnologia: capacidad.objetivos.tecnologia,
+    organizacion: capacidad.organizacion,
+    objetivoOrganizacion: capacidad.objetivos.organizacion,
+    scoreMedio: capacidad.scoreMedio,
+    targetMedio: capacidad.targetMedio,
+    gap: capacidad.gap,
+    prioridad: capacidad.prioridad,
+    avance: `${capacidad.evaluadas}/${capacidad.total}`,
+  }));
 }
 
 
@@ -5729,85 +5612,36 @@ function getEnhancedPdfReportStyles() {
 
 
 function buildSummaryRows() {
-  const scopedItems = getScopedItems();
+  return agregarPorCapacidad(getScopedItems()).map((capacidad) => ({
+    Tipo: "Resumen",
+    Capacidad: capacidad.capacidad,
+    Subcapacidad: "",
 
-  return unique(
-    scopedItems.map((item) => item.capacidad),
-  ).map((capability) => {
-    const items = scopedItems.filter(
-      (item) => item.capacidad === capability,
-    );
+    Procesos: capacidad.procesos ?? "",
+    ObjetivoProcesos: capacidad.objetivos.procesos,
 
-    const scored = items
-      .map(calculate)
-      .filter((metrics) => !metrics.isPending);
+    Tecnologia: capacidad.tecnologia ?? "",
+    ObjetivoTecnologia: capacidad.objetivos.tecnologia,
 
-    const scoreMedio = average(
-      scored.map((metrics) => metrics.scoreMedio),
-    );
+    Organizacion: capacidad.organizacion ?? "",
+    ObjetivoOrganizacion: capacidad.objetivos.organizacion,
 
-    const targetMedio = average(
-      scored.map((metrics) => metrics.targetMedio),
-    );
+    ScoreMedio: capacidad.scoreMedio ?? "",
+    ObjetivoMedio: capacidad.targetMedio ?? "",
 
-    const gap = average(
-      scored.map((metrics) => metrics.gap),
-    );
+    Nivel:
+      capacidad.scoreMedio === null
+        ? ""
+        : getMaturityLevel(capacidad.scoreMedio),
 
-    const capabilityTargets =
-      getCapabilityTargets(capability);
-
-    return {
-      Tipo: "Resumen",
-      Capacidad: capability,
-      Subcapacidad: "",
-
-      Procesos:
-        average(
-          items
-            .map((item) => item.scores.procesos)
-            .filter(Number.isFinite),
-        ) ?? "",
-
-      ObjetivoProcesos:
-        capabilityTargets.procesos,
-
-      Tecnologia:
-        average(
-          items
-            .map((item) => item.scores.tecnologia)
-            .filter(Number.isFinite),
-        ) ?? "",
-
-      ObjetivoTecnologia:
-        capabilityTargets.tecnologia,
-
-      Organizacion:
-        average(
-          items
-            .map((item) => item.scores.organizacion)
-            .filter(Number.isFinite),
-        ) ?? "",
-
-      ObjetivoOrganizacion:
-        capabilityTargets.organizacion,
-
-      ScoreMedio: scoreMedio ?? "",
-      ObjetivoMedio: targetMedio ?? "",
-      Nivel:
-        scoreMedio === null
-          ? ""
-          : getMaturityLevel(scoreMedio),
-
-      Gap: gap ?? "",
-      Prioridad: priorityFromGap(gap),
-      Oleada: "",
-      IniciativaSugerida: "",
-      Owner: "",
-      Estado: "",
-      Comentarios: "",
-    };
-  });
+    Gap: capacidad.gap ?? "",
+    Prioridad: capacidad.prioridad,
+    Oleada: "",
+    IniciativaSugerida: "",
+    Owner: "",
+    Estado: "",
+    Comentarios: "",
+  }));
 }
 
 
