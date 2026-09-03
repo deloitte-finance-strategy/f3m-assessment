@@ -7,70 +7,22 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "data" / "domains"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
+# La lista de dominios vive en data/domains.json y no aqui: estaba escrita tres
+# veces —este script, DOMAINS en app.js y los botones de index.html— sin nada
+# que detectara el olvido de una de ellas.
+CATALOGO = json.loads(
+    (ROOT / "data" / "domains.json").read_text(encoding="utf-8")
+)
+
 FILES = [
     {
-        "domain_id": "fpa",
-        "domain_label": "FP&A",
-        "domain_title": "Planificación y análisis financiero / FP&A",
-        "source": ROOT / "F3M_FP&A_assessment_ready_AI_v1.xlsx",
-        "output": OUT_DIR / "fpa.json",
-    },
-    {
-        "domain_id": "controlling",
-        "domain_label": "Controlling",
-        "domain_title": "Controlling",
-        "source": ROOT / "F3M_Controlling_assessment_ready_AI_v0.xlsx",
-        "output": OUT_DIR / "controlling.json",
-    },
-    {
-        "domain_id": "transacciones",
-        "domain_label": "Transacciones",
-        "domain_title": "Transacciones",
-        "source": ROOT / "F3M_Transaccional_assessment_ready_AI.xlsx",
-        "output": OUT_DIR / "transacciones.json",
-    },
-    {
-        "domain_id": "finanzas-negocio",
-        "domain_label": "Finanzas de negocio",
-        "domain_title": "Finanzas de negocio",
-        "source": ROOT / "F3M_Finanzas_Negocio_BU_assessment_ready_AI_v0.xlsx",
-        "output": OUT_DIR / "finanzas-negocio.json",
-    },
-    {
-        "domain_id": "auditoria-interna",
-        "domain_label": "Auditoría Interna",
-        "domain_title": "Auditoría Interna",
-        "source": ROOT / "F3M_Auditoria_Interna_assessment_ready_AI_v0.xlsx",
-        "output": OUT_DIR / "auditoria-interna.json",
-    },
-    {
-        "domain_id": "finanzas-estrategicas",
-        "domain_label": "Finanzas Estratégicas",
-        "domain_title": "Finanzas Estratégicas",
-        "source": ROOT / "F3M_Finanzas_Estrategicas_assessment_ready_AI_v0.xlsx",
-        "output": OUT_DIR / "finanzas-estrategicas.json",
-    },
-    {
-        "domain_id": "relacion-inversores",
-        "domain_label": "Relación con Inversores",
-        "domain_title": "Relación con Inversores",
-        "source": ROOT / "F3M_Relacion_Inversores_assessment_ready_AI_v0.xlsx",
-        "output": OUT_DIR / "relacion-inversores.json",
-    },
-    {
-        "domain_id": "tesoreria",
-        "domain_label": "Tesorería",
-        "domain_title": "Tesorería",
-        "source": ROOT / "F3M_Tesoreria_assessment_ready_AI_v0.xlsx",
-        "output": OUT_DIR / "tesoreria.json",
-    },
-    {
-        "domain_id": "fiscal",
-        "domain_label": "Fiscal",
-        "domain_title": "Fiscal",
-        "source": ROOT / "F3M_Fiscal_assessment_ready_AI_v0.xlsx",
-        "output": OUT_DIR / "fiscal.json",
-    },
+        "domain_id": dominio["id"],
+        "domain_label": dominio["label"],
+        "domain_title": dominio["title"],
+        "source": ROOT / dominio["source"],
+        "output": ROOT / dominio["dataUrl"],
+    }
+    for dominio in CATALOGO["domains"]
 ]
 
 

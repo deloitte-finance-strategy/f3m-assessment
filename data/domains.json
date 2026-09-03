@@ -1,0 +1,82 @@
+{
+  "_comentario": "Fuente unica de la lista de dominios. La leen app.js (para el conmutador y las rutas de datos) y scripts/convert_domains.py (para saber que Excel convertir). Anadir un dominio es anadir una entrada aqui, y scripts/check_domains_sync.py comprueba que no falta nada.",
+  "groups": [
+    "Transaccionales y operativos",
+    "Técnicos y especializados",
+    "Estratégicos y de negocio"
+  ],
+  "domains": [
+    {
+      "id": "controlling",
+      "label": "Controlling",
+      "title": "Controlling",
+      "group": "Transaccionales y operativos",
+      "source": "F3M_Controlling_assessment_ready_AI_v0.xlsx",
+      "dataUrl": "data/domains/controlling.json"
+    },
+    {
+      "id": "transacciones",
+      "label": "Transacciones",
+      "title": "Transacciones",
+      "group": "Transaccionales y operativos",
+      "source": "F3M_Transaccional_assessment_ready_AI.xlsx",
+      "dataUrl": "data/domains/transacciones.json"
+    },
+    {
+      "id": "auditoria-interna",
+      "label": "Auditoría Interna",
+      "title": "Auditoría Interna",
+      "group": "Técnicos y especializados",
+      "source": "F3M_Auditoria_Interna_assessment_ready_AI_v0.xlsx",
+      "dataUrl": "data/domains/auditoria-interna.json"
+    },
+    {
+      "id": "relacion-inversores",
+      "label": "Relación con Inversores",
+      "title": "Relación con Inversores",
+      "group": "Técnicos y especializados",
+      "source": "F3M_Relacion_Inversores_assessment_ready_AI_v0.xlsx",
+      "dataUrl": "data/domains/relacion-inversores.json"
+    },
+    {
+      "id": "fiscal",
+      "label": "Fiscal",
+      "title": "Fiscal",
+      "group": "Técnicos y especializados",
+      "source": "F3M_Fiscal_assessment_ready_AI_v0.xlsx",
+      "dataUrl": "data/domains/fiscal.json"
+    },
+    {
+      "id": "tesoreria",
+      "label": "Tesorería",
+      "title": "Tesorería",
+      "group": "Técnicos y especializados",
+      "source": "F3M_Tesoreria_assessment_ready_AI_v0.xlsx",
+      "dataUrl": "data/domains/tesoreria.json"
+    },
+    {
+      "id": "fpa",
+      "label": "FP&A",
+      "title": "Planificación y análisis financiero / FP&A",
+      "group": "Estratégicos y de negocio",
+      "source": "F3M_FP&A_assessment_ready_AI_v1.xlsx",
+      "dataUrl": "data/domains/fpa.json"
+    },
+    {
+      "id": "finanzas-estrategicas",
+      "label": "Finanzas Estratégicas",
+      "title": "Finanzas Estratégicas",
+      "group": "Estratégicos y de negocio",
+      "source": "F3M_Finanzas_Estrategicas_assessment_ready_AI_v0.xlsx",
+      "dataUrl": "data/domains/finanzas-estrategicas.json"
+    },
+    {
+      "id": "finanzas-negocio",
+      "label": "Finanzas de negocio",
+      "title": "Finanzas de negocio",
+      "group": "Estratégicos y de negocio",
+      "source": "F3M_Finanzas_Negocio_BU_assessment_ready_AI_v0.xlsx",
+      "dataUrl": "data/domains/finanzas-negocio.json"
+    }
+  ]
+}

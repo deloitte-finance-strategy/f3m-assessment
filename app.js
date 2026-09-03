@@ -13,6 +13,46 @@ import {
   signInAnonymously,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
+// El motor de calculo F3M: reglas de negocio puras, sin DOM ni estado global.
+// Vive aparte para poder probarlo sin levantar la aplicacion (ver tests/).
+import {
+  DEFAULT_TARGET_MATURITY,
+  PALANCAS,
+  agregarPorCapacidad as agregarPorCapacidadCore,
+  average,
+  calcularMetricas,
+  getMaturityLevel,
+  getMaturityLevelNumber,
+  normalizeTargetValue,
+  toScore,
+  unique,
+} from "./core/calculo.js";
+
+// El contrato de un escenario: que campos admite Firebase y con que limites.
+// Espejo de database.rules.json, para no enviar nunca algo que sera rechazado.
+import {
+  ESTADOS_VALIDOS,
+  LIMITES_DE_TEXTO,
+  normalizarAutoria,
+  normalizarEscenarioParaFirebase,
+  normalizarEstado,
+  recortarAlLimite,
+  revisarEscenario,
+} from "./core/escenario.js";
+
+// Escapado, formato y colores de marca. Los comparten la aplicacion y el
+// informe PDF, que desde que vive aparte ya no puede leerlos de aqui.
+import {
+  COLOR_DE_PALANCA,
+  escapeAttr,
+  escapeHtml,
+  formatNumber,
+  priorityColor,
+} from "./core/presentacion.js";
+
+// El informe PDF: entra el objeto de datos, sale el documento imprimible.
+import { buildEnhancedPdfReportHtml } from "./informe/pdf.js";
+
 // Configuración de Firebase del proyecto fpa-assessment-mvp
 const firebaseConfig = {
   apiKey: "AIzaSyAyHWPnALB5regOMmeR3C-vVLDTmh6fEio",
@@ -44,123 +84,34 @@ console.log("Modo escenario compartido:", scenarioId ? "escenario compartido" : 
 
 const DEFAULT_DOMAIN_ID = "fpa";
 
-const DEFAULT_TARGET_MATURITY = 4;
 
+/**
+ * La lista de dominios sale de data/domains.json, que es la fuente unica.
+ *
+ * Estaba escrita tres veces —aqui, en scripts/convert_domains.py y en los
+ * botones de index.html— sin nada que detectara el olvido de una de ellas.
+ * Ahora anadir un dominio es anadir una entrada al catalogo, y
+ * scripts/check_domains_sync.py comprueba que no falta nada.
+ *
+ * Se rellena en cargarCatalogoDeDominios(), antes de pedir ningun dato. Es un
+ * objeto mutable y no una constante reasignada para no obligar a que todo el
+ * modulo espere a un await de nivel superior.
+ */
+const DOMAINS = {};
 
-const DOMAINS = {
-  fpa: {
-    id: "fpa",
-    label: "FP&A",
-    title: "Planificación y análisis financiero / FP&A",
-    group: "Estratégicos y de negocio",
-    dataUrl: "data/domains/fpa.json",
-  },
-  controlling: {
-    id: "controlling",
-    label: "Controlling",
-    title: "Controlling",
-    group: "Transaccionales y operativos",
-    dataUrl: "data/domains/controlling.json",
-  },
-  transacciones: {
-    id: "transacciones",
-    label: "Transacciones",
-    title: "Transacciones",
-    group: "Transaccionales y operativos",
-    dataUrl: "data/domains/transacciones.json",
-  },
-  "finanzas-negocio": {
-    id: "finanzas-negocio",
-    label: "Finanzas de negocio",
-    title: "Finanzas de negocio",
-    group: "Estratégicos y de negocio",
-    dataUrl: "data/domains/finanzas-negocio.json",
-  },
-    "auditoria-interna": {
-    id: "auditoria-interna",
-    label: "Auditoría Interna",
-    title: "Auditoría Interna",
-    group: "Técnicos y especializados",
-    dataUrl: "data/domains/auditoria-interna.json",
-  },
-    "finanzas-estrategicas": {
-    id: "finanzas-estrategicas",
-    label: "Finanzas Estratégicas",
-    title: "Finanzas Estratégicas",
-    group: "Estratégicos y de negocio",
-    dataUrl: "data/domains/finanzas-estrategicas.json",
-  },
-    "relacion-inversores": {
-    id: "relacion-inversores",
-    label: "Relación con Inversores",
-    title: "Relación con Inversores",
-    group: "Técnicos y especializados",
-    dataUrl: "data/domains/relacion-inversores.json",
-  },
+const GRUPOS_DE_DOMINIO = [];
 
-  tesoreria: {
-    id: "tesoreria",
-    label: "Tesorería",
-    title: "Tesorería",
-    group: "Técnicos y especializados",
-    dataUrl: "data/domains/tesoreria.json",
-  },
-
-  fiscal: {
-    id: "fiscal",
-    label: "Fiscal",
-    title: "Fiscal",
-    group: "Técnicos y especializados",
-    dataUrl: "data/domains/fiscal.json",
-  },
-};
+const CATALOGO_URL = "data/domains.json";
 
 
 const STORAGE_KEY = "f3m-fpa-assessment-scenario";
 
 
-// Identidad de palanca. Estos tres colores solo significan una cosa: de que
-// palanca estamos hablando. No deben usarse para nada mas.
-const COLOR_DE_PALANCA = {
-  procesos: "#86BC25",
-  tecnologia: "#ED8B00",
-  organizacion: "#012169",
-};
-
-
-// Semantica de interfaz. Son otra familia y otro significado, aunque el acento
-// de marca comparta el verde de Procesos por decision de identidad visual.
-// El acento de marca comparte valor con el verde de Procesos, pero no es lo
-// mismo: aqui significa "Deloitte", no "palanca de Procesos". Se nombra aparte
-// para que se pueda cambiar uno sin arrastrar el otro.
-const COLOR_DE_MARCA = "#86BC25";
-
-
-const COLOR_DE_PRIORIDAD = {
-  Alta: "#bb3128",
-  Media: "#c87900",
-  Baja: "#3e6f11",
-  Pendiente: "#8a9189",
-};
-
-
-const LEVERS = [
-  {
-    key: "procesos",
-    label: "Procesos",
-    color: COLOR_DE_PALANCA.procesos,
-  },
-  {
-    key: "tecnologia",
-    label: "Tecnología",
-    color: COLOR_DE_PALANCA.tecnologia,
-  },
-  {
-    key: "organizacion",
-    label: "Organización",
-    color: COLOR_DE_PALANCA.organizacion,
-  },
-];
+// Las palancas las define el motor; aqui solo se les pone el color de marca.
+const LEVERS = PALANCAS.map((palanca) => ({
+  ...palanca,
+  color: COLOR_DE_PALANCA[palanca.key],
+}));
 
 const PRIORITY_ORDER = {
   Alta: 1,
@@ -169,16 +120,9 @@ const PRIORITY_ORDER = {
   Pendiente: 4,
 };
 
-const STATUS_OPTIONS = ["No iniciado", "En curso", "Completado", "Bloqueado"];
-
-
-// Límites de longitud de los campos editables del Roadmap. Tienen que coincidir
-// con los de database.rules.json: si el texto los supera, Firebase rechaza la
-// escritura entera y el cambio se pierde. Es preferible impedir escribirlo.
-const LIMITES_DE_TEXTO = {
-  owner: 120,
-  comentario: 2000,
-};
+// Los estados y los limites de longitud de los campos editables los define el
+// contrato del escenario, que es el espejo de database.rules.json.
+const STATUS_OPTIONS = ESTADOS_VALIDOS;
 
 
 const state = {
@@ -223,6 +167,79 @@ let aiInitiativeTrigger = null;
 const els = {};
 
 document.addEventListener("DOMContentLoaded", init);
+
+
+/**
+ * Lee el catalogo de dominios y pinta el conmutador.
+ *
+ * Va antes que cualquier otra carga: sin catalogo no hay ni rutas de datos ni
+ * botones. Si falla, la aplicacion no puede arrancar, y se dice asi.
+ */
+async function cargarCatalogoDeDominios() {
+  const response = await fetch(CATALOGO_URL);
+
+  if (!response.ok) {
+    throw new Error(`No se ha podido leer ${CATALOGO_URL}: ${response.status}`);
+  }
+
+  const catalogo = await response.json();
+
+  (catalogo.domains || []).forEach((dominio) => {
+    DOMAINS[dominio.id] = {
+      id: dominio.id,
+      label: dominio.label,
+      title: dominio.title,
+      group: dominio.group,
+      dataUrl: dominio.dataUrl,
+    };
+  });
+
+  (catalogo.groups || []).forEach((grupo) => {
+    GRUPOS_DE_DOMINIO.push(grupo);
+  });
+
+  renderDomainSwitcher();
+}
+
+
+/** Los botones del conmutador, agrupados como dice el catalogo. */
+function renderDomainSwitcher() {
+  const contenedor = document.querySelector(".domain-groups");
+
+  if (!contenedor) {
+    return;
+  }
+
+  const dominios = Object.values(DOMAINS);
+
+  const grupos = GRUPOS_DE_DOMINIO.length
+    ? GRUPOS_DE_DOMINIO
+    : unique(dominios.map((dominio) => dominio.group));
+
+  contenedor.innerHTML = grupos
+    .map((grupo) => {
+      const botones = dominios
+        .filter((dominio) => dominio.group === grupo)
+        .map(
+          (dominio) => `
+            <button
+              class="domain-button${dominio.id === state.activeDomainId ? " active" : ""}"
+              type="button"
+              data-domain-id="${escapeAttr(dominio.id)}"
+            >${escapeHtml(dominio.label)}</button>
+          `,
+        )
+        .join("");
+
+      return `
+        <div class="domain-group">
+          <span>${escapeHtml(grupo)}</span>
+          ${botones}
+        </div>
+      `;
+    })
+    .join("");
+}
 
 
 async function loadDomainData(domainId) {
@@ -433,6 +450,9 @@ async function init() {
 
 
   try {
+    // Lo primero: sin catalogo no se sabe ni que dominios hay ni de donde salen.
+    await cargarCatalogoDeDominios();
+
     const { cargados, fallidos } = await loadCoreDomains();
 
     // Ningún dominio disponible: casi siempre es que se ha abierto el archivo
@@ -476,6 +496,20 @@ async function init() {
     populateCapacityFilter();
     renderAll();
   } catch (error) {
+    // El catalogo es lo unico sin lo que no se puede empezar, y su fallo mas
+    // probable sigue siendo abrir el archivo con file:// en vez de servirlo.
+    if (!Object.keys(DOMAINS).length) {
+      showNotice(
+        "No se ha podido leer la lista de dominios. Si has abierto el archivo directamente, "
+          + "ábrelo a través de un servidor local: en esta carpeta, ejecuta "
+          + "python -m http.server 8000 y entra en http://localhost:8000/.",
+        "error",
+      );
+
+      console.error(error);
+      return;
+    }
+
     // Hasta aquí solo se llega por un fallo inesperado: los dominios y la
     // sincronizacion ya se gestionan por su cuenta. Antes cualquier error,
     // incluido el almacenamiento bloqueado, se explicaba como si fuera un
@@ -620,18 +654,6 @@ function createDefaultTargets(items, defaultTarget = DEFAULT_TARGET_MATURITY) {
 
 
 
-function normalizeTargetValue(value, fallback = DEFAULT_TARGET_MATURITY) {
-  const number = Number(value);
-
-  if (Number.isInteger(number) && number >= 1 && number <= 5) {
-    return number;
-  }
-
-  return fallback;
-}
-
-
-
 function normalizeDomainTargets(
   items,
   savedTargets = {},
@@ -748,47 +770,43 @@ function serializeTargetsForFirebase(
 
 
 
+/**
+ * Deja el escenario con exactamente lo que admiten las reglas de Firebase.
+ *
+ * Antes copiaba con spread las claves de la raiz y de cada dominio, asi que un
+ * campo que las reglas no declaran viajaba igualmente y hacia que rechazaran la
+ * escritura ENTERA. Ahora se construye desde cero con los campos permitidos.
+ */
 function sanitizeScenarioForFirebase(payload) {
-  if (!payload || typeof payload !== "object") {
-    return payload;
-  }
-
-  const sanitizedPayload = {
-    ...payload,
-    version: 3,
-    domains: {},
-  };
-
-  Object.entries(
-    payload.domains || {},
-  ).forEach(([domainId, domain]) => {
-    const domainItems = Array.isArray(domain.items)
-      ? domain.items
-      : Object.values(domain.items || {});
-
-    const defaultTarget =
-      normalizeTargetValue(
-        domain.meta?.targetMaturity,
-        DEFAULT_TARGET_MATURITY,
-      );
-
-    sanitizedPayload.domains[domainId] = {
-      ...domain,
-
-      targets: serializeTargetsForFirebase(
-        domainItems,
-        domain.targets,
-        defaultTarget,
+  return normalizarEscenarioParaFirebase(
+    payload,
+    (items, targets, meta) =>
+      serializeTargetsForFirebase(
+        items,
+        targets,
+        normalizeTargetValue(
+          meta?.targetMaturity,
+          DEFAULT_TARGET_MATURITY,
+        ),
       ),
-
-      items: domainItems,
-    };
-  });
-
-  return sanitizedPayload;
+  );
 }
 
 
+
+/**
+ * Objetivos de una capacidad, devolviendo SIEMPRE la misma referencia mientras
+ * los tres valores no cambien.
+ *
+ * Los valores se recalculan en cada llamada, asi que la funcion sigue siendo
+ * exacta: la cache solo decide si reutiliza el objeto anterior o crea uno
+ * nuevo. Eso permite que calculate() compare objetivos por referencia, sin
+ * construir una firma de texto en cada una de sus llamadas.
+ *
+ * Nadie muta el objeto devuelto: las escrituras van a state.domains[..].targets,
+ * que es el origen, no el resultado.
+ */
+const cacheDeObjetivos = new Map();
 
 function getCapabilityTargets(capability) {
   const defaultTarget = normalizeTargetValue(
@@ -803,28 +821,36 @@ function getCapabilityTargets(capability) {
     activeDomainTargets?.[capability] ||
     state.targets?.[capability];
 
-  if (!capabilityTargets) {
-    return {
-      procesos: defaultTarget,
-      tecnologia: defaultTarget,
-      organizacion: defaultTarget,
-    };
+  const procesos = normalizeTargetValue(
+    capabilityTargets?.procesos,
+    defaultTarget,
+  );
+
+  const tecnologia = normalizeTargetValue(
+    capabilityTargets?.tecnologia,
+    defaultTarget,
+  );
+
+  const organizacion = normalizeTargetValue(
+    capabilityTargets?.organizacion,
+    defaultTarget,
+  );
+
+  const guardados = cacheDeObjetivos.get(capability);
+
+  if (
+    guardados &&
+    guardados.procesos === procesos &&
+    guardados.tecnologia === tecnologia &&
+    guardados.organizacion === organizacion
+  ) {
+    return guardados;
   }
 
-  return {
-    procesos: normalizeTargetValue(
-      capabilityTargets.procesos,
-      defaultTarget,
-    ),
-    tecnologia: normalizeTargetValue(
-      capabilityTargets.tecnologia,
-      defaultTarget,
-    ),
-    organizacion: normalizeTargetValue(
-      capabilityTargets.organizacion,
-      defaultTarget,
-    ),
-  };
+  const objetivos = { procesos, tecnologia, organizacion };
+  cacheDeObjetivos.set(capability, objetivos);
+
+  return objetivos;
 }
 
 
@@ -846,126 +872,62 @@ function normalizeItem(item) {
   };
 }
 
-function toScore(value) {
-  const number = Number(value);
-  return Number.isInteger(number) && number >= 1 && number <= 5 ? number : null;
-}
-
-
+/**
+ * Metricas de una subcapacidad.
+ *
+ * El resultado depende solo de los tres scores del item y de los tres
+ * objetivos de su capacidad, asi que se guarda hasta que alguno de esos seis
+ * valores cambia. No hay que invalidar la cache a mano en ningun sitio: si un
+ * score o un objetivo cambia, la comparacion falla y se recalcula.
+ *
+ * Antes se llamaba ocho veces por item y render —una por vista, mas las de
+ * getVisibleItems— repitiendo exactamente el mismo trabajo.
+ */
+const cacheDeCalculo = new WeakMap();
 
 function calculate(item) {
   const capabilityTargets = getCapabilityTargets(
     item.capacidad,
   );
 
-  const scoredLevers = LEVERS
-    .map((lever) => {
-      const score = item.scores[lever.key];
-      const target = normalizeTargetValue(
-        capabilityTargets[lever.key],
-        DEFAULT_TARGET_MATURITY,
-      );
+  const guardado = cacheDeCalculo.get(item);
 
-      if (!Number.isFinite(score)) {
-        return null;
-      }
-
-      return {
-        lever: lever.key,
-        score,
-        target,
-        gap: round2(
-          Math.max(0, target - score),
-        ),
-      };
-    })
-    .filter(Boolean);
-
-  if (!scoredLevers.length) {
-    return {
-      isPending: true,
-      scoreMedio: null,
-      targetMedio: null,
-      nivel: "",
-      gap: null,
-      gaps: {
-        procesos: null,
-        tecnologia: null,
-        organizacion: null,
-      },
-      targets: capabilityTargets,
-      prioridad: "Pendiente",
-      oleada: "Pendiente",
-    };
+  if (
+    guardado &&
+    guardado.objetivos === capabilityTargets &&
+    guardado.procesos === item.scores.procesos &&
+    guardado.tecnologia === item.scores.tecnologia &&
+    guardado.organizacion === item.scores.organizacion
+  ) {
+    return guardado.metricas;
   }
 
-  const scoreMedio = average(
-    scoredLevers.map((entry) => entry.score),
-  );
+  const metricas = calcularMetricas(item, capabilityTargets);
 
-  const targetMedio = average(
-    scoredLevers.map((entry) => entry.target),
-  );
-
-  const gap = average(
-    scoredLevers.map((entry) => entry.gap),
-  );
-
-  const gaps = {
-    procesos: null,
-    tecnologia: null,
-    organizacion: null,
-  };
-
-  scoredLevers.forEach((entry) => {
-    gaps[entry.lever] = entry.gap;
+  cacheDeCalculo.set(item, {
+    objetivos: capabilityTargets,
+    procesos: item.scores.procesos,
+    tecnologia: item.scores.tecnologia,
+    organizacion: item.scores.organizacion,
+    metricas,
   });
 
-  const nivel = getMaturityLevel(scoreMedio);
-  const prioridad = priorityFromGap(gap);
-
-  const oleada =
-    prioridad === "Alta"
-      ? "Oleada 1"
-      : prioridad === "Media"
-        ? "Oleada 2"
-        : "Oleada 3";
-
-  return {
-    isPending: false,
-    scoreMedio,
-    targetMedio,
-    nivel,
-    gap,
-    gaps,
-    targets: capabilityTargets,
-    prioridad,
-    oleada,
-  };
+  return metricas;
 }
 
 
-
-function getMaturityLevel(score) {
-  if (score < 1.5) return "1 - Inicial";
-  if (score < 2.5) return "2 - Estructurado";
-  if (score < 3.5) return "3 - Estandarizado";
-  if (score < 4.5) return "4 - Optimizado";
-  return "5 - Avanzado/Referente";
-}
-
-
-function getMaturityLevelNumber(score) {
-  if (!Number.isFinite(score)) {
-    return null;
-  }
-
-  return Math.max(1, Math.min(5, Math.round(score)));
-}
-
-
-function round2(value) {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
+/**
+ * Agregacion por capacidad con el estado de la aplicacion.
+ *
+ * La aritmetica esta en el motor; aqui solo se le dice de donde salen las
+ * metricas —de calculate(), con cache— y los objetivos de cada capacidad.
+ */
+function agregarPorCapacidad(items) {
+  return agregarPorCapacidadCore(
+    items,
+    calculate,
+    getCapabilityTargets,
+  );
 }
 
 
@@ -1765,28 +1727,58 @@ function getScopeSummary() {
 }
 
 
+/**
+ * El texto sobre el que busca el buscador, armado una sola vez por
+ * subcapacidad.
+ *
+ * Sale de campos que vienen del JSON y no se editan nunca, asi que basta con
+ * guardarlo. Antes se recomponia —ocho campos, un toList por preguntas, un join
+ * y un toLowerCase— para cada item y en cada una de las llamadas a
+ * getVisibleItems, incluso cuando el buscador estaba vacio.
+ */
+const cacheDeTextoBuscable = new WeakMap();
+
+function getTextoBuscable(item) {
+  const guardado = cacheDeTextoBuscable.get(item);
+
+  if (guardado !== undefined) {
+    return guardado;
+  }
+
+  const texto = [
+    item.capacidad,
+    item.subcapacidad,
+    getItemObjective(item),
+    getItemQuestions(item).join(" "),
+    getItemEvidenceText(item),
+    item.iniciativaSugerida,
+    item.ai?.cases,
+    item.ai?.advanced,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  cacheDeTextoBuscable.set(item, texto);
+
+  return texto;
+}
+
+
 function getVisibleItems() {
   const capacity = els.capacityFilter.value;
   const priority = els.priorityFilter.value;
   const query = els.searchInput.value.trim().toLowerCase();
 
   return state.items.filter((item) => {
-    const metrics = calculate(item);
-    const matchesCapacity = capacity === "all" || item.capacidad === capacity;
-    const matchesPriority = priority === "all" || metrics.prioridad === priority;
-    const haystack = [
-      item.capacidad,
-      item.subcapacidad,
-      getItemObjective(item),
-      getItemQuestions(item).join(" "),
-      getItemEvidenceText(item),
-      item.iniciativaSugerida,
-      item.ai?.cases,
-      item.ai?.advanced,
-    ]
-      .join(" ")
-      .toLowerCase();
-    return matchesCapacity && matchesPriority && (!query || haystack.includes(query));
+    if (capacity !== "all" && item.capacidad !== capacity) {
+      return false;
+    }
+
+    if (priority !== "all" && calculate(item).prioridad !== priority) {
+      return false;
+    }
+
+    return !query || getTextoBuscable(item).includes(query);
   });
 }
 
@@ -1974,102 +1966,45 @@ function barRow(label, value, width, color) {
 
 
 function renderSummaryTable() {
-  const scopedItems = getScopedItems();
-
-  const capacities = unique(
-    scopedItems.map((item) => item.capacidad),
-  );
-
-  const rows = capacities.map((capability) => {
-    const items = scopedItems.filter(
-      (item) => item.capacidad === capability,
-    );
-
-    const entries = items.map((item) => ({
-      item,
-      metrics: calculate(item),
-    }));
-
-    const scored = entries.filter(
-      (entry) => !entry.metrics.isPending,
-    );
-
-    const scoreMedio = average(
-      scored.map(
-        (entry) => entry.metrics.scoreMedio,
-      ),
-    );
-
-    const targetMedio = average(
-      scored.map(
-        (entry) => entry.metrics.targetMedio,
-      ),
-    );
-
-    const gap = average(
-      scored.map(
-        (entry) => entry.metrics.gap,
-      ),
-    );
-
-    const prioridad = priorityFromGap(gap);
-
-    return `
+  const rows = agregarPorCapacidad(getScopedItems()).map(
+    (capacidad) => `
       <tr>
-        <td>${escapeHtml(capability)}</td>
+        <td>${escapeHtml(capacidad.capacidad)}</td>
 
         <td class="number">
-          ${formatNumber(
-            average(
-              items
-                .map((item) => item.scores.procesos)
-                .filter(Number.isFinite),
-            ),
-          )}
+          ${formatNumber(capacidad.procesos)}
         </td>
 
         <td class="number">
-          ${formatNumber(
-            average(
-              items
-                .map((item) => item.scores.tecnologia)
-                .filter(Number.isFinite),
-            ),
-          )}
+          ${formatNumber(capacidad.tecnologia)}
         </td>
 
         <td class="number">
-          ${formatNumber(
-            average(
-              items
-                .map((item) => item.scores.organizacion)
-                .filter(Number.isFinite),
-            ),
-          )}
+          ${formatNumber(capacidad.organizacion)}
         </td>
 
         <td class="number">
-          ${formatNumber(scoreMedio)}
+          ${formatNumber(capacidad.scoreMedio)}
         </td>
 
         <td class="number">
-          ${formatNumber(targetMedio)}
+          ${formatNumber(capacidad.targetMedio)}
         </td>
 
         <td class="number">
-          ${formatNumber(gap)}
+          ${formatNumber(capacidad.gap)}
         </td>
 
         <td>
-          ${priorityBadge(prioridad)}
+          ${priorityBadge(capacidad.prioridad)}
         </td>
 
         <td class="number">
-          ${scored.length}/${items.length}
+          ${capacidad.evaluadas}/${capacidad.total}
         </td>
       </tr>
-    `;
-  });
+    `,
+  );
 
   els.summaryTable.innerHTML = `
     <thead>
@@ -2958,19 +2893,18 @@ function actualizarTarjetaDeAssessment(item) {
 
 
 function renderHeatmap() {
-  const visibleItems = getVisibleItems();
-  const capabilityRows = buildHeatmapCapabilityRows(visibleItems);
+  const capabilityRows = agregarPorCapacidad(getScopedItems());
 
   const rows = capabilityRows
     .map((entry) => {
-      const isExpanded = expandedHeatmapCapabilities.has(entry.capability);
+      const isExpanded = expandedHeatmapCapabilities.has(entry.capacidad);
 
       const detailRows = entry.items
-        .map((item) => {
-          const metrics = calculate(item);
+        .map((item, indice) => {
+          const metrics = entry.metricas[indice];
 
           return `
-            <tr class="heatmap-detail-row ${isExpanded ? "" : "is-hidden"}" data-capability-detail="${escapeAttr(entry.capability)}">
+            <tr class="heatmap-detail-row ${isExpanded ? "" : "is-hidden"}" data-capability-detail="${escapeAttr(entry.capacidad)}">
               <td class="heatmap-detail-capability">${escapeHtml(item.capacidad)}</td>
               <td>${escapeHtml(item.subcapacidad)}</td>
               ${LEVERS.map((lever) => heatScoreCell(item.scores[lever.key])).join("")}
@@ -2985,13 +2919,13 @@ function renderHeatmap() {
       return `
         <tr class="heatmap-capability-row">
           <td>
-            <strong>${escapeHtml(entry.capability)}</strong>
+            <strong>${escapeHtml(entry.capacidad)}</strong>
           </td>
           <td>
             <button
               class="heatmap-toggle"
               type="button"
-              data-capability-toggle="${escapeAttr(entry.capability)}"
+              data-capability-toggle="${escapeAttr(entry.capacidad)}"
               aria-expanded="${String(isExpanded)}"
             >
               ${isExpanded ? "Ocultar subcapacidades" : `Ver subcapacidades (${entry.items.length})`}
@@ -3043,78 +2977,6 @@ function renderHeatmap() {
 
 
 
-function buildHeatmapCapabilityRows(items) {
-  const capabilities = unique(
-    items.map((item) => item.capacidad),
-  );
-
-  return capabilities.map((capability) => {
-    const capabilityItems = items.filter(
-      (item) => item.capacidad === capability,
-    );
-
-    const calculatedItems = capabilityItems.map(
-      (item) => calculate(item),
-    );
-
-    const scoredItems = calculatedItems.filter(
-      (metrics) => !metrics.isPending,
-    );
-
-    const procesos = average(
-      capabilityItems
-        .map((item) => item.scores.procesos)
-        .filter(Number.isFinite),
-    );
-
-    const tecnologia = average(
-      capabilityItems
-        .map((item) => item.scores.tecnologia)
-        .filter(Number.isFinite),
-    );
-
-    const organizacion = average(
-      capabilityItems
-        .map((item) => item.scores.organizacion)
-        .filter(Number.isFinite),
-    );
-
-    const scoreMedio = average(
-      scoredItems.map(
-        (metrics) => metrics.scoreMedio,
-      ),
-    );
-
-    const targetMedio = average(
-      scoredItems.map(
-        (metrics) => metrics.targetMedio,
-      ),
-    );
-
-    const gap = average(
-      scoredItems.map(
-        (metrics) => metrics.gap,
-      ),
-    );
-
-    const prioridad = priorityFromGap(gap);
-
-    return {
-      capability,
-      items: capabilityItems,
-      procesos,
-      tecnologia,
-      organizacion,
-      scoreMedio,
-      targetMedio,
-      gap,
-      prioridad,
-    };
-  });
-}
-
-
-
 function handleHeatmapToggle(event) {
   const button = event.currentTarget;
   const capability = button.dataset.capabilityToggle;
@@ -3143,8 +3005,8 @@ function handleHeatmapToggle(event) {
 
 
 function handleHeatmapExpandToggleAll() {
-  const capabilityRows = buildHeatmapCapabilityRows(getVisibleItems());
-  const visibleCapabilities = capabilityRows.map((entry) => entry.capability);
+  const capabilityRows = agregarPorCapacidad(getScopedItems());
+  const visibleCapabilities = capabilityRows.map((entry) => entry.capacidad);
 
   if (!visibleCapabilities.length) {
     return;
@@ -3172,7 +3034,7 @@ function updateHeatmapExpandAllButton(capabilityRows) {
     return;
   }
 
-  const visibleCapabilities = capabilityRows.map((entry) => entry.capability);
+  const visibleCapabilities = capabilityRows.map((entry) => entry.capacidad);
   const allExpanded =
     visibleCapabilities.length > 0 &&
     visibleCapabilities.every((capability) => expandedHeatmapCapabilities.has(capability));
@@ -3565,14 +3427,6 @@ function guardarCampoDeRoadmap(item, campo, valor) {
 }
 
 
-/** Recorta un campo de texto al límite que admiten las reglas de Firebase. */
-function recortarAlLimite(campo, valor) {
-  const limite = LIMITES_DE_TEXTO[campo];
-  const texto = String(valor ?? "");
-
-  return limite ? texto.slice(0, limite) : texto;
-}
-
 function heatScoreCell(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) {
@@ -3592,34 +3446,6 @@ function priorityBadge(priority) {
   const safePriority = priority || "Pendiente";
   return `<span class="priority-badge ${safePriority.toLowerCase()}">${escapeHtml(safePriority)}</span>`;
 }
-
-function priorityColor(priority) {
-  return COLOR_DE_PRIORIDAD[priority] || COLOR_DE_PRIORIDAD.Pendiente;
-}
-
-function priorityFromGap(gap) {
-  if (!Number.isFinite(gap)) return "Pendiente";
-  if (gap >= 2) return "Alta";
-  if (gap >= 1) return "Media";
-  return "Baja";
-}
-
-function average(values) {
-  const clean = values.filter((value) => Number.isFinite(value));
-  if (!clean.length) return null;
-  return round2(clean.reduce((sum, value) => sum + value, 0) / clean.length);
-}
-
-function formatNumber(value) {
-  if (!Number.isFinite(value)) return "-";
-  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0$/, "").replace(/\.0$/, "");
-}
-
-function unique(values) {
-  return [...new Set(values)];
-}
-
-
 
 /**
  * El almacenamiento del navegador puede fallar y no es motivo para caerse.
@@ -3778,7 +3604,10 @@ async function initializeSharedScenario() {
     isApplyingRemoteScenario = true;
 
     try {
-      applyScenarioPayload(remoteScenario);
+      // Al abrir el enlace si tiene sentido ir al dominio del escenario.
+      applyScenarioPayload(remoteScenario, {
+        seguirDominioDelEscenario: true,
+      });
 
       escribirAlmacenamiento(
         STORAGE_KEY,
@@ -4171,7 +4000,10 @@ function applyStoredScenario() {
 
   try {
     const payload = JSON.parse(stored);
-    applyScenarioPayload(payload);
+    // Al arrancar se vuelve al dominio en el que se estaba trabajando.
+    applyScenarioPayload(payload, {
+      seguirDominioDelEscenario: true,
+    });
   } catch (error) {
     console.warn("No se pudo aplicar el escenario local.", error);
   }
@@ -4365,15 +4197,22 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
     }
 
     if (status !== undefined) {
-      item.status = status;
+      // Las reglas admiten cualquier texto de 40 caracteres, pero la
+      // herramienta solo sabe pintar cuatro estados: un valor de fuera dejaba
+      // el select en blanco, y si era largo tumbaba la escritura entera.
+      item.status = normalizarEstado(status);
     }
 
     if (comentario !== undefined) {
       item.comentario = recortarAlLimite("comentario", comentario);
     }
 
-    if (savedItem.lastEditedBy) {
-      item.lastEditedBy = savedItem.lastEditedBy;
+    // Las reglas de autoria declaran "$otroCampoAutoria": false: un campo
+    // inventado dentro de lastEditedBy tumbaba tambien la escritura entera.
+    const autoria = normalizarAutoria(savedItem.lastEditedBy);
+
+    if (autoria) {
+      item.lastEditedBy = autoria;
     }
   });
 
@@ -4389,8 +4228,23 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
  * Devuelve cuántas subcapacidades ha reconocido: sin ese dato, una importación
  * que no casaba con nada terminaba igualmente en "Escenario importado
  * correctamente".
+ *
+ * `seguirDominioDelEscenario` solo debe ser true al CARGAR un escenario: al
+ * abrir un enlace compartido, al restaurar la copia local o al abrir un
+ * archivo. Nunca en una actualizacion en vivo.
+ *
+ * El motivo: el payload lleva un activeDomainId, y las escrituras granulares
+ * —que son las de puntuar— no lo actualizan nunca. Asi que en un escenario
+ * compartido el valor guardado se quedaba en el dominio de la primera
+ * escritura completa. Cada puntuacion volvia por Firebase como snapshot, se
+ * aplicaba, y devolvia a quien estuviera puntuando al dominio de entonces:
+ * puntuar en Tesoreria te dejaba en FP&A.
+ *
+ * Y aunque se actualizara, seguiria estando mal: el dominio que cada persona
+ * mira es suyo, no del escenario. Dos consultores trabajando en dominios
+ * distintos se arrastrarian el uno al otro en cada puntuacion.
  */
-function applyScenarioPayload(payload) {
+function applyScenarioPayload(payload, { seguirDominioDelEscenario = false } = {}) {
   const resultado = { aplicadas: 0, total: 0, dominios: 0 };
 
   if (!payload) {
@@ -4430,10 +4284,18 @@ function applyScenarioPayload(payload) {
       );
     });
 
-    if (payload.activeDomainId && state.domains[payload.activeDomainId]) {
-      setActiveDomain(payload.activeDomainId);
-    } else if (state.domains[state.activeDomainId]) {
-      setActiveDomain(state.activeDomainId);
+    // Se vuelve a fijar el dominio activo en cualquier caso: aplicar el
+    // escenario reasigna domain.targets, y state.targets debe volver a
+    // apuntar al objeto nuevo. Lo que cambia es CUAL, no si se hace.
+    const dominioDestino =
+      seguirDominioDelEscenario &&
+      payload.activeDomainId &&
+      state.domains[payload.activeDomainId]
+        ? payload.activeDomainId
+        : state.activeDomainId;
+
+    if (state.domains[dominioDestino]) {
+      setActiveDomain(dominioDestino);
     }
 
     return resultado;
@@ -4585,7 +4447,24 @@ async function importScenario(event) {
   reader.onload = () => {
     try {
       const payload = JSON.parse(reader.result);
-      const resultado = applyScenarioPayload(payload);
+
+      // Se revisa ANTES de aplicar nada. Un archivo que no es un escenario ya
+      // no llega a tocar los datos cargados, y lo que si se puede arreglar al
+      // vuelo se cuenta en vez de corregirse en silencio.
+      const revision = revisarEscenario(payload);
+
+      if (!revision.valido) {
+        showNotice(
+          `No se ha importado nada. ${revision.motivo}`,
+          "error",
+        );
+
+        return;
+      }
+
+      const resultado = applyScenarioPayload(payload, {
+        seguirDominioDelEscenario: true,
+      });
 
       if (!resultado.aplicadas) {
         showNotice(
@@ -4609,10 +4488,14 @@ async function importScenario(event) {
           ? ` ${resultado.total - resultado.aplicadas} del archivo no corresponden a ninguna subcapacidad y se han ignorado.`
           : "";
 
+      const corregido = revision.problemas.length
+        ? ` Se ha corregido lo siguiente al importar: ${revision.problemas.join("; ")}.`
+        : "";
+
       showNotice(
         `Escenario importado: ${resultado.aplicadas} subcapacidades actualizadas en ` +
-          `${resultado.dominios} ${resultado.dominios === 1 ? "dominio" : "dominios"}.${parciales}`,
-        "exito",
+          `${resultado.dominios} ${resultado.dominios === 1 ? "dominio" : "dominios"}.${parciales}${corregido}`,
+        revision.problemas.length ? "aviso" : "exito",
       );
     } catch (error) {
       showNotice(
@@ -4838,76 +4721,20 @@ function buildEnhancedPdfReportData() {
 }
 
 function buildPdfSummaryRowsFromItems(items) {
-  const capabilities = unique(
-    items.map((item) => item.capacidad),
-  );
-
-  return capabilities.map((capability) => {
-    const capabilityItems = items.filter(
-      (item) => item.capacidad === capability,
-    );
-
-    const calculatedItems =
-      capabilityItems.map(calculate);
-
-    const scoredItems = calculatedItems.filter(
-      (metrics) => !metrics.isPending,
-    );
-
-    const procesos = average(
-      capabilityItems
-        .map((item) => item.scores.procesos)
-        .filter(Number.isFinite),
-    );
-
-    const tecnologia = average(
-      capabilityItems
-        .map((item) => item.scores.tecnologia)
-        .filter(Number.isFinite),
-    );
-
-    const organizacion = average(
-      capabilityItems
-        .map((item) => item.scores.organizacion)
-        .filter(Number.isFinite),
-    );
-
-    const scoreMedio = average(
-      scoredItems.map(
-        (metrics) => metrics.scoreMedio,
-      ),
-    );
-
-    const targetMedio = average(
-      scoredItems.map(
-        (metrics) => metrics.targetMedio,
-      ),
-    );
-
-    const gap = average(
-      scoredItems.map(
-        (metrics) => metrics.gap,
-      ),
-    );
-
-    const prioridad = priorityFromGap(gap);
-    const targets = getCapabilityTargets(capability);
-
-    return {
-      capacidad: capability,
-      procesos,
-      objetivoProcesos: targets.procesos,
-      tecnologia,
-      objetivoTecnologia: targets.tecnologia,
-      organizacion,
-      objetivoOrganizacion: targets.organizacion,
-      scoreMedio,
-      targetMedio,
-      gap,
-      prioridad,
-      avance: `${scoredItems.length}/${capabilityItems.length}`,
-    };
-  });
+  return agregarPorCapacidad(items).map((capacidad) => ({
+    capacidad: capacidad.capacidad,
+    procesos: capacidad.procesos,
+    objetivoProcesos: capacidad.objetivos.procesos,
+    tecnologia: capacidad.tecnologia,
+    objetivoTecnologia: capacidad.objetivos.tecnologia,
+    organizacion: capacidad.organizacion,
+    objetivoOrganizacion: capacidad.objetivos.organizacion,
+    scoreMedio: capacidad.scoreMedio,
+    targetMedio: capacidad.targetMedio,
+    gap: capacidad.gap,
+    prioridad: capacidad.prioridad,
+    avance: `${capacidad.evaluadas}/${capacidad.total}`,
+  }));
 }
 
 
@@ -4956,858 +4783,37 @@ function getCanvasImageDataUrl(canvas) {
 }
 
 
-function buildEnhancedPdfReportHtml(data) {
-  return `
-    <!doctype html>
-    <html lang="es">
-      <head>
-        <meta charset="utf-8">
-        <title>Informe ${escapeHtml(data.domainLabel)} Assessment</title>
-        <style>
-          ${getEnhancedPdfReportStyles()}
-        </style>
-      </head>
-      <body>
-        <main class="pdf-report">
-          ${buildPdfEnhancedCover(data)}
-          ${buildPdfEnhancedExecutiveSummary(data)}
-          ${buildPdfEnhancedVisualSummarySection(data)}
-          ${buildPdfEnhancedRadarSection(data)}
-          ${buildPdfEnhancedSummarySection(data)}
-          ${buildPdfEnhancedHeatmapSection(data)}
-          ${buildPdfEnhancedPrioritiesSection(data)}
-          ${buildPdfEnhancedRoadmapSection(data)}
-          ${buildPdfEnhancedCommentsSection(data)}
-        </main>
-      </body>
-    </html>
-  `;
-}
-
-
-function buildPdfEnhancedCover(data) {
-  return `
-    <section class="pdf-page pdf-cover">
-      <div class="pdf-cover-accent"></div>
-      <p class="pdf-eyebrow">Finance Strategy · F3M Assessment</p>
-        <h1>Informe preliminar de madurez · ${escapeHtml(data.domainLabel)}</h1>
-      <p class="pdf-subtitle">
-        Resultados del assessment, gaps principales, visualizaciones y roadmap de iniciativas sugeridas.
-      </p>
-
-      <div class="pdf-meta-grid">
-        <div>
-          <span>Dominio analizado</span>
-          <strong>${escapeHtml(data.domainLabel)}</strong>
-        </div>
-        <div>
-          <span>Fecha de generación</span>
-          <strong>${escapeHtml(data.generatedAt)}</strong>
-        </div>
-        <div>
-          <span>Origen de los datos</span>
-          <strong>${escapeHtml(data.scenarioLabel)}</strong>
-        </div>
-        <div>
-          <span>Filtros aplicados</span>
-          <strong>${escapeHtml(data.filters)}</strong>
-        </div>
-        <div>
-          <span>Objetivo base</span>
-          <strong>${escapeHtml(String(data.targetMaturity))}</strong>
-        </div>
-      </div>
-    </section>
-  `;
-}
-
-
-function buildPdfEnhancedExecutiveSummary(data) {
-  return `
-    <section class="pdf-page">
-      <h2>1. Resumen ejecutivo</h2>
-      <p class="pdf-intro">
-        Este informe resume la lectura actual del assessment del dominio
-        ${escapeHtml(data.domainLabel)}. Los resultados reflejan los filtros activos
-        en la herramienta en el momento de la exportación.
-      </p>
-
-      <div class="pdf-kpi-grid">
-        <article>
-          <span>Score global</span>
-          <strong>${escapeHtml(formatNumber(data.scoreGlobal))}</strong>
-        </article>
-        <article>
-          <span>Gap medio</span>
-          <strong>${escapeHtml(formatNumber(data.gapMedio))}</strong>
-        </article>
-        <article>
-          <span>Subcapacidades puntuadas</span>
-          <strong>${data.scored.length}/${data.visibleItems.length}</strong>
-        </article>
-        <article>
-          <span>Prioridad alta</span>
-          <strong>${data.highCount}</strong>
-        </article>
-      </div>
-    </section>
-  `;
-}
-
-
-function buildPdfEnhancedVisualSummarySection(data) {
-  const priorityRows = buildPdfPriorityBars(data);
-  const leverRows = buildPdfLeverBars(data);
-
-  return `
-    <section class="pdf-page">
-      <h2>2. Visualización ejecutiva</h2>
-      <p class="pdf-intro">
-        Resumen visual de prioridades y puntuación promedio por palanca, calculado sobre los datos visibles según los filtros activos.
-      </p>
-
-      <div class="pdf-visual-grid">
-        <article class="pdf-visual-card">
-          <h3>Prioridad por subcapacidad</h3>
-          <div class="pdf-bars">
-            ${priorityRows}
-          </div>
-        </article>
-
-        <article class="pdf-visual-card">
-          <h3>Promedio por palanca</h3>
-          <div class="pdf-bars">
-            ${leverRows}
-          </div>
-        </article>
-      </div>
-    </section>
-  `;
-}
-
-function buildPdfPriorityBars(data) {
-  const counts = {
-    Alta: data.metrics.filter((entry) => entry.metrics.prioridad === "Alta").length,
-    Media: data.metrics.filter((entry) => entry.metrics.prioridad === "Media").length,
-    Baja: data.metrics.filter((entry) => entry.metrics.prioridad === "Baja").length,
-    Pendiente: data.metrics.filter((entry) => entry.metrics.isPending).length,
-  };
-
-  const maxValue = Math.max(...Object.values(counts), 1);
-
-  return Object.entries(counts)
-    .map(([label, value]) => buildPdfBarRow(label, value, maxValue, getPdfPriorityColor(label)))
-    .join("");
-}
-
-function buildPdfLeverBars(data) {
-  const procesos = average(
-    data.visibleItems.map((item) => item.scores.procesos).filter(Number.isFinite),
-  );
-  const tecnologia = average(
-    data.visibleItems.map((item) => item.scores.tecnologia).filter(Number.isFinite),
-  );
-  const organizacion = average(
-    data.visibleItems.map((item) => item.scores.organizacion).filter(Number.isFinite),
-  );
-
-  const rows = [
-    ["Procesos", procesos, COLOR_DE_PALANCA.procesos],
-    ["Tecnología", tecnologia, COLOR_DE_PALANCA.tecnologia],
-    ["Organización", organizacion, COLOR_DE_PALANCA.organizacion],
-  ];
-
-  return rows
-    .map(([label, value, color]) => buildPdfBarRow(label, value ?? 0, 5, color, formatNumber(value)))
-    .join("");
-}
-
-function buildPdfBarRow(label, value, maxValue, color, displayValue = value) {
-  const width = maxValue ? Math.max(0, Math.min(100, (value / maxValue) * 100)) : 0;
-
-  return `
-    <div class="pdf-bar-row">
-      <div class="pdf-bar-label">
-        <span>${escapeHtml(label)}</span>
-        <strong>${escapeHtml(String(displayValue))}</strong>
-      </div>
-      <div class="pdf-bar-track">
-        <div class="pdf-bar-fill" style="width:${width}%; background:${color};"></div>
-      </div>
-    </div>
-  `;
-}
-
-function getPdfPriorityColor(priority) {
-  return priorityColor(priority);
-}
-
-
-
-function buildPdfEnhancedRadarSection(data) {
-  const radarCards = [
-    { title: "Procesos", image: data.radarImages.procesos, color: COLOR_DE_PALANCA.procesos },
-    { title: "Tecnología", image: data.radarImages.tecnologia, color: COLOR_DE_PALANCA.tecnologia },
-    { title: "Organización", image: data.radarImages.organizacion, color: COLOR_DE_PALANCA.organizacion },
-  ]
-    .map((radar) => `
-      <article class="pdf-radar-card">
-        <h3>
-          <span style="background:${radar.color}"></span>
-          ${escapeHtml(radar.title)}
-        </h3>
-        ${buildPdfRadarImageHtml(radar)}
-      </article>
-    `)
-    .join("");
-
-  return `
-    <section class="pdf-page">
-      <h2>3. Radar por capacidad</h2>
-      <p class="pdf-intro">
-        Vista comparativa de las puntuaciones promedio por capacidad para Procesos, Tecnología y Organización.
-      </p>
-      <div class="pdf-radar-grid">
-        ${radarCards}
-      </div>
-    </section>
-  `;
-}
-
-function buildPdfRadarImageHtml(radar) {
-  if (!radar.image) {
-    return `<p class="pdf-muted">No se pudo capturar el gráfico ${escapeHtml(radar.title)}.</p>`;
-  }
-
-  return `
-    <img
-      class="pdf-radar-image"
-      src="${escapeAttr(radar.image)}"
-      alt="Radar de ${escapeAttr(radar.title)} por capacidad"
-    >
-  `;
-}
-
-
-
-function buildPdfEnhancedSummarySection(data) {
-  const rows = data.summaryRows
-    .map((row) => `
-      <tr>
-        <td>${escapeHtml(row.capacidad)}</td>
-        <td class="num">${escapeHtml(formatNumber(row.procesos))}</td>
-        <td class="num">${escapeHtml(formatNumber(row.tecnologia))}</td>
-        <td class="num">${escapeHtml(formatNumber(row.organizacion))}</td>
-        <td class="num">
-          ${escapeHtml(formatNumber(row.scoreMedio))}
-        </td>
-
-        <td class="num">
-          ${escapeHtml(formatNumber(row.targetMedio))}
-        </td>
-
-        <td class="num">
-          ${escapeHtml(formatNumber(row.gap))}
-        </td>
-        <td>${escapeHtml(row.prioridad)}</td>
-        <td class="num">${escapeHtml(row.avance)}</td>
-      </tr>
-    `)
-    .join("");
-
-  return `
-    <section class="pdf-page">
-      <h2>4. Resumen por capacidad</h2>
-      <table class="pdf-table">
-        <thead>
-          <tr>
-            <th>Capacidad</th>
-            <th>Procesos</th>
-            <th>Tecnología</th>
-            <th>Organización</th>
-            <th>Score medio</th>
-            <th>Objetivo medio</th>
-            <th>Gap vs objetivo</th>
-            <th>Prioridad</th>
-            <th>Avance</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows || `<tr><td colspan="9">No hay datos para los filtros actuales.</td></tr>`}
-        </tbody>
-      </table>
-    </section>
-  `;
-}
-
-function buildPdfEnhancedHeatmapSection(data) {
-  const rows = data.metrics
-    .map(({ item, metrics }) => `
-      <tr>
-        <td>${escapeHtml(item.capacidad)}</td>
-        <td>${escapeHtml(item.subcapacidad)}</td>
-        <td class="heat ${pdfHeatClass(item.scores.procesos)}">${escapeHtml(formatNumber(item.scores.procesos))}</td>
-        <td class="heat ${pdfHeatClass(item.scores.tecnologia)}">${escapeHtml(formatNumber(item.scores.tecnologia))}</td>
-        <td class="heat ${pdfHeatClass(item.scores.organizacion)}">${escapeHtml(formatNumber(item.scores.organizacion))}</td>
-        <td class="heat ${pdfHeatClass(metrics.scoreMedio)}">${escapeHtml(formatNumber(metrics.scoreMedio))}</td>
-        <td class="num">${escapeHtml(formatNumber(metrics.gap))}</td>
-        <td>${escapeHtml(metrics.prioridad)}</td>
-      </tr>
-    `)
-    .join("");
-
-  return `
-    <section class="pdf-page">
-      <h2>5. Heatmap por subcapacidad</h2>
-      <p class="pdf-intro">
-        Vista detallada de madurez por subcapacidad y por pilar, respetando los filtros activos de la herramienta.
-      </p>
-      <table class="pdf-table pdf-heatmap pdf-compact-table">
-        <thead>
-          <tr>
-            <th>Capacidad</th>
-            <th>Subcapacidad</th>
-            <th>Procesos</th>
-            <th>Tecnología</th>
-            <th>Organización</th>
-            <th>Score medio</th>
-            <th>Gap</th>
-            <th>Prioridad</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows || `<tr><td colspan="8">No hay datos para los filtros actuales.</td></tr>`}
-        </tbody>
-      </table>
-    </section>
-  `;
-}
-
-function pdfHeatClass(value) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number)) {
-    return "heat-blank";
-  }
-
-  if (number < 1.5) return "heat-1";
-  if (number < 2.5) return "heat-2";
-  if (number < 3.5) return "heat-3";
-  if (number < 4.5) return "heat-4";
-  return "heat-5";
-}
-
-function buildPdfEnhancedPrioritiesSection(data) {
-  const rows = data.topPriorities
-    .map(({ item, metrics }) => `
-      <tr>
-        <td>${escapeHtml(item.capacidad)}</td>
-        <td>${escapeHtml(item.subcapacidad)}</td>
-        <td class="num">${escapeHtml(formatNumber(metrics.scoreMedio))}</td>
-        <td class="num">${escapeHtml(formatNumber(metrics.gap))}</td>
-        <td>${escapeHtml(metrics.prioridad)}</td>
-        <td>${escapeHtml(metrics.oleada)}</td>
-      </tr>
-    `)
-    .join("");
-
-  return `
-    <section class="pdf-page">
-      <h2>6. Principales prioridades y gaps</h2>
-      <table class="pdf-table">
-        <thead>
-          <tr>
-            <th>Capacidad</th>
-            <th>Subcapacidad</th>
-            <th>Score</th>
-            <th>Gap</th>
-            <th>Prioridad</th>
-            <th>Oleada</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows || `<tr><td colspan="6">No hay prioridades para los filtros actuales.</td></tr>`}
-        </tbody>
-      </table>
-    </section>
-  `;
-}
-
-function buildPdfEnhancedRoadmapSection(data) {
-  const rows = data.roadmapItems
-    .map(({ item, metrics }) => `
-      <tr>
-        <td>${escapeHtml(item.capacidad)}</td>
-        <td>${escapeHtml(item.subcapacidad)}</td>
-        <td>${escapeHtml(metrics.prioridad)}</td>
-        <td>${escapeHtml(metrics.oleada)}</td>
-        <td>${escapeHtml(item.iniciativaSugerida)}</td>
-        <td>${escapeHtml(item.owner || "-")}</td>
-        <td>${escapeHtml(item.status || "-")}</td>
-      </tr>
-    `)
-    .join("");
-
-  return `
-    <section class="pdf-page">
-      <h2>7. Roadmap e iniciativas sugeridas</h2>
-      <p class="pdf-intro">
-        Roadmap filtrado según la vista actual de la herramienta, priorizado por gap y criticidad.
-      </p>
-      <table class="pdf-table pdf-roadmap">
-        <thead>
-          <tr>
-            <th>Capacidad</th>
-            <th>Subcapacidad</th>
-            <th>Prioridad</th>
-            <th>Oleada</th>
-            <th>Iniciativa sugerida</th>
-            <th>Responsable</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows || `<tr><td colspan="7">No hay iniciativas para los filtros actuales.</td></tr>`}
-        </tbody>
-      </table>
-    </section>
-  `;
-}
-
-function buildPdfEnhancedCommentsSection(data) {
-  if (!data.commentItems.length) {
-    return `
-      <section class="pdf-page">
-        <h2>8. Comentarios y hallazgos</h2>
-        <p class="pdf-muted">No hay comentarios registrados para los filtros actuales.</p>
-      </section>
-    `;
-  }
-
-  const cards = data.commentItems
-    .map((item) => `
-      <article class="pdf-comment-card">
-        <h3>${escapeHtml(item.capacidad)}</h3>
-        <p><strong>${escapeHtml(item.subcapacidad)}</strong></p>
-        <p>${escapeHtml(item.comentario)}</p>
-      </article>
-    `)
-    .join("");
-
-  return `
-    <section class="pdf-page">
-      <h2>8. Comentarios y hallazgos</h2>
-      <div class="pdf-comments-grid">
-        ${cards}
-      </div>
-    </section>
-  `;
-}
-
-function getEnhancedPdfReportStyles() {
-  return `
-    @page {
-      size: A4 landscape;
-      margin: 14mm;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      color: #161a18;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: #f3f5f0;
-      line-height: 1.42;
-      font-size: 10pt;
-    }
-
-    .pdf-report {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 24px;
-      background: #ffffff;
-    }
-
-    .pdf-page {
-      page-break-after: always;
-      break-after: page;
-      padding: 10mm 0;
-    }
-
-    .pdf-page:last-child {
-      page-break-after: auto;
-      break-after: auto;
-    }
-
-    .pdf-cover {
-      min-height: 170mm;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      position: relative;
-    }
-
-    .pdf-cover-accent {
-      width: 110px;
-      height: 9px;
-      margin-bottom: 26px;
-      background: ${COLOR_DE_MARCA};
-      border-radius: 999px;
-    }
-
-    .pdf-eyebrow {
-      margin: 0 0 10px;
-      color: ${COLOR_DE_MARCA};
-      font-size: 10.5pt;
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin: 0 0 16px;
-      max-width: 820px;
-      font-size: 32pt;
-      line-height: 1.08;
-    }
-
-    h2 {
-      margin: 0 0 14px;
-      padding-bottom: 8px;
-      border-bottom: 3px solid ${COLOR_DE_MARCA};
-      font-size: 18pt;
-    }
-
-    h3 {
-      margin: 0 0 10px;
-      font-size: 12pt;
-    }
-
-    .pdf-subtitle,
-    .pdf-intro,
-    .pdf-muted {
-      color: #5c665e;
-      font-size: 10.5pt;
-    }
-
-    .pdf-meta-grid,
-    .pdf-kpi-grid {
-      display: grid;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .pdf-meta-grid {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-    }
-
-    .pdf-kpi-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-    .pdf-meta-grid div,
-    .pdf-kpi-grid article,
-    .pdf-visual-card,
-    .pdf-radar-card,
-    .pdf-comment-card {
-      padding: 14px;
-      border: 1px solid #d9dfd4;
-      border-radius: 10px;
-      background: #f8faf5;
-    }
-
-    .pdf-meta-grid span,
-    .pdf-kpi-grid span {
-      display: block;
-      margin-bottom: 7px;
-      color: #5c665e;
-      font-size: 8.5pt;
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-
-    .pdf-meta-grid strong,
-    .pdf-kpi-grid strong {
-      display: block;
-      font-size: 15pt;
-    }
-
-    .pdf-meta-grid strong {
-      font-size: 11pt;
-      line-height: 1.3;
-      overflow-wrap: anywhere;
-    }
-
-    .pdf-kpi-grid strong {
-      font-size: 15pt;
-    }
-
-    .pdf-visual-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin-top: 16px;
-    }
-
-    .pdf-bars {
-      display: grid;
-      gap: 12px;
-    }
-
-    .pdf-bar-row {
-      display: grid;
-      gap: 5px;
-    }
-
-    .pdf-bar-label {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 9.5pt;
-      font-weight: 800;
-    }
-
-    .pdf-bar-track {
-      height: 13px;
-      border-radius: 999px;
-      background: #e7ece2;
-      overflow: hidden;
-    }
-
-    .pdf-bar-fill {
-      height: 100%;
-      border-radius: 999px;
-    }
-
-    .pdf-radar-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-top: 14px;
-    }
-
-    .pdf-radar-card {
-      background: #ffffff;
-    }
-
-    .pdf-radar-card h3 {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .pdf-radar-card h3 span {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      display: inline-block;
-    }
-
-
-    .pdf-radar-card img,
-    .pdf-radar-image {
-      width: 100%;
-      max-height: 105mm;
-      object-fit: contain;
-      display: block;
-    }
-
-
-    .pdf-table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-      margin-top: 12px;
-      font-size: 8.8pt;
-      background: #ffffff;
-    }
-
-    .pdf-table th,
-    .pdf-table td {
-      border: 1px solid #d9dfd4;
-      padding: 6px 7px;
-      text-align: left;
-      vertical-align: top;
-      overflow-wrap: anywhere;
-    }
-
-    .pdf-table th {
-      background: #eef2e9;
-      font-size: 8pt;
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-
-    .pdf-compact-table {
-      font-size: 8.2pt;
-    }
-
-    .pdf-table .num {
-      text-align: right;
-    }
-
-    .pdf-heatmap .heat {
-      text-align: center;
-      font-weight: 900;
-    }
-
-    .heat-blank {
-      background: #eef0ed;
-      color: #737a74;
-    }
-
-    .heat-1 {
-      background: #f9d2cc;
-      color: #7d1f19;
-    }
-
-    .heat-2 {
-      background: #ffe5ba;
-      color: #7a4700;
-    }
-
-    .heat-3 {
-      background: #f4efb5;
-      color: #504b00;
-    }
-
-    .heat-4 {
-      background: #d9edc3;
-      color: #315d11;
-    }
-
-    .heat-5 {
-      background: #bfe1ce;
-      color: #0f5132;
-    }
-
-    .pdf-roadmap th:nth-child(5),
-    .pdf-roadmap td:nth-child(5) {
-      width: 32%;
-    }
-
-    .pdf-comments-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .pdf-comment-card {
-      font-size: 9pt;
-    }
-
-    tr {
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-
-    @media print {
-      body {
-        background: #ffffff;
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-      }
-
-      .pdf-report {
-        max-width: none;
-        padding: 0;
-      }
-
-      .pdf-page {
-        padding: 5mm 0;
-      }
-    }
-  `;
-}
-
-
-
-
-
 function buildSummaryRows() {
-  const scopedItems = getScopedItems();
+  return agregarPorCapacidad(getScopedItems()).map((capacidad) => ({
+    Tipo: "Resumen",
+    Capacidad: capacidad.capacidad,
+    Subcapacidad: "",
 
-  return unique(
-    scopedItems.map((item) => item.capacidad),
-  ).map((capability) => {
-    const items = scopedItems.filter(
-      (item) => item.capacidad === capability,
-    );
+    Procesos: capacidad.procesos ?? "",
+    ObjetivoProcesos: capacidad.objetivos.procesos,
 
-    const scored = items
-      .map(calculate)
-      .filter((metrics) => !metrics.isPending);
+    Tecnologia: capacidad.tecnologia ?? "",
+    ObjetivoTecnologia: capacidad.objetivos.tecnologia,
 
-    const scoreMedio = average(
-      scored.map((metrics) => metrics.scoreMedio),
-    );
+    Organizacion: capacidad.organizacion ?? "",
+    ObjetivoOrganizacion: capacidad.objetivos.organizacion,
 
-    const targetMedio = average(
-      scored.map((metrics) => metrics.targetMedio),
-    );
+    ScoreMedio: capacidad.scoreMedio ?? "",
+    ObjetivoMedio: capacidad.targetMedio ?? "",
 
-    const gap = average(
-      scored.map((metrics) => metrics.gap),
-    );
+    Nivel:
+      capacidad.scoreMedio === null
+        ? ""
+        : getMaturityLevel(capacidad.scoreMedio),
 
-    const capabilityTargets =
-      getCapabilityTargets(capability);
-
-    return {
-      Tipo: "Resumen",
-      Capacidad: capability,
-      Subcapacidad: "",
-
-      Procesos:
-        average(
-          items
-            .map((item) => item.scores.procesos)
-            .filter(Number.isFinite),
-        ) ?? "",
-
-      ObjetivoProcesos:
-        capabilityTargets.procesos,
-
-      Tecnologia:
-        average(
-          items
-            .map((item) => item.scores.tecnologia)
-            .filter(Number.isFinite),
-        ) ?? "",
-
-      ObjetivoTecnologia:
-        capabilityTargets.tecnologia,
-
-      Organizacion:
-        average(
-          items
-            .map((item) => item.scores.organizacion)
-            .filter(Number.isFinite),
-        ) ?? "",
-
-      ObjetivoOrganizacion:
-        capabilityTargets.organizacion,
-
-      ScoreMedio: scoreMedio ?? "",
-      ObjetivoMedio: targetMedio ?? "",
-      Nivel:
-        scoreMedio === null
-          ? ""
-          : getMaturityLevel(scoreMedio),
-
-      Gap: gap ?? "",
-      Prioridad: priorityFromGap(gap),
-      Oleada: "",
-      IniciativaSugerida: "",
-      Owner: "",
-      Estado: "",
-      Comentarios: "",
-    };
-  });
+    Gap: capacidad.gap ?? "",
+    Prioridad: capacidad.prioridad,
+    Oleada: "",
+    IniciativaSugerida: "",
+    Owner: "",
+    Estado: "",
+    Comentarios: "",
+  }));
 }
 
 
@@ -6417,18 +5423,4 @@ async function copyScenarioLink() {
       "aviso",
     );
   }
-}
-
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function escapeAttr(value) {
-  return escapeHtml(value);
 }
