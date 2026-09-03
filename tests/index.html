@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pruebas del motor de calculo · F3M Assessment</title>
+  <title>Pruebas · F3M Assessment</title>
   <style>
     :root {
       --verde: #3e6f11;
@@ -86,12 +86,14 @@
 </head>
 <body>
 <main>
-  <h1>Pruebas del motor de calculo</h1>
+  <h1>Pruebas</h1>
 
   <p class="intro">
-    Las reglas F3M de <code>core/calculo.js</code>: gap por palanca, prioridad,
-    oleada, nivel de madurez, subcapacidades pendientes y agregacion por
-    capacidad. No tocan el DOM, ni Firebase, ni el estado de la aplicacion.
+    Las reglas F3M de <code>core/calculo.js</code> —gap por palanca, prioridad,
+    oleada, nivel, pendientes y agregacion— y el contrato de escenario de
+    <code>core/escenario.js</code>, que es el espejo de
+    <code>database.rules.json</code>. No tocan el DOM, ni Firebase, ni el
+    estado de la aplicacion.
   </p>
 
   <div id="resultado">Ejecutando…</div>
@@ -100,7 +102,7 @@
 </main>
 
 <script type="module">
-  import { casos, ejecutarCasos } from "./casos.js";
+  import { casos, ejecutarCasos } from "./runner.js";
 
   const resultado = ejecutarCasos();
   const caja = document.getElementById("resultado");

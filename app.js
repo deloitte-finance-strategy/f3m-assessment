@@ -30,6 +30,18 @@ import {
   unique,
 } from "./core/calculo.js";
 
+// El contrato de un escenario: que campos admite Firebase y con que limites.
+// Espejo de database.rules.json, para no enviar nunca algo que sera rechazado.
+import {
+  ESTADOS_VALIDOS,
+  LIMITES_DE_TEXTO,
+  normalizarAutoria,
+  normalizarEscenarioParaFirebase,
+  normalizarEstado,
+  recortarAlLimite,
+  revisarEscenario,
+} from "./core/escenario.js";
+
 // Configuración de Firebase del proyecto fpa-assessment-mvp
 const firebaseConfig = {
   apiKey: "AIzaSyAyHWPnALB5regOMmeR3C-vVLDTmh6fEio",
@@ -172,16 +184,9 @@ const PRIORITY_ORDER = {
   Pendiente: 4,
 };
 
-const STATUS_OPTIONS = ["No iniciado", "En curso", "Completado", "Bloqueado"];
-
-
-// Límites de longitud de los campos editables del Roadmap. Tienen que coincidir
-// con los de database.rules.json: si el texto los supera, Firebase rechaza la
-// escritura entera y el cambio se pierde. Es preferible impedir escribirlo.
-const LIMITES_DE_TEXTO = {
-  owner: 120,
-  comentario: 2000,
-};
+// Los estados y los limites de longitud de los campos editables los define el
+// contrato del escenario, que es el espejo de database.rules.json.
+const STATUS_OPTIONS = ESTADOS_VALIDOS;
 
 
 const state = {
@@ -739,44 +744,26 @@ function serializeTargetsForFirebase(
 
 
 
+/**
+ * Deja el escenario con exactamente lo que admiten las reglas de Firebase.
+ *
+ * Antes copiaba con spread las claves de la raiz y de cada dominio, asi que un
+ * campo que las reglas no declaran viajaba igualmente y hacia que rechazaran la
+ * escritura ENTERA. Ahora se construye desde cero con los campos permitidos.
+ */
 function sanitizeScenarioForFirebase(payload) {
-  if (!payload || typeof payload !== "object") {
-    return payload;
-  }
-
-  const sanitizedPayload = {
-    ...payload,
-    version: 3,
-    domains: {},
-  };
-
-  Object.entries(
-    payload.domains || {},
-  ).forEach(([domainId, domain]) => {
-    const domainItems = Array.isArray(domain.items)
-      ? domain.items
-      : Object.values(domain.items || {});
-
-    const defaultTarget =
-      normalizeTargetValue(
-        domain.meta?.targetMaturity,
-        DEFAULT_TARGET_MATURITY,
-      );
-
-    sanitizedPayload.domains[domainId] = {
-      ...domain,
-
-      targets: serializeTargetsForFirebase(
-        domainItems,
-        domain.targets,
-        defaultTarget,
+  return normalizarEscenarioParaFirebase(
+    payload,
+    (items, targets, meta) =>
+      serializeTargetsForFirebase(
+        items,
+        targets,
+        normalizeTargetValue(
+          meta?.targetMaturity,
+          DEFAULT_TARGET_MATURITY,
+        ),
       ),
-
-      items: domainItems,
-    };
-  });
-
-  return sanitizedPayload;
+  );
 }
 
 
@@ -3414,14 +3401,6 @@ function guardarCampoDeRoadmap(item, campo, valor) {
 }
 
 
-/** Recorta un campo de texto al límite que admiten las reglas de Firebase. */
-function recortarAlLimite(campo, valor) {
-  const limite = LIMITES_DE_TEXTO[campo];
-  const texto = String(valor ?? "");
-
-  return limite ? texto.slice(0, limite) : texto;
-}
-
 function heatScoreCell(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) {
@@ -4195,15 +4174,22 @@ function applyScenarioItemsToDomain(domainId, savedItems) {
     }
 
     if (status !== undefined) {
-      item.status = status;
+      // Las reglas admiten cualquier texto de 40 caracteres, pero la
+      // herramienta solo sabe pintar cuatro estados: un valor de fuera dejaba
+      // el select en blanco, y si era largo tumbaba la escritura entera.
+      item.status = normalizarEstado(status);
     }
 
     if (comentario !== undefined) {
       item.comentario = recortarAlLimite("comentario", comentario);
     }
 
-    if (savedItem.lastEditedBy) {
-      item.lastEditedBy = savedItem.lastEditedBy;
+    // Las reglas de autoria declaran "$otroCampoAutoria": false: un campo
+    // inventado dentro de lastEditedBy tumbaba tambien la escritura entera.
+    const autoria = normalizarAutoria(savedItem.lastEditedBy);
+
+    if (autoria) {
+      item.lastEditedBy = autoria;
     }
   });
 
@@ -4415,6 +4401,21 @@ async function importScenario(event) {
   reader.onload = () => {
     try {
       const payload = JSON.parse(reader.result);
+
+      // Se revisa ANTES de aplicar nada. Un archivo que no es un escenario ya
+      // no llega a tocar los datos cargados, y lo que si se puede arreglar al
+      // vuelo se cuenta en vez de corregirse en silencio.
+      const revision = revisarEscenario(payload);
+
+      if (!revision.valido) {
+        showNotice(
+          `No se ha importado nada. ${revision.motivo}`,
+          "error",
+        );
+
+        return;
+      }
+
       const resultado = applyScenarioPayload(payload);
 
       if (!resultado.aplicadas) {
@@ -4439,10 +4440,14 @@ async function importScenario(event) {
           ? ` ${resultado.total - resultado.aplicadas} del archivo no corresponden a ninguna subcapacidad y se han ignorado.`
           : "";
 
+      const corregido = revision.problemas.length
+        ? ` Se ha corregido lo siguiente al importar: ${revision.problemas.join("; ")}.`
+        : "";
+
       showNotice(
         `Escenario importado: ${resultado.aplicadas} subcapacidades actualizadas en ` +
-          `${resultado.dominios} ${resultado.dominios === 1 ? "dominio" : "dominios"}.${parciales}`,
-        "exito",
+          `${resultado.dominios} ${resultado.dominios === 1 ? "dominio" : "dominios"}.${parciales}${corregido}`,
+        revision.problemas.length ? "aviso" : "exito",
       );
     } catch (error) {
       showNotice(

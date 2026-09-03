@@ -10,7 +10,7 @@
  * el servidor estatico de siempre (python -m http.server).
  */
 
-import { casos, ejecutarCasos } from "./casos.js";
+import { casos, ejecutarCasos } from "./runner.js";
 
 const resultado = ejecutarCasos();
 

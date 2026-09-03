@@ -6,10 +6,8 @@
  * agregacion por capacidad. Si alguien cambia una regla sin querer, esto falla.
  *
  * No dependen del DOM, ni de Firebase, ni de la aplicacion: solo del motor.
- * Se ejecutan de dos maneras, con los mismos casos:
- *
- *   - En el navegador: abrir tests/ con el servidor estatico ya en marcha.
- *   - Desde la linea de comandos, si hay Node: node tests/ejecutar.mjs
+ * Se ejecutan con el resto: /tests/ en el navegador, o
+ * node tests/ejecutar.mjs desde la linea de comandos.
  */
 
 import {
@@ -356,49 +354,3 @@ export const casos = [
     },
   },
 ];
-
-
-// --- el runner --------------------------------------------------------------
-
-/**
- * Ejecuta todos los casos y devuelve el resultado.
- *
- * Sin librerias: un fallo es una comprobacion que no cuadra, y se informa con
- * el caso, el valor esperado y el obtenido.
- */
-export function ejecutarCasos() {
-  const fallos = [];
-  let comprobaciones = 0;
-
-  casos.forEach((caso) => {
-    const t = {
-      igual(obtenido, esperado, detalle = "") {
-        comprobaciones += 1;
-
-        if (!Object.is(obtenido, esperado)) {
-          fallos.push({
-            grupo: caso.grupo,
-            nombre: caso.nombre,
-            detalle,
-            esperado,
-            obtenido,
-          });
-        }
-      },
-    };
-
-    try {
-      caso.ejecutar(t);
-    } catch (error) {
-      fallos.push({
-        grupo: caso.grupo,
-        nombre: caso.nombre,
-        detalle: "excepcion",
-        esperado: "sin excepciones",
-        obtenido: String(error && error.message ? error.message : error),
-      });
-    }
-  });
-
-  return { casos: casos.length, comprobaciones, fallos };
-}
