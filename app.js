@@ -2147,17 +2147,19 @@ function renderSummaryTable() {
   );
 
   els.summaryTable.innerHTML = `
+    <caption class="solo-lectores">Resumen por capacidad: medias por palanca, score medio, objetivo, gap y prioridad.</caption>
+
     <thead>
       <tr>
-        <th>Capacidad</th>
-        <th class="number">Procesos</th>
-        <th class="number">Tecnología</th>
-        <th class="number">Organización</th>
-        <th class="number">Score medio</th>
-        <th class="number">Objetivo medio</th>
-        <th class="number">Gap vs objetivo</th>
-        <th>Prioridad</th>
-        <th class="number">Avance</th>
+        <th scope="col">Capacidad</th>
+        <th scope="col" class="number">Procesos</th>
+        <th scope="col" class="number">Tecnología</th>
+        <th scope="col" class="number">Organización</th>
+        <th scope="col" class="number">Score medio</th>
+        <th scope="col" class="number">Objetivo medio</th>
+        <th scope="col" class="number">Gap vs objetivo</th>
+        <th scope="col">Prioridad</th>
+        <th scope="col" class="number">Avance</th>
       </tr>
     </thead>
 
@@ -3140,16 +3142,18 @@ function renderHeatmap() {
     .join("");
 
   els.heatmapTable.innerHTML = `
+    <caption class="solo-lectores">Heatmap de madurez por capacidad, desplegable a subcapacidad.</caption>
+
     <thead>
       <tr>
-        <th>Capacidad</th>
-        <th>Subcapacidades</th>
-        <th class="number">Procesos</th>
-        <th class="number">Tecnología</th>
-        <th class="number">Organización</th>
-        <th class="number">Score medio</th>
-        <th class="number">Gap vs objetivo</th>
-        <th>Prioridad</th>
+        <th scope="col">Capacidad</th>
+        <th scope="col">Subcapacidades</th>
+        <th scope="col" class="number">Procesos</th>
+        <th scope="col" class="number">Tecnología</th>
+        <th scope="col" class="number">Organización</th>
+        <th scope="col" class="number">Score medio</th>
+        <th scope="col" class="number">Gap vs objetivo</th>
+        <th scope="col">Prioridad</th>
       </tr>
     </thead>
     <tbody>
@@ -3329,19 +3333,21 @@ function renderRoadmap() {
     .join("");
 
   els.roadmapTable.innerHTML = `
+    <caption class="solo-lectores">Roadmap de iniciativas, ordenado por prioridad y gap, con responsable, estado y comentarios.</caption>
+
     <thead>
       <tr>
-        <th>Capacidad</th>
-        <th>Subcapacidad</th>
-        <th class="number">Gap</th>
-        <th>Prioridad</th>
-        <th>Iniciativa sugerida</th>
-        <th>IA</th>
-        <th>Oleada</th>
-        <th>Responsable</th>
-        <th>Estado</th>
-        <th>Comentarios</th>
-        <th>Último cambio</th>
+        <th scope="col">Capacidad</th>
+        <th scope="col">Subcapacidad</th>
+        <th scope="col" class="number">Gap</th>
+        <th scope="col">Prioridad</th>
+        <th scope="col">Iniciativa sugerida</th>
+        <th scope="col">IA</th>
+        <th scope="col">Oleada</th>
+        <th scope="col">Responsable</th>
+        <th scope="col">Estado</th>
+        <th scope="col">Comentarios</th>
+        <th scope="col">Último cambio</th>
       </tr>
     </thead>
     <tbody>
