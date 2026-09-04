@@ -3,6 +3,56 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--
+      La CSP va aqui arriba y no mas abajo: una politica entregada en <meta>
+      solo rige lo que viene despues de ella en el documento.
+
+      Lo que hay que saber antes de tocarla:
+
+      - connect-src lleva comodin a proposito. El SDK de la Realtime Database
+        se conecta al host del proyecto, pero el servidor puede redirigirlo a un
+        host de shard (s-euw1b-nss-NNNN...). Con el host exacto la conexion
+        inicial funciona y la reconexion falla horas despues, en mitad de un
+        taller. Va en https: y en wss: porque detras de un proxy corporativo el
+        SDK cae a long-polling.
+
+      - 'unsafe-inline' en style-src hace falta y no hay alternativa. El informe
+        PDF inyecta su hoja de estilos en linea, y las barras se pintan con
+        style="width:X%", cuyo valor depende de los datos: un nonce no cubre
+        atributos style y un hash es imposible con valores variables. Sin esto
+        el informe se imprime sin ningun estilo. El valor real de esta politica
+        esta en script-src y connect-src, no aqui.
+
+      - script-src NO lleva 'unsafe-inline'. En este HTML no hay ni un script en
+        linea ni un manejador onclick, asi que no hace falta, y es justo la
+        directiva que cierra la inyeccion de codigo. No anadirlo por comodidad.
+
+      - Falta frame-ancestors, que es lo que protegeria del clickjacking. No es
+        un olvido: en <meta> se ignora Y el navegador imprime una advertencia en
+        consola en cada carga, lo que romperia el "la consola arranca en
+        silencio" del que depende toda la verificacion manual. En GitHub Pages
+        tampoco se pueden mandar cabeceras. Queda documentado en SECURITY.md
+        como limitacion asumida.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+
+    <!--
+      El ?scenario=<id> es la credencial del escenario, y va en la URL. Esto
+      evita que viaje en la cabecera Referer a cualquier recurso externo.
+
+      No es 'no-referrer' a proposito: si algun dia se restringe la clave de API
+      de Firebase por referentes HTTP —que es la recomendacion estandar de
+      Google para claves web— 'no-referrer' dejaria de autenticar. Esta manda
+      solo el origen, sin ruta ni query, que es lo que hace falta.
+
+      Los navegadores modernos ya usan esta politica por defecto, asi que esto
+      es un seguro barato, no un arreglo. Las vias de fuga reales del
+      identificador —la barra de direcciones al compartir pantalla, el
+      historial, los logs del proxy del cliente, el copiar y pegar a un correo—
+      no se arreglan con una cabecera.
+    -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>F3M Assessment</title>
 
     <!--
