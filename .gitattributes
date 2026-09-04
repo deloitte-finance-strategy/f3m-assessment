@@ -1,0 +1,7 @@
+# Chart.js se trata como binario para que git no le toque los finales de linea.
+#
+# Es un archivo de texto, pero su SHA-384 esta documentado en vendor/LEEME.md y
+# es lo que permite comprobar que es el mismo que publica el CDN. Con la
+# conversion automatica de finales de linea, un clon en Windows tendria 14 bytes
+# mas que uno en Linux y ese hash no cuadraria en la mitad de los equipos.
+vendor/chart.umd.min.js -text
