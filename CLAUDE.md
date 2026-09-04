@@ -46,6 +46,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `data/domains/*.json` | Datos del assessment, un archivo por dominio | — |
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
 | `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
+| `vendor/` | Chart.js, servido desde aquí y no desde un CDN. **Se versiona** | — |
 
 La regla de reparto: **en `core/` no hay DOM, ni Firebase, ni estado global, ni imports.** Todo son
 funciones puras, y por eso se pueden probar sin levantar la aplicación. `app.js` es quien conoce el
@@ -64,10 +65,15 @@ cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScena
   → populateCapacityFilter() → renderAll()
 ```
 
-Dependencias externas por CDN, sin bundler:
+Dependencias de terceros, sin bundler:
 
-- **Chart.js 4.5.0** desde cdnjs (al final de `index.html`) — radares por capacidad.
-- **Firebase Realtime Database 12.15.0** importado desde `gstatic.com` (cabecera de `app.js`).
+- **Chart.js 4.5.0** desde `vendor/chart.umd.min.js` (al final de `index.html`) — radares por
+  capacidad. **No va por CDN a propósito**: una red de cliente que filtre cdnjs dejaba los radares
+  sin pintar y el PDF entregable con tres huecos. `vendor/LEEME.md` explica el porqué y cómo se
+  actualiza.
+- **Firebase Realtime Database y Auth 12.15.0** importados desde `gstatic.com` (cabecera de
+  `app.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
+  ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
 
 ### Las cuatro pestañas son vistas, no anclas
 

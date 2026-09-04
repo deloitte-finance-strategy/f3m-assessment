@@ -14,6 +14,10 @@ dist/
 build/
 out/
 
+# Ojo: vendor/ NO va aqui. Contiene Chart.js minificado, que parece una salida
+# generada pero es una dependencia que se sirve desde el repositorio. Si se
+# ignora, la aplicacion se queda sin graficos. Ver vendor/LEEME.md.
+
 # Variables de entorno y logs
 .env
 .env.local

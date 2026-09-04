@@ -612,7 +612,17 @@
 
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+    <!--
+      Chart.js va en el repositorio, no en un CDN. Muchas redes corporativas
+      filtran los CDN de terceros por categoria, y la red del cliente es
+      justo donde se usa esto: cuando cdnjs no cargaba, no habia radares y el
+      PDF que se entrega salia con tres recuadros en blanco.
+
+      Un integrity= no cubre ese caso —protege de un archivo distinto, no de
+      uno que no llega—, asi que se sirve desde el mismo origen: si carga la
+      aplicacion, cargan los graficos. Como actualizarlo: vendor/LEEME.md.
+    -->
+    <script src="vendor/chart.umd.min.js?v=4.5.0"></script>
     <!--
       El ?v= no es decoracion: index.html y app.js dejaron de ser
       independientes cuando los botones de dominio pasaron a pintarse desde
