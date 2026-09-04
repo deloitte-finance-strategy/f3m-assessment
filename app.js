@@ -96,7 +96,24 @@ const GRUPOS_DE_DOMINIO = [];
 const CATALOGO_URL = "data/domains.json";
 
 
-const STORAGE_KEY = "f3m-fpa-assessment-scenario";
+/**
+ * La copia local se guarda por escenario, no bajo una clave unica.
+ *
+ * Con una sola clave, abrir el escenario de un cliente y despues el de otro en
+ * el mismo navegador dejaba cargados los datos del primero cuando la lectura
+ * remota del segundo fallaba: applyStoredScenario() corre antes de leer
+ * Firebase, y el catch de initializeSharedScenario() avisa de la falta de
+ * conexion pero no limpia lo que ya se ha pintado. La pantalla acababa
+ * ensenando los datos de un cliente bajo la URL de otro, y el aviso decia
+ * "estas trabajando sobre la copia de este navegador" sin aclarar de quien era
+ * esa copia.
+ *
+ * En modo local la clave es la misma de siempre, asi que nadie pierde su
+ * trabajo al desplegar esto. En modo compartido la primera carga no encuentra
+ * copia y baja de Firebase, que es la fuente de verdad de todos modos.
+ */
+const STORAGE_KEY_BASE = "f3m-fpa-assessment-scenario";
+const STORAGE_KEY = scenarioId ? `${STORAGE_KEY_BASE}:${scenarioId}` : STORAGE_KEY_BASE;
 
 
 // Las palancas las define el motor; aqui solo se les pone el color de marca.

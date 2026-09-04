@@ -134,8 +134,11 @@ recalcula. No hay que acordarse de vaciar nada al tocar el estado.
 
 ## Persistencia y escenarios compartidos
 
-- **Local**: `localStorage`, clave `f3m-fpa-assessment-scenario` (`STORAGE_KEY`). El nombre de quien
-  edita va aparte, en `f3m-nombre-editor`.
+- **Local**: `localStorage`. La clave (`STORAGE_KEY`) es `f3m-fpa-assessment-scenario` sin escenario
+  compartido, y `f3m-fpa-assessment-scenario:<id>` con él. **Es por escenario a propósito**: con una
+  clave única, abrir el escenario de un cliente y después el de otro dejaba los datos del primero en
+  pantalla cuando la lectura remota del segundo fallaba. El nombre de quien edita va aparte, en
+  `f3m-nombre-editor`.
 - **Compartido**: parámetro de URL `?scenario=<id>`. Lee y escribe en `scenarios/<id>` de la
   Realtime Database. El id se valida contra `/^[a-zA-Z0-9_-]{20,120}$/` en `getScenarioIdFromUrl()`.
 
