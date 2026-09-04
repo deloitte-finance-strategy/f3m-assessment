@@ -2194,8 +2194,30 @@ function renderSummaryTable() {
 
 
 
+/**
+ * Solo se avisa una vez por carga: renderCapabilityRadar() se llama en cada
+ * repintado del dashboard, y el aviso taparia todo lo demas.
+ */
+let avisoDeGraficosMostrado = false;
+
+
 function renderCapabilityRadar() {
   if (typeof Chart === "undefined") {
+    // Antes esto era un return mudo. Si la red del cliente bloquea el CDN
+    // —normal en una red corporativa ajena— no habia radares, no habia aviso, y
+    // el PDF que se entrega salia con tres recuadros en blanco. Nadie se
+    // enteraba hasta tener el informe delante.
+    if (!avisoDeGraficosMostrado) {
+      avisoDeGraficosMostrado = true;
+
+      showNotice(
+        "No se ha podido cargar la librería de gráficos: los radares no se pintan y el informe PDF "
+          + "saldrá sin ellos. El resto de la herramienta funciona con normalidad. Recarga la página "
+          + "para reintentarlo.",
+        "aviso",
+      );
+    }
+
     return;
   }
 
@@ -3761,6 +3783,33 @@ function getStoredScenario() {
 // concretas. Además los relojes de cada equipo no son fiables, así que la
 // comparación descartaba cambios ajenos de forma arbitraria.
 
+/**
+ * La misma promesa, pero que falla en vez de quedarse colgada.
+ *
+ * Sin esto, init() esperaba a signInAnonymously() con un await sin limite: en
+ * una red que descarta paquetes en silencio —un portal cautivo, una wifi de
+ * invitados— la aplicacion se quedaba en "Preparando datos" para siempre, que
+ * es la peor forma de fallar delante de un cliente.
+ *
+ * readScenarioFromFirebase() y saveScenarioToFirebase() traen su propia copia
+ * de este patron. No se tocan aqui: estan en el camino del guardado, funcionan,
+ * y unificarlas no es lo que se venia a hacer.
+ */
+function conLimiteDeEspera(promesa, mensaje, timeoutMs = 8000) {
+  let timeoutId;
+
+  const limite = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      reject(new Error(mensaje));
+    }, timeoutMs);
+  });
+
+  return Promise.race([promesa, limite]).finally(() => {
+    window.clearTimeout(timeoutId);
+  });
+}
+
+
 function readScenarioFromFirebase(timeoutMs = 8000) {
   const firebaseRead = get(scenarioDatabaseRef);
 
@@ -5040,14 +5089,26 @@ function getPdfActiveFiltersLabel() {
 
 function getRadarImagesForPdf() {
   return {
-    procesos: getCanvasImageDataUrl(els.capabilityRadarProcessesChart),
-    tecnologia: getCanvasImageDataUrl(els.capabilityRadarTechnologyChart),
-    organizacion: getCanvasImageDataUrl(els.capabilityRadarOrganizationChart),
+    procesos: getCanvasImageDataUrl("procesos", els.capabilityRadarProcessesChart),
+    tecnologia: getCanvasImageDataUrl("tecnologia", els.capabilityRadarTechnologyChart),
+    organizacion: getCanvasImageDataUrl("organizacion", els.capabilityRadarOrganizationChart),
   };
 }
 
-function getCanvasImageDataUrl(canvas) {
-  if (!canvas) {
+/**
+ * La imagen de un radar para el informe, o cadena vacia si no hay radar.
+ *
+ * La cadena vacia importa: con ella, buildPdfRadarImageHtml() escribe "No se
+ * pudo capturar el grafico" y el informe dice la verdad. Sin ella, un canvas
+ * sin grafico devuelve un PNG en blanco perfectamente valido —no lanza— y el
+ * PDF que se entrega al cliente sale con tres recuadros vacios.
+ *
+ * Se pregunta por la instancia de Chart y no por el tamano del canvas: es lo
+ * unico que distingue "aqui no se ha pintado nada" de "se ha pintado un radar
+ * sin datos", que son casos distintos.
+ */
+function getCanvasImageDataUrl(palanca, canvas) {
+  if (!canvas || !capabilityRadarCharts[palanca]) {
     return "";
   }
 
@@ -5594,7 +5655,10 @@ async function inicializarIdentidad() {
   }
 
   try {
-    const credencial = await signInAnonymously(firebaseAuth);
+    const credencial = await conLimiteDeEspera(
+      signInAnonymously(firebaseAuth),
+      "Tiempo de espera agotado al autenticar",
+    );
 
     usuarioActual = {
       uid: credencial.user.uid,
@@ -5608,6 +5672,23 @@ async function inicializarIdentidad() {
     );
 
     usuarioActual = null;
+
+    // Esto se avisa aunque hoy no impida guardar. Es la senal de campo que dice
+    // si exigir `auth != null` en las reglas dejaria a alguien sin escribir: si
+    // el chip rojo aparece en la red de algun cliente, se sabe antes de
+    // desplegar ese cambio y no despues.
+    marcarFalloDeSincronia(
+      "Sin identidad para atribuir los cambios",
+      "Este navegador no ha podido identificarse contra Firebase. Los cambios se siguen guardando y "
+        + "compartiendo, pero sin atribución en la columna \"Último cambio\". Avisa a quien mantiene "
+        + "la herramienta.",
+    );
+
+    showNotice(
+      "Este navegador no ha podido identificarse. Los cambios se guardan y se comparten, pero sin "
+        + "atribución en la columna \"Último cambio\".",
+      "aviso",
+    );
   }
 
   actualizarIndicadorDeIdentidad();
