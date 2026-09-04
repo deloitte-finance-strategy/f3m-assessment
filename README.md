@@ -146,28 +146,40 @@ credenciales, pero asigna un identificador estable a cada navegador. Sirve para 
 cambio, con **Escenario → "Poner mi nombre"** para elegir cómo apareces ante el resto.
 La columna **"Último cambio"** del Roadmap muestra quién tocó cada subcapacidad por última vez.
 
-Si la autenticación no está disponible, la herramienta sigue funcionando sin atribución. Se
-prefiere perder la trazabilidad a que deje de guardarse.
+**La identidad es obligatoria para escribir.** Sin ella, la aplicación no intenta guardar en el
+escenario compartido: el chip se pone rojo y dice *"Sin identidad: no se está compartiendo"*. Los
+cambios siguen guardados en el navegador y no se pierden. Antes se guardaba sin atribución, pero eso
+deja de ser posible en cuanto las reglas exigen `auth != null`, y un rechazo del servidor llega
+disfrazado de fallo de red: es mejor decir la verdad desde el principio.
 
-> **Orden de despliegue.** Las escrituras son atómicas: si las reglas rechazan el campo de autoría,
-> falla también el dato que lo acompaña, y el guardado deja de funcionar sin que se note.
-> Por eso hay que hacerlo en este orden:
->
-> 1. Publicar `database.rules.json` (ya incluye `lastEditedBy`).
-> 2. Habilitar *Anonymous* en Firebase → *Authentication* → *Sign-in method*.
-> 3. Desplegar el código.
->
-> Al revés, cada guardado se rechazaría con `Permission denied`.
+### Desplegar el endurecimiento de las reglas
 
-Cuando todo el equipo use la versión nueva, se puede exigir autenticación en las reglas cambiando
-las dos líneas de `$scenarioId`:
+`database.rules.json` ya incluye `auth != null`, la lista cerrada de dominios y la de estados. **El
+repositorio no despliega reglas**: eso se hace a mano en la consola, y el orden importa.
 
-```json
-".read": "auth != null && $scenarioId.length >= 20",
-".write": "auth != null && $scenarioId.length >= 20"
-```
+1. **Comprobar los datos que ya existen.** Exportar la base y pasarla por
+   `python scripts/audit_scenarios.py <export>`. Si sale algo, corregirlo o relajar la regla antes
+   de seguir.
+2. **Desplegar el código primero, las reglas después.** Mientras las reglas sigan siendo permisivas,
+   la aplicación es más estricta que el servidor y la vuelta atrás es un despliegue, no una urgencia.
+3. **Observar unos días.** Si en alguna red de cliente aparece el chip rojo por identidad, publicar
+   las reglas dejaría a esa persona sin escribir. Es la señal que hay que esperar.
+4. **Probar las reglas en el simulador** de Firebase Console → Realtime Database → Reglas, que
+   permite validar una escritura sin publicar nada. Comprobar como mínimo: un `status` válido y uno
+   inválido, un dominio del catálogo y uno inventado, un id de escenario con el formato correcto, y
+   una escritura completa del escenario de pruebas. **El regex de `$scenarioId` es lo que hay que
+   mirar con más cuidado**: si `matches()` no se comportara como se espera, la regla falla cerrada y
+   nadie podría leer ni escribir.
+5. **Publicar las reglas** fuera de horario de sesión. La consola guarda el historial de versiones,
+   así que revertir es un clic.
 
-No hacerlo antes: quien siga con la versión anterior dejaría de poder leer y escribir.
+> **Anonymous Auth tiene que estar habilitado** en Firebase → *Authentication* → *Sign-in method*
+> antes de publicar las reglas. Si no, nadie obtiene identidad y nadie puede escribir.
+
+Conviene ser claro sobre qué compra `auth != null` y qué no. La autenticación es **anónima y
+abierta**: cualquiera puede obtener un uid. Lo que aporta es atribución, trazabilidad y una barrera
+frente a quien lea la base con `curl` sin siquiera cargar la aplicación. **No es control de acceso**:
+quien tenga el enlace sigue pudiendo leer y escribir el escenario entero.
 
 ### Rotar un escenario expuesto
 

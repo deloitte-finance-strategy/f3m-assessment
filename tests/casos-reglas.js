@@ -22,6 +22,7 @@ import {
   CAMPOS_DE_DOMINIO,
   CAMPOS_DE_ITEM,
   CAMPOS_RAIZ,
+  ESTADOS_VALIDOS,
   LIMITE_DE_META,
   LIMITES_DE_TEXTO,
 } from "../core/escenario.js";
@@ -57,6 +58,7 @@ async function leerJson(nombre) {
 // Top-level await: el grafo de modulos espera a que esto termine, asi que
 // ejecutarCasos() sigue siendo sincrono y runner.js no cambia de forma.
 const reglas = await leerJson("database.rules.json");
+const catalogo = await leerJson("data/domains.json");
 
 const ESCENARIO = reglas?.rules?.scenarios?.$scenarioId;
 const DOMINIO = ESCENARIO?.domains?.$domainId;
@@ -78,6 +80,14 @@ function camposDe(nodo) {
     .filter((clave) => !clave.startsWith(".") && !clave.startsWith("$"))
     .sort()
     .join(", ");
+}
+
+
+/** Los valores de un ".validate" con matches(/^(a|b|c)$/), en orden. */
+function alternativasDe(nodo) {
+  const encontrado = /matches\(\/\^\((.+?)\)\$\//.exec(nodo?.[".validate"] ?? "");
+
+  return encontrado ? encontrado[1].split("|").sort().join(", ") : null;
 }
 
 
@@ -211,6 +221,48 @@ export const casos = [
       cerrojos.forEach(([nodo, comodin]) => {
         t.igual(nodo?.[comodin]?.[".validate"], false, comodin);
       });
+    },
+  },
+
+  // ---------------------------------------------------- valores admitidos
+  {
+    grupo: "Espejo de las reglas · valores admitidos",
+    nombre: "status admite exactamente los estados que ofrece la herramienta",
+    ejecutar: (t) => {
+      t.igual(alternativasDe(ITEM?.status), enOrden(ESTADOS_VALIDOS), "status");
+    },
+  },
+  {
+    grupo: "Espejo de las reglas · valores admitidos",
+    nombre: "domains admite exactamente los dominios del catalogo",
+    ejecutar: (t) => {
+      // Esto convierte "anadir un dominio y olvidar las reglas" en un CI rojo,
+      // que es la mitad de su valor. La otra mitad es que un archivo importado
+      // no pueda crear ramas de dominios que la aplicacion no sabe leer.
+      const delCatalogo = (catalogo?.domains ?? []).map((dominio) => dominio.id);
+
+      t.igual(alternativasDe(DOMINIO), enOrden(delCatalogo), "$domainId");
+    },
+  },
+
+  // ------------------------------------------------------------- el acceso
+  {
+    grupo: "Espejo de las reglas · acceso",
+    nombre: "leer y escribir un escenario exige identidad",
+    ejecutar: (t) => {
+      // No es espejo de nada de core/, es un cerrojo: quitar el auth != null
+      // deja la base abierta a cualquiera con la URL y sin sesion siquiera, y
+      // eso no puede pasar sin que algo se ponga rojo.
+      t.igual(
+        (ESCENARIO?.[".read"] ?? "").includes("auth != null"),
+        true,
+        ".read",
+      );
+      t.igual(
+        (ESCENARIO?.[".write"] ?? "").includes("auth != null"),
+        true,
+        ".write",
+      );
     },
   },
 
