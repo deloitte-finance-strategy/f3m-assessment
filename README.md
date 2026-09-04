@@ -192,8 +192,33 @@ python scripts/rotate_scenario.py <id-antiguo> --confirm    # copia y verifica
 ```
 
 El script copia el contenido a un id aleatorio de 128 bits y comprueba que la copia es idéntica.
-No borra el original: eso se hace a mano desde la consola de Firebase, una vez confirmado que el
-enlace nuevo funciona.
+No borra el original: para eso está el script siguiente.
+
+### Borrar un escenario
+
+```powershell
+python scripts/delete_scenario.py <id>              # muestra qué haría
+python scripts/delete_scenario.py <id> --confirm    # guarda copia y borra
+```
+
+Guarda una copia verificada en `copias/<id>-<fecha>.json` antes de borrar, y si la copia no coincide
+no borra nada. `copias/` está en el `.gitignore` a propósito: son datos reales de cliente y este
+repositorio es público.
+
+> **Un escenario borrado puede resucitar.** Si alguien tiene la pestaña abierta con ese enlace, la
+> aplicación lo recrea en cuanto recargue o toque algo. El orden correcto es rotar primero,
+> confirmar que todo el mundo está en el enlace nuevo y ha cerrado el viejo, y borrar después.
+
+### Los scripts y la autenticación
+
+Con `auth != null` en las reglas, los tres scripts que hablan con la base necesitan un token. Lo
+piden solos: uno **anónimo**, el mismo que obtiene cualquier navegador que abra la aplicación, así
+que acaban con exactamente los mismos privilegios que cualquiera con el enlace. No hace falta
+ninguna credencial de administrador, y por tanto no hay ningún secreto nuevo que guardar.
+
+- `--token <idToken>` reutiliza uno en vez de crear otro usuario anónimo.
+- `--sin-auth` no autentica. Sirve mientras las reglas no exijan `auth != null`, y para diagnosticar:
+  si un script funciona con este flag y falla sin él, el problema es la autenticación y no la base.
 
 ### Antes de cambiar las reglas de Firebase
 

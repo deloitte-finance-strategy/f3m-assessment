@@ -23,6 +23,10 @@ out/
 .env.local
 *.log
 
+# Copias de escenarios que hace scripts/delete_scenario.py antes de borrar.
+# Son datos reales de cliente y este repositorio es publico: no pueden entrar.
+copias/
+
 # Archivos del sistema
 .DS_Store
 Thumbs.db

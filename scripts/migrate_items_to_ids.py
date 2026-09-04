@@ -11,41 +11,22 @@ dejando el escenario con datos duplicados.
 
 La app lee ambos formatos (toSavedItemsArray acepta lista y objeto), así que la
 migración es segura: un escenario ya migrado se detecta y se deja intacto.
+
+Con `auth != null` en las reglas hace falta un token: se pide uno anónimo, el
+mismo que obtiene cualquier navegador. Ver scripts/firebase_rest.py.
 """
 
 import argparse
 import json
-import re
 import sys
-import urllib.error
-import urllib.request
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-APP_JS = ROOT / "app.js"
-
-
-def leer_database_url():
-    match = re.search(r'databaseURL:\s*"([^"]+)"', APP_JS.read_text(encoding="utf-8"))
-
-    if not match:
-        raise SystemExit("No se encontró databaseURL en app.js")
-
-    return match.group(1).rstrip("/")
-
-
-def peticion(url, metodo="GET", cuerpo=None):
-    datos = cuerpo.encode("utf-8") if cuerpo is not None else None
-    req = urllib.request.Request(url, data=datos, method=metodo)
-
-    if datos is not None:
-        req.add_header("Content-Type", "application/json")
-
-    try:
-        with urllib.request.urlopen(req, timeout=30) as r:
-            return r.status, r.read().decode("utf-8")
-    except urllib.error.HTTPError as e:
-        return e.code, e.read().decode("utf-8")[:300]
+from firebase_rest import (
+    anadir_flags_de_auth,
+    con_auth,
+    leer_config,
+    obtener_token,
+    peticion,
+)
 
 
 def migrar_items(items, domain_id):
@@ -83,10 +64,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("escenario", help="Identificador del escenario a migrar")
     parser.add_argument("--confirm", action="store_true", help="Escribe los cambios")
+    anadir_flags_de_auth(parser)
     args = parser.parse_args()
 
-    base = leer_database_url()
-    url = f"{base}/scenarios/{args.escenario}.json"
+    base, _ = leer_config()
+    token = obtener_token(args)
+    url = con_auth(f"{base}/scenarios/{args.escenario}.json", token)
 
     estado, cuerpo = peticion(url)
 
