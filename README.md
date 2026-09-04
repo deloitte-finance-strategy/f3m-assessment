@@ -182,3 +182,21 @@ python scripts/rotate_scenario.py <id-antiguo> --confirm    # copia y verifica
 El script copia el contenido a un id aleatorio de 128 bits y comprueba que la copia es idéntica.
 No borra el original: eso se hace a mano desde la consola de Firebase, una vez confirmado que el
 enlace nuevo funciona.
+
+### Antes de cambiar las reglas de Firebase
+
+Unas reglas más estrictas pueden rechazar datos que ya están escritos. Para saberlo **antes** de
+publicarlas, exporta la base desde Firebase Console → Realtime Database → ⋮ → *Exportar JSON* y
+pásale el archivo a:
+
+```powershell
+python scripts/audit_scenarios.py <export-de-la-consola.json>
+```
+
+Lee `database.rules.json` de la rama en la que estés, así que sirve tal cual para probar reglas
+candidatas: las cambias, lo ejecutas, y te dice qué se rompería. Sale con código `1` si encuentra
+algo.
+
+Se usa un export y no la API REST porque las reglas no permiten leer `/scenarios` entero, y meter
+una credencial de administrador en un repositorio público para esquivarlo sería peor que el problema
+que resuelve.
