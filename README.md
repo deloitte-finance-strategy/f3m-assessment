@@ -118,10 +118,13 @@ identificador aleatorio de 128 bits y te lleva a la URL correspondiente:
 https://deloitte-finance-strategy.github.io/f3m-assessment/?scenario=<id-generado>
 ```
 
-> **El enlace es la credencial.** Cualquier persona que lo tenga puede ver y editar el escenario,
-> sin autenticación. Trátalo como una contraseña: no lo publiques en repositorios, documentos
-> compartidos ni tickets. No inventes identificadores a mano — un ID adivinable expone el
-> assessment completo a cualquiera.
+> **El enlace es la credencial.** Cualquier persona que lo tenga puede ver y editar el escenario.
+> Trátalo como una contraseña: no lo publiques en repositorios, documentos compartidos ni tickets.
+> No inventes identificadores a mano — un ID adivinable expone el assessment completo a cualquiera.
+>
+> Las reglas exigen autenticación, pero es **anónima y abierta**: eso da atribución y frena a quien
+> quisiera leer la base sin cargar la aplicación, no controla quién entra. **[SECURITY.md](SECURITY.md)
+> explica en detalle qué protege la herramienta y qué no.**
 >
 > Por eso la herramienta no lo enseña entero: ni en pantalla ni en la portada del PDF, que es un
 > documento que se envía al cliente. Para obtener el enlace completo, **Escenario → "Copiar

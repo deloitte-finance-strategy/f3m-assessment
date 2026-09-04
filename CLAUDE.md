@@ -47,6 +47,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
 | `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
 | `vendor/` | Chart.js, servido desde aquí y no desde un CDN. **Se versiona** | — |
+| `SECURITY.md` | Modelo de amenazas, qué protege y qué no, y los procedimientos | — |
 
 La regla de reparto: **en `core/` no hay DOM, ni Firebase, ni estado global, ni imports.** Todo son
 funciones puras, y por eso se pueden probar sin levantar la aplicación. `app.js` es quien conoce el
@@ -183,18 +184,28 @@ aviso en vez de corregirse en silencio.
 
 ### Aviso de seguridad — Firebase
 
+**`SECURITY.md` es el documento completo**: qué protege la herramienta, qué no, qué datos guarda y
+dónde, y los procedimientos. Lo que sigue es lo que hay que tener presente al tocar este código.
+
 La configuración de Firebase está en claro en la cabecera de `app.js` (`apiKey`, `databaseURL`,
 `projectId`…). En una web app de Firebase esto es **público por diseño** y no constituye un secreto
-filtrado.
+filtrado: la autorización la dan las reglas, no el secreto de la clave.
 
-Las reglas de seguridad sí están en este repositorio, en `database.rules.json`, y son restrictivas:
-validan campo a campo y rechazan cualquier campo no declarado. Pero **el repositorio no puede
-garantizar qué reglas están desplegadas**: eso se comprueba en la consola de Firebase. Si las reglas
-activas fueran abiertas, cualquiera con la URL de la base —que está en el código público— podría
-leer y escribir todos los escenarios.
+Las reglas de `database.rules.json` exigen `auth != null`, validan campo a campo y rechazan
+cualquier campo no declarado. Pero **el repositorio no puede garantizar qué reglas están
+desplegadas**: eso se comprueba en la consola de Firebase. Si las reglas activas fueran las
+permisivas, cualquiera con la URL de la base —que está en el código público— podría leer y escribir
+todos los escenarios.
 
-El README documenta el orden de despliegue obligatorio (reglas → Anonymous Auth → código) y cómo
-rotar un escenario expuesto.
+Y conviene no confundirse con lo que aporta `auth != null`: la autenticación es **anónima y
+abierta**, así que da atribución y una barrera frente al `curl`, no control de acceso. **El enlace
+sigue siendo la credencial.**
+
+Al tocar el guardado, tener presente que hay una puerta de identidad:
+`hayIdentidadParaEscribir()` corta la escritura antes de intentarla si no hay `usuarioActual`. No
+quitarla al refactorizar — sin ella, el rechazo de las reglas llega disfrazado de fallo de red.
+
+El README documenta el orden de despliegue y los scripts de rotación, borrado y auditoría.
 
 ## Datos: flujo Excel → JSON
 
