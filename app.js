@@ -4963,6 +4963,17 @@ function exportPdfReport() {
   // navegador la bloquearia por emergente.
   const reportWindow = window.open("", "_blank");
 
+  // window.open(url, "_blank", "noopener") no vale aqui: devuelve null y
+  // entonces no se puede escribir en la ventana. Hay que anularlo despues.
+  //
+  // Hoy esto no impide nada. El informe lo genera esta misma aplicacion, va
+  // escapado y no lleva scripts, asi que no hay nadie que pueda usar el opener.
+  // Se deja como red para el dia en que el informe incorpore algo de fuera, que
+  // es justo el dia en que nadie se acordaria de anadirlo.
+  if (reportWindow) {
+    reportWindow.opener = null;
+  }
+
   if (!reportWindow) {
     showNotice("El navegador ha bloqueado la ventana del informe. Permite las ventanas emergentes de esta página y vuelve a pulsar Exportar PDF.", "aviso");
     return;
