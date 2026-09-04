@@ -3918,15 +3918,32 @@ async function initializeSharedScenario() {
       error,
     );
 
+    // Un rechazo por permisos no es una caida de red, y decir "sin conexion"
+    // manda a mirar el wifi cuando el problema es otro. Con `auth != null` en
+    // las reglas este es el error que sale cuando la autenticacion no ha
+    // llegado a tiempo, y el arreglo es recargar, no cambiar de red.
+    const esPermiso =
+      error?.code === "PERMISSION_DENIED" ||
+      String(error?.message || "").toLowerCase().includes("permission_denied") ||
+      !usuarioActual;
+
     marcarFalloDeSincronia(
-      "Sin conexión con el escenario compartido",
-      "No se ha podido conectar con el escenario compartido. Estás trabajando sobre la copia de este navegador " +
-        "y tus cambios no le llegan al resto del equipo. Si vas a trabajar así, exporta una copia antes de cerrar.",
+      esPermiso
+        ? "Sin permiso para abrir el escenario compartido"
+        : "Sin conexión con el escenario compartido",
+      esPermiso
+        ? "Este navegador no ha podido identificarse, así que el escenario compartido no le deja entrar. " +
+          "Estás viendo la copia local y tus cambios no le llegan al resto del equipo. Recarga la página; " +
+          "si sigue igual, exporta una copia antes de cerrar."
+        : "No se ha podido conectar con el escenario compartido. Estás trabajando sobre la copia de este navegador " +
+          "y tus cambios no le llegan al resto del equipo. Si vas a trabajar así, exporta una copia antes de cerrar.",
     );
 
     showNotice(
-      "No se ha podido conectar con el escenario compartido. Tus cambios se guardan en este navegador, "
-        + "pero el resto del equipo no los ve.",
+      esPermiso
+        ? "Este navegador no ha podido identificarse y el escenario compartido no le deja entrar. Recarga la página."
+        : "No se ha podido conectar con el escenario compartido. Tus cambios se guardan en este navegador, "
+          + "pero el resto del equipo no los ve.",
       "aviso",
     );
   }
@@ -4058,6 +4075,36 @@ function marcarFalloDeSincronia(mensaje, detalle) {
 }
 
 
+/**
+ * Sin identidad no se intenta escribir en el escenario compartido.
+ *
+ * Con `auth != null` en las reglas esa escritura se rechaza entera, y el error
+ * llega como un fallo de red generico: "comprueba la conexion y vuelve a hacer
+ * el cambio". Es un consejo falso —repetirlo no arregla nada— y de los que
+ * hacen perder media hora en una sesion. Asi el chip dice lo que pasa de
+ * verdad y el cambio ni se intenta.
+ *
+ * La guarda es sincrona y no espera a ninguna promesa a proposito. init() llama
+ * a renderAll() antes de await inicializarIdentidad(), asi que hay una ventana
+ * de milisegundos con controles ya editables; preguntar por usuarioActual la
+ * cierra sin depender del orden de arranque, que es fragil por naturaleza.
+ */
+function hayIdentidadParaEscribir() {
+  if (usuarioActual) {
+    return true;
+  }
+
+  marcarFalloDeSincronia(
+    "Sin identidad: no se está compartiendo",
+    "Este navegador no ha podido identificarse contra Firebase, y sin identidad el escenario " +
+      "compartido rechaza las escrituras. Tus cambios están guardados aquí y no se han perdido. " +
+      "Recarga la página; si sigue igual, exporta una copia con Escenario → Guardar una copia.",
+  );
+
+  return false;
+}
+
+
 
 function saveScenarioToFirebase(
   payload,
@@ -4124,6 +4171,10 @@ function persistGranularChange(rutas) {
   }
 
   if (isApplyingRemoteScenario) {
+    return;
+  }
+
+  if (!hayIdentidadParaEscribir()) {
     return;
   }
 
@@ -4232,6 +4283,10 @@ function persistScenario() {
   }
 
   if (isApplyingRemoteScenario) {
+    return;
+  }
+
+  if (!hayIdentidadParaEscribir()) {
     return;
   }
 
