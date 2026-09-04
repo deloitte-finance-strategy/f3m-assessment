@@ -9,6 +9,9 @@ cuando ya se ha confirmado que el enlace nuevo funciona.
 
 El id de destino se genera con `secrets`, no con `random`, porque el enlace es
 la única credencial del escenario.
+
+Con `auth != null` en las reglas hace falta un token: se pide uno anónimo, el
+mismo que obtiene cualquier navegador. Ver scripts/firebase_rest.py.
 """
 
 import argparse
@@ -16,39 +19,17 @@ import json
 import re
 import secrets
 import sys
-import urllib.error
-import urllib.request
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-APP_JS = ROOT / "app.js"
+from firebase_rest import (
+    anadir_flags_de_auth,
+    con_auth,
+    leer_config,
+    obtener_token,
+    peticion,
+    resumen,
+)
 
 ID_VALIDO = re.compile(r"^[a-zA-Z0-9_-]{20,120}$")
-
-
-def leer_database_url():
-    """Toma la URL de la base desde app.js para no duplicar configuración."""
-    texto = APP_JS.read_text(encoding="utf-8")
-    match = re.search(r'databaseURL:\s*"([^"]+)"', texto)
-
-    if not match:
-        raise SystemExit("No se encontró databaseURL en app.js")
-
-    return match.group(1).rstrip("/")
-
-
-def peticion(url, metodo="GET", cuerpo=None):
-    datos = cuerpo.encode("utf-8") if cuerpo is not None else None
-    req = urllib.request.Request(url, data=datos, method=metodo)
-
-    if datos is not None:
-        req.add_header("Content-Type", "application/json")
-
-    try:
-        with urllib.request.urlopen(req, timeout=30) as r:
-            return r.status, r.read().decode("utf-8")
-    except urllib.error.HTTPError as e:
-        return e.code, e.read().decode("utf-8")[:300]
 
 
 def nuevo_id():
@@ -63,12 +44,16 @@ def main():
         action="store_true",
         help="Ejecuta la copia. Sin este flag solo muestra qué haría.",
     )
+    anadir_flags_de_auth(parser)
     args = parser.parse_args()
 
-    base = leer_database_url()
+    base, _ = leer_config()
+    token = obtener_token(args)
 
     # 1. Leer el original
-    estado, cuerpo = peticion(f"{base}/scenarios/{args.id_antiguo}.json")
+    estado, cuerpo = peticion(
+        con_auth(f"{base}/scenarios/{args.id_antiguo}.json", token)
+    )
 
     if estado != 200:
         raise SystemExit(f"No se pudo leer el escenario origen ({estado}): {cuerpo}")
@@ -77,16 +62,9 @@ def main():
         raise SystemExit(f"El escenario '{args.id_antiguo}' está vacío o no existe.")
 
     payload = json.loads(cuerpo)
-    dominios = payload.get("domains") or {}
-    puntuadas = sum(
-        1
-        for d in dominios.values()
-        for i in (d.get("items") or [])
-        if any(isinstance(v, (int, float)) for v in (i.get("scores") or {}).values())
-    )
 
     print(f"Origen  : {args.id_antiguo}")
-    print(f"          {len(cuerpo)} bytes | {len(dominios)} dominios | {puntuadas} subcapacidades puntuadas")
+    print(f"          {resumen(payload, cuerpo)}")
     print(f"          updatedAt: {payload.get('updatedAt')}")
 
     destino = nuevo_id()
@@ -100,14 +78,16 @@ def main():
         return 0
 
     # 2. Comprobar que el destino está libre antes de escribir
-    estado, cuerpo_destino = peticion(f"{base}/scenarios/{destino}.json")
+    estado, cuerpo_destino = peticion(
+        con_auth(f"{base}/scenarios/{destino}.json", token)
+    )
 
     if estado == 200 and cuerpo_destino.strip() not in ("null", ""):
         raise SystemExit(f"El destino '{destino}' ya tiene datos. Abortado.")
 
     # 3. Copiar
     estado, respuesta = peticion(
-        f"{base}/scenarios/{destino}.json",
+        con_auth(f"{base}/scenarios/{destino}.json", token),
         metodo="PUT",
         cuerpo=json.dumps(payload, ensure_ascii=False),
     )
@@ -116,7 +96,9 @@ def main():
         raise SystemExit(f"Fallo al escribir la copia ({estado}): {respuesta}")
 
     # 4. Verificar que la copia es idéntica
-    estado, cuerpo_verificacion = peticion(f"{base}/scenarios/{destino}.json")
+    estado, cuerpo_verificacion = peticion(
+        con_auth(f"{base}/scenarios/{destino}.json", token)
+    )
 
     if estado != 200:
         raise SystemExit(f"No se pudo releer la copia ({estado})")

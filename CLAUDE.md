@@ -40,11 +40,14 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 407 |
 | `core/presentacion.js` | Escapado, formato de números y colores de marca | 65 |
 | `informe/pdf.js` | El informe PDF: de los datos al HTML imprimible | 790 |
-| `tests/` | Pruebas de `core/`, sin dependencias | 814 |
+| `tests/` | Pruebas de `core/` y del espejo con las reglas, sin dependencias | — |
+| `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
 | `data/domains/*.json` | Datos del assessment, un archivo por dominio | — |
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
 | `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
+| `vendor/` | Chart.js, servido desde aquí y no desde un CDN. **Se versiona** | — |
+| `SECURITY.md` | Modelo de amenazas, qué protege y qué no, y los procedimientos | — |
 
 La regla de reparto: **en `core/` no hay DOM, ni Firebase, ni estado global, ni imports.** Todo son
 funciones puras, y por eso se pueden probar sin levantar la aplicación. `app.js` es quien conoce el
@@ -63,10 +66,15 @@ cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScena
   → populateCapacityFilter() → renderAll()
 ```
 
-Dependencias externas por CDN, sin bundler:
+Dependencias de terceros, sin bundler:
 
-- **Chart.js 4.5.0** desde cdnjs (al final de `index.html`) — radares por capacidad.
-- **Firebase Realtime Database 12.15.0** importado desde `gstatic.com` (cabecera de `app.js`).
+- **Chart.js 4.5.0** desde `vendor/chart.umd.min.js` (al final de `index.html`) — radares por
+  capacidad. **No va por CDN a propósito**: una red de cliente que filtre cdnjs dejaba los radares
+  sin pintar y el PDF entregable con tres huecos. `vendor/LEEME.md` explica el porqué y cómo se
+  actualiza.
+- **Firebase Realtime Database y Auth 12.15.0** importados desde `gstatic.com` (cabecera de
+  `app.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
+  ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
 
 ### Las cuatro pestañas son vistas, no anclas
 
@@ -134,8 +142,11 @@ recalcula. No hay que acordarse de vaciar nada al tocar el estado.
 
 ## Persistencia y escenarios compartidos
 
-- **Local**: `localStorage`, clave `f3m-fpa-assessment-scenario` (`STORAGE_KEY`). El nombre de quien
-  edita va aparte, en `f3m-nombre-editor`.
+- **Local**: `localStorage`. La clave (`STORAGE_KEY`) es `f3m-fpa-assessment-scenario` sin escenario
+  compartido, y `f3m-fpa-assessment-scenario:<id>` con él. **Es por escenario a propósito**: con una
+  clave única, abrir el escenario de un cliente y después el de otro dejaba los datos del primero en
+  pantalla cuando la lectura remota del segundo fallaba. El nombre de quien edita va aparte, en
+  `f3m-nombre-editor`.
 - **Compartido**: parámetro de URL `?scenario=<id>`. Lee y escribe en `scenarios/<id>` de la
   Realtime Database. El id se valida contra `/^[a-zA-Z0-9_-]{20,120}$/` en `getScenarioIdFromUrl()`.
 
@@ -159,8 +170,13 @@ Al tocar el flujo de guardado, tener en cuenta:
 `core/escenario.js` es el **espejo en JavaScript de `database.rules.json`**: campos admitidos en
 cada nivel, longitudes máximas, estados válidos y campos de autoría.
 
-**Si se cambia `database.rules.json`, hay que cambiar `core/escenario.js` también.** No hay nada que
-lo compruebe automáticamente.
+**Si se cambia `database.rules.json`, hay que cambiar `core/escenario.js` también.** Esto ya no
+depende de que alguien se acuerde: `tests/casos-reglas.js` lee el archivo de reglas y compara campo a
+campo los límites, los campos admitidos, los cerrojos `$otro...` y los rangos de score. Si los dos
+dejan de decir lo mismo, el CI se pone rojo.
+
+Lo que **no** puede comprobar ninguna prueba es que las reglas desplegadas en Firebase coincidan con
+las de este repositorio. Eso se mira en la consola.
 
 `revisarEscenario()` revisa un archivo importado **antes** de aplicarlo: lo que no es un escenario
 de esta herramienta no llega a tocar los datos, y lo que se puede arreglar al vuelo se enumera en el
@@ -168,18 +184,28 @@ aviso en vez de corregirse en silencio.
 
 ### Aviso de seguridad — Firebase
 
+**`SECURITY.md` es el documento completo**: qué protege la herramienta, qué no, qué datos guarda y
+dónde, y los procedimientos. Lo que sigue es lo que hay que tener presente al tocar este código.
+
 La configuración de Firebase está en claro en la cabecera de `app.js` (`apiKey`, `databaseURL`,
 `projectId`…). En una web app de Firebase esto es **público por diseño** y no constituye un secreto
-filtrado.
+filtrado: la autorización la dan las reglas, no el secreto de la clave.
 
-Las reglas de seguridad sí están en este repositorio, en `database.rules.json`, y son restrictivas:
-validan campo a campo y rechazan cualquier campo no declarado. Pero **el repositorio no puede
-garantizar qué reglas están desplegadas**: eso se comprueba en la consola de Firebase. Si las reglas
-activas fueran abiertas, cualquiera con la URL de la base —que está en el código público— podría
-leer y escribir todos los escenarios.
+Las reglas de `database.rules.json` exigen `auth != null`, validan campo a campo y rechazan
+cualquier campo no declarado. Pero **el repositorio no puede garantizar qué reglas están
+desplegadas**: eso se comprueba en la consola de Firebase. Si las reglas activas fueran las
+permisivas, cualquiera con la URL de la base —que está en el código público— podría leer y escribir
+todos los escenarios.
 
-El README documenta el orden de despliegue obligatorio (reglas → Anonymous Auth → código) y cómo
-rotar un escenario expuesto.
+Y conviene no confundirse con lo que aporta `auth != null`: la autenticación es **anónima y
+abierta**, así que da atribución y una barrera frente al `curl`, no control de acceso. **El enlace
+sigue siendo la credencial.**
+
+Al tocar el guardado, tener presente que hay una puerta de identidad:
+`hayIdentidadParaEscribir()` corta la escritura antes de intentarla si no hay `usuarioActual`. No
+quitarla al refactorizar — sin ella, el rechazo de las reglas llega disfrazado de fallo de red.
+
+El README documenta el orden de despliegue y los scripts de rotación, borrado y auditoría.
 
 ## Datos: flujo Excel → JSON
 
@@ -231,18 +257,24 @@ python scripts/check_domains_sync.py
 Verifica el catálogo de dominios y que los 9 JSON coinciden con sus Excel. Código de salida `1` si
 algo falla.
 
-Las reglas de negocio y el contrato de escenario se prueban en `tests/`, sin dependencias:
+Las reglas de negocio, el contrato de escenario y el espejo con `database.rules.json` se prueban en
+`tests/`, sin dependencias:
 
 - **En el navegador**: con el servidor en marcha, abrir `http://localhost:8000/tests/`. Es la forma
   que funciona en cualquier equipo, sin instalar nada.
 - **Desde la línea de comandos**, si hay Node: `node tests/ejecutar.mjs`. Sale con código `1` si
   falla algo, listo para CI.
 
-Los dos ejecutan los mismos casos. Al tocar `core/`, ejecutarlas.
+Los dos ejecutan los mismos casos. Al tocar `core/` **o `database.rules.json`**, ejecutarlas.
+
+Ojo con el navegador: los módulos ES se cachean con ganas, y un cambio en `core/` puede no verse al
+recargar. Si un resultado no cuadra con lo que acabas de editar, sirve en un puerto distinto —origen
+nuevo, caché vacía— antes de dar por buena la prueba.
 
 ### Comprobación manual en el navegador
 
-No hay linter ni CI. El resto se comprueba a mano:
+El CI (`.github/workflows/verificacion.yml`) ejecuta esas dos cosas en cada PR. No hay linter, y el
+resto se comprueba a mano:
 
 1. `python -m http.server 8000` → `http://localhost:8000/`.
 2. Consola del navegador **en silencio**. Un arranque correcto no imprime nada: lo que aparezca

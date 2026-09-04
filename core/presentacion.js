@@ -60,6 +60,18 @@ export function escapeHtml(value) {
 }
 
 
+/**
+ * El mismo escapado que escapeHtml, con otro nombre.
+ *
+ * No es un descuido que sea un alias: en un atributo entrecomillado hace falta
+ * exactamente eso y nada mas, y el nombre documenta la intencion en los sitios
+ * donde se usa.
+ *
+ * Lo que NO hace es validar el esquema de una URL. En informe/pdf.js se usa
+ * sobre el src de los radares, que sale de canvas.toDataURL() y por tanto es
+ * siempre un data: nuestro. Si algun dia un href o un src llega de fuera, esto
+ * no basta.
+ */
 export function escapeAttr(value) {
   return escapeHtml(value);
 }

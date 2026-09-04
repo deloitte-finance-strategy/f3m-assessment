@@ -94,7 +94,12 @@ Las reglas de cálculo y el contrato de los escenarios se prueban sin instalar n
 
 Los dos ejecutan los mismos casos y cubren gap, prioridad, oleada, nivel de madurez,
 subcapacidades pendientes, agregación por capacidad y lo que se acepta o se rechaza al importar un
-escenario.
+escenario. También comprueban que `core/escenario.js` siga siendo el espejo exacto de
+`database.rules.json`: si uno cambia y el otro no, Firebase rechazaría el guardado entero en la
+siguiente sesión, y eso ahora se detecta antes de fusionar.
+
+Se ejecutan solas en cada pull request, en `.github/workflows/verificacion.yml`, junto a
+`scripts/check_domains_sync.py`.
 
 
 ## Uso online
@@ -113,10 +118,13 @@ identificador aleatorio de 128 bits y te lleva a la URL correspondiente:
 https://deloitte-finance-strategy.github.io/f3m-assessment/?scenario=<id-generado>
 ```
 
-> **El enlace es la credencial.** Cualquier persona que lo tenga puede ver y editar el escenario,
-> sin autenticación. Trátalo como una contraseña: no lo publiques en repositorios, documentos
-> compartidos ni tickets. No inventes identificadores a mano — un ID adivinable expone el
-> assessment completo a cualquiera.
+> **El enlace es la credencial.** Cualquier persona que lo tenga puede ver y editar el escenario.
+> Trátalo como una contraseña: no lo publiques en repositorios, documentos compartidos ni tickets.
+> No inventes identificadores a mano — un ID adivinable expone el assessment completo a cualquiera.
+>
+> Las reglas exigen autenticación, pero es **anónima y abierta**: eso da atribución y frena a quien
+> quisiera leer la base sin cargar la aplicación, no controla quién entra. **[SECURITY.md](SECURITY.md)
+> explica en detalle qué protege la herramienta y qué no.**
 >
 > Por eso la herramienta no lo enseña entero: ni en pantalla ni en la portada del PDF, que es un
 > documento que se envía al cliente. Para obtener el enlace completo, **Escenario → "Copiar
@@ -141,28 +149,40 @@ credenciales, pero asigna un identificador estable a cada navegador. Sirve para 
 cambio, con **Escenario → "Poner mi nombre"** para elegir cómo apareces ante el resto.
 La columna **"Último cambio"** del Roadmap muestra quién tocó cada subcapacidad por última vez.
 
-Si la autenticación no está disponible, la herramienta sigue funcionando sin atribución. Se
-prefiere perder la trazabilidad a que deje de guardarse.
+**La identidad es obligatoria para escribir.** Sin ella, la aplicación no intenta guardar en el
+escenario compartido: el chip se pone rojo y dice *"Sin identidad: no se está compartiendo"*. Los
+cambios siguen guardados en el navegador y no se pierden. Antes se guardaba sin atribución, pero eso
+deja de ser posible en cuanto las reglas exigen `auth != null`, y un rechazo del servidor llega
+disfrazado de fallo de red: es mejor decir la verdad desde el principio.
 
-> **Orden de despliegue.** Las escrituras son atómicas: si las reglas rechazan el campo de autoría,
-> falla también el dato que lo acompaña, y el guardado deja de funcionar sin que se note.
-> Por eso hay que hacerlo en este orden:
->
-> 1. Publicar `database.rules.json` (ya incluye `lastEditedBy`).
-> 2. Habilitar *Anonymous* en Firebase → *Authentication* → *Sign-in method*.
-> 3. Desplegar el código.
->
-> Al revés, cada guardado se rechazaría con `Permission denied`.
+### Desplegar el endurecimiento de las reglas
 
-Cuando todo el equipo use la versión nueva, se puede exigir autenticación en las reglas cambiando
-las dos líneas de `$scenarioId`:
+`database.rules.json` ya incluye `auth != null`, la lista cerrada de dominios y la de estados. **El
+repositorio no despliega reglas**: eso se hace a mano en la consola, y el orden importa.
 
-```json
-".read": "auth != null && $scenarioId.length >= 20",
-".write": "auth != null && $scenarioId.length >= 20"
-```
+1. **Comprobar los datos que ya existen.** Exportar la base y pasarla por
+   `python scripts/audit_scenarios.py <export>`. Si sale algo, corregirlo o relajar la regla antes
+   de seguir.
+2. **Desplegar el código primero, las reglas después.** Mientras las reglas sigan siendo permisivas,
+   la aplicación es más estricta que el servidor y la vuelta atrás es un despliegue, no una urgencia.
+3. **Observar unos días.** Si en alguna red de cliente aparece el chip rojo por identidad, publicar
+   las reglas dejaría a esa persona sin escribir. Es la señal que hay que esperar.
+4. **Probar las reglas en el simulador** de Firebase Console → Realtime Database → Reglas, que
+   permite validar una escritura sin publicar nada. Comprobar como mínimo: un `status` válido y uno
+   inválido, un dominio del catálogo y uno inventado, un id de escenario con el formato correcto, y
+   una escritura completa del escenario de pruebas. **El regex de `$scenarioId` es lo que hay que
+   mirar con más cuidado**: si `matches()` no se comportara como se espera, la regla falla cerrada y
+   nadie podría leer ni escribir.
+5. **Publicar las reglas** fuera de horario de sesión. La consola guarda el historial de versiones,
+   así que revertir es un clic.
 
-No hacerlo antes: quien siga con la versión anterior dejaría de poder leer y escribir.
+> **Anonymous Auth tiene que estar habilitado** en Firebase → *Authentication* → *Sign-in method*
+> antes de publicar las reglas. Si no, nadie obtiene identidad y nadie puede escribir.
+
+Conviene ser claro sobre qué compra `auth != null` y qué no. La autenticación es **anónima y
+abierta**: cualquiera puede obtener un uid. Lo que aporta es atribución, trazabilidad y una barrera
+frente a quien lea la base con `curl` sin siquiera cargar la aplicación. **No es control de acceso**:
+quien tenga el enlace sigue pudiendo leer y escribir el escenario entero.
 
 ### Rotar un escenario expuesto
 
@@ -175,5 +195,48 @@ python scripts/rotate_scenario.py <id-antiguo> --confirm    # copia y verifica
 ```
 
 El script copia el contenido a un id aleatorio de 128 bits y comprueba que la copia es idéntica.
-No borra el original: eso se hace a mano desde la consola de Firebase, una vez confirmado que el
-enlace nuevo funciona.
+No borra el original: para eso está el script siguiente.
+
+### Borrar un escenario
+
+```powershell
+python scripts/delete_scenario.py <id>              # muestra qué haría
+python scripts/delete_scenario.py <id> --confirm    # guarda copia y borra
+```
+
+Guarda una copia verificada en `copias/<id>-<fecha>.json` antes de borrar, y si la copia no coincide
+no borra nada. `copias/` está en el `.gitignore` a propósito: son datos reales de cliente y este
+repositorio es público.
+
+> **Un escenario borrado puede resucitar.** Si alguien tiene la pestaña abierta con ese enlace, la
+> aplicación lo recrea en cuanto recargue o toque algo. El orden correcto es rotar primero,
+> confirmar que todo el mundo está en el enlace nuevo y ha cerrado el viejo, y borrar después.
+
+### Los scripts y la autenticación
+
+Con `auth != null` en las reglas, los tres scripts que hablan con la base necesitan un token. Lo
+piden solos: uno **anónimo**, el mismo que obtiene cualquier navegador que abra la aplicación, así
+que acaban con exactamente los mismos privilegios que cualquiera con el enlace. No hace falta
+ninguna credencial de administrador, y por tanto no hay ningún secreto nuevo que guardar.
+
+- `--token <idToken>` reutiliza uno en vez de crear otro usuario anónimo.
+- `--sin-auth` no autentica. Sirve mientras las reglas no exijan `auth != null`, y para diagnosticar:
+  si un script funciona con este flag y falla sin él, el problema es la autenticación y no la base.
+
+### Antes de cambiar las reglas de Firebase
+
+Unas reglas más estrictas pueden rechazar datos que ya están escritos. Para saberlo **antes** de
+publicarlas, exporta la base desde Firebase Console → Realtime Database → ⋮ → *Exportar JSON* y
+pásale el archivo a:
+
+```powershell
+python scripts/audit_scenarios.py <export-de-la-consola.json>
+```
+
+Lee `database.rules.json` de la rama en la que estés, así que sirve tal cual para probar reglas
+candidatas: las cambias, lo ejecutas, y te dice qué se rompería. Sale con código `1` si encuentra
+algo.
+
+Se usa un export y no la API REST porque las reglas no permiten leer `/scenarios` entero, y meter
+una credencial de administrador en un repositorio público para esquivarlo sería peor que el problema
+que resuelve.

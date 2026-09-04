@@ -8,6 +8,7 @@
 
 import { casos as casosDeCalculo } from "./casos-calculo.js";
 import { casos as casosDeEscenario } from "./casos-escenario.js";
+import { casos as casosDeReglas } from "./casos-reglas.js";
 import { casos as casosDePresentacion } from "./casos-presentacion.js";
 
 
@@ -15,6 +16,7 @@ import { casos as casosDePresentacion } from "./casos-presentacion.js";
 export const casos = [
   ...casosDeCalculo,
   ...casosDeEscenario,
+  ...casosDeReglas,
   ...casosDePresentacion,
 ];
 

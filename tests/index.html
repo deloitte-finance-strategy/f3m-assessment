@@ -91,9 +91,10 @@
   <p class="intro">
     Las reglas F3M de <code>core/calculo.js</code> —gap por palanca, prioridad,
     oleada, nivel, pendientes y agregacion— y el contrato de escenario de
-    <code>core/escenario.js</code>, que es el espejo de
-    <code>database.rules.json</code>. No tocan el DOM, ni Firebase, ni el
-    estado de la aplicacion.
+    <code>core/escenario.js</code>. Ademas se comprueba que ese contrato siga
+    siendo el espejo de <code>database.rules.json</code>: campos admitidos,
+    longitudes, cerrojos y rangos. No tocan el DOM, ni Firebase, ni el estado de
+    la aplicacion.
   </p>
 
   <div id="resultado">Ejecutando…</div>

@@ -96,7 +96,24 @@ const GRUPOS_DE_DOMINIO = [];
 const CATALOGO_URL = "data/domains.json";
 
 
-const STORAGE_KEY = "f3m-fpa-assessment-scenario";
+/**
+ * La copia local se guarda por escenario, no bajo una clave unica.
+ *
+ * Con una sola clave, abrir el escenario de un cliente y despues el de otro en
+ * el mismo navegador dejaba cargados los datos del primero cuando la lectura
+ * remota del segundo fallaba: applyStoredScenario() corre antes de leer
+ * Firebase, y el catch de initializeSharedScenario() avisa de la falta de
+ * conexion pero no limpia lo que ya se ha pintado. La pantalla acababa
+ * ensenando los datos de un cliente bajo la URL de otro, y el aviso decia
+ * "estas trabajando sobre la copia de este navegador" sin aclarar de quien era
+ * esa copia.
+ *
+ * En modo local la clave es la misma de siempre, asi que nadie pierde su
+ * trabajo al desplegar esto. En modo compartido la primera carga no encuentra
+ * copia y baja de Firebase, que es la fuente de verdad de todos modos.
+ */
+const STORAGE_KEY_BASE = "f3m-fpa-assessment-scenario";
+const STORAGE_KEY = scenarioId ? `${STORAGE_KEY_BASE}:${scenarioId}` : STORAGE_KEY_BASE;
 
 
 // Las palancas las define el motor; aqui solo se les pone el color de marca.
@@ -2177,8 +2194,30 @@ function renderSummaryTable() {
 
 
 
+/**
+ * Solo se avisa una vez por carga: renderCapabilityRadar() se llama en cada
+ * repintado del dashboard, y el aviso taparia todo lo demas.
+ */
+let avisoDeGraficosMostrado = false;
+
+
 function renderCapabilityRadar() {
   if (typeof Chart === "undefined") {
+    // Antes esto era un return mudo. Si la red del cliente bloquea el CDN
+    // —normal en una red corporativa ajena— no habia radares, no habia aviso, y
+    // el PDF que se entrega salia con tres recuadros en blanco. Nadie se
+    // enteraba hasta tener el informe delante.
+    if (!avisoDeGraficosMostrado) {
+      avisoDeGraficosMostrado = true;
+
+      showNotice(
+        "No se ha podido cargar la librería de gráficos: los radares no se pintan y el informe PDF "
+          + "saldrá sin ellos. El resto de la herramienta funciona con normalidad. Recarga la página "
+          + "para reintentarlo.",
+        "aviso",
+      );
+    }
+
     return;
   }
 
@@ -3744,6 +3783,33 @@ function getStoredScenario() {
 // concretas. Además los relojes de cada equipo no son fiables, así que la
 // comparación descartaba cambios ajenos de forma arbitraria.
 
+/**
+ * La misma promesa, pero que falla en vez de quedarse colgada.
+ *
+ * Sin esto, init() esperaba a signInAnonymously() con un await sin limite: en
+ * una red que descarta paquetes en silencio —un portal cautivo, una wifi de
+ * invitados— la aplicacion se quedaba en "Preparando datos" para siempre, que
+ * es la peor forma de fallar delante de un cliente.
+ *
+ * readScenarioFromFirebase() y saveScenarioToFirebase() traen su propia copia
+ * de este patron. No se tocan aqui: estan en el camino del guardado, funcionan,
+ * y unificarlas no es lo que se venia a hacer.
+ */
+function conLimiteDeEspera(promesa, mensaje, timeoutMs = 8000) {
+  let timeoutId;
+
+  const limite = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      reject(new Error(mensaje));
+    }, timeoutMs);
+  });
+
+  return Promise.race([promesa, limite]).finally(() => {
+    window.clearTimeout(timeoutId);
+  });
+}
+
+
 function readScenarioFromFirebase(timeoutMs = 8000) {
   const firebaseRead = get(scenarioDatabaseRef);
 
@@ -3852,15 +3918,32 @@ async function initializeSharedScenario() {
       error,
     );
 
+    // Un rechazo por permisos no es una caida de red, y decir "sin conexion"
+    // manda a mirar el wifi cuando el problema es otro. Con `auth != null` en
+    // las reglas este es el error que sale cuando la autenticacion no ha
+    // llegado a tiempo, y el arreglo es recargar, no cambiar de red.
+    const esPermiso =
+      error?.code === "PERMISSION_DENIED" ||
+      String(error?.message || "").toLowerCase().includes("permission_denied") ||
+      !usuarioActual;
+
     marcarFalloDeSincronia(
-      "Sin conexión con el escenario compartido",
-      "No se ha podido conectar con el escenario compartido. Estás trabajando sobre la copia de este navegador " +
-        "y tus cambios no le llegan al resto del equipo. Si vas a trabajar así, exporta una copia antes de cerrar.",
+      esPermiso
+        ? "Sin permiso para abrir el escenario compartido"
+        : "Sin conexión con el escenario compartido",
+      esPermiso
+        ? "Este navegador no ha podido identificarse, así que el escenario compartido no le deja entrar. " +
+          "Estás viendo la copia local y tus cambios no le llegan al resto del equipo. Recarga la página; " +
+          "si sigue igual, exporta una copia antes de cerrar."
+        : "No se ha podido conectar con el escenario compartido. Estás trabajando sobre la copia de este navegador " +
+          "y tus cambios no le llegan al resto del equipo. Si vas a trabajar así, exporta una copia antes de cerrar.",
     );
 
     showNotice(
-      "No se ha podido conectar con el escenario compartido. Tus cambios se guardan en este navegador, "
-        + "pero el resto del equipo no los ve.",
+      esPermiso
+        ? "Este navegador no ha podido identificarse y el escenario compartido no le deja entrar. Recarga la página."
+        : "No se ha podido conectar con el escenario compartido. Tus cambios se guardan en este navegador, "
+          + "pero el resto del equipo no los ve.",
       "aviso",
     );
   }
@@ -3992,6 +4075,36 @@ function marcarFalloDeSincronia(mensaje, detalle) {
 }
 
 
+/**
+ * Sin identidad no se intenta escribir en el escenario compartido.
+ *
+ * Con `auth != null` en las reglas esa escritura se rechaza entera, y el error
+ * llega como un fallo de red generico: "comprueba la conexion y vuelve a hacer
+ * el cambio". Es un consejo falso —repetirlo no arregla nada— y de los que
+ * hacen perder media hora en una sesion. Asi el chip dice lo que pasa de
+ * verdad y el cambio ni se intenta.
+ *
+ * La guarda es sincrona y no espera a ninguna promesa a proposito. init() llama
+ * a renderAll() antes de await inicializarIdentidad(), asi que hay una ventana
+ * de milisegundos con controles ya editables; preguntar por usuarioActual la
+ * cierra sin depender del orden de arranque, que es fragil por naturaleza.
+ */
+function hayIdentidadParaEscribir() {
+  if (usuarioActual) {
+    return true;
+  }
+
+  marcarFalloDeSincronia(
+    "Sin identidad: no se está compartiendo",
+    "Este navegador no ha podido identificarse contra Firebase, y sin identidad el escenario " +
+      "compartido rechaza las escrituras. Tus cambios están guardados aquí y no se han perdido. " +
+      "Recarga la página; si sigue igual, exporta una copia con Escenario → Guardar una copia.",
+  );
+
+  return false;
+}
+
+
 
 function saveScenarioToFirebase(
   payload,
@@ -4058,6 +4171,10 @@ function persistGranularChange(rutas) {
   }
 
   if (isApplyingRemoteScenario) {
+    return;
+  }
+
+  if (!hayIdentidadParaEscribir()) {
     return;
   }
 
@@ -4166,6 +4283,10 @@ function persistScenario() {
   }
 
   if (isApplyingRemoteScenario) {
+    return;
+  }
+
+  if (!hayIdentidadParaEscribir()) {
     return;
   }
 
@@ -4842,6 +4963,17 @@ function exportPdfReport() {
   // navegador la bloquearia por emergente.
   const reportWindow = window.open("", "_blank");
 
+  // window.open(url, "_blank", "noopener") no vale aqui: devuelve null y
+  // entonces no se puede escribir en la ventana. Hay que anularlo despues.
+  //
+  // Hoy esto no impide nada. El informe lo genera esta misma aplicacion, va
+  // escapado y no lleva scripts, asi que no hay nadie que pueda usar el opener.
+  // Se deja como red para el dia en que el informe incorpore algo de fuera, que
+  // es justo el dia en que nadie se acordaria de anadirlo.
+  if (reportWindow) {
+    reportWindow.opener = null;
+  }
+
   if (!reportWindow) {
     showNotice("El navegador ha bloqueado la ventana del informe. Permite las ventanas emergentes de esta página y vuelve a pulsar Exportar PDF.", "aviso");
     return;
@@ -5023,14 +5155,26 @@ function getPdfActiveFiltersLabel() {
 
 function getRadarImagesForPdf() {
   return {
-    procesos: getCanvasImageDataUrl(els.capabilityRadarProcessesChart),
-    tecnologia: getCanvasImageDataUrl(els.capabilityRadarTechnologyChart),
-    organizacion: getCanvasImageDataUrl(els.capabilityRadarOrganizationChart),
+    procesos: getCanvasImageDataUrl("procesos", els.capabilityRadarProcessesChart),
+    tecnologia: getCanvasImageDataUrl("tecnologia", els.capabilityRadarTechnologyChart),
+    organizacion: getCanvasImageDataUrl("organizacion", els.capabilityRadarOrganizationChart),
   };
 }
 
-function getCanvasImageDataUrl(canvas) {
-  if (!canvas) {
+/**
+ * La imagen de un radar para el informe, o cadena vacia si no hay radar.
+ *
+ * La cadena vacia importa: con ella, buildPdfRadarImageHtml() escribe "No se
+ * pudo capturar el grafico" y el informe dice la verdad. Sin ella, un canvas
+ * sin grafico devuelve un PNG en blanco perfectamente valido —no lanza— y el
+ * PDF que se entrega al cliente sale con tres recuadros vacios.
+ *
+ * Se pregunta por la instancia de Chart y no por el tamano del canvas: es lo
+ * unico que distingue "aqui no se ha pintado nada" de "se ha pintado un radar
+ * sin datos", que son casos distintos.
+ */
+function getCanvasImageDataUrl(palanca, canvas) {
+  if (!canvas || !capabilityRadarCharts[palanca]) {
     return "";
   }
 
@@ -5577,7 +5721,10 @@ async function inicializarIdentidad() {
   }
 
   try {
-    const credencial = await signInAnonymously(firebaseAuth);
+    const credencial = await conLimiteDeEspera(
+      signInAnonymously(firebaseAuth),
+      "Tiempo de espera agotado al autenticar",
+    );
 
     usuarioActual = {
       uid: credencial.user.uid,
@@ -5591,6 +5738,23 @@ async function inicializarIdentidad() {
     );
 
     usuarioActual = null;
+
+    // Esto se avisa aunque hoy no impida guardar. Es la senal de campo que dice
+    // si exigir `auth != null` en las reglas dejaria a alguien sin escribir: si
+    // el chip rojo aparece en la red de algun cliente, se sabe antes de
+    // desplegar ese cambio y no despues.
+    marcarFalloDeSincronia(
+      "Sin identidad para atribuir los cambios",
+      "Este navegador no ha podido identificarse contra Firebase. Los cambios se siguen guardando y "
+        + "compartiendo, pero sin atribución en la columna \"Último cambio\". Avisa a quien mantiene "
+        + "la herramienta.",
+    );
+
+    showNotice(
+      "Este navegador no ha podido identificarse. Los cambios se guardan y se comparten, pero sin "
+        + "atribución en la columna \"Último cambio\".",
+      "aviso",
+    );
   }
 
   actualizarIndicadorDeIdentidad();
