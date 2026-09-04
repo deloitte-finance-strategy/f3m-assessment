@@ -40,7 +40,8 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 407 |
 | `core/presentacion.js` | Escapado, formato de números y colores de marca | 65 |
 | `informe/pdf.js` | El informe PDF: de los datos al HTML imprimible | 790 |
-| `tests/` | Pruebas de `core/`, sin dependencias | 814 |
+| `tests/` | Pruebas de `core/` y del espejo con las reglas, sin dependencias | — |
+| `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
 | `data/domains/*.json` | Datos del assessment, un archivo por dominio | — |
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
@@ -162,8 +163,13 @@ Al tocar el flujo de guardado, tener en cuenta:
 `core/escenario.js` es el **espejo en JavaScript de `database.rules.json`**: campos admitidos en
 cada nivel, longitudes máximas, estados válidos y campos de autoría.
 
-**Si se cambia `database.rules.json`, hay que cambiar `core/escenario.js` también.** No hay nada que
-lo compruebe automáticamente.
+**Si se cambia `database.rules.json`, hay que cambiar `core/escenario.js` también.** Esto ya no
+depende de que alguien se acuerde: `tests/casos-reglas.js` lee el archivo de reglas y compara campo a
+campo los límites, los campos admitidos, los cerrojos `$otro...` y los rangos de score. Si los dos
+dejan de decir lo mismo, el CI se pone rojo.
+
+Lo que **no** puede comprobar ninguna prueba es que las reglas desplegadas en Firebase coincidan con
+las de este repositorio. Eso se mira en la consola.
 
 `revisarEscenario()` revisa un archivo importado **antes** de aplicarlo: lo que no es un escenario
 de esta herramienta no llega a tocar los datos, y lo que se puede arreglar al vuelo se enumera en el
@@ -234,18 +240,24 @@ python scripts/check_domains_sync.py
 Verifica el catálogo de dominios y que los 9 JSON coinciden con sus Excel. Código de salida `1` si
 algo falla.
 
-Las reglas de negocio y el contrato de escenario se prueban en `tests/`, sin dependencias:
+Las reglas de negocio, el contrato de escenario y el espejo con `database.rules.json` se prueban en
+`tests/`, sin dependencias:
 
 - **En el navegador**: con el servidor en marcha, abrir `http://localhost:8000/tests/`. Es la forma
   que funciona en cualquier equipo, sin instalar nada.
 - **Desde la línea de comandos**, si hay Node: `node tests/ejecutar.mjs`. Sale con código `1` si
   falla algo, listo para CI.
 
-Los dos ejecutan los mismos casos. Al tocar `core/`, ejecutarlas.
+Los dos ejecutan los mismos casos. Al tocar `core/` **o `database.rules.json`**, ejecutarlas.
+
+Ojo con el navegador: los módulos ES se cachean con ganas, y un cambio en `core/` puede no verse al
+recargar. Si un resultado no cuadra con lo que acabas de editar, sirve en un puerto distinto —origen
+nuevo, caché vacía— antes de dar por buena la prueba.
 
 ### Comprobación manual en el navegador
 
-No hay linter ni CI. El resto se comprueba a mano:
+El CI (`.github/workflows/verificacion.yml`) ejecuta esas dos cosas en cada PR. No hay linter, y el
+resto se comprueba a mano:
 
 1. `python -m http.server 8000` → `http://localhost:8000/`.
 2. Consola del navegador **en silencio**. Un arranque correcto no imprime nada: lo que aparezca

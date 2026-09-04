@@ -94,7 +94,12 @@ Las reglas de cálculo y el contrato de los escenarios se prueban sin instalar n
 
 Los dos ejecutan los mismos casos y cubren gap, prioridad, oleada, nivel de madurez,
 subcapacidades pendientes, agregación por capacidad y lo que se acepta o se rechaza al importar un
-escenario.
+escenario. También comprueban que `core/escenario.js` siga siendo el espejo exacto de
+`database.rules.json`: si uno cambia y el otro no, Firebase rechazaría el guardado entero en la
+siguiente sesión, y eso ahora se detecta antes de fusionar.
+
+Se ejecutan solas en cada pull request, en `.github/workflows/verificacion.yml`, junto a
+`scripts/check_domains_sync.py`.
 
 
 ## Uso online

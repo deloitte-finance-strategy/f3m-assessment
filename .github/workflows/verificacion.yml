@@ -1,0 +1,53 @@
+# Las dos verificaciones que ya existian en el repositorio y no ejecutaba nadie.
+#
+# No hay build ni dependencias que instalar: las pruebas usan modulos ES nativos
+# y el comprobador de dominios solo necesita openpyxl. Por eso este workflow es
+# tan corto, y por eso merece la pena que sea obligatorio para fusionar.
+name: Verificación
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# El token por defecto de una organizacion puede venir con permisos de
+# escritura. Aqui no hace falta ninguno.
+permissions:
+  contents: read
+
+concurrency:
+  group: verificacion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 22 a proposito. El repositorio no tiene package.json —es una
+      # decision deliberada, aqui no hay npm— asi que los .js de tests/ solo se
+      # cargan como modulos ES gracias a la deteccion automatica de sintaxis,
+      # que viene activada por defecto desde Node 22.7. Con una version
+      # anterior, "node tests/ejecutar.mjs" falla al importar runner.js.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Reglas de calculo F3M, contrato de escenario, formato de presentacion, y
+      # que core/escenario.js siga siendo el espejo de database.rules.json.
+      - name: Reglas de negocio y contrato de escenario
+        run: node tests/ejecutar.mjs
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Version fijada a proposito: check_domains_sync.py compara byte a byte los
+      # JSON generados contra los commiteados, y otra version de openpyxl podria
+      # leer una celda de otra forma y hacer fallar la comparacion sin que haya
+      # cambiado nada en el repositorio.
+      - run: pip install openpyxl==3.1.5
+
+      - name: Catálogo de dominios y JSON generados
+        run: python scripts/check_domains_sync.py
