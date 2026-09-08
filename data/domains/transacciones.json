@@ -36,7 +36,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Using data from contract management system, forecast monthly expense for all third-party contracts; Resilient logistics and planning",
+        "cases": "Previsión del gasto mensual de todos los contratos con terceros con datos del sistema de gestión de contratos; Logística y planificación resilientes",
         "advanced": "Planificación predictiva de gasto y demanda de terceros basada en contratos, históricos y señales externas, con recomendaciones de sourcing y timing.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.1 Estrategia de compras, categorías y demanda"
@@ -52,7 +52,7 @@
         "2": "Homologación básica, con criterios documentados parcialmente y seguimiento limitado.",
         "3": "Proceso estándar de evaluación, homologación y seguimiento de performance/proveedor.",
         "4": "Gestión integrada de desempeño, riesgos, cumplimiento y oportunidades de mejora por proveedor.",
-        "5": "Motor AI de evaluación de proveedores, riesgo supply chain y recomendaciones de selección/negociación basadas en desempeño, riesgo y contexto externo."
+        "5": "Motor IA de evaluación de proveedores, riesgo supply chain y recomendaciones de selección/negociación basadas en desempeño, riesgo y contexto externo."
       },
       "scores": {
         "procesos": null,
@@ -71,8 +71,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Resilient logistics and planning; Supplier assessment AI; Drafting contracts and SoWs",
-        "advanced": "Motor AI de evaluación de proveedores, riesgo supply chain y recomendaciones de selección/negociación basadas en desempeño, riesgo y contexto externo.",
+        "cases": "Logística y planificación resilientes; IA de evaluación de proveedores; Redacción de contratos y SoW",
+        "advanced": "Motor IA de evaluación de proveedores, riesgo supply chain y recomendaciones de selección/negociación basadas en desempeño, riesgo y contexto externo.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.2 Selección, evaluación y gestión de proveedores"
       }
@@ -87,7 +87,7 @@
         "2": "Plantillas básicas y repositorio parcial, con revisión manual intensiva.",
         "3": "Proceso estándar para RFPs, contratos y SoWs, con plantillas, aprobaciones y repositorio central.",
         "4": "Gestión contractual integrada con compras, legal, presupuesto y proveedores, con alertas y trazabilidad de cambios.",
-        "5": "Asistente AI para generar RFPs, contratos y SoWs, extraer cláusulas, analizar riesgos y recomendar condiciones financieras/comerciales."
+        "5": "Asistente IA para generar RFPs, contratos y SoWs, extraer cláusulas, analizar riesgos y recomendar condiciones financieras/comerciales."
       },
       "scores": {
         "procesos": null,
@@ -101,13 +101,13 @@
         "¿Se monitorizan vencimientos y obligaciones?"
       ],
       "evidencias": "Contratos; RFPs; SoWs; repositorio; workflow de aprobación; matriz de cláusulas; contratos vencidos.",
-      "iniciativaSugerida": "Implantar asistente contractual AI para generación, revisión y explotación financiera de contratos y SoWs.",
+      "iniciativaSugerida": "Implantar asistente contractual IA para generación, revisión y explotación financiera de contratos y SoWs.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Drafting contracts and SoWs; AI-powered RFP and knowledge assistant; Using data from contract management system forecast monthly expense",
-        "advanced": "Asistente AI para generar RFPs, contratos y SoWs, extraer cláusulas, analizar riesgos y recomendar condiciones financieras/comerciales.",
+        "cases": "Redacción de contratos y SoW; Asistente de RFP y de conocimiento impulsado por IA; Previsión del gasto mensual con datos del sistema de gestión de contratos",
+        "advanced": "Asistente IA para generar RFPs, contratos y SoWs, extraer cláusulas, analizar riesgos y recomendar condiciones financieras/comerciales.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.3 Gestión contractual, RFPs y SoWs"
       }
@@ -122,7 +122,7 @@
         "2": "Workflow parcial, autorizaciones básicas y controles manuales de recepción/factura.",
         "3": "Proceso estándar de PR/PO, recepción y aprobaciones, con reglas y responsabilidades claras.",
         "4": "Workflow integrado con catálogo, recepción, presupuesto, contrato y controles automáticos.",
-        "5": "AI recomienda timing óptimo de pagos/compras, detecta excepciones operativas y prioriza aprobaciones según impacto en caja, contrato y riesgo."
+        "5": "IA recomienda timing óptimo de pagos/compras, detecta excepciones operativas y prioriza aprobaciones según impacto en caja, contrato y riesgo."
       },
       "scores": {
         "procesos": null,
@@ -141,8 +141,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recommend most optimal payment timing; Proactive defect resolution recommendations; Guided adaptable workflows for master data record changes",
-        "advanced": "AI recomienda timing óptimo de pagos/compras, detecta excepciones operativas y prioriza aprobaciones según impacto en caja, contrato y riesgo.",
+        "cases": "Recomendación del momento óptimo de pago; Recomendaciones proactivas para la resolución de incidencias; Flujos guiados y adaptables para cambios en datos maestros",
+        "advanced": "IA recomienda timing óptimo de pagos/compras, detecta excepciones operativas y prioriza aprobaciones según impacto en caja, contrato y riesgo.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.4 Orden de compra, recepción y aprobación"
       }
@@ -157,7 +157,7 @@
         "2": "Proceso básico definido, aunque con validaciones manuales y excepciones recurrentes.",
         "3": "Modelo estándar de entrada de pedidos, validación comercial y control de condiciones.",
         "4": "Pedidos integrados con contratos, pricing, crédito, facturación y controles automáticos.",
-        "5": "Asistente AI analiza contratos/pedidos, valida obligaciones y condiciones comerciales, y recomienda acciones para evitar errores, revenue leakage o disputas."
+        "5": "Asistente IA analiza contratos/pedidos, valida obligaciones y condiciones comerciales, y recomienda acciones para evitar errores, revenue leakage o disputas."
       },
       "scores": {
         "procesos": null,
@@ -176,8 +176,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Read customer contracts and identify performance obligations; Identify & proactively correct revenue leakage; AI assistant for vehicle buying and leasing",
-        "advanced": "Asistente AI analiza contratos/pedidos, valida obligaciones y condiciones comerciales, y recomienda acciones para evitar errores, revenue leakage o disputas.",
+        "cases": "Lectura de contratos de cliente e identificación de obligaciones de desempeño; Identificación y corrección proactiva de fugas de ingresos; Asistente de IA para la compra y el leasing de vehículos",
+        "advanced": "Asistente IA analiza contratos/pedidos, valida obligaciones y condiciones comerciales, y recomienda acciones para evitar errores, revenue leakage o disputas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.1 Gestión de pedidos, contratos y condiciones comerciales"
       }
@@ -192,7 +192,7 @@
         "2": "Plantillas y controles básicos, con validación manual relevante.",
         "3": "Proceso de facturación estándar, con reglas documentadas y controles recurrentes.",
         "4": "Facturación integrada con pedidos, contratos, impuestos, entregas y controles automáticos de error.",
-        "5": "Detección/corrección AI de errores de factura y generación de facturas personalizadas para pedidos no estándar, con validación fiscal/contable."
+        "5": "Detección/corrección IA de errores de factura y generación de facturas personalizadas para pedidos no estándar, con validación fiscal/contable."
       },
       "scores": {
         "procesos": null,
@@ -206,13 +206,13 @@
         "¿Se mide first-time-right?"
       ],
       "evidencias": "Facturas; notas de crédito; errores; controles; logs de emisión; KPI first-time-right.",
-      "iniciativaSugerida": "Implantar motor AI de validación y corrección preventiva de facturas antes de emisión.",
+      "iniciativaSugerida": "Implantar motor IA de validación y corrección preventiva de facturas antes de emisión.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Automated invoice error detection & correction; Generate customized invoices for nonstandard customer orders",
-        "advanced": "Detección/corrección AI de errores de factura y generación de facturas personalizadas para pedidos no estándar, con validación fiscal/contable.",
+        "cases": "Detección y corrección automatizada de errores en facturas; Generación de facturas personalizadas para pedidos de cliente no estándar",
+        "advanced": "Detección/corrección IA de errores de factura y generación de facturas personalizadas para pedidos no estándar, con validación fiscal/contable.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.2 Facturación y emisión de documentos"
       }
@@ -227,7 +227,7 @@
         "2": "Proceso básico de cobros con seguimientos manuales y criterios variables.",
         "3": "Modelo estándar de cash application, aging, dunning y gestión de disputas.",
         "4": "Cash application automatizada, segmentación de cartera, workflow de disputas y control de aging/DSO.",
-        "5": "Asistente AI identifica gaps de cobro, automatiza outreach, recomienda payment terms para mejorar DSO y apoya recuperación de ingresos/disputas."
+        "5": "Asistente IA identifica gaps de cobro, automatiza outreach, recomienda payment terms para mejorar DSO y apoya recuperación de ingresos/disputas."
       },
       "scores": {
         "procesos": null,
@@ -246,8 +246,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Facilitate payment collection to identify collections gaps and automate outreach; Recommend optimal payment terms to improve DSO; Denial appeal letters",
-        "advanced": "Asistente AI identifica gaps de cobro, automatiza outreach, recomienda payment terms para mejorar DSO y apoya recuperación de ingresos/disputas.",
+        "cases": "Facilitación del cobro para identificar brechas de recobro y automatizar el contacto; Recomendación de condiciones de pago óptimas para mejorar el DSO; Cartas de recurso ante denegaciones",
+        "advanced": "Asistente IA identifica gaps de cobro, automatiza outreach, recomienda payment terms para mejorar DSO y apoya recuperación de ingresos/disputas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.3 Cobros, aplicación de pagos y gestión de disputas"
       }
@@ -262,7 +262,7 @@
         "2": "Políticas básicas de crédito y revisión manual de excepciones.",
         "3": "Modelo de crédito definido, con límites, aprobaciones y seguimiento periódico.",
         "4": "Riesgo cliente integrado con pedidos, cobros, aging, límites y alertas de exposición.",
-        "5": "Scoring dinámico AI de cliente y riesgo de cobro, con alertas tempranas, recomendaciones de bloqueo/liberación y condiciones comerciales."
+        "5": "Scoring dinámico IA de cliente y riesgo de cobro, con alertas tempranas, recomendaciones de bloqueo/liberación y condiciones comerciales."
       },
       "scores": {
         "procesos": null,
@@ -281,8 +281,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "AI agents for credit underwriting; Predicts late payments or defaults; Recommend optimal payment terms to improve DSO",
-        "advanced": "Scoring dinámico AI de cliente y riesgo de cobro, con alertas tempranas, recomendaciones de bloqueo/liberación y condiciones comerciales.",
+        "cases": "Agentes de IA para el análisis de riesgo crediticio; Predicción de retrasos en el pago o impagos; Recomendación de condiciones de pago óptimas para mejorar el DSO",
+        "advanced": "Scoring dinámico IA de cliente y riesgo de cobro, con alertas tempranas, recomendaciones de bloqueo/liberación y condiciones comerciales.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.4 Crédito, riesgo cliente y control de exposición"
       }
@@ -297,7 +297,7 @@
         "2": "Proceso básico de alta y capitalización, con revisiones manuales puntuales.",
         "3": "Políticas de capitalización y clasificación documentadas y aplicadas de forma consistente.",
         "4": "Proceso integrado con compras, proyectos, contabilidad y control presupuestario.",
-        "5": "AI ayuda a clasificar gastos vs activos, detectar errores de codificación y generar metadata/documentación de activos."
+        "5": "IA ayuda a clasificar gastos vs activos, detectar errores de codificación y generar metadata/documentación de activos."
       },
       "scores": {
         "procesos": null,
@@ -315,8 +315,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identify expense classification errors; Generate metadata documentation; Guided adaptable workflows for master data record changes",
-        "advanced": "AI ayuda a clasificar gastos vs activos, detectar errores de codificación y generar metadata/documentación de activos.",
+        "cases": "Identificación de errores de clasificación de gastos; Generación de documentación de metadatos; Flujos guiados y adaptables para cambios en datos maestros",
+        "advanced": "IA ayuda a clasificar gastos vs activos, detectar errores de codificación y generar metadata/documentación de activos.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.1 Alta, capitalización y clasificación de activos"
       }
@@ -331,7 +331,7 @@
         "2": "Inventarios periódicos y conciliaciones básicas, con incidencias recurrentes.",
         "3": "Inventario contable y físico conciliado de forma recurrente, con owners y evidencias.",
         "4": "Trazabilidad integrada de altas, bajas, traslados, mantenimiento, ubicación y estado de activos.",
-        "5": "AI/digital sensing permite detectar inconsistencias, anomalías de activos y generar alertas sobre activos críticos o no conciliados."
+        "5": "IA/digital sensing permite detectar inconsistencias, anomalías de activos y generar alertas sobre activos críticos o no conciliados."
       },
       "scores": {
         "procesos": null,
@@ -350,8 +350,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identify inconsistencies in master data records; AI-powered archive access and extraction; Autonomous drone-based infrastructure inspection",
-        "advanced": "AI/digital sensing permite detectar inconsistencias, anomalías de activos y generar alertas sobre activos críticos o no conciliados.",
+        "cases": "Identificación de inconsistencias en los registros de datos maestros; Acceso y extracción documental impulsados por IA; Inspección autónoma de infraestructuras con drones",
+        "advanced": "IA/digital sensing permite detectar inconsistencias, anomalías de activos y generar alertas sobre activos críticos o no conciliados.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.2 Inventario, localización y trazabilidad de activos"
       }
@@ -366,7 +366,7 @@
         "2": "Reglas de depreciación configuradas parcialmente y análisis de impairment ad hoc.",
         "3": "Políticas y reglas de depreciación/impairment documentadas y aplicadas recurrentemente.",
         "4": "Modelo integrado con reporting, planificación de activos, KPIs operativos y revisiones estructuradas.",
-        "5": "Modelos AI detectan patrones de deterioro, anomalías de uso/coste y recomiendan revisión de vida útil, impairment o mantenimiento."
+        "5": "Modelos IA detectan patrones de deterioro, anomalías de uso/coste y recomiendan revisión de vida útil, impairment o mantenimiento."
       },
       "scores": {
         "procesos": null,
@@ -384,8 +384,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "AI-driven predictive maintenance; Identify past data patterns to predict and improve future financial performance",
-        "advanced": "Modelos AI detectan patrones de deterioro, anomalías de uso/coste y recomiendan revisión de vida útil, impairment o mantenimiento.",
+        "cases": "Mantenimiento predictivo basado en IA; Identificación de patrones históricos para predecir y mejorar el rendimiento financiero futuro",
+        "advanced": "Modelos IA detectan patrones de deterioro, anomalías de uso/coste y recomiendan revisión de vida útil, impairment o mantenimiento.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.3 Depreciación, impairments y valoración"
       }
@@ -400,7 +400,7 @@
         "2": "Proceso básico de bajas y seguimiento CAPEX con revisiones manuales.",
         "3": "Workflow estándar de baja/disposición y reporting de CAPEX con responsables definidos.",
         "4": "Control integrado de CAPEX, activos, proyectos, aprobaciones, beneficios y desviaciones.",
-        "5": "AI prioriza decisiones de inversión/desinversión mediante business case, coste evitado, riesgo de activo y escenarios de rendimiento."
+        "5": "IA prioriza decisiones de inversión/desinversión mediante business case, coste evitado, riesgo de activo y escenarios de rendimiento."
       },
       "scores": {
         "procesos": null,
@@ -419,8 +419,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Project-level recommendations; AI-driven predictive maintenance; Autonomous drone-based infrastructure inspection",
-        "advanced": "AI prioriza decisiones de inversión/desinversión mediante business case, coste evitado, riesgo de activo y escenarios de rendimiento.",
+        "cases": "Recomendaciones a nivel de proyecto; Mantenimiento predictivo basado en IA; Inspección autónoma de infraestructuras con drones",
+        "advanced": "IA prioriza decisiones de inversión/desinversión mediante business case, coste evitado, riesgo de activo y escenarios de rendimiento.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.4 Bajas, desinversiones y control de CAPEX"
       }
@@ -435,7 +435,7 @@
         "2": "KPIs básicos por área, con limitaciones de frecuencia y trazabilidad.",
         "3": "Catálogo de KPIs operativos-financieros definido, con owners, periodicidad y fuentes.",
         "4": "KPIs integrados, automatizados y conectados con procesos, productividad, coste y control.",
-        "5": "AI genera alertas e insights operativos en tiempo real, detecta desviaciones y recomienda acciones de mejora."
+        "5": "IA genera alertas e insights operativos en tiempo real, detecta desviaciones y recomienda acciones de mejora."
       },
       "scores": {
         "procesos": null,
@@ -454,8 +454,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Proactive defect resolution recommendations; Next-generation store operations; AI agents for service lifecycle management",
-        "advanced": "AI genera alertas e insights operativos en tiempo real, detecta desviaciones y recomienda acciones de mejora.",
+        "cases": "Recomendaciones proactivas para la resolución de incidencias; Operaciones de tienda de nueva generación; Agentes de IA para la gestión del ciclo de vida del servicio",
+        "advanced": "IA genera alertas e insights operativos en tiempo real, detecta desviaciones y recomienda acciones de mejora.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.1 Modelo de KPIs operativos financieros"
       }
@@ -470,7 +470,7 @@
         "2": "Integraciones parciales y controles básicos de calidad.",
         "3": "Fuentes oficiales, reglas de calidad y modelo de datos documentado.",
         "4": "Capa integrada de datos operativos-financieros, controles automáticos y gestión de incidencias.",
-        "5": "AI detecta inconsistencias en master data, automatiza datos de fuentes diversas y guía workflows de cambios de datos maestros."
+        "5": "IA detecta inconsistencias en master data, automatiza datos de fuentes diversas y guía workflows de cambios de datos maestros."
       },
       "scores": {
         "procesos": null,
@@ -489,8 +489,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Guided adaptable workflows for master data record changes; Identify inconsistencies in master data records; Automate financial data across diverse sources",
-        "advanced": "AI detecta inconsistencias en master data, automatiza datos de fuentes diversas y guía workflows de cambios de datos maestros.",
+        "cases": "Flujos guiados y adaptables para cambios en datos maestros; Identificación de inconsistencias en los registros de datos maestros; Automatización de datos financieros de fuentes diversas",
+        "advanced": "IA detecta inconsistencias en master data, automatiza datos de fuentes diversas y guía workflows de cambios de datos maestros.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.2 Calidad, integración y gobierno de datos operativos"
       }
@@ -505,7 +505,7 @@
         "2": "Informes recurrentes con cierta automatización, pero ajustes manuales significativos.",
         "3": "Reporting operativo estándar, con dashboards y actualizaciones periódicas.",
         "4": "Reporting automatizado, con drill-down, alertas, comentarios y acceso por rol.",
-        "5": "AI permite reporting operativo bajo demanda, búsqueda conversacional, extracción histórica y generación de resúmenes ejecutivos."
+        "5": "IA permite reporting operativo bajo demanda, búsqueda conversacional, extracción histórica y generación de resúmenes ejecutivos."
       },
       "scores": {
         "procesos": null,
@@ -524,8 +524,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Data access for all; Enterprise-wide data search and access; AI-powered archive access and extraction",
-        "advanced": "AI permite reporting operativo bajo demanda, búsqueda conversacional, extracción histórica y generación de resúmenes ejecutivos.",
+        "cases": "Acceso a datos para toda la organización; Búsqueda y acceso a datos en toda la compañía; Acceso y extracción documental impulsados por IA",
+        "advanced": "IA permite reporting operativo bajo demanda, búsqueda conversacional, extracción histórica y generación de resúmenes ejecutivos.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.3 Automatización del reporting operativo"
       }
@@ -540,7 +540,7 @@
         "2": "Seguimiento manual de incidencias, con acciones poco trazables.",
         "3": "Rutinas de revisión con responsables, acciones y seguimiento periódico.",
         "4": "Modelo de mejora continua basado en KPIs, root cause, priorización e impacto financiero.",
-        "5": "AI prioriza incidencias, recomienda resolución, asigna tareas y aprende de tiempos reales de ejecución para mejorar productividad."
+        "5": "IA prioriza incidencias, recomienda resolución, asigna tareas y aprende de tiempos reales de ejecución para mejorar productividad."
       },
       "scores": {
         "procesos": null,
@@ -554,13 +554,13 @@
         "¿Se mide impacto de mejoras?"
       ],
       "evidencias": "Trackers de acciones; incidencias; actas; KPIs; planes de mejora; análisis causa-raíz.",
-      "iniciativaSugerida": "Implantar workflow de gestión de incidencias con priorización AI, root cause y seguimiento de beneficios.",
+      "iniciativaSugerida": "Implantar workflow de gestión de incidencias con priorización IA, root cause y seguimiento de beneficios.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Proactive defect resolution recommendations; Autonomous field operations management; AI-driven permitting",
-        "advanced": "AI prioriza incidencias, recomienda resolución, asigna tareas y aprende de tiempos reales de ejecución para mejorar productividad.",
+        "cases": "Recomendaciones proactivas para la resolución de incidencias; Gestión autónoma de operaciones de campo; Gestión de permisos basada en IA",
+        "advanced": "IA prioriza incidencias, recomienda resolución, asigna tareas y aprende de tiempos reales de ejecución para mejorar productividad.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.4 Rutinas de gestión, incidencias y mejora continua"
       }
@@ -575,7 +575,7 @@
         "2": "Estructura básica de proyectos, con reglas parciales de codificación y responsables.",
         "3": "Modelo estándar de creación, codificación, WBS, ownership y conexión con presupuesto/contrato.",
         "4": "Alta integrada con business case, presupuesto, compras, tiempos, facturación y reporting.",
-        "5": "AI asiste la creación de estructuras de proyecto, clasificación de costes, metadata y documentación a partir de contratos, SoWs y planes."
+        "5": "IA asiste la creación de estructuras de proyecto, clasificación de costes, metadata y documentación a partir de contratos, SoWs y planes."
       },
       "scores": {
         "procesos": null,
@@ -594,8 +594,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Drafting contracts and SoWs; Generate metadata documentation; AI-powered RFP and knowledge assistant",
-        "advanced": "AI asiste la creación de estructuras de proyecto, clasificación de costes, metadata y documentación a partir de contratos, SoWs y planes.",
+        "cases": "Redacción de contratos y SoW; Generación de documentación de metadatos; Asistente de RFP y de conocimiento impulsado por IA",
+        "advanced": "IA asiste la creación de estructuras de proyecto, clasificación de costes, metadata y documentación a partir de contratos, SoWs y planes.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.1 Alta, estructura y codificación de proyectos"
       }
@@ -610,7 +610,7 @@
         "2": "Controles básicos de coste y compromisos, con análisis de desviaciones manual.",
         "3": "Proceso estándar de imputación, compromisos, aprobaciones y reporting de desviaciones.",
         "4": "Control integrado de costes reales, comprometidos, forecast, presupuesto y margen por proyecto.",
-        "5": "AI detecta errores de clasificación/imputación, anomalías de coste y recomienda acciones para corregir desviaciones tempranamente."
+        "5": "IA detecta errores de clasificación/imputación, anomalías de coste y recomienda acciones para corregir desviaciones tempranamente."
       },
       "scores": {
         "procesos": null,
@@ -629,8 +629,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identify expense classification errors; Proactive defect resolution recommendations; Identify past data patterns to predict and improve future financial performance",
-        "advanced": "AI detecta errores de clasificación/imputación, anomalías de coste y recomienda acciones para corregir desviaciones tempranamente.",
+        "cases": "Identificación de errores de clasificación de gastos; Recomendaciones proactivas para la resolución de incidencias; Identificación de patrones históricos para predecir y mejorar el rendimiento financiero futuro",
+        "advanced": "IA detecta errores de clasificación/imputación, anomalías de coste y recomienda acciones para corregir desviaciones tempranamente.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.2 Registro, imputación y control de costes"
       }
@@ -645,7 +645,7 @@
         "2": "Control básico de hitos y facturación, con conciliaciones manuales.",
         "3": "Modelo estándar de avance, hitos, facturación, revenue recognition y margen.",
         "4": "Integración entre contrato, avance, costes, facturación, ingresos y margen, con controles preventivos.",
-        "5": "AI identifica obligaciones contractuales, genera alertas de hitos/facturación y detecta revenue leakage o riesgo de margen."
+        "5": "IA identifica obligaciones contractuales, genera alertas de hitos/facturación y detecta revenue leakage o riesgo de margen."
       },
       "scores": {
         "procesos": null,
@@ -659,13 +659,13 @@
         "¿Hay leakage?"
       ],
       "evidencias": "Contrato; hitos; facturas; ingresos; margen; avance; notas de crédito; revenue recognition.",
-      "iniciativaSugerida": "Crear control AI de contrato-hito-factura-ingreso-margen para proyectos, con alertas de leakage y desviaciones.",
+      "iniciativaSugerida": "Crear control IA de contrato-hito-factura-ingreso-margen para proyectos, con alertas de leakage y desviaciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Read customer contracts and identify performance obligations; Identify & proactively correct revenue leakage; Automated invoice error detection & correction",
-        "advanced": "AI identifica obligaciones contractuales, genera alertas de hitos/facturación y detecta revenue leakage o riesgo de margen.",
+        "cases": "Lectura de contratos de cliente e identificación de obligaciones de desempeño; Identificación y corrección proactiva de fugas de ingresos; Detección y corrección automatizada de errores en facturas",
+        "advanced": "IA identifica obligaciones contractuales, genera alertas de hitos/facturación y detecta revenue leakage o riesgo de margen.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.3 Facturación, ingresos y margen de proyectos"
       }
@@ -680,7 +680,7 @@
         "2": "Forecast básico de coste/margen y cierre con revisión manual.",
         "3": "Forecast recurrente y cierre estructurado con análisis de desviaciones por proyecto.",
         "4": "Forecast integrado coste-ingreso-caja, revisión de margen, lecciones aprendidas y acciones de mejora.",
-        "5": "AI predice performance futura del proyecto, genera escenarios, recomendaciones y resumen ejecutivo de salud financiera."
+        "5": "IA predice performance futura del proyecto, genera escenarios, recomendaciones y resumen ejecutivo de salud financiera."
       },
       "scores": {
         "procesos": null,
@@ -699,8 +699,8 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identify past data patterns to predict and improve future financial performance; Generate executive level overview of company financial health; Project-level recommendations",
-        "advanced": "AI predice performance futura del proyecto, genera escenarios, recomendaciones y resumen ejecutivo de salud financiera.",
+        "cases": "Identificación de patrones históricos para predecir y mejorar el rendimiento financiero futuro; Generación de una visión ejecutiva de la salud financiera de la compañía; Recomendaciones a nivel de proyecto",
+        "advanced": "IA predice performance futura del proyecto, genera escenarios, recomendaciones y resumen ejecutivo de salud financiera.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.4 Forecast, cierre y análisis del proyecto"
       }

@@ -1509,7 +1509,7 @@ function openAiInitiativeModal(itemId) {
 
   els.aiModalCapability.textContent = item.capacidad;
   els.aiModalSubcapability.textContent = `Subcapacidad relacionada: ${item.subcapacidad}`;
-  els.aiModalCases.textContent = aiData.cases || "Sin casos AI asociados informados.";
+  els.aiModalCases.textContent = aiData.cases || "Sin casos de IA asociados informados.";
   els.aiModalAdvanced.textContent = aiData.advanced || "Sin aplicación avanzada informada.";
   els.aiModalSource.textContent = aiData.source ? `Fuente: ${aiData.source}` : "";
 
