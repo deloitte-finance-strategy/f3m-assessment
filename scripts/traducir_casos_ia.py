@@ -55,6 +55,9 @@ NSR = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
 
 SEPARADOR = "; "
 
+# Para reconocer lo que ya esta traducido y no tomarlo por un error.
+TRADUCIDAS = set(GLOSARIO.values())
+
 # Columnas cuyo texto esta en ingles y se traduce con el glosario de frases. Se
 # localizan por el nombre de su cabecera y no por letra: FP&A tiene otra
 # disposicion de columnas que los otros ocho.
@@ -185,6 +188,15 @@ def indices_objetivo(z, textos):
 def traducir_casos(texto):
     """Traduce una lista de casos de uso separada por "; "."""
     frases = texto.split(SEPARADOR)
+
+    # Volver a pasar el script sobre un Excel ya traducido tiene que decir "nada
+    # que traducir", no reventar: si no, la segunda ejecucion parece un fallo. Se
+    # reconoce por que todas las frases son ya traducciones del glosario. Una
+    # cadena a medias no entra por aqui y cae en el error de mas abajo, que es lo
+    # que se quiere: eso si es algo que hay que mirar.
+    if all(frase in TRADUCIDAS for frase in frases):
+        return texto
+
     sin_glosario = [f for f in frases if f not in GLOSARIO]
     if sin_glosario:
         raise Aborta(
