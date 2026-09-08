@@ -386,10 +386,10 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Preparación automatizada de estados financieros",
-        "advanced": "Automated financial statement preparation con generación asistida de notas/secciones y validaciones de consistencia antes de revisión.",
+        "cases": "Generación del borrador narrativo del MD&A; consolidación de informes financieros en un único informe conforme a normativa",
+        "advanced": "Narrative MD&A draft generation y consolidation of written reports con GenAI, manteniendo evidencia, consistencia y revisión humana.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
-        "subcapacidad": "3.1 Preparación de estados financieros"
+        "subcapacidad": "3.3 Narrative reporting y envío ESEF"
       }
     },
     {

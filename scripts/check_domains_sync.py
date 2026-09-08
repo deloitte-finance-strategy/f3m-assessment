@@ -1,6 +1,6 @@
 """Verifica el catalogo de dominios y que los JSON coinciden con los Excel.
 
-Dos comprobaciones, en este orden:
+Tres comprobaciones, en este orden:
 
 1. El catalogo (data/domains.json) esta completo y es coherente: cada dominio
    tiene los campos que la aplicacion espera, su Excel de origen existe, su
@@ -8,7 +8,10 @@ Dos comprobaciones, en este orden:
    grupo se sale de los declarados, y no queda ningun JSON huerfano en
    data/domains/ que el catalogo no mencione.
 
-2. Cada JSON generado coincide con su Excel: se regenera el payload en memoria
+2. Cada subcapacidad encuentra SU fila de casos de IA en la hoja AI Overlay,
+   y ninguna fila de esa hoja se queda sin subcapacidad que la use.
+
+3. Cada JSON generado coincide con su Excel: se regenera el payload en memoria
    y se compara con el archivo commiteado. No escribe nada.
 
 Devuelve codigo de salida 1 si algo falla, para poder usarse en CI o antes de
@@ -21,7 +24,9 @@ import json
 import sys
 from pathlib import Path
 
-from convert_domains import CATALOGO, FILES, ROOT, build_payload, serialize
+from openpyxl import load_workbook
+
+from convert_domains import CATALOGO, FILES, ROOT, build_payload, clean, serialize, sheet_rows
 
 CAMPOS_DE_DOMINIO = ("id", "label", "title", "group", "source", "dataUrl")
 
@@ -85,6 +90,68 @@ def check_catalogo():
     return problemas
 
 
+def check_overlay(config):
+    """Devuelve la lista de desajustes entre Assessment y AI Overlay de un dominio.
+
+    Existe por un fallo que estuvo meses sin que nadie lo viera. `find_ai_for_row()`
+    tiene un respaldo: si no encuentra la subcapacidad en AI Overlay, devuelve la
+    primera fila de esa capacidad y no avisa de nada. Asi es como la subcapacidad
+    "3.3 Narrative reporting y envio ESEF" de Controlling —escrita "3.3 Narrative
+    reporting y MD&A" en la otra hoja— acabo enseñando los casos de IA de la 3.1,
+    y perdiendo los suyos, sin un solo mensaje en consola ni en CI.
+
+    El respaldo se deja en el conversor a proposito, para que un Excel a medias no
+    reviente la carga de la aplicacion delante de un cliente. Lo que se hace aqui es
+    que deje de ser silencioso: si se usa, el CI se pone rojo.
+
+    Se comprueban las dos direcciones. Una subcapacidad sin fila hereda casos que no
+    son suyos; una fila que ninguna subcapacidad usa es trabajo escrito que no se ve
+    en ningun sitio.
+    """
+    libro = load_workbook(config["source"], data_only=True)
+
+    if "AI Overlay" not in libro.sheetnames:
+        return [f"{config['source'].name} no tiene hoja AI Overlay"]
+
+    declaradas = {}
+    for fila in sheet_rows(libro["AI Overlay"]):
+        capacidad = clean(fila.get("Capacidad"))
+        if capacidad:
+            declaradas.setdefault(capacidad, []).append(clean(fila.get("Subcapacidad")))
+
+    problemas = []
+    usadas = set()
+
+    for fila in sheet_rows(libro["Assessment"]):
+        capacidad = clean(fila.get("Capacidad"))
+        subcapacidad = clean(fila.get("Subcapacidad"))
+
+        if not capacidad or not subcapacidad:
+            continue
+
+        del_grupo = declaradas.get(capacidad, [])
+
+        if subcapacidad in del_grupo:
+            usadas.add((capacidad, subcapacidad))
+            continue
+
+        heredaria = del_grupo[0] if del_grupo else "(ninguna: se quedaria sin casos)"
+        problemas.append(
+            f'"{subcapacidad}" no tiene fila propia en AI Overlay; '
+            f'heredaria los casos de "{heredaria}"'
+        )
+
+    for capacidad, subcapacidades in declaradas.items():
+        for subcapacidad in subcapacidades:
+            if (capacidad, subcapacidad) not in usadas:
+                problemas.append(
+                    f'la fila de AI Overlay "{capacidad} / {subcapacidad}" no la usa '
+                    "ninguna subcapacidad de Assessment"
+                )
+
+    return problemas
+
+
 def check_domain(config):
     """Devuelve (estado, detalle) para un dominio."""
     destino = config["output"]
@@ -137,6 +204,25 @@ def main():
         )
 
     print()
+    print("Casos de IA por subcapacidad (Assessment <-> AI Overlay)")
+
+    problemas_de_overlay = 0
+
+    for config in FILES:
+        problemas = check_overlay(config)
+
+        if not problemas:
+            continue
+
+        problemas_de_overlay += len(problemas)
+
+        for problema in problemas:
+            print(f"  ERROR {config['domain_id']}: {problema}")
+
+    if not problemas_de_overlay:
+        print(f"  OK    los {len(FILES)} dominios cruzan al 100%")
+
+    print()
 
     fallos = 0
 
@@ -150,6 +236,12 @@ def main():
 
     print()
 
+    if problemas_de_overlay:
+        print(
+            f"{problemas_de_overlay} subcapacidad(es) sin su fila de casos de IA. "
+            "Alinea el nombre en las hojas Assessment y AI Overlay del Excel."
+        )
+
     if problemas_de_catalogo:
         print(
             f"{len(problemas_de_catalogo)} problema(s) en el catalogo. "
@@ -162,7 +254,7 @@ def main():
             "Ejecuta 'python scripts/convert_domains.py' para regenerarlos."
         )
 
-    if problemas_de_catalogo or fallos:
+    if problemas_de_catalogo or problemas_de_overlay or fallos:
         return 1
 
     print(f"Los {len(FILES)} dominios coinciden con sus Excel.")
