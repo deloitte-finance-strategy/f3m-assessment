@@ -733,20 +733,6 @@ display: none;
   gap: 14px;
 }
 
-/*
-  Seis KPIs y no cuatro: el Overview responde dos preguntas que solo existen
-  mirando los nueve dominios a la vez —cuantos llevan scoring y cuantos estan en
-  riesgo—. Con la rejilla de cuatro columnas la segunda fila quedaba con dos
-  tarjetas y un hueco del ancho de otras dos.
-
-  Va aqui, justo despues de .kpi-grid y antes de las consultas de medios: tiene
-  la misma especificidad, asi que decide el orden del archivo, y a partir de
-  1100 px tienen que seguir mandando las dos columnas de la consulta.
-*/
-.kpi-grid-overview {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .kpi-card,
 .panel,
 .assessment-card {

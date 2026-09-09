@@ -314,7 +314,7 @@ resto se comprueba a mano:
 2. Consola del navegador **en silencio**. Un arranque correcto no imprime nada: lo que aparezca
    ahí es un `warn` o un `error` de verdad, y hay que mirarlo.
 3. Recorrer las cinco vistas:
-   - **Overview**: los 6 KPIs, el titular, las barras, la tabla por dominio y los 3 radares de 9
+   - **Overview**: los 4 KPIs, el titular, las barras, la tabla por dominio y los 3 radares de 9
      ejes. Cambiar de dominio en el conmutador **no** debe cambiar ninguna cifra del Overview.
    - **Dashboard**: KPIs, titulares ejecutivos, barras de prioridad y palanca, y los 3 radares.
    - **Assessment**: cambiar un score y comprobar que se recalculan nivel, gap, prioridad y oleada,

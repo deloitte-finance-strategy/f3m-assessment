@@ -28,7 +28,7 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
 - Calcular automáticamente score medio, nivel resultante, gap vs objetivo y prioridad.
 - Consultar resumen ejecutivo por dominio y por capacidad.
 - Ver en **Overview** los nueve dominios agregados en una sola lectura: score global, gap medio,
-  avance, dominios en riesgo, radares por dominio y una tabla de resumen dominio a dominio. Cada
+  avance y prioridad alta, radares por dominio y una tabla de resumen dominio a dominio. Cada
   dominio se mide contra sus propios objetivos, y la vista **no depende de los filtros activos** ni
   del dominio abierto en el conmutador.
 - Ver heatmap por subcapacidad y palanca.

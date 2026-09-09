@@ -2743,16 +2743,6 @@ function renderOverview() {
     (entrada) => entrada.metrics.prioridad === "Alta",
   ).length;
 
-  const conScoring = filas.filter((fila) => fila.evaluadas > 0);
-
-  const completos = filas.filter(
-    (fila) => fila.total && fila.evaluadas === fila.total,
-  );
-
-  const enRiesgo = filas.filter(
-    (fila) => fila.prioridad === "Alta",
-  );
-
   const sinCargar = Object.keys(DOMAINS).length - filas.length;
 
   els.overviewSourceNote.textContent = [
@@ -2800,25 +2790,6 @@ function renderOverview() {
       String(prioridadAlta),
       "Subcapacidades con gap igual o superior a 2",
       prioridadAlta > 0 ? "alert" : "neutral",
-    ),
-
-    // Los dos que solo tienen sentido mirando los nueve a la vez.
-    kpiCard(
-      "Dominios con scoring",
-      `${conScoring.length}/${filas.length}`,
-      completos.length
-        ? `${completos.length} completo${completos.length > 1 ? "s" : ""}`
-        : "Ninguno completo todavía",
-      "progress",
-    ),
-    kpiCard(
-      "Dominios en riesgo",
-      String(enRiesgo.length),
-      enRiesgo.length
-        ? enRiesgo.slice(0, 3).map((fila) => fila.label).join(", ")
-            + (enRiesgo.length > 3 ? "…" : "")
-        : "Ningún dominio con gap medio igual o superior a 2",
-      enRiesgo.length ? "alert" : "neutral",
     ),
   ].join("");
 
