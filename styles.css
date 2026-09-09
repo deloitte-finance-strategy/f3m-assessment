@@ -733,6 +733,20 @@ display: none;
   gap: 14px;
 }
 
+/*
+  Seis KPIs y no cuatro: el Overview responde dos preguntas que solo existen
+  mirando los nueve dominios a la vez —cuantos llevan scoring y cuantos estan en
+  riesgo—. Con la rejilla de cuatro columnas la segunda fila quedaba con dos
+  tarjetas y un hueco del ancho de otras dos.
+
+  Va aqui, justo despues de .kpi-grid y antes de las consultas de medios: tiene
+  la misma especificidad, asi que decide el orden del archivo, y a partir de
+  1100 px tienen que seguir mandando las dos columnas de la consulta.
+*/
+.kpi-grid-overview {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .kpi-card,
 .panel,
 .assessment-card {
@@ -1557,11 +1571,13 @@ border-radius: 999px;
 
 
 
-#summaryTable {
+#summaryTable,
+#overviewSummaryTable {
   font-size: 0.88rem;
 }
 
-#summaryTable thead th {
+#summaryTable thead th,
+#overviewSummaryTable thead th {
   padding-top: 10px;
   padding-bottom: 10px;
   border-bottom: 2px solid var(--line);
@@ -1570,11 +1586,13 @@ border-radius: 999px;
 }
 
 #summaryTable tbody td:first-child,
+#overviewSummaryTable tbody td:first-child,
 .roadmap-table tbody td:first-child {
   background: var(--surface);
 }
 
-#summaryTable tbody tr {
+#summaryTable tbody tr,
+#overviewSummaryTable tbody tr {
   transition: background-color 140ms ease;
 }
 
@@ -1584,45 +1602,54 @@ border-radius: 999px;
   Un fondo ligeramente distinto las deja a un lado sin esconderlas: el texto no
   cambia de color, asi que el contraste se mantiene.
 */
-#summaryTable tbody tr.is-pending {
+#summaryTable tbody tr.is-pending,
+#overviewSummaryTable tbody tr.is-pending {
   background: var(--surface-muted);
 }
 
-#summaryTable tbody tr.is-pending:hover {
+#summaryTable tbody tr.is-pending:hover,
+#overviewSummaryTable tbody tr.is-pending:hover {
   background: #eaeee3;
 }
 
-#summaryTable tbody tr:hover {
+#summaryTable tbody tr:hover,
+#overviewSummaryTable tbody tr:hover {
   background: #f8faf5;
 }
 
-#summaryTable tbody td {
+#summaryTable tbody td,
+#overviewSummaryTable tbody td {
   padding-top: 11px;
   padding-bottom: 11px;
 }
 
-#summaryTable tbody td:first-child {
+#summaryTable tbody td:first-child,
+#overviewSummaryTable tbody td:first-child {
   border-left: 3px solid transparent;
   color: #252c27;
   font-weight: 750;
 }
 
-#summaryTable tbody tr:hover td:first-child {
+#summaryTable tbody tr:hover td:first-child,
+#overviewSummaryTable tbody tr:hover td:first-child {
   border-left-color: var(--green);
 }
 
-#summaryTable .number {
+#summaryTable .number,
+#overviewSummaryTable .number {
   font-variant-numeric: tabular-nums;
 }
 
-#summaryTable tbody td:last-child {
+#summaryTable tbody td:last-child,
+#overviewSummaryTable tbody td:last-child {
   color: var(--muted);
   font-weight: 750;
   white-space: nowrap;
 }
 
 
-#sourceNote {
+#sourceNote,
+#overviewSourceNote {
   max-width: 420px;
   flex: 0 0 auto;
   font-size: 0.78rem;
@@ -1944,7 +1971,8 @@ border-color: #eef0ed;
 
 /* Sin colapsar, el borde inferior del encabezado se dibuja en cada celda. */
 .roadmap-table thead th,
-#summaryTable thead th {
+#summaryTable thead th,
+#overviewSummaryTable thead th {
   box-shadow: inset 0 -2px 0 var(--line);
 }
 
@@ -2953,6 +2981,16 @@ min-height: 0;
 width: 100%;
 }
 
+/*
+  Nueve ejes con etiquetas de dos lineas no caben en el alto pensado para cinco:
+  los nombres de los extremos se recortaban contra el borde del canvas. Gana
+  tambien dentro de la consulta de 1100 px, donde la rejilla pasa a una columna
+  y sobra sitio de resto.
+*/
+.radar-grid-overview .radar-chart-wrap {
+height: 380px;
+}
+
 .radar-chart-wrap canvas {
 display: block;
 width: 100% !important;
@@ -3480,7 +3518,8 @@ height: 100% !important;
   }
 
 
-  #sourceNote {
+  #sourceNote,
+  #overviewSourceNote {
   max-width: 100%;
   }
 

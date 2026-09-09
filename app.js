@@ -19,6 +19,7 @@ import {
   DEFAULT_TARGET_MATURITY,
   PALANCAS,
   agregarPorCapacidad as agregarPorCapacidadCore,
+  agregarPorDominio as agregarPorDominioCore,
   average,
   calcularMetricas,
   getMaturityLevel,
@@ -554,6 +555,15 @@ function cacheElements() {
     "loadNoticeClose",
     "initialLoadingState", // NUEVO: estado visual de carga inicial
     "sourceNote",
+    "overviewSourceNote",
+    "overviewKpiGrid",
+    "overviewHeadline",
+    "overviewPriorityBars",
+    "overviewLeverBars",
+    "overviewSummaryTable",
+    "overviewRadarProcessesChart",
+    "overviewRadarTechnologyChart",
+    "overviewRadarOrganizationChart",
     "kpiGrid",
     "dashboardHeadline",
     "priorityBars",
@@ -875,31 +885,46 @@ function sanitizeScenarioForFirebase(payload) {
 
 
 /**
- * Objetivos de una capacidad, devolviendo SIEMPRE la misma referencia mientras
- * los tres valores no cambien.
+ * Objetivos de una capacidad de un dominio, devolviendo SIEMPRE la misma
+ * referencia mientras los tres valores no cambien.
  *
  * Los valores se recalculan en cada llamada, asi que la funcion sigue siendo
  * exacta: la cache solo decide si reutiliza el objeto anterior o crea uno
  * nuevo. Eso permite que calculate() compare objetivos por referencia, sin
  * construir una firma de texto en cada una de sus llamadas.
  *
+ * El dominio es un parametro y no state.activeDomainId porque el Overview
+ * agrega los nueve a la vez: con el dominio activo de por medio, los gaps de
+ * los otros ocho salian calculados contra objetivos que no eran los suyos. Y la
+ * clave de la cache lo lleva por lo mismo: "Contabilidad y provision fiscal"
+ * existe en Fiscal y en Tesoreria, y no tienen por que compartir objetivo.
+ *
  * Nadie muta el objeto devuelto: las escrituras van a state.domains[..].targets,
  * que es el origen, no el resultado.
  */
 const cacheDeObjetivos = new Map();
 
-function getCapabilityTargets(capability) {
+// Un caracter que no puede venir en un nombre de capacidad leido del Excel, para
+// que la clave compuesta no se pueda confundir con otra pareja distinta.
+const SEPARADOR_DE_CLAVE = "\u0000";
+
+function getCapabilityTargets(capability, domainId = state.activeDomainId) {
+  const dominio = state.domains[domainId];
+
   const defaultTarget = normalizeTargetValue(
-    state.meta?.targetMaturity,
+    dominio?.meta?.targetMaturity,
     DEFAULT_TARGET_MATURITY,
   );
 
-  const activeDomainTargets =
-    state.domains[state.activeDomainId]?.targets;
-
+  // El respaldo a state.targets solo vale para el dominio activo, del que es
+  // alias. Para cualquier otro seria colar aqui el objetivo de una capacidad
+  // que se llama igual pero es de otro dominio, que es justo el fallo que este
+  // parametro viene a arreglar.
   const capabilityTargets =
-    activeDomainTargets?.[capability] ||
-    state.targets?.[capability];
+    dominio?.targets?.[capability] ||
+    (domainId === state.activeDomainId
+      ? state.targets?.[capability]
+      : null);
 
   const procesos = normalizeTargetValue(
     capabilityTargets?.procesos,
@@ -916,7 +941,8 @@ function getCapabilityTargets(capability) {
     defaultTarget,
   );
 
-  const guardados = cacheDeObjetivos.get(capability);
+  const clave = `${domainId}${SEPARADOR_DE_CLAVE}${capability}`;
+  const guardados = cacheDeObjetivos.get(clave);
 
   if (
     guardados &&
@@ -928,7 +954,7 @@ function getCapabilityTargets(capability) {
   }
 
   const objetivos = { procesos, tecnologia, organizacion };
-  cacheDeObjetivos.set(capability, objetivos);
+  cacheDeObjetivos.set(clave, objetivos);
 
   return objetivos;
 }
@@ -965,9 +991,10 @@ function normalizeItem(item) {
  */
 const cacheDeCalculo = new WeakMap();
 
-function calculate(item) {
+function calculate(item, domainId = state.activeDomainId) {
   const capabilityTargets = getCapabilityTargets(
     item.capacidad,
+    domainId,
   );
 
   const guardado = cacheDeCalculo.get(item);
@@ -1002,18 +1029,36 @@ function calculate(item) {
  * La aritmetica esta en el motor; aqui solo se le dice de donde salen las
  * metricas —de calculate(), con cache— y los objetivos de cada capacidad.
  */
-function agregarPorCapacidad(items) {
+function agregarPorCapacidad(items, domainId = state.activeDomainId) {
   return agregarPorCapacidadCore(
     items,
-    calculate,
-    getCapabilityTargets,
+    // Envueltas, y no pasadas por referencia: el motor las recorre con map, que
+    // pasa el indice como segundo argumento, y el segundo argumento de estas dos
+    // es ahora el dominio. Las lambdas no son redundantes.
+    (item) => calculate(item, domainId),
+    (capacidad) => getCapabilityTargets(capacidad, domainId),
   );
 }
 
 
-const VISTAS = ["dashboard", "assessment", "heatmap", "roadmap"];
+/**
+ * Agregacion por dominio con el estado de la aplicacion.
+ *
+ * Gemela de la de arriba. Las metricas y los objetivos se resuelven contra el
+ * dominio de cada fila, no contra el que este abierto en el conmutador.
+ */
+function agregarPorDominio(dominios) {
+  return agregarPorDominioCore(
+    dominios,
+    (item, domainId) => calculate(item, domainId),
+    (capacidad, domainId) => getCapabilityTargets(capacidad, domainId),
+  );
+}
 
-let vistaActiva = "dashboard";
+
+const VISTAS = ["overview", "dashboard", "assessment", "heatmap", "roadmap"];
+
+let vistaActiva = "overview";
 
 
 /**
@@ -1076,7 +1121,7 @@ function setupVistas() {
 function vistaDesdeLaUrl() {
   const id = window.location.hash.slice(1);
 
-  return VISTAS.includes(id) ? id : "dashboard";
+  return VISTAS.includes(id) ? id : "overview";
 }
 
 
@@ -1603,6 +1648,14 @@ function updateNavigationBadges() {
 
 
 function renderAll(opciones = {}) {
+  // El Overview agrega state.domains y no state.items: es la unica vista que
+  // sigue teniendo algo que ensenar cuando el dominio abierto se queda sin
+  // subcapacidades. Por eso va antes del corte de abajo, que las otras cuatro
+  // necesitan porque todas leen el dominio activo.
+  if (vistaActiva === "overview") {
+    renderOverview();
+  }
+
   if (!state.items.length) {
     return;
   }
@@ -2071,13 +2124,21 @@ function kpiCard(label, value, note, tone = "neutral") {
 }
 
 
-function renderPriorityBars(entries) {
+// El destino es un parametro —con el de siempre por defecto— porque el Overview
+// pinta las mismas barras en su propia seccion. Los llamantes del Dashboard no
+// cambian: los valores por defecto se evaluan en la llamada, asi que
+// getScopedItems() solo se invoca si no se pasa la lista.
+function renderPriorityBars(entries, destino = els.priorityBars) {
+  if (!destino) {
+    return;
+  }
+
   const counts = { Alta: 0, Media: 0, Baja: 0, Pendiente: 0 };
   entries.forEach((entry) => {
     counts[entry.metrics.prioridad] += 1;
   });
   const max = Math.max(...Object.values(counts), 1);
-  els.priorityBars.innerHTML = Object.entries(counts)
+  destino.innerHTML = Object.entries(counts)
     .map(([label, count]) => {
       const width = Math.round((count / max) * 100);
       return barRow(label, count, width, priorityColor(label));
@@ -2086,8 +2147,10 @@ function renderPriorityBars(entries) {
 }
 
 
-function renderLeverBars() {
-  const items = getScopedItems();
+function renderLeverBars(items = getScopedItems(), destino = els.leverBars) {
+  if (!destino) {
+    return;
+  }
 
   const rows = LEVERS.map((lever) => {
     const avg = average(
@@ -2106,7 +2169,7 @@ function renderLeverBars() {
     );
   });
 
-  els.leverBars.innerHTML = rows.join("");
+  destino.innerHTML = rows.join("");
 }
 
 
@@ -2201,23 +2264,40 @@ function renderSummaryTable() {
 let avisoDeGraficosMostrado = false;
 
 
+/**
+ * Si no hay Chart.js, se dice una sola vez por carga y se sigue.
+ *
+ * Antes esto era un return mudo dentro de renderCapabilityRadar(). Si la red del
+ * cliente bloquea el CDN —normal en una red corporativa ajena— no habia radares,
+ * no habia aviso, y el PDF que se entrega salia con tres recuadros en blanco.
+ * Nadie se enteraba hasta tener el informe delante.
+ *
+ * Esta fuera de renderCapabilityRadar() porque ahora hay dos vistas que pintan
+ * radares: entrar directamente por #overview con la libreria bloqueada tiene que
+ * dar el mismo aviso.
+ */
+function hayLibreriaDeGraficos() {
+  if (typeof Chart !== "undefined") {
+    return true;
+  }
+
+  if (!avisoDeGraficosMostrado) {
+    avisoDeGraficosMostrado = true;
+
+    showNotice(
+      "No se ha podido cargar la librería de gráficos: los radares no se pintan y el informe PDF "
+        + "saldrá sin ellos. El resto de la herramienta funciona con normalidad. Recarga la página "
+        + "para reintentarlo.",
+      "aviso",
+    );
+  }
+
+  return false;
+}
+
+
 function renderCapabilityRadar() {
-  if (typeof Chart === "undefined") {
-    // Antes esto era un return mudo. Si la red del cliente bloquea el CDN
-    // —normal en una red corporativa ajena— no habia radares, no habia aviso, y
-    // el PDF que se entrega salia con tres recuadros en blanco. Nadie se
-    // enteraba hasta tener el informe delante.
-    if (!avisoDeGraficosMostrado) {
-      avisoDeGraficosMostrado = true;
-
-      showNotice(
-        "No se ha podido cargar la librería de gráficos: los radares no se pintan y el informe PDF "
-          + "saldrá sin ellos. El resto de la herramienta funciona con normalidad. Recarga la página "
-          + "para reintentarlo.",
-        "aviso",
-      );
-    }
-
+  if (!hayLibreriaDeGraficos()) {
     return;
   }
 
@@ -2268,6 +2348,12 @@ function renderSingleCapabilityRadar({
   color,
   backgroundColor,
   radarData,
+
+  // Donde se guarda la instancia de Chart. El Dashboard escribe en el registro
+  // de siempre —del que tira getCanvasImageDataUrl() para el PDF— y el Overview
+  // en el suyo: son seis canvas distintos y una sola caja de tres claves los
+  // pisaria, capturando ademas el radar equivocado en el informe.
+  registro = capabilityRadarCharts,
 }) {
   if (!canvas) {
     return;
@@ -2437,14 +2523,14 @@ function renderSingleCapabilityRadar({
     },
   };
 
-  if (capabilityRadarCharts[key]) {
-    capabilityRadarCharts[key].data = chartData;
-    capabilityRadarCharts[key].options = chartOptions;
-    capabilityRadarCharts[key].update();
+  if (registro[key]) {
+    registro[key].data = chartData;
+    registro[key].options = chartOptions;
+    registro[key].update();
     return;
   }
 
-  capabilityRadarCharts[key] = new Chart(canvas, {
+  registro[key] = new Chart(canvas, {
     type: "radar",
     data: chartData,
     options: chartOptions,
@@ -2538,6 +2624,451 @@ function wrapRadarLabel(label) {
 
   return lines;
 }
+
+
+
+/* ---------------------------------------------------------------- Overview --
+ *
+ * La vista que agrega los nueve dominios. Tres cosas la separan del Dashboard,
+ * y las tres son deliberadas:
+ *
+ * 1. No lee state.items ni getScopedItems(), sino state.domains entero. Es la
+ *    excepcion a la regla del ambito unico, y existe porque su pregunta es otra:
+ *    no "como esta este dominio" sino "como esta la funcion financiera".
+ * 2. No aplica los filtros. Son del dominio abierto —el desplegable de capacidad
+ *    se rellena con las capacidades del activo—, asi que a nivel global no
+ *    significan nada. La nota de ambito lo dice en pantalla para que nadie lea
+ *    el descuadre con el Dashboard como un fallo.
+ * 3. Cada dominio se calcula contra SUS objetivos, no contra los del activo.
+ */
+
+/**
+ * Los dominios cargados, en el orden del conmutador, con sus subcapacidades.
+ *
+ * Se recorren los grupos del catalogo y no las claves de state.domains: el orden
+ * en que terminan nueve fetch en paralelo no es el orden en que se leen los
+ * dominios, y la tabla bailaria entre recargas.
+ *
+ * Los que no hayan podido cargarse se saltan, igual que hace
+ * actualizarAvanceDeDominios(). El Overview cuenta sobre los que hay y lo dice:
+ * un "8/8" honesto vale mas que un "8/9" que finge saber algo del noveno.
+ */
+function getDominiosDelOverview() {
+  // Los scores del dominio abierto viven en state.items hasta que alguien los
+  // devuelve a state.domains. Hoy son la misma referencia; esta es la red que lo
+  // garantiza si algun dia deja de serlo, como en buildScenarioPayload().
+  syncActiveDomainState();
+
+  const dominios = Object.values(DOMAINS);
+
+  const grupos = GRUPOS_DE_DOMINIO.length
+    ? GRUPOS_DE_DOMINIO
+    : unique(dominios.map((dominio) => dominio.group));
+
+  return grupos.flatMap((grupo) =>
+    dominios
+      .filter(
+        (dominio) =>
+          dominio.group === grupo && state.domains[dominio.id],
+      )
+      .map((dominio) => ({
+        id: dominio.id,
+        label: dominio.label,
+        items: state.domains[dominio.id].items,
+      })),
+  );
+}
+
+
+/** describirObjetivos(), pero mirando los nueve dominios a la vez. */
+function describirObjetivosDeTodos(dominios) {
+  const valores = unique(
+    dominios.flatMap((dominio) =>
+      dominio.items.flatMap((item) => {
+        const objetivos = getCapabilityTargets(
+          item.capacidad,
+          dominio.id,
+        );
+
+        return LEVERS.map((lever) => objetivos[lever.key]);
+      }),
+    ),
+  ).sort((a, b) => a - b);
+
+  if (!valores.length) {
+    return null;
+  }
+
+  if (valores.length === 1) {
+    return `Objetivo de madurez ${valores[0]}`;
+  }
+
+  return `Objetivos entre ${valores[0]} y ${valores[valores.length - 1]}`;
+}
+
+
+function renderOverview() {
+  // Un index.html cacheado de una version anterior no tiene estos nodos: GitHub
+  // Pages sirve el HTML y el JS con cachés independientes, asi que la pareja
+  // "HTML viejo + app.js nuevo" es un caso real y no una hipotesis. Sin esto,
+  // cambiar de pestana dejaria la aplicacion a medias y en silencio.
+  if (!els.overviewKpiGrid || !els.overviewSummaryTable) {
+    return;
+  }
+
+  const dominios = getDominiosDelOverview();
+
+  if (!dominios.length) {
+    return;
+  }
+
+  const filas = agregarPorDominio(dominios);
+
+  // Las subcapacidades de los nueve, cada una con su dominio y sus metricas al
+  // lado. No se aplanan a secas: un item no sabe de que dominio es, y de eso
+  // dependen sus objetivos y por tanto su gap.
+  const entradas = filas.flatMap((fila) =>
+    fila.items.map((item, indice) => ({
+      item,
+      domainId: fila.id,
+      metrics: fila.metricas[indice],
+    })),
+  );
+
+  const evaluadas = entradas.filter(
+    (entrada) => !entrada.metrics.isPending,
+  );
+
+  const prioridadAlta = evaluadas.filter(
+    (entrada) => entrada.metrics.prioridad === "Alta",
+  ).length;
+
+  const conScoring = filas.filter((fila) => fila.evaluadas > 0);
+
+  const completos = filas.filter(
+    (fila) => fila.total && fila.evaluadas === fila.total,
+  );
+
+  const enRiesgo = filas.filter(
+    (fila) => fila.prioridad === "Alta",
+  );
+
+  const sinCargar = Object.keys(DOMAINS).length - filas.length;
+
+  els.overviewSourceNote.textContent = [
+    `${entradas.length} subcapacidades en ${filas.length} dominios`,
+    describirObjetivosDeTodos(dominios),
+    sinCargar
+      ? `${sinCargar} dominio${sinCargar > 1 ? "s" : ""} sin cargar`
+      : null,
+    "No depende de los filtros activos",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  els.overviewKpiGrid.innerHTML = [
+    kpiCard(
+      "Score global F3M",
+      formatNumber(
+        average(evaluadas.map((entrada) => entrada.metrics.scoreMedio)),
+      ),
+      evaluadas.length
+        // Se dice "subcapacidades" y no "dominios" a proposito: si no, alguien
+        // promedia a mano las nueve cifras de la tabla y no le cuadra.
+        ? "Promedio de las subcapacidades puntuadas de todos los dominios"
+        : "Pendiente de scoring",
+      "score",
+    ),
+    kpiCard(
+      "Gap medio vs objetivo",
+      formatNumber(
+        average(evaluadas.map((entrada) => entrada.metrics.gap)),
+      ),
+      "Cada dominio contra sus propios objetivos por capacidad y palanca",
+      "gap",
+    ),
+    kpiCard(
+      "Subcapacidades puntuadas",
+      `${evaluadas.length}/${entradas.length}`,
+      entradas.length
+        ? `${Math.round((evaluadas.length / entradas.length) * 100)}% de avance`
+        : "Sin subcapacidades",
+      "progress",
+    ),
+    kpiCard(
+      "Prioridad alta",
+      String(prioridadAlta),
+      "Subcapacidades con gap igual o superior a 2",
+      prioridadAlta > 0 ? "alert" : "neutral",
+    ),
+
+    // Los dos que solo tienen sentido mirando los nueve a la vez.
+    kpiCard(
+      "Dominios con scoring",
+      `${conScoring.length}/${filas.length}`,
+      completos.length
+        ? `${completos.length} completo${completos.length > 1 ? "s" : ""}`
+        : "Ninguno completo todavía",
+      "progress",
+    ),
+    kpiCard(
+      "Dominios en riesgo",
+      String(enRiesgo.length),
+      enRiesgo.length
+        ? enRiesgo.slice(0, 3).map((fila) => fila.label).join(", ")
+            + (enRiesgo.length > 3 ? "…" : "")
+        : "Ningún dominio con gap medio igual o superior a 2",
+      enRiesgo.length ? "alert" : "neutral",
+    ),
+  ].join("");
+
+  renderOverviewHeadline(filas, entradas);
+  renderPriorityBars(entradas, els.overviewPriorityBars);
+  renderLeverBars(
+    entradas.map((entrada) => entrada.item),
+    els.overviewLeverBars,
+  );
+  renderOverviewSummaryTable(filas);
+  renderOverviewRadar(filas);
+}
+
+
+/**
+ * Los tres titulares del Overview.
+ *
+ * Hermana de renderTitularesEjecutivos() y no la misma funcion: alli el sujeto
+ * es la capacidad y hay un mensaje entero para cuando los filtros no dejan ver
+ * nada, que aqui seria falso. Lo unico repetido son dos average, y unificarlas
+ * costaria dos condicionales de modo.
+ */
+function renderOverviewHeadline(filas, entradas) {
+  if (!els.overviewHeadline) {
+    return;
+  }
+
+  const evaluadas = entradas.filter(
+    (entrada) => !entrada.metrics.isPending,
+  );
+
+  if (!evaluadas.length) {
+    els.overviewHeadline.hidden = false;
+    els.overviewHeadline.textContent =
+      "Todavía no hay ninguna subcapacidad puntuada en ningún dominio: "
+        + "empieza por la pestaña Assessment.";
+    return;
+  }
+
+  const titulares = [];
+
+  const porGap = filas
+    .filter((fila) => Number.isFinite(fila.gap))
+    .sort((a, b) => b.gap - a.gap);
+
+  if (porGap.length) {
+    titulares.push(
+      `Dominio con mayor brecha: ${porGap[0].label} (gap ${formatNumber(porGap[0].gap)})`,
+    );
+  }
+
+  const porPalanca = LEVERS.map((lever) => ({
+    label: lever.label,
+    media: average(
+      entradas
+        .map((entrada) => entrada.item.scores[lever.key])
+        .filter(Number.isFinite),
+    ),
+  }))
+    .filter((fila) => Number.isFinite(fila.media))
+    .sort((a, b) => a.media - b.media);
+
+  if (porPalanca.length) {
+    titulares.push(
+      `Palanca más débil: ${porPalanca[0].label} (${formatNumber(porPalanca[0].media)})`,
+    );
+  }
+
+  const pendientes = entradas.length - evaluadas.length;
+
+  const aMedias = filas.filter(
+    (fila) => fila.evaluadas < fila.total,
+  ).length;
+
+  titulares.push(
+    pendientes
+      ? `Quedan ${pendientes} subcapacidades por evaluar en ${aMedias} dominios`
+      : "Todos los dominios están evaluados por completo",
+  );
+
+  els.overviewHeadline.hidden = false;
+  els.overviewHeadline.textContent = titulares.join(" · ");
+}
+
+
+function renderOverviewSummaryTable(filas) {
+  const rows = filas.map(
+    (fila) => `
+      <tr class="${fila.evaluadas === 0 ? "is-pending" : ""}">
+        <td>${escapeHtml(fila.label)}</td>
+
+        <td class="number">
+          ${fila.capacidades}
+        </td>
+
+        <td class="number">
+          ${formatNumber(fila.procesos)}
+        </td>
+
+        <td class="number">
+          ${formatNumber(fila.tecnologia)}
+        </td>
+
+        <td class="number">
+          ${formatNumber(fila.organizacion)}
+        </td>
+
+        <td class="number">
+          ${formatNumber(fila.scoreMedio)}
+        </td>
+
+        <td class="number">
+          ${formatNumber(fila.targetMedio)}
+        </td>
+
+        <td class="number">
+          ${formatNumber(fila.gap)}
+        </td>
+
+        <td>
+          ${priorityBadge(fila.prioridad)}
+        </td>
+
+        <td class="number">
+          ${fila.evaluadas}/${fila.total}
+        </td>
+      </tr>
+    `,
+  );
+
+  // Sin estado vacio: renderOverview() ya sale antes si no hay ningun dominio
+  // cargado, y aqui no hay filtros que puedan dejar la tabla a cero.
+  els.overviewSummaryTable.innerHTML = `
+    <caption class="solo-lectores">Resumen por dominio: capacidades, medias por palanca, score medio, objetivo, gap y prioridad.</caption>
+
+    <thead>
+      <tr>
+        <th scope="col">Dominio</th>
+        <th scope="col" class="number">Capacidades</th>
+        <th scope="col" class="number">Procesos</th>
+        <th scope="col" class="number">Tecnología</th>
+        <th scope="col" class="number">Organización</th>
+        <th scope="col" class="number">Score medio</th>
+        <th scope="col" class="number">Objetivo medio</th>
+        <th scope="col" class="number">Gap vs objetivo</th>
+        <th scope="col">Prioridad</th>
+        <th scope="col" class="number">Avance</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      ${rows.join("")}
+    </tbody>
+  `;
+}
+
+
+// Seis canvas, dos registros. getCanvasImageDataUrl() sigue leyendo el del
+// Dashboard, que es de donde salen los radares del informe PDF.
+const overviewRadarCharts = {
+  procesos: null,
+  tecnologia: null,
+  organizacion: null,
+};
+
+
+function renderOverviewRadar(filas) {
+  if (!hayLibreriaDeGraficos()) {
+    return;
+  }
+
+  const radarData = buildOverviewRadarData(filas);
+
+  renderSingleCapabilityRadar({
+    key: "procesos",
+    canvas: els.overviewRadarProcessesChart,
+    label: "Procesos",
+    values: radarData.procesos,
+    targetValues: radarData.objetivoProcesos,
+    color: COLOR_DE_PALANCA.procesos,
+    backgroundColor: "rgba(134, 188, 37, 0.24)",
+    radarData,
+    registro: overviewRadarCharts,
+  });
+
+  renderSingleCapabilityRadar({
+    key: "tecnologia",
+    canvas: els.overviewRadarTechnologyChart,
+    label: "Tecnología",
+    values: radarData.tecnologia,
+    targetValues: radarData.objetivoTecnologia,
+    color: COLOR_DE_PALANCA.tecnologia,
+    backgroundColor: "rgba(237, 139, 0, 0.22)",
+    radarData,
+    registro: overviewRadarCharts,
+  });
+
+  renderSingleCapabilityRadar({
+    key: "organizacion",
+    canvas: els.overviewRadarOrganizationChart,
+    label: "Organización",
+    values: radarData.organizacion,
+    targetValues: radarData.objetivoOrganizacion,
+    color: COLOR_DE_PALANCA.organizacion,
+    backgroundColor: "rgba(1, 33, 105, 0.18)",
+    radarData,
+    registro: overviewRadarCharts,
+  });
+}
+
+
+/**
+ * Los ejes del radar del Overview son los nueve dominios.
+ *
+ * Sin getRadarShortLabel(): sus abreviaturas son de capacidades de FP&A y aqui
+ * no aplican. Las etiquetas del catalogo ya son cortas y solo hay que partirlas;
+ * la mas larga, "Relación con Inversores", cabe en dos lineas.
+ *
+ * Ojo con toRadarNumber(null), que devuelve 0 y no null: un dominio sin puntuar
+ * se dibuja en el centro en vez de dejar hueco. Es exactamente lo que hace hoy el
+ * radar por capacidad —buildSummaryRows() pone "" y Number("") es 0— y se
+ * replica a proposito para que los dos se comporten igual. Si algun dia se
+ * quiere el hueco, hay que arreglar los dos a la vez.
+ */
+function buildOverviewRadarData(filas) {
+  return {
+    originalLabels: filas.map((fila) => fila.label),
+
+    displayLabels: filas.map((fila) => wrapRadarLabel(fila.label)),
+
+    procesos: filas.map((fila) => toRadarNumber(fila.procesos)),
+
+    objetivoProcesos: filas.map(
+      (fila) => toRadarNumber(fila.objetivoProcesos),
+    ),
+
+    tecnologia: filas.map((fila) => toRadarNumber(fila.tecnologia)),
+
+    objetivoTecnologia: filas.map(
+      (fila) => toRadarNumber(fila.objetivoTecnologia),
+    ),
+
+    organizacion: filas.map((fila) => toRadarNumber(fila.organizacion)),
+
+    objetivoOrganizacion: filas.map(
+      (fila) => toRadarNumber(fila.objetivoOrganizacion),
+    ),
+  };
+}
+
 
 function toList(value, separator = "\n") {
   if (Array.isArray(value)) {
