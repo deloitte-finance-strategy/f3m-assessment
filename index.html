@@ -68,7 +68,7 @@
   <body>
     <!--
       Con teclado habia que pasar 35 controles —exportar, el menu, los nueve
-      dominios, las cuatro pestanas y los filtros— antes de llegar a la primera
+      dominios, las cinco pestanas y los filtros— antes de llegar a la primera
       puntuacion. Este enlace es el primer elemento enfocable de la pagina y
       solo se ve cuando recibe el foco: para quien usa raton no existe.
     -->
@@ -191,7 +191,8 @@
 
 
       <nav class="tabs" aria-label="Secciones del assessment">
-        <a href="#dashboard" aria-current="page">Dashboard</a>
+        <a href="#overview" aria-current="page">Overview</a>
+        <a href="#dashboard">Dashboard</a>
         <a href="#assessment">
           Assessment
           <span class="tab-badge" id="assessmentTabBadge">0/0</span>
@@ -202,6 +203,90 @@
           <span class="tab-badge tab-badge-alert" id="roadmapTabBadge">0 Alta</span>
         </a>
       </nav>
+
+      <!--
+        El Overview agrega los nueve dominios. A diferencia de las otras cuatro
+        vistas no depende del dominio abierto en el conmutador, y tampoco de los
+        filtros: por eso su nota de ambito lo dice en pantalla.
+      -->
+      <section id="overview" class="section-block">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Los nueve dominios</p>
+            <h2>Lectura global del modelo F3M</h2>
+          </div>
+          <p class="small-note" id="overviewSourceNote"></p>
+        </div>
+
+        <div class="kpi-grid" id="overviewKpiGrid"></div>
+
+        <p class="dashboard-headline" id="overviewHeadline" hidden></p>
+
+        <div class="split-grid">
+          <div class="panel">
+            <div class="panel-heading">
+              <h3>Prioridad por subcapacidad</h3>
+              <span class="small-note">Todos los dominios cargados, sin filtros</span>
+            </div>
+            <div class="priority-bars" id="overviewPriorityBars"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading">
+              <h3>Promedio por palanca</h3>
+              <span class="small-note">Solo scores informados</span>
+            </div>
+            <div class="lever-bars" id="overviewLeverBars"></div>
+          </div>
+        </div>
+
+        <div class="table-wrap panel">
+          <div class="panel-heading">
+            <h3>Resumen por dominio</h3>
+            <span class="small-note">Cada dominio contra sus propios objetivos por capacidad y palanca</span>
+          </div>
+          <table class="data-table" id="overviewSummaryTable"></table>
+        </div>
+
+        <div class="summary-radar-block">
+          <div class="panel-heading radar-heading">
+            <h3>Radar por dominio</h3>
+            <span class="small-note">Comparativa entre madurez actual y objetivo, dominio a dominio</span>
+          </div>
+
+          <div class="radar-grid radar-grid-overview">
+            <article class="radar-mini-card">
+              <div class="radar-mini-heading">
+                <span class="radar-dot radar-dot-processes"></span>
+                <h4>Procesos</h4>
+              </div>
+              <div class="radar-chart-wrap">
+                <canvas id="overviewRadarProcessesChart" aria-label="Radar de Procesos por dominio" role="img"></canvas>
+              </div>
+            </article>
+
+            <article class="radar-mini-card">
+              <div class="radar-mini-heading">
+                <span class="radar-dot radar-dot-technology"></span>
+                <h4>Tecnología</h4>
+              </div>
+              <div class="radar-chart-wrap">
+                <canvas id="overviewRadarTechnologyChart" aria-label="Radar de Tecnología por dominio" role="img"></canvas>
+              </div>
+            </article>
+
+            <article class="radar-mini-card">
+              <div class="radar-mini-heading">
+                <span class="radar-dot radar-dot-organization"></span>
+                <h4>Organización</h4>
+              </div>
+              <div class="radar-chart-wrap">
+                <canvas id="overviewRadarOrganizationChart" aria-label="Radar de Organización por dominio" role="img"></canvas>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
 
       <section id="dashboard" class="section-block">
         <div class="section-heading">
@@ -685,7 +770,7 @@
 
       AL DESPLEGAR UN CAMBIO EN EL JAVASCRIPT, SUBIR ESTE NUMERO.
     -->
-    <script type="module" src="app.js?v=9"></script>
+    <script type="module" src="app.js?v=10"></script>
   </body>
 </html>
 

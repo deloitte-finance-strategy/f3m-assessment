@@ -33,13 +33,13 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 603 |
-| `app.js` | Estado, DOM, Firebase, filtros, render de las cuatro vistas | 5.395 |
-| `styles.css` | Estilos | 3.660 |
-| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 273 |
-| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 407 |
-| `core/presentacion.js` | Escapado, formato de números y colores de marca | 65 |
-| `informe/pdf.js` | El informe PDF: de los datos al HTML imprimible | 790 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 776 |
+| `app.js` | Estado, DOM, Firebase, filtros, render de las cinco vistas | 6.464 |
+| `styles.css` | Estilos | 3.845 |
+| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 374 |
+| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 453 |
+| `core/presentacion.js` | Escapado, formato de números y colores de marca | 105 |
+| `informe/pdf.js` | El informe PDF: de los datos al HTML imprimible | 825 |
 | `tests/` | Pruebas de `core/` y del espejo con las reglas, sin dependencias | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
@@ -76,22 +76,44 @@ Dependencias de terceros, sin bundler:
   `app.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
   ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
 
-### Las cuatro pestañas son vistas, no anclas
+### Las cinco pestañas son vistas, no anclas
 
-`setupVistas()` muestra **solo la sección activa**; las otras tres están `hidden` y no se pintan.
+`setupVistas()` muestra **solo la sección activa**; las otras cuatro están `hidden` y no se pintan.
 `renderAll()` solo repinta la vista visible. El enlace directo (`#roadmap`) se sigue respetando.
+
+La vista de arranque es **Overview**: `vistaDesdeLaUrl()` cae ahí cuando la URL no trae ancla.
 
 Consecuencia práctica: si algo depende de medir un elemento oculto, hay que hacerlo visible primero.
 Es lo que hace `conElDashboardVisible()` para capturar los radares del PDF — un canvas oculto no
 tiene tamaño y saldría en blanco.
 
-### El ámbito de datos es uno solo
+Añadir una vista son cinco sitios: `VISTAS` y `cacheElements()` en `app.js`, un `<a>` en
+`<nav class="tabs">`, una `<section id>` en `index.html`, y su rama en `renderAll()`.
 
-`getScopedItems()` es **la única** fuente de subcapacidades para todas las vistas y exportaciones:
-dashboard, resumen, radares, heatmap, roadmap, CSV y PDF. Antes convivían dos ámbitos y el KPI decía
-"7 de prioridad alta" mientras el roadmap enseñaba 2.
+### El ámbito de datos es uno solo, salvo en el Overview
+
+`getScopedItems()` es **la única** fuente de subcapacidades para el dominio abierto: dashboard,
+resumen, radares, heatmap, roadmap, CSV y PDF. Antes convivían dos ámbitos y el KPI decía "7 de
+prioridad alta" mientras el roadmap enseñaba 2.
 
 No añadir una vista que lea `state.items` directamente.
+
+**El Overview es la excepción, y es deliberada.** Su pregunta es otra —no "cómo está este dominio"
+sino "cómo está la función financiera"—, así que lee `state.domains` entero vía
+`getDominiosDelOverview()` y **no aplica los filtros**: son del dominio abierto (el desplegable de
+capacidad se rellena con las capacidades del activo), así que a nivel global no significan nada. Su
+nota de ámbito lo dice en pantalla para que el descuadre con el Dashboard no se lea como un fallo.
+
+### Los objetivos se resuelven por dominio
+
+`getCapabilityTargets(capacidad, domainId)` y `calculate(item, domainId)` reciben el dominio, con el
+activo por defecto. Antes solo miraban el abierto en el conmutador, y eso daba gaps equivocados para
+los otros ocho: **"Contabilidad y provisión fiscal" existe en Fiscal y en Tesorería** y no tienen por
+qué compartir objetivo. La caché de objetivos va indexada por la pareja dominio + capacidad.
+
+Cuidado al pasar cualquiera de las dos a un `map()`: su segundo argumento es el dominio, y `map`
+pasa el índice. Por eso `agregarPorCapacidad()` las envuelve en lambdas, y el motor también
+(`core/calculo.js`). Esas lambdas no son redundantes.
 
 ## Reglas de negocio F3M
 
@@ -130,6 +152,18 @@ tiene objetivo propio, no una constante fija del modelo.
 **Agregación por capacidad** (`agregarPorCapacidad()`): una sola función para la tabla resumen, el
 heatmap, el PDF y el CSV. Las medias por palanca usan todas las subcapacidades con esa palanca
 puntuada; score medio, objetivo medio y gap solo las que tienen alguna palanca puntuada.
+
+**Agregación por dominio** (`agregarPorDominio()`): la hermana de la anterior, para el Overview, con
+las mismas reglas de promedio. Dos cosas propias:
+
+- Se promedian **métricas de subcapacidad, nunca filas de capacidad ya promediadas**. Un dominio con
+  capacidades de 2 y 8 subcapacidades daría otro número con una media de medias, y no coincidiría
+  con el PDF.
+- El **objetivo por palanca del dominio** (`objetivoProcesos` y compañeros, los que dibuja el radar)
+  promedia **todas** las subcapacidades, también las pendientes. El objetivo es configuración, no
+  medición: si contara solo lo puntuado, la línea de referencia del radar se movería cada vez que se
+  rellena una celda en un taller. Es distinto de `targetMedio`, la columna "Objetivo medio" de la
+  tabla, que sí cuenta solo lo evaluado — igual que en la agregación por capacidad.
 
 ### Cachés de cálculo
 
@@ -279,17 +313,24 @@ resto se comprueba a mano:
 1. `python -m http.server 8000` → `http://localhost:8000/`.
 2. Consola del navegador **en silencio**. Un arranque correcto no imprime nada: lo que aparezca
    ahí es un `warn` o un `error` de verdad, y hay que mirarlo.
-3. Recorrer las cuatro vistas:
+3. Recorrer las cinco vistas:
+   - **Overview**: los 4 KPIs, el titular, las barras, la tabla por dominio y los 3 radares de 9
+     ejes. Cambiar de dominio en el conmutador **no** debe cambiar ninguna cifra del Overview.
    - **Dashboard**: KPIs, titulares ejecutivos, barras de prioridad y palanca, y los 3 radares.
    - **Assessment**: cambiar un score y comprobar que se recalculan nivel, gap, prioridad y oleada,
      **sin perder el foco ni cerrar los paneles de detalle abiertos**.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos.
 4. Con un filtro puesto, comprobar que **KPIs, tabla, radares, heatmap, roadmap, CSV y PDF dan el
-   mismo recuento**.
-5. Cambiar de dominio y confirmar que los datos se recargan.
-6. Recargar la página y confirmar que el escenario persiste.
-7. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
+   mismo recuento** — y que el **Overview no cambia**, que es lo suyo.
+5. Ir y volver entre Overview y Dashboard: los radares de los dos siguen correctos (5 ejes de
+   capacidad y 9 de dominio). Exportar el PDF desde el Overview y comprobar que sale del dominio
+   activo y **con sus tres radares**, no en blanco.
+6. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
+   la fila de Fiscal. Tesorería tiene una capacidad con el mismo nombre y no debe moverse.
+7. Cambiar de dominio y confirmar que los datos se recargan.
+8. Recargar la página y confirmar que el escenario persiste.
+9. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
    uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
    guardado se pone **rojo**.
 
@@ -306,3 +347,15 @@ cd <carpeta-temporal>; python -m http.server 8001
 Aplicar el mismo patrón de puntuaciones en los dos y comparar tabla resumen, KPIs, heatmap, roadmap
 y CSV. Es lo que se usó para verificar que la unificación de la agregación, las cachés y la
 extracción del informe PDF no cambiaban ningún número.
+
+**Si el cambio toca los objetivos, puntuar no basta.** Los nueve JSON vienen sin `targets` y con
+`meta.targetMaturity` a 4, así que con los valores por defecto todos los caminos dan el mismo
+número y el A/B saldría idéntico aunque el cambio estuviera mal. Hay que **editar objetivos por
+capacidad en al menos dos dominios**, con valores distintos entre sí —Fiscal y Tesorería tienen una
+capacidad con el mismo nombre, "Contabilidad y provisión fiscal", y son el par que de verdad pone a
+prueba la resolución por dominio—, guardar una copia con **Escenario → Guardar una copia**, abrirla
+en la versión antigua y comparar entonces.
+
+La forma cómoda de comparar es recorrer los nueve dominios en las dos versiones y quedarse con un
+hash del texto de las vistas, en lugar de mirar tabla por tabla: si los hashes coinciden, no se ha
+movido ninguna cifra.

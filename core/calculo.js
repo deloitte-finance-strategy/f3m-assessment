@@ -233,7 +233,11 @@ export function agregarPorCapacidad(items, metricasDe, objetivosDe) {
       (item) => item.capacidad === capacidad,
     );
 
-    const metricas = subcapacidades.map(metricasDe);
+    // Envuelto, y no `subcapacidades.map(metricasDe)`: map pasa el indice como
+    // segundo argumento, y el segundo argumento de metricasDe en app.js es
+    // ahora el dominio. Sin la lambda, la capacidad numero 3 se calculaba
+    // contra los objetivos del "dominio 3", que no existe.
+    const metricas = subcapacidades.map((item) => metricasDe(item));
 
     const puntuadas = metricas.filter(
       (entrada) => !entrada.isPending,
@@ -268,6 +272,103 @@ export function agregarPorCapacidad(items, metricasDe, objetivosDe) {
       prioridad: priorityFromGap(gap),
       evaluadas: puntuadas.length,
       total: subcapacidades.length,
+    };
+  });
+}
+
+
+/**
+ * La agregacion por dominio, para la vista Overview.
+ *
+ * Hermana de agregarPorCapacidad() y con sus mismas reglas de promedio, pero
+ * agrupando por dominio. No se generalizo la de capacidad con una clave de
+ * agrupacion porque los objetivos no se resuelven igual: dentro de una
+ * capacidad los tres objetivos son uno solo, y dentro de un dominio hay uno por
+ * cada capacidad, asi que hay que promediarlos.
+ *
+ * Las reglas que comparte:
+ * - Las medias por palanca salen de TODAS las subcapacidades del dominio con
+ *   esa palanca puntuada, aunque el item este pendiente en las otras dos.
+ * - Score medio, objetivo medio y gap solo promedian las subcapacidades con
+ *   alguna palanca puntuada: lo no evaluado no entra.
+ * - La prioridad del dominio se deriva del gap agregado.
+ *
+ * Y una decision propia: el objetivo por palanca —objetivoProcesos y
+ * companeros, los que dibuja el radar— promedia TODAS las subcapacidades del
+ * dominio, tambien las pendientes. El objetivo es configuracion, no medicion:
+ * si contara solo lo puntuado, la linea de referencia del radar se moveria cada
+ * vez que se rellena una celda en un taller, y al empezar el encargo no habria
+ * linea que ensenar. Es la generalizacion de lo que ya hace el radar por
+ * capacidad, donde el objetivo se dibuja aunque no haya ningun score.
+ *
+ * Ojo con la ponderacion: se promedia por subcapacidad y no por capacidad a
+ * proposito. Una capacidad de ocho subcapacidades pesa cuatro veces mas que una
+ * de dos, igual que en el numerador. Promediar filas de capacidad ya
+ * promediadas daria otro numero que el del PDF.
+ *
+ * metricasDe(item, domainId) y objetivosDe(capacidad, domainId) reciben el
+ * dominio porque el mismo nombre de capacidad existe en dos dominios distintos
+ * —"Contabilidad y provision fiscal", en Fiscal y en Tesoreria— y no tienen por
+ * que compartir objetivo.
+ */
+export function agregarPorDominio(dominios, metricasDe, objetivosDe) {
+  return dominios.map((dominio) => {
+    const items = dominio.items || [];
+
+    const metricas = items.map(
+      (item) => metricasDe(item, dominio.id),
+    );
+
+    const puntuadas = metricas.filter(
+      (entrada) => !entrada.isPending,
+    );
+
+    const mediaDePalanca = (clave) =>
+      average(
+        items
+          .map((item) => item.scores?.[clave])
+          .filter(Number.isFinite),
+      );
+
+    const mediaDeObjetivo = (clave) =>
+      average(
+        items.map(
+          (item) => objetivosDe(item.capacidad, dominio.id)?.[clave],
+        ),
+      );
+
+    const gap = average(
+      puntuadas.map((entrada) => entrada.gap),
+    );
+
+    return {
+      id: dominio.id,
+      label: dominio.label,
+      items,
+      metricas,
+
+      procesos: mediaDePalanca("procesos"),
+      tecnologia: mediaDePalanca("tecnologia"),
+      organizacion: mediaDePalanca("organizacion"),
+
+      objetivoProcesos: mediaDeObjetivo("procesos"),
+      objetivoTecnologia: mediaDeObjetivo("tecnologia"),
+      objetivoOrganizacion: mediaDeObjetivo("organizacion"),
+
+      scoreMedio: average(
+        puntuadas.map((entrada) => entrada.scoreMedio),
+      ),
+      targetMedio: average(
+        puntuadas.map((entrada) => entrada.targetMedio),
+      ),
+      gap,
+      prioridad: priorityFromGap(gap),
+
+      capacidades: unique(
+        items.map((item) => item.capacidad),
+      ).length,
+      evaluadas: puntuadas.length,
+      total: items.length,
     };
   });
 }
