@@ -68,6 +68,30 @@ const firebaseConfig = {
 
 // Inicialización de Firebase
 const firebaseApp = initializeApp(firebaseConfig);
+
+/**
+ * Olvida el fallo de WebSocket que el SDK dejó apuntado la vez anterior.
+ *
+ * Cuando un intento de WebSocket falla, el SDK de la Realtime Database escribe
+ * `firebase:previous_websocket_failure` en localStorage y a partir de ahí deja
+ * de intentarlo: va directo a long-polling. En una red corporativa el
+ * long-polling puede estar roto —medido el 2026-09-09 sobre el sitio publicado:
+ * WebSocket abre en 182 ms, REST responde 200, y `/.lp` devuelve 503 en todos
+ * los reintentos—, así que el escenario compartido no vuelve a conectar nunca.
+ *
+ * Y el flag es por origen y no lo limpia nadie: sobrevive a las recargas y a
+ * cerrar el navegador. Un solo minuto malo de red en la oficina de un cliente
+ * dejaba a ese consultor con la herramienta desplegada incapaz de abrir un
+ * escenario compartido para siempre, con un chip rojo que le mandaba a mirar el
+ * wifi teniendo la red perfecta.
+ *
+ * Borrarlo solo renuncia a recordar el fallo entre sesiones. El fallback sigue
+ * intacto dentro de cada carga: si el WebSocket no va, el SDK cae a
+ * long-polling igual. Lo que se gana es que el transporte que sí funciona se
+ * vuelva a intentar siempre.
+ */
+borrarDeAlmacenamiento("firebase:previous_websocket_failure");
+
 const firebaseDatabase = getDatabase(firebaseApp);
 const firebaseAuth = getAuth(firebaseApp);
 
@@ -4382,9 +4406,22 @@ async function initializeSharedScenario() {
 
   const localScenario = getStoredScenario();
 
-  try {
-    const snapshot = await readScenarioFromFirebase();
+  // La lectura y el volcado en pantalla van en dos try distintos a proposito.
+  // Compartian uno solo, asi que un fallo de applyScenarioPayload() o de
+  // renderAll() —datos raros en el escenario, un fallo de pintado— se anunciaba
+  // como "sin conexion con el escenario compartido". Con la red perfecta, eso
+  // manda al consultor a mirar el wifi delante del cliente mientras el problema
+  // real esta en otra parte. Cada fallo dice ahora lo que es.
+  let snapshot;
 
+  try {
+    snapshot = await readScenarioFromFirebase();
+  } catch (error) {
+    avisarDeFalloDeLectura(error);
+    return;
+  }
+
+  try {
     const remoteScenario = snapshot.exists()
       ? snapshot.val()
       : null;
@@ -4458,39 +4495,69 @@ async function initializeSharedScenario() {
     pendingScenarioWrites = 0;
 
     console.warn(
-      "Firebase no está disponible. Se conserva la copia local.",
+      "El escenario compartido se ha leído, pero no se ha podido aplicar.",
       error,
     );
 
-    // Un rechazo por permisos no es una caida de red, y decir "sin conexion"
-    // manda a mirar el wifi cuando el problema es otro. Con `auth != null` en
-    // las reglas este es el error que sale cuando la autenticacion no ha
-    // llegado a tiempo, y el arreglo es recargar, no cambiar de red.
-    const esPermiso =
-      error?.code === "PERMISSION_DENIED" ||
-      String(error?.message || "").toLowerCase().includes("permission_denied") ||
-      !usuarioActual;
-
     marcarFalloDeSincronia(
-      esPermiso
-        ? "Sin permiso para abrir el escenario compartido"
-        : "Sin conexión con el escenario compartido",
-      esPermiso
-        ? "Este navegador no ha podido identificarse, así que el escenario compartido no le deja entrar. " +
-          "Estás viendo la copia local y tus cambios no le llegan al resto del equipo. Recarga la página; " +
-          "si sigue igual, exporta una copia antes de cerrar."
-        : "No se ha podido conectar con el escenario compartido. Estás trabajando sobre la copia de este navegador " +
-          "y tus cambios no le llegan al resto del equipo. Si vas a trabajar así, exporta una copia antes de cerrar.",
+      "El escenario compartido no se ha podido mostrar",
+      "Se ha leído el escenario compartido, pero la herramienta no ha podido aplicarlo en pantalla. " +
+        "La conexión funciona, así que cambiar de red no lo arregla: el problema está en los datos o " +
+        "en el pintado. Recarga la página; si sigue igual, avisa a quien mantiene la herramienta.",
     );
 
     showNotice(
-      esPermiso
-        ? "Este navegador no ha podido identificarse y el escenario compartido no le deja entrar. Recarga la página."
-        : "No se ha podido conectar con el escenario compartido. Tus cambios se guardan en este navegador, "
-          + "pero el resto del equipo no los ve.",
+      "Se ha leído el escenario compartido, pero no se ha podido mostrar. La conexión funciona: "
+        + "recarga la página.",
       "aviso",
     );
   }
+}
+
+
+/**
+ * Avisa de que el escenario compartido no se ha podido leer.
+ *
+ * Esta separado de initializeSharedScenario() para que el catch de alli cubra
+ * solo el volcado en pantalla y no herede estos mensajes, que hablan de red.
+ */
+function avisarDeFalloDeLectura(error) {
+  isApplyingRemoteScenario = false;
+  pendingScenarioWrites = 0;
+
+  console.warn(
+    "Firebase no está disponible. Se conserva la copia local.",
+    error,
+  );
+
+  // Un rechazo por permisos no es una caida de red, y decir "sin conexion"
+  // manda a mirar el wifi cuando el problema es otro. Con `auth != null` en
+  // las reglas este es el error que sale cuando la autenticacion no ha
+  // llegado a tiempo, y el arreglo es recargar, no cambiar de red.
+  const esPermiso =
+    error?.code === "PERMISSION_DENIED" ||
+    String(error?.message || "").toLowerCase().includes("permission_denied") ||
+    !usuarioActual;
+
+  marcarFalloDeSincronia(
+    esPermiso
+      ? "Sin permiso para abrir el escenario compartido"
+      : "Sin conexión con el escenario compartido",
+    esPermiso
+      ? "Este navegador no ha podido identificarse, así que el escenario compartido no le deja entrar. " +
+        "Estás viendo la copia local y tus cambios no le llegan al resto del equipo. Recarga la página; " +
+        "si sigue igual, exporta una copia antes de cerrar."
+      : "No se ha podido conectar con el escenario compartido. Estás trabajando sobre la copia de este navegador " +
+        "y tus cambios no le llegan al resto del equipo. Si vas a trabajar así, exporta una copia antes de cerrar.",
+  );
+
+  showNotice(
+    esPermiso
+      ? "Este navegador no ha podido identificarse y el escenario compartido no le deja entrar. Recarga la página."
+      : "No se ha podido conectar con el escenario compartido. Tus cambios se guardan en este navegador, "
+        + "pero el resto del equipo no los ve.",
+    "aviso",
+  );
 }
 
 
