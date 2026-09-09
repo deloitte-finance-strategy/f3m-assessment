@@ -13,6 +13,7 @@
 import {
   DEFAULT_TARGET_MATURITY,
   agregarPorCapacidad,
+  agregarPorDominio,
   average,
   calcularMetricas,
   getMaturityLevel,
@@ -51,6 +52,25 @@ const agregar = (items, objetivos) =>
     (item) => calcularMetricas(item, objetivos),
     () => objetivos,
   );
+
+const dominio = (id, items) => ({ id, label: id.toUpperCase(), items });
+
+/**
+ * Agrega por dominio con una tabla de objetivos indexada por dominio Y
+ * capacidad, que es justo lo que la aplicacion tiene que respetar: dos dominios
+ * pueden tener una capacidad con el mismo nombre y objetivos distintos.
+ */
+const agregarDominios = (dominios, tablaDeObjetivos = {}) => {
+  const objetivoDe = (capacidad, domainId) =>
+    tablaDeObjetivos[domainId + "/" + capacidad] || objetivo(4);
+
+  return agregarPorDominio(
+    dominios,
+    (item, domainId) =>
+      calcularMetricas(item, objetivoDe(item.capacidad, domainId)),
+    objetivoDe,
+  );
+};
 
 
 // --- los casos --------------------------------------------------------------
@@ -351,6 +371,124 @@ export const casos = [
     nombre: "unique conserva el orden de aparicion",
     ejecutar: (t) => {
       t.igual(unique(["b", "a", "b", "c"]).join(","), "b,a,c");
+    },
+  },
+
+  // ------------------------------------------------ agregacion por dominio
+  {
+    grupo: "Agregacion por dominio",
+    nombre: "las medias promedian subcapacidades, no las medias de sus capacidades",
+    ejecutar: (t) => {
+      // La capacidad A tiene tres subcapacidades a 1 y la B una a 5. Promediando
+      // subcapacidades sale 2. Promediando las medias de las dos capacidades
+      // saldria (1 + 5) / 2 = 3, que es el numero que NO enseña el PDF.
+      const [d] = agregarDominios([
+        dominio("d1", [
+          sub("A", 1, 1, 1),
+          sub("A", 1, 1, 1),
+          sub("A", 1, 1, 1),
+          sub("B", 5, 5, 5),
+        ]),
+      ]);
+
+      t.igual(d.procesos, 2, "media de procesos por subcapacidad");
+      t.igual(d.scoreMedio, 2, "score medio del dominio");
+      t.igual(d.gap, 2.25, "gaps de item 3, 3, 3 y 0");
+      t.igual(d.prioridad, "Alta", "prioridad derivada del gap");
+      t.igual(d.capacidades, 2, "capacidades distintas");
+      t.igual(d.evaluadas, 4, "todas puntuadas");
+      t.igual(d.total, 4, "subcapacidades del dominio");
+    },
+  },
+  {
+    grupo: "Agregacion por dominio",
+    nombre: "dos dominios con la misma capacidad usan cada uno SU objetivo",
+    ejecutar: (t) => {
+      // El caso real: "Contabilidad y provision fiscal" existe en Fiscal y en
+      // Tesoreria. Con los objetivos indexados solo por nombre de capacidad,
+      // los dos salian calculados contra el objetivo del dominio abierto.
+      const capacidad = "Contabilidad y provision fiscal";
+
+      const [fiscal, tesoreria] = agregarDominios(
+        [
+          dominio("fiscal", [sub(capacidad, 2, 2, 2)]),
+          dominio("tesoreria", [sub(capacidad, 2, 2, 2)]),
+        ],
+        {
+          ["fiscal/" + capacidad]: objetivo(4),
+          ["tesoreria/" + capacidad]: objetivo(3),
+        },
+      );
+
+      t.igual(fiscal.gap, 2, "objetivo 4 contra score 2");
+      t.igual(fiscal.prioridad, "Alta", "prioridad de Fiscal");
+      t.igual(fiscal.objetivoProcesos, 4, "objetivo de palanca de Fiscal");
+      t.igual(tesoreria.gap, 1, "objetivo 3 contra el mismo score 2");
+      t.igual(tesoreria.prioridad, "Media", "prioridad de Tesoreria");
+      t.igual(tesoreria.objetivoProcesos, 3, "objetivo de palanca de Tesoreria");
+    },
+  },
+  {
+    grupo: "Agregacion por dominio",
+    nombre: "el objetivo por palanca cuenta lo pendiente; el objetivo medio, no",
+    ejecutar: (t) => {
+      // A: objetivo 5, una subcapacidad con solo procesos puntuado a 3.
+      // B: objetivo 3, una subcapacidad sin puntuar.
+      const [d] = agregarDominios(
+        [
+          dominio("d1", [
+            sub("A", 3, null, null),
+            sub("B", null, null, null),
+          ]),
+        ],
+        { "d1/A": objetivo(5), "d1/B": objetivo(3) },
+      );
+
+      t.igual(d.procesos, 3, "la media actual solo cuenta lo puntuado");
+      t.igual(d.objetivoProcesos, 4, "el objetivo promedia tambien lo pendiente: (5 + 3) / 2");
+      t.igual(d.tecnologia, null, "sin ningun score no hay media");
+      t.igual(d.objetivoTecnologia, 4, "el objetivo existe aunque no haya nada puntuado");
+      t.igual(d.targetMedio, 5, "el objetivo medio de la tabla solo cuenta lo evaluado");
+      t.igual(d.scoreMedio, 3, "score medio");
+      t.igual(d.gap, 2, "gap contra el objetivo 5 de su capacidad");
+      t.igual(d.evaluadas, 1, "una de dos");
+    },
+  },
+  {
+    grupo: "Agregacion por dominio",
+    nombre: "un dominio entero sin puntuar queda pendiente y no se inventa nada",
+    ejecutar: (t) => {
+      const [d] = agregarDominios([
+        dominio("d1", [
+          sub("A", null, null, null),
+          sub("A", null, null, null),
+        ]),
+      ]);
+
+      t.igual(d.scoreMedio, null, "sin score medio");
+      t.igual(d.targetMedio, null, "sin objetivo medio");
+      t.igual(d.gap, null, "sin gap");
+      t.igual(d.prioridad, "Pendiente", "no se inventa una prioridad");
+      t.igual(d.procesos, null, "sin media de palanca");
+      t.igual(d.objetivoProcesos, 4, "el objetivo sigue estando: es configuracion");
+      t.igual(d.evaluadas, 0, "ninguna evaluada");
+      t.igual(d.total, 2, "las dos siguen contando");
+    },
+  },
+  {
+    grupo: "Agregacion por dominio",
+    nombre: "los dominios salen en el orden en que se pasan",
+    ejecutar: (t) => {
+      const agregados = agregarDominios([
+        dominio("fpa", [sub("A", 4, 4, 4)]),
+        dominio("fiscal", [sub("B", 2, 2, 2), sub("B", 2, 2, 2)]),
+      ]);
+
+      t.igual(agregados.length, 2, "dos dominios");
+      t.igual(agregados[0].id, "fpa", "orden de entrada");
+      t.igual(agregados[1].id, "fiscal", "orden de entrada");
+      t.igual(agregados[0].gap, 0, "en el objetivo, gap 0");
+      t.igual(agregados[1].total, 2, "cada uno con sus items");
     },
   },
 ];
