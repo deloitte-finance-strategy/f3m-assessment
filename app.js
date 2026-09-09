@@ -2273,6 +2273,12 @@ function renderSingleCapabilityRadar({
     return;
   }
 
+  // Estos dos colores se nombran porque ahora aparecen en dos sitios cada uno
+  // —la serie y su marca de leyenda, y `labels.color` y el `fontColor` de cada
+  // item— y tenerlos escritos dos veces era pedir que se descuadraran.
+  const colorDelObjetivo = "#4f5952";
+  const colorDelTextoDeLeyenda = "#3a433d";
+
   const chartData = {
     labels: radarData.displayLabels,
 
@@ -2292,22 +2298,38 @@ function renderSingleCapabilityRadar({
         pointHoverBackgroundColor: "#ffffff",
         pointHoverBorderColor: color,
         order: 2,
+
+        // La marca que esta serie ensena en la leyenda. Va aqui, junto al
+        // estilo del trazo, para que no se puedan separar al editar una:
+        // generateLabels() la lee tal cual. No se usa `pointStyle` del dataset
+        // porque eso cambiaria tambien los vertices dibujados en el radar.
+        marcaDeLeyenda: {
+          pointStyle: "circle",
+          fillStyle: color,
+          lineWidth: 0,
+        },
       },
       {
         label: `${label} objetivo`,
         data: targetValues,
         fill: false,
-        borderColor: "#4f5952",
+        borderColor: colorDelObjetivo,
         borderWidth: 2.25,
         borderDash: [7, 5],
         pointBackgroundColor: "#ffffff",
-        pointBorderColor: "#4f5952",
+        pointBorderColor: colorDelObjetivo,
         pointBorderWidth: 2,
         pointRadius: 3,
         pointHoverRadius: 5,
-        pointHoverBackgroundColor: "#4f5952",
+        pointHoverBackgroundColor: colorDelObjetivo,
         pointHoverBorderColor: "#ffffff",
         order: 1,
+
+        marcaDeLeyenda: {
+          pointStyle: "line",
+          strokeStyle: colorDelObjetivo,
+          lineWidth: 2,
+        },
       },
     ],
   };
@@ -2328,16 +2350,36 @@ function renderSingleCapabilityRadar({
 
         labels: {
           usePointStyle: true,
-          pointStyle: "line",
           boxWidth: 28,
           boxHeight: 8,
           padding: 16,
-          color: "#3a433d",
+          color: colorDelTextoDeLeyenda,
 
           font: {
             size: 11,
             weight: "700",
           },
+
+          // Antes esto era `pointStyle: "line"` para las dos series. Pero
+          // `labels.pointStyle` es global —pisa el del dataset— y la marca se
+          // traza con el color del BORDE del punto, que en la serie actual es
+          // blanco para que los vertices resalten sobre el area de color: la
+          // linea de la leyenda salia blanca sobre fondo blanco y no se veia.
+          // Quedaba el texto "Procesos actual" sin nada al lado y no habia
+          // forma de saber que ese era el nivel de la empresa hoy.
+          //
+          // Generandola a mano, cada serie declara su marca en
+          // `marcaDeLeyenda` y aqui solo se completan los campos que Chart.js
+          // necesita: el color del texto, el estado de visibilidad y el indice
+          // que usa el onClick por defecto para ocultar la serie.
+          generateLabels: (chart) =>
+            chart.data.datasets.map((dataset, index) => ({
+              text: dataset.label,
+              fontColor: colorDelTextoDeLeyenda,
+              hidden: !chart.isDatasetVisible(index),
+              datasetIndex: index,
+              ...dataset.marcaDeLeyenda,
+            })),
         },
       },
 
