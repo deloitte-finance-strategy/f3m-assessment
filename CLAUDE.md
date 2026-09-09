@@ -347,3 +347,15 @@ cd <carpeta-temporal>; python -m http.server 8001
 Aplicar el mismo patrón de puntuaciones en los dos y comparar tabla resumen, KPIs, heatmap, roadmap
 y CSV. Es lo que se usó para verificar que la unificación de la agregación, las cachés y la
 extracción del informe PDF no cambiaban ningún número.
+
+**Si el cambio toca los objetivos, puntuar no basta.** Los nueve JSON vienen sin `targets` y con
+`meta.targetMaturity` a 4, así que con los valores por defecto todos los caminos dan el mismo
+número y el A/B saldría idéntico aunque el cambio estuviera mal. Hay que **editar objetivos por
+capacidad en al menos dos dominios**, con valores distintos entre sí —Fiscal y Tesorería tienen una
+capacidad con el mismo nombre, "Contabilidad y provisión fiscal", y son el par que de verdad pone a
+prueba la resolución por dominio—, guardar una copia con **Escenario → Guardar una copia**, abrirla
+en la versión antigua y comparar entonces.
+
+La forma cómoda de comparar es recorrer los nueve dominios en las dos versiones y quedarse con un
+hash del texto de las vistas, en lugar de mirar tabla por tabla: si los hashes coinciden, no se ha
+movido ninguna cifra.
