@@ -6246,6 +6246,36 @@ async function createSharedScenario() {
     return;
   }
 
+  // El diálogo promete "un escenario nuevo con los datos que tienes ahora", y
+  // hasta aquí era mentira: STORAGE_KEY lleva el id del escenario
+  // (`STORAGE_KEY_BASE:<id>`), así que al navegar a ?scenario=<nuevo> la clave
+  // pasaba a una que nadie había escrito nunca. La aplicación arrancaba vacía,
+  // no encontraba copia local, y subía ese vacío a Firebase: el escenario se
+  // creaba de verdad, pero sin un solo dato. Con un assessment entero puntuado
+  // detrás, eso es la sesión de taller tirada a la basura.
+  //
+  // Dejamos la copia de ahora escrita en la clave del escenario nuevo antes de
+  // saltar. Al recargar, applyStoredScenario() la encuentra y
+  // initializeSharedScenario() la sube como payload inicial. La copia de la
+  // clave base se queda intacta a propósito: es a la que se vuelve al salir
+  // del escenario.
+  const preparado = escribirAlmacenamiento(
+    `${STORAGE_KEY_BASE}:${nuevoId}`,
+    JSON.stringify(buildScenarioPayload()),
+  );
+
+  if (!preparado) {
+    // Sin esa copia el escenario nace en blanco, que es justo lo que se venía
+    // a arreglar. Mejor no crearlo que crearlo vacío y que alguien reparta el
+    // enlace creyendo que lleva el assessment dentro.
+    showNotice(
+      "No se ha podido preparar el escenario compartido en este navegador, así que no se ha creado: "
+        + "habría salido sin ninguno de tus datos. Exporta una copia y vuelve a intentarlo.",
+      "aviso",
+    );
+    return;
+  }
+
   const url = new URL(window.location.href);
   url.searchParams.set("scenario", nuevoId);
   window.location.assign(url.toString());
