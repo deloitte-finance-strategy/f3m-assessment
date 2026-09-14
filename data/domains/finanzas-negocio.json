@@ -17,7 +17,7 @@
         "2": "Existe un inventario básico de iniciativas y criterios financieros parciales, aunque la priorización y el seguimiento son heterogéneos entre áreas o unidades.",
         "3": "Portfolio de I+D definido, con ownership, criterios de aprobación, presupuestos, métricas económicas y proceso periódico de revisión.",
         "4": "Gobierno integrado del portfolio de I+D con estrategia, presupuesto, riesgos, capacidad de ejecución, beneficios esperados y reasignación periódica de recursos.",
-        "5": "Portfolio de innovación dinámico y basado en IA, con priorización basada en escenarios, señales de mercado, probabilidad de éxito, ROI esperado y recomendaciones de asignación de capital."
+        "5": "Cartera de innovación dinámica y basada en IA, con priorización por escenarios, señales de mercado, probabilidad de éxito y ROI esperado, y recomendación de asignación de capital."
       },
       "scores": {
         "procesos": null,
@@ -37,7 +37,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Diseño de producto orquestado por IA; Ensayos clínicos más inteligentes; Descubrimiento autónomo de fármacos",
-        "advanced": "Portfolio de innovación dinámico y basado en IA, con priorización basada en escenarios, señales de mercado, probabilidad de éxito, ROI esperado y recomendaciones de asignación de capital.",
+        "advanced": "Cartera de innovación dinámica y basada en IA, con priorización por escenarios, señales de mercado, probabilidad de éxito y ROI esperado, y recomendación de asignación de capital.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.1 Gobierno y portfolio de iniciativas de I+D"
       }
@@ -87,7 +87,7 @@
         "2": "Se gestionan algunas ayudas o incentivos relevantes, aunque la identificación, justificación y seguimiento dependen de esfuerzos manuales.",
         "3": "Proceso definido para identificar, evaluar, solicitar y justificar financiación e incentivos de I+D, con responsabilidades claras.",
         "4": "Gestión integrada de funding con portfolio, presupuesto, contabilidad, fiscalidad, reporting y evidencias requeridas por organismos financiadores.",
-        "5": "Motor inteligente de identificación y optimización de incentivos, con screening normativo, elegibilidad predictiva, generación asistida de documentación y alertas de cumplimiento."
+        "5": "Motor inteligente de identificación y optimización de incentivos, con cribado normativo, elegibilidad predictiva, generación asistida de documentación y alertas de cumplimiento."
       },
       "scores": {
         "procesos": null,
@@ -107,7 +107,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Cumplimiento regulatorio automatizado; Interpretación de normativa financiera; Diseño de producto orquestado por IA; Determinación de elegibilidad para incentivos",
-        "advanced": "Motor inteligente de identificación y optimización de incentivos, con screening normativo, elegibilidad predictiva, generación asistida de documentación y alertas de cumplimiento.",
+        "advanced": "Motor inteligente de identificación y optimización de incentivos, con cribado normativo, elegibilidad predictiva, generación asistida de documentación y alertas de cumplimiento.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.3 Financiación, subvenciones e incentivos de I+D"
       }
@@ -192,7 +192,7 @@
         "2": "Análisis financiero básico en oportunidades relevantes, con plantillas parciales y dependencia de analistas o equipos comerciales.",
         "3": "Modelo estándar de evaluación de oportunidades con ingresos, costes, margen, riesgos, condiciones, capacidad y probabilidad de éxito.",
         "4": "Evaluación integrada con pipeline, pricing, capacidad operativa, riesgos contractuales, forecast y priorización comercial.",
-        "5": "IA/RFP assistant que resume requerimientos, estima economics, identifica riesgos, propone respuestas y prioriza oportunidades según valor ajustado por probabilidad y riesgo."
+        "5": "Asistente de IA para RFP que resume los requisitos, estima la rentabilidad esperada, identifica riesgos, propone respuestas y prioriza oportunidades por valor ajustado a probabilidad y riesgo."
       },
       "scores": {
         "procesos": null,
@@ -212,7 +212,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Asistente de RFP y de conocimiento comercial; Operaciones comerciales inteligentes; Personalización de ventas y marketing",
-        "advanced": "IA/RFP assistant que resume requerimientos, estima economics, identifica riesgos, propone respuestas y prioriza oportunidades según valor ajustado por probabilidad y riesgo.",
+        "advanced": "Asistente de IA para RFP que resume los requisitos, estima la rentabilidad esperada, identifica riesgos, propone respuestas y prioriza oportunidades por valor ajustado a probabilidad y riesgo.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.2 Evaluación financiera de oportunidades, RFPs y ofertas"
       }
@@ -227,7 +227,7 @@
         "2": "Se revisan riesgos en operaciones relevantes, aunque con criterios no homogéneos y análisis manual de exposición.",
         "3": "Modelo de riesgo comercial definido con criterios de crédito, exposición, términos, concentración, rentabilidad y aprobación.",
         "4": "Riesgo comercial integrado con CRM, contratos, O2C, pricing, margen, cash y límites de exposición, con alertas y seguimiento.",
-        "5": "Scoring predictivo de riesgo comercial y exposición, con recomendaciones de condiciones, garantías, límites, pricing y acciones preventivas por cliente u oportunidad."
+        "5": "Puntuación predictiva del riesgo comercial y de la exposición, con recomendación de condiciones, garantías, límites, precio y acciones preventivas por cliente u oportunidad."
       },
       "scores": {
         "procesos": null,
@@ -247,7 +247,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Agentes de IA para análisis de riesgo crediticio; Condiciones de pago óptimas para el DSO; Operaciones comerciales inteligentes",
-        "advanced": "Scoring predictivo de riesgo comercial y exposición, con recomendaciones de condiciones, garantías, límites, pricing y acciones preventivas por cliente u oportunidad.",
+        "advanced": "Puntuación predictiva del riesgo comercial y de la exposición, con recomendación de condiciones, garantías, límites, precio y acciones preventivas por cliente u oportunidad.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.3 Gestión de riesgos comerciales y exposición financiera"
       }
@@ -262,7 +262,7 @@
         "2": "Reporting comercial-financiero básico, con análisis de margen parcial y seguimiento manual de ofertas relevantes.",
         "3": "Performance comercial monitorizada con KPIs de pipeline, conversión, margen, desviación oferta-real y rentabilidad por cliente/canal/producto.",
         "4": "Reporting integrado de ventas, margen, cash, descuentos, forecast y acciones, con owners y revisión periódica de performance.",
-        "5": "IA genera insights de performance comercial, identifica oportunidades de mejora, riesgos de margen, leakage y acciones personalizadas por cliente, canal o producto."
+        "5": "IA genera conclusiones de rendimiento comercial, identifica oportunidades de mejora, riesgos de margen, fuga de ingresos y acciones personalizadas por cliente, canal o producto."
       },
       "scores": {
         "procesos": null,
@@ -282,7 +282,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Operaciones comerciales inteligentes; Personalización de ventas y marketing; Detección de fugas de ingresos",
-        "advanced": "IA genera insights de performance comercial, identifica oportunidades de mejora, riesgos de margen, leakage y acciones personalizadas por cliente, canal o producto.",
+        "advanced": "IA genera conclusiones de rendimiento comercial, identifica oportunidades de mejora, riesgos de margen, fuga de ingresos y acciones personalizadas por cliente, canal o producto.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.4 Seguimiento de performance comercial y rentabilidad de ventas"
       }
@@ -297,7 +297,7 @@
         "2": "Forecast operativo-financiero básico, con inputs parciales de demanda, producción o logística y alta dependencia de Excel.",
         "3": "Planificación estructurada con drivers de demanda, producción, logística, inventario, costes y responsables definidos.",
         "4": "Planificación integrada con S&OP/IBP, presupuesto, forecast, capacidad, cash, riesgos y escenarios operativos.",
-        "5": "Integrated business planning basado en IA, con simulación de demanda, capacidad, costes, inventario, restricciones y recomendaciones de decisiones operativas-financieras."
+        "5": "Planificación integrada de negocio basada en IA, con simulación de demanda, capacidad, costes, inventario y restricciones, y recomendación de decisiones operativas y financieras."
       },
       "scores": {
         "procesos": null,
@@ -317,7 +317,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Operaciones autónomas de cadena de suministro; Planificación integrada de negocio; Gestión dinámica de inventario",
-        "advanced": "Integrated business planning basado en IA, con simulación de demanda, capacidad, costes, inventario, restricciones y recomendaciones de decisiones operativas-financieras.",
+        "advanced": "Planificación integrada de negocio basada en IA, con simulación de demanda, capacidad, costes, inventario y restricciones, y recomendación de decisiones operativas y financieras.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.1 Planificación financiera de operaciones y supply chain"
       }
@@ -367,7 +367,7 @@
         "2": "Seguimiento básico de inventario, rotación y obsolescencia, con acciones puntuales y análisis manual.",
         "3": "KPIs de inventario y capital circulante definidos, con owners, reporting periódico y análisis por driver, material, producto o ubicación.",
         "4": "Gestión integrada de inventario, demanda, producción, compras, servicio, cash y riesgo de obsolescencia, con acciones y seguimiento.",
-        "5": "Optimización predictiva de inventario y working capital con IA, anticipando demanda, obsolescencia, rupturas, exceso de stock y necesidades de caja."
+        "5": "Optimización predictiva de inventario y capital circulante con IA, anticipando demanda, obsolescencia, rupturas, exceso de stock y necesidades de caja."
       },
       "scores": {
         "procesos": null,
@@ -387,7 +387,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Gestión dinámica de inventario; Operaciones autónomas de cadena de suministro; Previsión predictiva de flujo de caja",
-        "advanced": "Optimización predictiva de inventario y working capital con IA, anticipando demanda, obsolescencia, rupturas, exceso de stock y necesidades de caja.",
+        "advanced": "Optimización predictiva de inventario y capital circulante con IA, anticipando demanda, obsolescencia, rupturas, exceso de stock y necesidades de caja.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.3 Gestión financiera de inventarios y capital circulante operativo"
       }
@@ -402,7 +402,7 @@
         "2": "Análisis puntuales de riesgos relevantes, con estimaciones manuales de impacto y planes de mitigación limitados.",
         "3": "Modelo de riesgos operativos-financieros definido, con escenarios de impacto, criticidad, proveedores/materiales clave y responsables.",
         "4": "Gestión integrada de resiliencia con coste, servicio, inventario, proveedores, logística, continuidad y planes de contingencia cuantificados.",
-        "5": "IA monitoriza señales internas/externas de riesgo, simula impactos financieros y recomienda acciones de mitigación, sourcing, inventario o red logística."
+        "5": "IA monitoriza señales internas/externas de riesgo, simula impactos financieros y recomienda acciones de mitigación, aprovisionamiento, inventario o red logística."
       },
       "scores": {
         "procesos": null,
@@ -422,7 +422,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Planificación logística resiliente; Operaciones autónomas de cadena de suministro",
-        "advanced": "IA monitoriza señales internas/externas de riesgo, simula impactos financieros y recomienda acciones de mitigación, sourcing, inventario o red logística.",
+        "advanced": "IA monitoriza señales internas/externas de riesgo, simula impactos financieros y recomienda acciones de mitigación, aprovisionamiento, inventario o red logística.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.4 Resiliencia, riesgo y eficiencia de la cadena de suministro"
       }
@@ -437,7 +437,7 @@
         "2": "Políticas de pricing básicas, con criterios parciales por producto, cliente o canal y revisión manual de excepciones.",
         "3": "Modelo de gobierno de pricing definido, con roles, criterios, niveles de aprobación, catálogo de precios y control de descuentos.",
         "4": "Pricing integrado con estrategia comercial, costes, competencia, elasticidad, margen, promociones y performance, con rutinas de revisión.",
-        "5": "Pricing dinámico basado en IA que recomienda precios y condiciones según demanda, elasticidad, inventario, cliente, competencia, costes y objetivos de margen."
+        "5": "Fijación dinámica de precios basada en IA, que recomienda precio y condiciones según demanda, elasticidad, inventario, cliente, competencia, costes y objetivos de margen."
       },
       "scores": {
         "procesos": null,
@@ -457,7 +457,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Precio dinámico y optimización de inventario; Precio óptimo a partir de señales de mercado; Recomendación de demanda, coste y precio",
-        "advanced": "Pricing dinámico basado en IA que recomienda precios y condiciones según demanda, elasticidad, inventario, cliente, competencia, costes y objetivos de margen.",
+        "advanced": "Fijación dinámica de precios basada en IA, que recomienda precio y condiciones según demanda, elasticidad, inventario, cliente, competencia, costes y objetivos de margen.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.1 Estrategia y gobierno de pricing"
       }
@@ -472,7 +472,7 @@
         "2": "Análisis de margen recurrente para algunos segmentos, con asignaciones parciales y criterios no homogéneos.",
         "3": "Modelo de rentabilidad definido con ingresos, descuentos, coste de producto, coste de servir, asignaciones y dimensiones comunes.",
         "4": "Rentabilidad integrada con pricing, mix, descuentos, promociones, servicio, canal, forecast y acciones comerciales.",
-        "5": "Modelos IA identifican patrones de rentabilidad, leakage, cross-sell/upsell y recomendaciones de mix, cliente, canal y nivel de servicio."
+        "5": "Modelos IA identifican patrones de rentabilidad, fuga de ingresos, venta cruzada y ampliación y recomendaciones de mix, cliente, canal y nivel de servicio."
       },
       "scores": {
         "procesos": null,
@@ -492,7 +492,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Detección de fugas de ingresos; Agentes de IA para el éxito del cliente; Personalización de ventas y marketing",
-        "advanced": "Modelos IA identifican patrones de rentabilidad, leakage, cross-sell/upsell y recomendaciones de mix, cliente, canal y nivel de servicio.",
+        "advanced": "Modelos IA identifican patrones de rentabilidad, fuga de ingresos, venta cruzada y ampliación y recomendaciones de mix, cliente, canal y nivel de servicio.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.2 Modelos de rentabilidad por cliente, producto y canal"
       }
@@ -542,7 +542,7 @@
         "2": "Análisis periódico de margen y descuentos, con identificación manual de desviaciones relevantes.",
         "3": "Modelo de performance de margen con drivers, owners, desviaciones, leakage, acciones y seguimiento por dimensión.",
         "4": "Margin management integrado con pricing, ventas, costes, mix, contratos, forecast y rutinas de gestión orientadas a acción.",
-        "5": "IA detecta leakage y desviaciones tempranas, explica drivers de margen, recomienda acciones de precio/mix/coste y cuantifica impacto esperado en valor."
+        "5": "IA detecta fuga de ingresos y desviaciones tempranas, explica drivers de margen, recomienda acciones de precio/mix/coste y cuantifica impacto esperado en valor."
       },
       "scores": {
         "procesos": null,
@@ -562,7 +562,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Detección de fugas de ingresos; Analista digital de Finanzas bajo demanda; Análisis de desviaciones con explicación automática",
-        "advanced": "IA detecta leakage y desviaciones tempranas, explica drivers de margen, recomienda acciones de precio/mix/coste y cuantifica impacto esperado en valor.",
+        "advanced": "IA detecta fuga de ingresos y desviaciones tempranas, explica drivers de margen, recomienda acciones de precio/mix/coste y cuantifica impacto esperado en valor.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.4 Seguimiento de margen, leakage y creación de valor"
       }

@@ -87,7 +87,7 @@
         "2": "Controles básicos de actualización y validación, aunque con workflow parcial y visibilidad limitada de calidad del dato.",
         "3": "Modelo de gobierno de datos maestros financieros con owners, reglas, aprobaciones, controles y auditoría de cambios.",
         "4": "Gobierno integrado con bancos, ERP, TMS, pagos, deuda y reporting, con controles automáticos y gestión de incidencias.",
-        "5": "IA detecta inconsistencias en datos maestros, propone remediación y guía workflows adaptativos de cambios financieros/bancarios."
+        "5": "IA detecta inconsistencias en datos maestros, propone remediación y guía flujos de trabajo adaptativos de cambios financieros/bancarios."
       },
       "scores": {
         "procesos": null,
@@ -107,7 +107,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Detección de inconsistencias en datos maestros; Flujos guiados de cambio en datos maestros; Generación de documentación de metadatos",
-        "advanced": "IA detecta inconsistencias en datos maestros, propone remediación y guía workflows adaptativos de cambios financieros/bancarios.",
+        "advanced": "IA detecta inconsistencias en datos maestros, propone remediación y guía flujos de trabajo adaptativos de cambios financieros/bancarios.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.3 Calidad del dato maestro financiero y bancario"
       }
@@ -122,7 +122,7 @@
         "2": "Reporting recurrente de gastos/ingresos financieros, aunque con narrativa limitada y análisis manual.",
         "3": "Reporting estándar con KPIs, variaciones, drivers, posiciones, coste financiero y comentarios ejecutivos.",
         "4": "Reporting integrado con deuda, liquidez, inversiones, riesgos financieros, forecast y acciones de gestión.",
-        "5": "Reporting basado en IA con narrativa automática, explicación de drivers, alertas tempranas y recomendaciones sobre coste financiero y liquidez."
+        "5": "Informes basados en IA, con narrativa automática, explicación de los drivers, alertas tempranas y recomendaciones sobre coste financiero y liquidez."
       },
       "scores": {
         "procesos": null,
@@ -142,7 +142,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Visión ejecutiva de la salud financiera; Análisis de desviaciones con explicación automática; Analista digital de Finanzas bajo demanda",
-        "advanced": "Reporting basado en IA con narrativa automática, explicación de drivers, alertas tempranas y recomendaciones sobre coste financiero y liquidez.",
+        "advanced": "Informes basados en IA, con narrativa automática, explicación de los drivers, alertas tempranas y recomendaciones sobre coste financiero y liquidez.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.4 Reporting financiero de resultados de tesorería"
       }
@@ -192,7 +192,7 @@
         "2": "Forecast de exposición y coberturas básicas, aunque con baja integración con presupuesto, ventas/compras o cash forecast.",
         "3": "Modelo estándar de exposición FX con fuentes, periodicidad, sensibilidad, instrumentos, aprobaciones y reporting.",
         "4": "Gestión integrada de FX con forecast, operaciones, posiciones, escenarios, límites, efectividad de cobertura y contabilidad.",
-        "5": "IA identifica patrones FX, anticipa exposición, simula escenarios y recomienda estrategias de cobertura según riesgo, coste y política."
+        "5": "IA identifica patrones de tipo de cambio, anticipa exposición, simula escenarios y recomienda estrategias de cobertura según riesgo, coste y política."
       },
       "scores": {
         "procesos": null,
@@ -212,7 +212,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Optimización de operaciones de divisa; Generación de estrategias de inversión",
-        "advanced": "IA identifica patrones FX, anticipa exposición, simula escenarios y recomienda estrategias de cobertura según riesgo, coste y política.",
+        "advanced": "IA identifica patrones de tipo de cambio, anticipa exposición, simula escenarios y recomienda estrategias de cobertura según riesgo, coste y política.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.2 Medición y cobertura de riesgo de divisa"
       }
@@ -262,7 +262,7 @@
         "2": "Stress testing básico para riesgos relevantes, con supuestos manuales y reporting limitado.",
         "3": "Metodología de escenarios financieros con variables, supuestos, sensibilidad, impactos y revisión periódica.",
         "4": "Stress testing integrado con cash forecast, deuda, covenants, FX, tipos, liquidez, capital allocation y comités.",
-        "5": "IA simula escenarios dinámicos, identifica early warnings, estima impactos y recomienda respuestas financieras preventivas."
+        "5": "IA simula escenarios dinámicos, identifica alertas tempranas, estima impactos y recomienda respuestas financieras preventivas."
       },
       "scores": {
         "procesos": null,
@@ -282,7 +282,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Previsión predictiva de flujo de caja; Optimización de operaciones de divisa; Patrones históricos para predecir el rendimiento",
-        "advanced": "IA simula escenarios dinámicos, identifica early warnings, estima impactos y recomienda respuestas financieras preventivas.",
+        "advanced": "IA simula escenarios dinámicos, identifica alertas tempranas, estima impactos y recomienda respuestas financieras preventivas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.4 Escenarios, stress testing y reporting de riesgos financieros"
       }
@@ -367,7 +367,7 @@
         "2": "Comparativas básicas entre fuentes de financiación, aunque con criterios poco homogéneos y dependencia de asesores externos.",
         "3": "Metodología de evaluación de instrumentos con coste, riesgo, vencimiento, flexibilidad, covenants, mercado y proceso de aprobación.",
         "4": "Ejecución integrada con estrategia de financiación, ventanas de mercado, rating, inversores, bancos, riesgos y reporting de operación.",
-        "5": "IA analiza condiciones de mercado, simula alternativas de instrumentos y recomienda timing, estructura y fuentes óptimas de financiación."
+        "5": "IA analiza condiciones de mercado, simula alternativas de instrumentos y recomienda momento, estructura y fuentes óptimas de financiación."
       },
       "scores": {
         "procesos": null,
@@ -387,7 +387,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Agentes de IA para trading y simulación de mercado; Generación de estrategias de inversión; Valoración predictiva de la compañía",
-        "advanced": "IA analiza condiciones de mercado, simula alternativas de instrumentos y recomienda timing, estructura y fuentes óptimas de financiación.",
+        "advanced": "IA analiza condiciones de mercado, simula alternativas de instrumentos y recomienda momento, estructura y fuentes óptimas de financiación.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.3 Acceso a mercados, instrumentos y ejecución de operaciones"
       }
@@ -402,7 +402,7 @@
         "2": "Seguimiento básico de tipos, spreads y noticias de mercado, aunque con análisis irregular y baja conexión con decisiones.",
         "3": "Market intelligence financiero con fuentes, indicadores, benchmarks, reporting periódico y responsables.",
         "4": "Inteligencia integrada con estrategia de financiación, deuda, inversión, riesgos, escenarios y decisiones de timing.",
-        "5": "IA sintetiza señales de mercado, detecta oportunidades de financiación, genera alertas y recomienda acciones de capital markets."
+        "5": "IA sintetiza señales de mercado, detecta oportunidades de financiación, genera alertas y recomienda acciones de mercados de capitales."
       },
       "scores": {
         "procesos": null,
@@ -422,7 +422,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Inteligencia de mercado; Generación de estrategias de inversión; Agentes de IA para trading y simulación de mercado",
-        "advanced": "IA sintetiza señales de mercado, detecta oportunidades de financiación, genera alertas y recomienda acciones de capital markets.",
+        "advanced": "IA sintetiza señales de mercado, detecta oportunidades de financiación, genera alertas y recomienda acciones de mercados de capitales.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.4 Reporting de capital markets e inteligencia de financiación"
       }
@@ -437,7 +437,7 @@
         "2": "Forecast básico con periodicidad definida, aunque con inputs manuales, baja integración y análisis limitado de desviaciones.",
         "3": "Modelo estándar de cash forecasting con metodología, fuentes, owners, horizonte, granularidad y control de calidad.",
         "4": "Forecast integrado con ERP/TMS, presupuesto, ventas, compras, deuda, working capital, escenarios y revisión de desviaciones.",
-        "5": "Cash forecasting predictivo basado en IA con aprendizaje histórico, señales operativas, escenarios dinámicos y recomendaciones de acción."
+        "5": "Previsión de caja predictiva basada en IA, con aprendizaje sobre el histórico, señales operativas, escenarios dinámicos y recomendación de acciones."
       },
       "scores": {
         "procesos": null,
@@ -457,7 +457,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Previsión predictiva de flujo de caja; Análisis de caja y riesgo de liquidez; Optimización de la liquidez intradía",
-        "advanced": "Cash forecasting predictivo basado en IA con aprendizaje histórico, señales operativas, escenarios dinámicos y recomendaciones de acción.",
+        "advanced": "Previsión de caja predictiva basada en IA, con aprendizaje sobre el histórico, señales operativas, escenarios dinámicos y recomendación de acciones.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.1 Gobierno y modelo de cash forecasting"
       }
@@ -507,7 +507,7 @@
         "2": "Seguimiento básico de liquidez y working capital, aunque con acciones manuales y baja priorización por impacto.",
         "3": "KPIs de liquidez y working capital definidos, con rutinas de seguimiento, owners y acciones de mejora.",
         "4": "Gestión integrada de liquidez con O2C/P2P, forecast, deuda, inversiones, pagos, cobros, DSO/DPO/DIO y escenarios.",
-        "5": "IA recomienda términos de pago/cobro, timing óptimo, acciones sobre working capital e inversiones de excedentes según liquidez y riesgo."
+        "5": "IA recomienda términos de pago/cobro, momento óptimo, acciones sobre capital circulante e inversiones de excedentes según liquidez y riesgo."
       },
       "scores": {
         "procesos": null,
@@ -527,7 +527,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Condiciones de pago óptimas para el DSO; Momento óptimo de pago a proveedores; Gestión dinámica de inventario",
-        "advanced": "IA recomienda términos de pago/cobro, timing óptimo, acciones sobre working capital e inversiones de excedentes según liquidez y riesgo.",
+        "advanced": "IA recomienda términos de pago/cobro, momento óptimo, acciones sobre capital circulante e inversiones de excedentes según liquidez y riesgo.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.3 Gestión de liquidez, working capital y decisiones de caja"
       }
@@ -542,7 +542,7 @@
         "2": "Reporting recurrente de caja y deuda, aunque con narrativa limitada y acciones poco trazadas.",
         "3": "Pack de tesorería estándar con posición, forecast, desviaciones, deuda, riesgos, KPIs, owners y acciones.",
         "4": "Rutinas integradas de liquidez con comité, decisiones, seguimiento de acciones, alertas, escenarios y beneficios esperados.",
-        "5": "Reporting basado en IA con narrativa ejecutiva, alertas, explicación de desviaciones, escenarios y recomendaciones de liquidez."
+        "5": "Informes basados en IA, con narrativa ejecutiva, alertas, explicación de las desviaciones, escenarios y recomendaciones de liquidez."
       },
       "scores": {
         "procesos": null,
@@ -562,7 +562,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Visión ejecutiva de la salud financiera; Analista digital de Finanzas bajo demanda; Análisis de desviaciones con explicación automática",
-        "advanced": "Reporting basado en IA con narrativa ejecutiva, alertas, explicación de desviaciones, escenarios y recomendaciones de liquidez.",
+        "advanced": "Informes basados en IA, con narrativa ejecutiva, alertas, explicación de las desviaciones, escenarios y recomendaciones de liquidez.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.4 Reporting de tesorería y rutinas de gestión de liquidez"
       }
@@ -682,7 +682,7 @@
         "2": "Reportes periódicos básicos, aunque con controles manuales de límites y documentación parcial.",
         "3": "Reporting estándar de inversiones con rentabilidad, riesgo, límites, cumplimiento, vencimientos, contrapartes y aprobaciones.",
         "4": "Control integrado con workflows, alertas de límites, evidencias, accounting, compliance y revisión de performance.",
-        "5": "IA genera reporting ejecutivo, detecta incumplimientos potenciales, explica variaciones y recomienda acciones correctivas."
+        "5": "IA genera los informes ejecutivos, detecta incumplimientos potenciales, explica las variaciones y recomienda acciones correctivas."
       },
       "scores": {
         "procesos": null,
@@ -702,7 +702,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Visión ejecutiva de la salud financiera; Analista digital de Finanzas bajo demanda; Monitorización predictiva del cumplimiento",
-        "advanced": "IA genera reporting ejecutivo, detecta incumplimientos potenciales, explica variaciones y recomienda acciones correctivas.",
+        "advanced": "IA genera los informes ejecutivos, detecta incumplimientos potenciales, explica las variaciones y recomienda acciones correctivas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.4 Reporting, cumplimiento y control de inversiones"
       }

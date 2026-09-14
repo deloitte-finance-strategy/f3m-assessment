@@ -17,7 +17,7 @@
         "2": "Calendario básico de cierre y responsables identificados, aunque con variabilidad entre sociedades/áreas.",
         "3": "Calendario de cierre corporativo, roles, hitos, entregables y controles documentados.",
         "4": "Cierre integrado, medido por KPIs, con dependencias controladas y mejora continua de plazos/calidad.",
-        "5": "Modelo de fast/continuous close con checklist inteligente, alertas de dependencias y automatización del seguimiento de tareas."
+        "5": "Modelo de cierre rápido y continuo con checklist inteligente, alertas de dependencias y automatización del seguimiento de tareas."
       },
       "scores": {
         "procesos": null,
@@ -37,7 +37,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Checklist inteligente de cierre; Cierre sin intervención sobre P2P y O2C; Recomendaciones de resolución de incidencias",
-        "advanced": "Modelo de fast/continuous close con checklist inteligente, alertas de dependencias y automatización del seguimiento de tareas.",
+        "advanced": "Modelo de cierre rápido y continuo con checklist inteligente, alertas de dependencias y automatización del seguimiento de tareas.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "1.1 Gobierno y calendario de cierre"
       }
@@ -52,7 +52,7 @@
         "2": "Plantillas y controles básicos para ciertos asientos recurrentes, con revisión manual.",
         "3": "Asientos recurrentes y accruals definidos, documentados y parcialmente automatizados.",
         "4": "Automatización integrada de asientos recurrentes, accruals y validaciones, con trazabilidad y control de excepciones.",
-        "5": "Identificación predictiva de accruals esperados, detección de omisiones y propuestas de asiento/ajuste con workflow de aprobación."
+        "5": "Identificación predictiva de devengos esperados, detección de omisiones y propuestas de asiento/ajuste con circuito de aprobación."
       },
       "scores": {
         "procesos": null,
@@ -72,7 +72,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Detección de provisiones omitidas; Automatización de asientos y previsión del cierre; Vigilancia en tiempo real de asientos sospechosos",
-        "advanced": "Identificación predictiva de accruals esperados, detección de omisiones y propuestas de asiento/ajuste con workflow de aprobación.",
+        "advanced": "Identificación predictiva de devengos esperados, detección de omisiones y propuestas de asiento/ajuste con circuito de aprobación.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "1.2 Automatización de asientos, accruals y ajustes"
       }
@@ -87,7 +87,7 @@
         "2": "Controles definidos para áreas críticas, pero con ejecución manual y baja priorización por riesgo.",
         "3": "Controles de cierre estandarizados, documentados y ejecutados recurrentemente.",
         "4": "Controles automatizados, con alertas, umbrales y priorización de revisiones por materialidad/riesgo.",
-        "5": "Detección IA de asientos inusuales o sospechosos durante el cierre, con scoring de anomalía, explicación y workflow de investigación."
+        "5": "Detección IA de asientos inusuales o sospechosos durante el cierre, con puntuación de anomalía, explicación y flujo de trabajo de investigación."
       },
       "scores": {
         "procesos": null,
@@ -107,7 +107,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Detección de asientos inusuales en el cierre; Vigilancia en tiempo real de asientos sospechosos",
-        "advanced": "Detección IA de asientos inusuales o sospechosos durante el cierre, con scoring de anomalía, explicación y workflow de investigación.",
+        "advanced": "Detección IA de asientos inusuales o sospechosos durante el cierre, con puntuación de anomalía, explicación y flujo de trabajo de investigación.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "1.3 Control de calidad y anomalías del cierre"
       }
@@ -122,7 +122,7 @@
         "2": "Seguimiento básico del avance, con coordinación manual entre equipos.",
         "3": "KPIs de cierre definidos y reporting periódico de avance, incidencias y retrasos.",
         "4": "Análisis causa-raíz de retrasos, acciones de mejora, reducción de reprocesos y automatización progresiva.",
-        "5": "Cierre basado en process mining y IA para detectar cuellos de botella, excepciones recurrentes y oportunidades de touchless close."
+        "5": "Cierre basado en minería de procesos y IA para detectar cuellos de botella, excepciones recurrentes y oportunidades de cierre sin intervención."
       },
       "scores": {
         "procesos": null,
@@ -142,7 +142,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Cierre sin intervención sobre P2P y O2C; Minería de procesos del cierre",
-        "advanced": "Cierre basado en process mining y IA para detectar cuellos de botella, excepciones recurrentes y oportunidades de touchless close.",
+        "advanced": "Cierre basado en minería de procesos y IA para detectar cuellos de botella, excepciones recurrentes y oportunidades de cierre sin intervención.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "1.4 Eficiencia, coordinación y mejora continua del cierre"
       }
@@ -262,7 +262,7 @@
         "2": "Reporting recurrente con revisión manual y explicaciones limitadas.",
         "3": "Reporting consolidado estructurado, conciliado y con comentarios básicos.",
         "4": "Reporting automatizado con análisis de variaciones, explicaciones, revisiones y controles de consistencia.",
-        "5": "Generación automática de informes consolidados, narratives y explicaciones de variaciones con GenAI, con revisión humana y controles de compliance."
+        "5": "Generación automática de informes consolidados, narrativas y explicaciones de variaciones con GenAI, con revisión humana y controles de cumplimiento."
       },
       "scores": {
         "procesos": null,
@@ -282,7 +282,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Consolidación de informes en un único documento; Análisis de desviaciones con explicación automática",
-        "advanced": "Generación automática de informes consolidados, narratives y explicaciones de variaciones con GenAI, con revisión humana y controles de compliance.",
+        "advanced": "Generación automática de informes consolidados, narrativas y explicaciones de variaciones con GenAI, con revisión humana y controles de cumplimiento.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "2.4 Reporting consolidado y revisión ejecutiva"
       }
@@ -297,7 +297,7 @@
         "2": "Plantillas recurrentes y controles básicos, pero con manipulación manual significativa.",
         "3": "Proceso documentado con fuentes, responsables, calendario, revisiones y controles definidos.",
         "4": "Preparación integrada y automatizada con trazabilidad desde dato origen y controles de consistencia.",
-        "5": "Automated financial statement preparation con generación asistida de notas/secciones y validaciones de consistencia antes de revisión."
+        "5": "Preparación automatizada de los estados financieros, con generación asistida de notas y secciones y validación de consistencia antes de la revisión."
       },
       "scores": {
         "procesos": null,
@@ -317,7 +317,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Preparación asistida de estados financieros; Consolidación de informes en un único documento",
-        "advanced": "Automated financial statement preparation con generación asistida de notas/secciones y validaciones de consistencia antes de revisión.",
+        "advanced": "Preparación automatizada de los estados financieros, con generación asistida de notas y secciones y validación de consistencia antes de la revisión.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "3.1 Preparación de estados financieros"
       }
@@ -332,7 +332,7 @@
         "2": "Proceso definido para filings clave, con revisiones manuales y documentación parcial.",
         "3": "Calendario regulatorio, owners, controles y evidencias definidos para filings recurrentes.",
         "4": "Proceso integrado con datos financieros y regulatorios, controles automáticos y gestión de cambios normativos.",
-        "5": "Generación GenAI de borradores de regulatory filings con interpretación normativa, trazabilidad y human review."
+        "5": "Generación GenAI de borradores de informes regulatorios con interpretación normativa, trazabilidad y revisión humana."
       },
       "scores": {
         "procesos": null,
@@ -352,7 +352,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Borrador de informes regulatorios; Borrador de secciones 10Q y 10K; Interpretación de normativa financiera",
-        "advanced": "Generación GenAI de borradores de regulatory filings / secciones 10Q-10K con interpretación normativa, trazabilidad y human review.",
+        "advanced": "Generación con GenAI de borradores de informes regulatorios y de secciones 10Q y 10K, con interpretación normativa, trazabilidad de la fuente y revisión humana.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "3.2 Reporting regulatorio y filings"
       }
@@ -402,7 +402,7 @@
         "2": "Controles clave definidos, pero con ejecución y documentación manual.",
         "3": "Modelo de control documentado con owners, evidencias y revisiones recurrentes.",
         "4": "Controles integrados con workflow, trazabilidad de cambios, revisión y gestión de incidencias.",
-        "5": "Modelo basado en IA de revisión de consistencia, detección de anomalías en cifras/narrativas y alertas de compliance en reporting externo."
+        "5": "Modelo basado en IA de revisión de consistencia, detección de anomalías en cifras/narrativas y alertas de cumplimiento en los informes externos."
       },
       "scores": {
         "procesos": null,
@@ -422,7 +422,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Interpretación de normativa financiera; Consolidación de informes en un único documento; Detección de asientos inusuales en el cierre",
-        "advanced": "Modelo basado en IA de revisión de consistencia, detección de anomalías en cifras/narrativas y alertas de compliance en reporting externo.",
+        "advanced": "Modelo basado en IA de revisión de consistencia, detección de anomalías en cifras/narrativas y alertas de cumplimiento en los informes externos.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "3.4 Gobierno, control y auditoría del reporting externo"
       }
@@ -437,7 +437,7 @@
         "2": "Explicaciones recurrentes para partidas relevantes, con criterios no homogéneos.",
         "3": "Metodología común de variance analysis por cuenta, entidad, negocio, driver y periodo.",
         "4": "Análisis integrado con datos, drivers, acciones y conexión con reporting/forecast.",
-        "5": "Generación automática de account variance analysis e intelligent explanations con GenAI, incluyendo drivers, causas y narrativa ejecutiva."
+        "5": "Generación automática del análisis de desviaciones por cuenta y de su explicación con GenAI, incluyendo drivers, causas y narrativa ejecutiva."
       },
       "scores": {
         "procesos": null,
@@ -457,7 +457,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Análisis de desviaciones con explicación automática; Informes de gestión con comentario automático",
-        "advanced": "Generación automática de account variance analysis e intelligent explanations con GenAI, incluyendo drivers, causas y narrativa ejecutiva.",
+        "advanced": "Generación automática del análisis de desviaciones por cuenta y de su explicación con GenAI, incluyendo drivers, causas y narrativa ejecutiva.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "4.1 Modelo de análisis de variaciones"
       }
@@ -472,7 +472,7 @@
         "2": "Validaciones básicas y correcciones recurrentes, pero baja trazabilidad.",
         "3": "Reglas de calidad y clasificación documentadas para datos financieros clave.",
         "4": "Validaciones automatizadas, gobierno de datos maestros y gestión estructurada de incidencias.",
-        "5": "Detección IA de inconsistencias en master data, errores de clasificación de gastos y documentación automática de metadata."
+        "5": "Detección IA de inconsistencias en datos maestros, errores de clasificación de gastos y documentación automática de metadatos."
       },
       "scores": {
         "procesos": null,
@@ -492,7 +492,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Detección de inconsistencias en datos maestros; Detección de errores de clasificación de gasto; Generación de documentación de metadatos",
-        "advanced": "Detección IA de inconsistencias en master data, errores de clasificación de gastos y documentación automática de metadata.",
+        "advanced": "Detección IA de inconsistencias en datos maestros, errores de clasificación de gastos y documentación automática de metadatos.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "4.2 Calidad, clasificación y consistencia de datos financieros"
       }
@@ -507,7 +507,7 @@
         "2": "Insights puntuales, dependientes de analistas y no siempre accionables.",
         "3": "Análisis estructurado con mensajes clave, drivers, riesgos y oportunidades.",
         "4": "Insights recurrentes, priorizados y conectados con decisiones, acciones y forecast.",
-        "5": "Digital analyst / FinanceAI Insights Platform con análisis bajo demanda, investigación y primeras conclusiones desde múltiples fuentes."
+        "5": "Analista digital sobre la plataforma FinanceAI Insights Platform, con análisis bajo demanda, investigación y primeras conclusiones a partir de múltiples fuentes."
       },
       "scores": {
         "procesos": null,
@@ -527,7 +527,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Analista digital de Finanzas bajo demanda; Visión ejecutiva de la salud financiera",
-        "advanced": "Digital analyst / FinanceAI Insights Platform con análisis bajo demanda, investigación y primeras conclusiones desde múltiples fuentes.",
+        "advanced": "Analista digital sobre la plataforma FinanceAI Insights Platform, con análisis bajo demanda, investigación y primeras conclusiones a partir de múltiples fuentes.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "4.3 Insight financiero y explicación de performance"
       }
@@ -542,7 +542,7 @@
         "2": "Proyecciones manuales o análisis ad hoc en situaciones concretas.",
         "3": "Modelos de tendencia básicos con supuestos documentados.",
         "4": "Modelos predictivos recurrentes para anticipar desviaciones y oportunidades.",
-        "5": "IA identifica patrones históricos para predecir performance futura, detectar desviaciones tempranas y recomendar acciones."
+        "5": "La IA identifica patrones históricos para predecir el rendimiento futuro, detectar desviaciones tempranas y recomendar acciones."
       },
       "scores": {
         "procesos": null,
@@ -562,7 +562,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Patrones históricos para predecir el rendimiento; Previsión y escenarios bajo demanda",
-        "advanced": "IA identifica patrones históricos para predecir performance futura, detectar desviaciones tempranas y recomendar acciones.",
+        "advanced": "La IA identifica patrones históricos para predecir el rendimiento futuro, detectar desviaciones tempranas y recomendar acciones.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "4.4 Análisis predictivo y detección temprana"
       }
@@ -577,7 +577,7 @@
         "2": "Reporting recurrente para algunas áreas, con criterios y formatos variables.",
         "3": "Modelo de reporting interno definido con KPIs, dimensiones, periodicidad y owners.",
         "4": "Reporting integrado, automatizado y con drill-down, análisis de variaciones y acciones.",
-        "5": "Reporting interno con generación automática de commentary, insights y narrative reporting desde múltiples fuentes financieras."
+        "5": "Informes internos con generación automática del comentario, de las conclusiones y de la narrativa, a partir de múltiples fuentes financieras."
       },
       "scores": {
         "procesos": null,
@@ -597,7 +597,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Informes de gestión con comentario automático; Integración automatizada de datos financieros",
-        "advanced": "Reporting interno con generación automática de commentary, insights y narrative reporting desde múltiples fuentes financieras.",
+        "advanced": "Informes internos con generación automática del comentario, de las conclusiones y de la narrativa, a partir de múltiples fuentes financieras.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "5.1 Modelo de reporting interno"
       }
@@ -612,7 +612,7 @@
         "2": "Integraciones parciales y conciliaciones manuales recurrentes.",
         "3": "Fuentes oficiales definidas, modelo de datos documentado y controles de carga.",
         "4": "Single source of truth con integración automática, modelo semántico y control de calidad.",
-        "5": "Capa IA/automation para integrar datos financieros de fuentes diversas, detectar inconsistencias y habilitar reporting autoservicio."
+        "5": "Capa de IA y automatización para integrar datos financieros de fuentes diversas, detectar inconsistencias y habilitar los informes en autoservicio."
       },
       "scores": {
         "procesos": null,
@@ -632,7 +632,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Integración automatizada de datos financieros; Detección de inconsistencias en datos maestros",
-        "advanced": "Capa IA/automation para integrar datos financieros de fuentes diversas, detectar inconsistencias y habilitar reporting autoservicio.",
+        "advanced": "Capa de IA y automatización para integrar datos financieros de fuentes diversas, detectar inconsistencias y habilitar los informes en autoservicio.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "5.2 Integración de datos y single source of truth"
       }
@@ -647,7 +647,7 @@
         "2": "Dashboards parciales y consultas ad hoc gestionadas por analistas.",
         "3": "Dashboards corporativos por rol, con KPIs comunes y acceso controlado.",
         "4": "Autoservicio gobernado con drill-down, narrativa, flujos de aprobación y control de acceso.",
-        "5": "Chat-with-my-Finance-data / Digital Analyst para consultas en lenguaje natural, insights y explicación automática de resultados."
+        "5": "Consulta conversacional de los datos de Finanzas con el analista digital, para preguntar en lenguaje natural y obtener la explicación automática de los resultados."
       },
       "scores": {
         "procesos": null,
@@ -667,7 +667,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Analista digital de Finanzas bajo demanda; Consulta del dato en lenguaje natural",
-        "advanced": "Chat-with-my-Finance-data / Digital Analyst para consultas en lenguaje natural, insights y explicación automática de resultados.",
+        "advanced": "Consulta conversacional de los datos de Finanzas con el analista digital, para preguntar en lenguaje natural y obtener la explicación automática de los resultados.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "5.3 Narrativa de gestión y autoservicio"
       }
@@ -682,7 +682,7 @@
         "2": "Existen reuniones de revisión con decisiones poco trazables.",
         "3": "Rutinas de reporting con agenda, KPIs, responsables y actas.",
         "4": "Reporting conectado con acciones, owners, beneficios esperados y seguimiento.",
-        "5": "IA genera recomendaciones de acciones, identifica riesgos/oportunidades y prepara packs ejecutivos con decisiones sugeridas."
+        "5": "IA genera recomendaciones de acciones, identifica riesgos/oportunidades y prepara informes ejecutivos con decisiones sugeridas."
       },
       "scores": {
         "procesos": null,
@@ -702,7 +702,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Analista digital de Finanzas bajo demanda; Recomendaciones de acción a nivel de proyecto; Visión ejecutiva de la salud financiera",
-        "advanced": "IA genera recomendaciones de acciones, identifica riesgos/oportunidades y prepara packs ejecutivos con decisiones sugeridas.",
+        "advanced": "IA genera recomendaciones de acciones, identifica riesgos/oportunidades y prepara informes ejecutivos con decisiones sugeridas.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "5.4 Rutinas de revisión y acciones de gestión"
       }
@@ -717,7 +717,7 @@
         "2": "Calendario básico y responsables por entidad, con variabilidad y retrasos.",
         "3": "Calendario, ownership, materialidad, reglas y evidencias definidos.",
         "4": "Proceso integrado en el cierre, con seguimiento de incidencias, escalados y KPIs.",
-        "5": "Conciliación intercompany integrada con alertas tempranas, workflow y priorización IA de partidas críticas."
+        "5": "Conciliación intercompany integrada con alertas tempranas, flujo de trabajo y priorización IA de partidas críticas."
       },
       "scores": {
         "procesos": null,
@@ -737,7 +737,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Conciliación a nivel de transacción; Checklist inteligente de cierre",
-        "advanced": "Conciliación intercompany integrada con alertas tempranas, workflow y priorización IA de partidas críticas.",
+        "advanced": "Conciliación intercompany integrada con alertas tempranas, flujo de trabajo y priorización IA de partidas críticas.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "6.1 Gobierno y calendario de conciliación"
       }
@@ -752,7 +752,7 @@
         "2": "Reglas básicas de matching y conciliación manual de excepciones.",
         "3": "Matching estandarizado con reglas y documentación de excepciones.",
         "4": "Matching automatizado con reglas avanzadas, workflow de resolución y análisis causa-raíz.",
-        "5": "IA/NLP reconciliation a nivel transacción contra documentos soporte, con matching inteligente, explicación de diferencias y recomendaciones de resolución."
+        "5": "Conciliación con IA y NLP a nivel de transacción contra los documentos soporte, con emparejamiento inteligente, explicación de las diferencias y recomendación de resolución."
       },
       "scores": {
         "procesos": null,
@@ -772,7 +772,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Conciliación a nivel de transacción; Recomendaciones de resolución de incidencias",
-        "advanced": "IA/NLP reconciliation a nivel transacción contra documentos soporte, con matching inteligente, explicación de diferencias y recomendaciones de resolución.",
+        "advanced": "Conciliación con IA y NLP a nivel de transacción contra los documentos soporte, con emparejamiento inteligente, explicación de las diferencias y recomendación de resolución.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "6.2 Matching, diferencias y resolución de partidas"
       }
@@ -822,7 +822,7 @@
         "2": "Interacción parcial con consolidación, con reconciliaciones manuales finales.",
         "3": "Proceso IC conectado al cierre y consolidación con reglas y responsables definidos.",
         "4": "Integración automática con consolidación, eliminaciones, reporting y seguimiento de impactos.",
-        "5": "Conciliación IC automatizada conectada con consolidación multiestándar/multimoneda y detección IA de impactos en reporting."
+        "5": "Conciliación intercompany automatizada, conectada con la consolidación multiestándar y multidivisa, y detección con IA de su impacto en los informes."
       },
       "scores": {
         "procesos": null,
@@ -842,7 +842,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Consolidación multinorma y multidivisa; Conciliación a nivel de transacción",
-        "advanced": "Conciliación IC automatizada conectada con consolidación multiestándar/multimoneda y detección IA de impactos en reporting.",
+        "advanced": "Conciliación intercompany automatizada, conectada con la consolidación multiestándar y multidivisa, y detección con IA de su impacto en los informes.",
         "source": "FinanceAI - Use Cases Summary_C / F3M AI Use Case Mapping",
         "subcapacidad": "6.4 Integración con consolidación y reporting"
       }

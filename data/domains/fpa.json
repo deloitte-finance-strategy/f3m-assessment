@@ -228,7 +228,7 @@
         "2": "Dashboards parciales o locales, con cierta automatización pero baja integración.",
         "3": "Cuadros de mando definidos por audiencia, con KPIs y dimensiones comunes.",
         "4": "Dashboards integrados, autoservicio controlado, drill-down y conexión con acciones de gestión.",
-        "5": "Visualización ejecutiva avanzada, con insights automáticos, alertas, narrativa analítica y soporte predictivo."
+        "5": "Visualización ejecutiva avanzada, con conclusiones automáticas, alertas, narrativa analítica y soporte predictivo."
       },
       "scores": {
         "procesos": null,
@@ -298,7 +298,7 @@
         "2": "Plantillas parciales para iniciativas relevantes, con criterios financieros básicos.",
         "3": "Metodología común con inversión, costes, beneficios, riesgos, supuestos y métricas financieras.",
         "4": "Metodología integrada con escenarios, sensibilidad, dependencias, beneficios no financieros y gobierno de aprobación.",
-        "5": "Gestión portfolio basada en valor, con priorización dinámica, tracking de beneficios y aprendizaje post-implementación."
+        "5": "Gestión de la cartera de iniciativas basada en valor, con priorización dinámica, seguimiento de beneficios y aprendizaje posterior a la implantación."
       },
       "scores": {
         "procesos": null,
@@ -438,7 +438,7 @@
         "2": "Información recurrente para algunas decisiones, pero con calidad y criterios variables.",
         "3": "Modelo de información definido, con KPIs, dimensiones, fuentes y reglas de cálculo comunes.",
         "4": "Información integrada, trazable, orientada a decisión y conectada con análisis de escenarios.",
-        "5": "Decision intelligence con insights predictivos, recomendaciones y autoservicio gobernado para la dirección."
+        "5": "Inteligencia de decisión con conclusiones predictivas, recomendaciones y autoservicio analítico gobernado para la dirección."
       },
       "scores": {
         "procesos": null,
@@ -543,7 +543,7 @@
         "2": "Se preparan resúmenes ejecutivos, pero con variabilidad en calidad, foco y accionabilidad.",
         "3": "Narrativa financiera estructurada, con mensajes clave, desviaciones, riesgos, oportunidades y acciones.",
         "4": "Storytelling financiero integrado con dashboards, escenarios, decisiones requeridas y seguimiento.",
-        "5": "Narrativa ejecutiva dinámica, basada en insights automáticos, anticipación de riesgos y recomendaciones de decisión."
+        "5": "Narrativa ejecutiva dinámica, basada en conclusiones automáticas, anticipación de riesgos y recomendaciones de decisión."
       },
       "scores": {
         "procesos": null,
@@ -648,7 +648,7 @@
         "2": "Existen vínculos parciales, pero con baja trazabilidad entre estrategia y presupuesto.",
         "3": "La estrategia se traduce en objetivos, presupuesto, iniciativas y KPIs de seguimiento.",
         "4": "Conexión integrada entre estrategia, capital allocation, presupuesto, forecast y performance management.",
-        "5": "Modelo cerrado estrategia-ejecución-aprendizaje, con feedback continuo, reasignación dinámica y gestión del portfolio de iniciativas."
+        "5": "Modelo cerrado de estrategia, ejecución y aprendizaje, con retroalimentación continua, reasignación dinámica y gestión de la cartera de iniciativas."
       },
       "scores": {
         "procesos": null,

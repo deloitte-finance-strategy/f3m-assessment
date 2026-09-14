@@ -17,7 +17,7 @@
         "2": "Calendario y responsables básicos definidos, aunque con variabilidad entre sociedades, revisiones manuales y dependencias relevantes de Excel.",
         "3": "Proceso documentado con calendario, roles, entregables, controles, aprobaciones y criterios contables/fiscales comunes.",
         "4": "Proceso integrado con cierre, reporting, consolidación y fiscalidad local, con controles automatizados, trazabilidad y mejora continua.",
-        "5": "Tax accounting continuo y basado en IA, con generación asistida de provisiones, validaciones inteligentes, alertas de desviación y explicación automática de variaciones."
+        "5": "Contabilidad fiscal continua y basada en IA, con generación asistida de provisiones, validaciones inteligentes, alertas de desviación y explicación automática de variaciones."
       },
       "scores": {
         "procesos": null,
@@ -37,7 +37,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Generación de informes fiscales; Preparación asistida de estados financieros; Análisis de desviaciones con explicación automática",
-        "advanced": "Tax accounting continuo y basado en IA, con generación asistida de provisiones, validaciones inteligentes, alertas de desviación y explicación automática de variaciones.",
+        "advanced": "Contabilidad fiscal continua y basada en IA, con generación asistida de provisiones, validaciones inteligentes, alertas de desviación y explicación automática de variaciones.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.1 Gobierno del tax accounting y calendario de provisión fiscal"
       }
@@ -87,7 +87,7 @@
         "2": "Fuentes principales identificadas, aunque con integraciones parciales, controles manuales y calidad variable entre entidades.",
         "3": "Modelo de datos fiscal-contable definido, con fuentes oficiales, reglas de calidad, conciliaciones y owners por dato clave.",
         "4": "Capa integrada de datos fiscal-contables con controles automáticos, reconciliaciones recurrentes, gestión de incidencias y trazabilidad end-to-end.",
-        "5": "IA detecta inconsistencias, clasificaciones anómalas y gaps de dato, genera metadata fiscal y recomienda acciones de remediación."
+        "5": "IA detecta inconsistencias, clasificaciones anómalas y lagunas de dato, genera metadatos fiscal y recomienda acciones de remediación."
       },
       "scores": {
         "procesos": null,
@@ -107,7 +107,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Integración automatizada de datos financieros; Detección de inconsistencias en datos maestros; Generación de documentación de metadatos",
-        "advanced": "IA detecta inconsistencias, clasificaciones anómalas y gaps de dato, genera metadata fiscal y recomienda acciones de remediación.",
+        "advanced": "IA detecta inconsistencias, clasificaciones anómalas y lagunas de dato, genera metadatos fiscal y recomienda acciones de remediación.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.3 Calidad, integración y trazabilidad del dato fiscal-contable"
       }
@@ -122,7 +122,7 @@
         "2": "Reportes recurrentes para cierres relevantes, aunque con narrativa variable y dependencia de análisis manual.",
         "3": "Reporting tax accounting estándar con KPIs, ETR, cash tax, diferidos, riesgos, variaciones y comentarios ejecutivos.",
         "4": "Reporting integrado con cierre, forecast, auditoría, riesgos fiscales, acciones y revisión ejecutiva periódica.",
-        "5": "Reporting fiscal basado en IA con generación automática de narrative commentary, explicación de variaciones, alertas y recomendaciones de gestión."
+        "5": "Informes fiscales basados en IA, con generación automática del comentario narrativo, explicación de las variaciones, alertas y recomendaciones de gestión."
       },
       "scores": {
         "procesos": null,
@@ -142,7 +142,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Generación de informes fiscales; Consolidación de informes en un único documento; Análisis de desviaciones con explicación automática",
-        "advanced": "Reporting fiscal basado en IA con generación automática de narrative commentary, explicación de variaciones, alertas y recomendaciones de gestión.",
+        "advanced": "Informes fiscales basados en IA, con generación automática del comentario narrativo, explicación de las variaciones, alertas y recomendaciones de gestión.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.4 Reporting fiscal financiero y explicación ejecutiva"
       }
@@ -157,7 +157,7 @@
         "2": "Calendario fiscal básico y responsables identificados, aunque con seguimiento manual y controles parciales de vencimientos.",
         "3": "Modelo de cumplimiento directo documentado con calendario, owners, entregables, aprobaciones, controles y repositorio de evidencias.",
         "4": "Cumplimiento integrado con datos financieros, workflow, gestión documental, alertas y reporting de estatus/riesgos.",
-        "5": "Compliance directo basado en IA con monitorización de vencimientos, revisión asistida de obligaciones, alertas regulatorias y generación de borradores."
+        "5": "Cumplimiento directo basado en IA con monitorización de vencimientos, revisión asistida de obligaciones, alertas regulatorias y generación de borradores."
       },
       "scores": {
         "procesos": null,
@@ -177,7 +177,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Automatización de la presentación de impuestos; Cumplimiento regulatorio automatizado; Seguimiento de políticas y regulación global",
-        "advanced": "Compliance directo basado en IA con monitorización de vencimientos, revisión asistida de obligaciones, alertas regulatorias y generación de borradores.",
+        "advanced": "Cumplimiento directo basado en IA con monitorización de vencimientos, revisión asistida de obligaciones, alertas regulatorias y generación de borradores.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.1 Gobierno, calendario y obligaciones de impuestos directos"
       }
@@ -297,7 +297,7 @@
         "2": "Modelo básico de responsabilidades y calendario, aunque con coordinación parcial con ventas, compras, sistemas y operaciones.",
         "3": "Gobierno documentado de impuestos indirectos con roles, calendario, reglas, controles, procesos y responsables por jurisdicción.",
         "4": "Modelo integrado con procesos comerciales, compras, ERP, facturación, maestros fiscales, controles automáticos y reporting de incidencias.",
-        "5": "Modelo indirect tax basado en IA con monitorización continua de transacciones, detección de errores, alertas regulatorias y recomendaciones de tratamiento fiscal."
+        "5": "Modelo de impuestos indirectos basado en IA, con monitorización continua de las transacciones, detección de errores, alertas regulatorias y recomendación de tratamiento fiscal."
       },
       "scores": {
         "procesos": null,
@@ -317,7 +317,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Cumplimiento regulatorio automatizado; Interpretación de normativa financiera; Detección de inconsistencias en datos maestros",
-        "advanced": "Modelo indirect tax basado en IA con monitorización continua de transacciones, detección de errores, alertas regulatorias y recomendaciones de tratamiento fiscal.",
+        "advanced": "Modelo de impuestos indirectos basado en IA, con monitorización continua de las transacciones, detección de errores, alertas regulatorias y recomendación de tratamiento fiscal.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.1 Gobierno de IVA/impuestos indirectos y modelo operativo"
       }
@@ -367,7 +367,7 @@
         "2": "Plantillas recurrentes y conciliaciones básicas, aunque con extracción manual y controles limitados sobre errores transaccionales.",
         "3": "Proceso estándar con fuentes definidas, conciliaciones, controles, aprobaciones, evidencias y presentación recurrente documentada.",
         "4": "Preparación integrada con datos transaccionales, validaciones automáticas, conciliación contable-fiscal y workflow de revisión/aprobación.",
-        "5": "Generación asistida de declaraciones indirectas con IA, detección de transacciones anómalas, reconciliación inteligente y explicación de variaciones."
+        "5": "Generación asistida de declaraciones indirectas con IA, detección de transacciones anómalas, conciliación inteligente y explicación de variaciones."
       },
       "scores": {
         "procesos": null,
@@ -387,7 +387,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Automatización de la presentación de impuestos; Generación de informes fiscales; Conciliación a nivel de transacción",
-        "advanced": "Generación asistida de declaraciones indirectas con IA, detección de transacciones anómalas, reconciliación inteligente y explicación de variaciones.",
+        "advanced": "Generación asistida de declaraciones indirectas con IA, detección de transacciones anómalas, conciliación inteligente y explicación de variaciones.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.3 Preparación, conciliación y presentación de declaraciones indirectas"
       }
@@ -437,7 +437,7 @@
         "2": "Canales básicos de consulta y soporte para temas relevantes, aunque con criterios de priorización y trazabilidad parciales.",
         "3": "Modelo de advisory definido con demanda, intake, priorización, roles, entregables, criterios de riesgo y documentación de consultas.",
         "4": "Advisory integrado con negocio, operaciones, legal, finanzas y estrategia, con seguimiento de impacto, riesgos y decisiones.",
-        "5": "Tax advisory basado en IA con asistente de consultas, búsqueda normativa, recomendaciones preliminares y priorización de asuntos por riesgo/valor."
+        "5": "Asesoría fiscal basada en IA, con asistente de consultas, búsqueda normativa, recomendaciones preliminares y priorización de asuntos por riesgo y valor."
       },
       "scores": {
         "procesos": null,
@@ -457,7 +457,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Evaluación normativa y recomendación fiscal; Interpretación de normativa financiera; Consulta del dato en lenguaje natural",
-        "advanced": "Tax advisory basado en IA con asistente de consultas, búsqueda normativa, recomendaciones preliminares y priorización de asuntos por riesgo/valor.",
+        "advanced": "Asesoría fiscal basada en IA, con asistente de consultas, búsqueda normativa, recomendaciones preliminares y priorización de asuntos por riesgo y valor.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.1 Modelo de tax advisory y demanda de negocio"
       }
@@ -472,7 +472,7 @@
         "2": "Análisis de planificación para operaciones relevantes, aunque con escenarios limitados y documentación no siempre homogénea.",
         "3": "Metodología de planificación fiscal con escenarios, supuestos, riesgos, sensibilidad, impacto financiero y approvals.",
         "4": "Planificación integrada con estrategia, cash tax, estructura legal/operativa, transfer pricing, forecast y gobierno de riesgo fiscal.",
-        "5": "Planificación predictiva basada en IA que simula escenarios, impactos regulatorios, cash tax, riesgos y recomendaciones de optimización responsable."
+        "5": "Planificación predictiva basada en IA que simula escenarios, impactos regulatorios, impuesto pagado en caja, riesgos y recomendaciones de optimización responsable."
       },
       "scores": {
         "procesos": null,
@@ -492,7 +492,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Planificación fiscal predictiva; Evaluación normativa y recomendación fiscal; Generación de estrategias de inversión",
-        "advanced": "Planificación predictiva basada en IA que simula escenarios, impactos regulatorios, cash tax, riesgos y recomendaciones de optimización responsable.",
+        "advanced": "Planificación predictiva basada en IA que simula escenarios, impactos regulatorios, impuesto pagado en caja, riesgos y recomendaciones de optimización responsable.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.2 Planificación fiscal, escenarios y optimización dentro del marco normativo"
       }
@@ -542,7 +542,7 @@
         "2": "Repositorios o archivos básicos de documentos, aunque con búsqueda limitada y actualización manual de normativa/criterios.",
         "3": "Repositorio estructurado de normativa, consultas, criterios, tax memos, posiciones, templates y lessons learned.",
         "4": "Gestión de conocimiento integrada con workflow de consultas, actualización normativa, control de versiones, formación y reutilización de criterios.",
-        "5": "Tax knowledge assistant basado en IA que busca normativa, resume cambios, recupera precedentes y propone borradores de análisis o respuestas."
+        "5": "Asistente de conocimiento fiscal basado en IA, que busca la normativa, resume los cambios, recupera precedentes y propone borradores de análisis o de respuesta."
       },
       "scores": {
         "procesos": null,
@@ -562,7 +562,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Interpretación de normativa financiera; Acceso y extracción documental; Seguimiento de políticas y regulación global",
-        "advanced": "Tax knowledge assistant basado en IA que busca normativa, resume cambios, recupera precedentes y propone borradores de análisis o respuestas.",
+        "advanced": "Asistente de conocimiento fiscal basado en IA, que busca la normativa, resume los cambios, recupera precedentes y propone borradores de análisis o de respuesta.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.4 Gestión de conocimiento fiscal, normativa y soporte a decisiones"
       }
