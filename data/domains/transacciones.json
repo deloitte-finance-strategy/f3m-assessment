@@ -36,7 +36,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Previsión del gasto mensual de todos los contratos con terceros con datos del sistema de gestión de contratos; Logística y planificación resilientes",
+        "cases": "Previsión del gasto contratado con terceros; Planificación logística resiliente",
         "advanced": "Planificación predictiva de gasto y demanda de terceros basada en contratos, históricos y señales externas, con recomendaciones de sourcing y timing.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.1 Estrategia de compras, categorías y demanda"
@@ -71,7 +71,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Logística y planificación resilientes; IA de evaluación de proveedores; Redacción de contratos y SoW",
+        "cases": "Planificación logística resiliente; Evaluación de proveedores con IA; Redacción de contratos y pliegos; Insights sobre el dato de proveedor",
         "advanced": "Motor IA de evaluación de proveedores, riesgo supply chain y recomendaciones de selección/negociación basadas en desempeño, riesgo y contexto externo.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.2 Selección, evaluación y gestión de proveedores"
@@ -106,7 +106,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Redacción de contratos y SoW; Asistente de RFP y de conocimiento impulsado por IA; Previsión del gasto mensual con datos del sistema de gestión de contratos",
+        "cases": "Redacción de contratos y pliegos; Asistente de RFP y de conocimiento comercial; Previsión del gasto contratado con terceros",
         "advanced": "Asistente IA para generar RFPs, contratos y SoWs, extraer cláusulas, analizar riesgos y recomendar condiciones financieras/comerciales.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.3 Gestión contractual, RFPs y SoWs"
@@ -141,7 +141,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recomendación del momento óptimo de pago; Recomendaciones proactivas para la resolución de incidencias; Flujos guiados y adaptables para cambios en datos maestros",
+        "cases": "Momento óptimo de pago a proveedores; Recomendaciones de resolución de incidencias; Flujos guiados de cambio en datos maestros; Detección de facturas duplicadas",
         "advanced": "IA recomienda timing óptimo de pagos/compras, detecta excepciones operativas y prioriza aprobaciones según impacto en caja, contrato y riesgo.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.4 Orden de compra, recepción y aprobación"
@@ -176,7 +176,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Lectura de contratos de cliente e identificación de obligaciones de desempeño; Identificación y corrección proactiva de fugas de ingresos; Asistente de IA para la compra y el leasing de vehículos",
+        "cases": "Lectura de contratos y obligaciones de desempeño; Detección de fugas de ingresos",
         "advanced": "Asistente IA analiza contratos/pedidos, valida obligaciones y condiciones comerciales, y recomienda acciones para evitar errores, revenue leakage o disputas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.1 Gestión de pedidos, contratos y condiciones comerciales"
@@ -211,7 +211,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Detección y corrección automatizada de errores en facturas; Generación de facturas personalizadas para pedidos de cliente no estándar",
+        "cases": "Detección y corrección de errores en facturas; Facturación de pedidos no estándar",
         "advanced": "Detección/corrección IA de errores de factura y generación de facturas personalizadas para pedidos no estándar, con validación fiscal/contable.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.2 Facturación y emisión de documentos"
@@ -246,7 +246,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Facilitación del cobro para identificar brechas de recobro y automatizar el contacto; Recomendación de condiciones de pago óptimas para mejorar el DSO; Cartas de recurso ante denegaciones",
+        "cases": "Gestión asistida del recobro; Condiciones de pago óptimas para el DSO; Redacción de recursos ante denegaciones; Asistente financiero para el cliente",
         "advanced": "Asistente IA identifica gaps de cobro, automatiza outreach, recomienda payment terms para mejorar DSO y apoya recuperación de ingresos/disputas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.3 Cobros, aplicación de pagos y gestión de disputas"
@@ -281,7 +281,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Agentes de IA para el análisis de riesgo crediticio; Predicción de retrasos en el pago o impagos; Recomendación de condiciones de pago óptimas para mejorar el DSO",
+        "cases": "Agentes de IA para análisis de riesgo crediticio; Predicción de retraso e impago; Condiciones de pago óptimas para el DSO",
         "advanced": "Scoring dinámico IA de cliente y riesgo de cobro, con alertas tempranas, recomendaciones de bloqueo/liberación y condiciones comerciales.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.4 Crédito, riesgo cliente y control de exposición"
@@ -315,7 +315,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identificación de errores de clasificación de gastos; Generación de documentación de metadatos; Flujos guiados y adaptables para cambios en datos maestros",
+        "cases": "Detección de errores de clasificación de gasto; Generación de documentación de metadatos; Flujos guiados de cambio en datos maestros",
         "advanced": "IA ayuda a clasificar gastos vs activos, detectar errores de codificación y generar metadata/documentación de activos.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.1 Alta, capitalización y clasificación de activos"
@@ -350,7 +350,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identificación de inconsistencias en los registros de datos maestros; Acceso y extracción documental impulsados por IA; Inspección autónoma de infraestructuras con drones",
+        "cases": "Detección de inconsistencias en datos maestros; Acceso y extracción documental",
         "advanced": "IA/digital sensing permite detectar inconsistencias, anomalías de activos y generar alertas sobre activos críticos o no conciliados.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.2 Inventario, localización y trazabilidad de activos"
@@ -384,7 +384,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Mantenimiento predictivo basado en IA; Identificación de patrones históricos para predecir y mejorar el rendimiento financiero futuro",
+        "cases": "Mantenimiento predictivo de activos; Patrones históricos para predecir el rendimiento",
         "advanced": "Modelos IA detectan patrones de deterioro, anomalías de uso/coste y recomiendan revisión de vida útil, impairment o mantenimiento.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.3 Depreciación, impairments y valoración"
@@ -419,7 +419,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recomendaciones a nivel de proyecto; Mantenimiento predictivo basado en IA; Inspección autónoma de infraestructuras con drones",
+        "cases": "Recomendaciones de acción a nivel de proyecto; Mantenimiento predictivo de activos",
         "advanced": "IA prioriza decisiones de inversión/desinversión mediante business case, coste evitado, riesgo de activo y escenarios de rendimiento.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.4 Bajas, desinversiones y control de CAPEX"
@@ -454,7 +454,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recomendaciones proactivas para la resolución de incidencias; Operaciones de tienda de nueva generación; Agentes de IA para la gestión del ciclo de vida del servicio",
+        "cases": "Recomendaciones de resolución de incidencias; Análisis de desviaciones con explicación automática",
         "advanced": "IA genera alertas e insights operativos en tiempo real, detecta desviaciones y recomienda acciones de mejora.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.1 Modelo de KPIs operativos financieros"
@@ -489,7 +489,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Flujos guiados y adaptables para cambios en datos maestros; Identificación de inconsistencias en los registros de datos maestros; Automatización de datos financieros de fuentes diversas",
+        "cases": "Flujos guiados de cambio en datos maestros; Detección de inconsistencias en datos maestros; Integración automatizada de datos financieros",
         "advanced": "IA detecta inconsistencias en master data, automatiza datos de fuentes diversas y guía workflows de cambios de datos maestros.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.2 Calidad, integración y gobierno de datos operativos"
@@ -524,7 +524,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Acceso a datos para toda la organización; Búsqueda y acceso a datos en toda la compañía; Acceso y extracción documental impulsados por IA",
+        "cases": "Consulta del dato en lenguaje natural; Acceso y extracción documental",
         "advanced": "IA permite reporting operativo bajo demanda, búsqueda conversacional, extracción histórica y generación de resúmenes ejecutivos.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.3 Automatización del reporting operativo"
@@ -559,7 +559,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recomendaciones proactivas para la resolución de incidencias; Gestión autónoma de operaciones de campo; Gestión de permisos basada en IA",
+        "cases": "Recomendaciones de resolución de incidencias; Predicción de retraso e impago",
         "advanced": "IA prioriza incidencias, recomienda resolución, asigna tareas y aprende de tiempos reales de ejecución para mejorar productividad.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.4 Rutinas de gestión, incidencias y mejora continua"
@@ -594,7 +594,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Redacción de contratos y SoW; Generación de documentación de metadatos; Asistente de RFP y de conocimiento impulsado por IA",
+        "cases": "Redacción de contratos y pliegos; Generación de documentación de metadatos; Asistente de RFP y de conocimiento comercial",
         "advanced": "IA asiste la creación de estructuras de proyecto, clasificación de costes, metadata y documentación a partir de contratos, SoWs y planes.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.1 Alta, estructura y codificación de proyectos"
@@ -629,7 +629,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identificación de errores de clasificación de gastos; Recomendaciones proactivas para la resolución de incidencias; Identificación de patrones históricos para predecir y mejorar el rendimiento financiero futuro",
+        "cases": "Detección de errores de clasificación de gasto; Recomendaciones de resolución de incidencias; Patrones históricos para predecir el rendimiento",
         "advanced": "IA detecta errores de clasificación/imputación, anomalías de coste y recomienda acciones para corregir desviaciones tempranamente.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.2 Registro, imputación y control de costes"
@@ -664,7 +664,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Lectura de contratos de cliente e identificación de obligaciones de desempeño; Identificación y corrección proactiva de fugas de ingresos; Detección y corrección automatizada de errores en facturas",
+        "cases": "Lectura de contratos y obligaciones de desempeño; Detección de fugas de ingresos; Detección y corrección de errores en facturas",
         "advanced": "IA identifica obligaciones contractuales, genera alertas de hitos/facturación y detecta revenue leakage o riesgo de margen.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.3 Facturación, ingresos y margen de proyectos"
@@ -699,7 +699,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identificación de patrones históricos para predecir y mejorar el rendimiento financiero futuro; Generación de una visión ejecutiva de la salud financiera de la compañía; Recomendaciones a nivel de proyecto",
+        "cases": "Patrones históricos para predecir el rendimiento; Visión ejecutiva de la salud financiera; Recomendaciones de acción a nivel de proyecto",
         "advanced": "IA predice performance futura del proyecto, genera escenarios, recomendaciones y resumen ejecutivo de salud financiera.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.4 Forecast, cierre y análisis del proyecto"

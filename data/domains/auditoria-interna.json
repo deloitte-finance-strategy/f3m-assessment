@@ -36,7 +36,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Monitorización predictiva del cumplimiento; Gestión de riesgos y cumplimiento regulatorio impulsados por IA; Seguimiento de políticas globales",
+        "cases": "Monitorización predictiva del cumplimiento; Vigilancia continua de riesgo y cumplimiento; Seguimiento de políticas y regulación global",
         "advanced": "Planificación continua y predictiva, con IA para monitorizar cambios internos/externos, anticipar áreas de riesgo y recomendar ajustes al plan de auditoría.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.1 Universo auditable y planificación basada en riesgos"
@@ -71,7 +71,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Exámenes e inspecciones regulatorias asistidos por IA; Gestión de riesgos y cumplimiento regulatorio impulsados por IA; Conciliación de saldos contables a nivel de transacción con facturas, pedidos de compra y extractos bancarios",
+        "cases": "Apoyo a exámenes e inspecciones regulatorias; Vigilancia continua de riesgo y cumplimiento; Conciliación a nivel de transacción; Generación de casos de prueba de control",
         "advanced": "Auditoría basada en IA con pruebas continuas, selección inteligente de muestras, análisis de poblaciones completas y recomendaciones sobre foco de testing.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.2 Diseño y ejecución de auditorías y pruebas de control"
@@ -106,7 +106,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de informes de investigación / KYC; Inteligencia más avanzada; Análisis accesibles para toda la organización",
+        "cases": "Informes de investigación y KYC; Síntesis multifuente para informes de análisis; Consulta del dato en lenguaje natural; Borrador de informe de auditoría",
         "advanced": "Generación asistida de informes de assurance con IA, síntesis de evidencias, detección de inconsistencias y narrativa ejecutiva orientada a decisiones.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.3 Calidad, trazabilidad y reporting de assurance"
@@ -141,7 +141,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Monitorización predictiva del cumplimiento; Recomendaciones proactivas para la resolución de incidencias; Gestión de riesgos y cumplimiento regulatorio impulsados por IA",
+        "cases": "Monitorización predictiva del cumplimiento; Recomendaciones de resolución de incidencias; Vigilancia continua de riesgo y cumplimiento",
         "advanced": "IA prioriza acciones, anticipa retrasos, recomienda escalados y detecta patrones recurrentes de control para prevenir reincidencias.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.4 Seguimiento de hallazgos y remediación"
@@ -176,7 +176,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Gestión de riesgos y cumplimiento regulatorio impulsados por IA; Inteligencia más avanzada; Análisis accesibles para toda la organización",
+        "cases": "Vigilancia continua de riesgo y cumplimiento; Síntesis multifuente para informes de análisis; Consulta del dato en lenguaje natural",
         "advanced": "Modelo proactivo de advisory basado en señales de riesgo y IA, que recomienda focos de asesoramiento y aporta insights preventivos sin comprometer independencia.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.1 Modelo de advisory y rol de Auditoría Interna"
@@ -211,7 +211,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Asistente de código para la transformación digital; Gestión de vulnerabilidades basada en IA; Interpretación de normas y regulación financiera",
+        "cases": "Asistente de código para la transformación; Gestión de vulnerabilidades con IA; Interpretación de normativa financiera",
         "advanced": "IA apoya la identificación temprana de riesgos de transformación, brechas de control, cambios regulatorios y recomendaciones de diseño preventivo.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.2 Asesoramiento en transformación, procesos y controles"
@@ -246,7 +246,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Inteligencia más avanzada; Búsqueda y acceso a datos en toda la compañía; Seguimiento de políticas globales",
+        "cases": "Síntesis multifuente para informes de análisis; Consulta del dato en lenguaje natural; Seguimiento de políticas y regulación global",
         "advanced": "Decision support basado en IA con búsqueda de evidencias, síntesis multifuente, escenarios de riesgo y recomendaciones de challenge para comités.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.3 Challenge independiente y soporte a decisiones de riesgo"
@@ -281,7 +281,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Acceso y extracción documental impulsados por IA; Búsqueda y acceso a datos en toda la compañía; Acceso a datos para toda la organización",
+        "cases": "Acceso y extracción documental; Consulta del dato en lenguaje natural",
         "advanced": "Asistente de conocimiento con IA que permite consultar políticas, controles, hallazgos, benchmarks y recomendaciones contextualizadas para mejorar la cultura de control.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.4 Gestión de conocimiento, capacidades y cultura de control"
@@ -316,7 +316,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Monitorización predictiva del cumplimiento; Gestión de riesgos y cumplimiento regulatorio impulsados por IA; Cumplimiento regulatorio automatizado",
+        "cases": "Monitorización predictiva del cumplimiento; Vigilancia continua de riesgo y cumplimiento; Cumplimiento regulatorio automatizado",
         "advanced": "Continuous auditing basado en IA con detección de desviaciones, priorización dinámica y alertas tempranas sobre riesgos emergentes.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.1 Monitorización continua de riesgos y controles"
@@ -351,7 +351,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Monitorización en tiempo real de asientos potencialmente sospechosos o fraudulentos; Detección proactiva de actividades fraudulentas; Identificación de asientos inusuales registrados durante el periodo de cierre",
+        "cases": "Vigilancia en tiempo real de asientos sospechosos; Detección proactiva de fraude; Detección de asientos inusuales en el cierre",
         "advanced": "Modelos IA de fraude/anomalías en tiempo real, con scoring, explicación, aprendizaje continuo y workflow de investigación.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.2 Detección de fraude, anomalías y operaciones sospechosas"
@@ -386,7 +386,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de datos sintéticos; Monitorización predictiva del cumplimiento; Gestión de vulnerabilidades basada en IA",
+        "cases": "Generación de datos sintéticos; Monitorización predictiva del cumplimiento; Gestión de vulnerabilidades con IA",
         "advanced": "IA anticipa cambios de exposición, simula escenarios de riesgo y recomienda acciones preventivas, auditorías o revisiones focalizadas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.3 Modelos predictivos de riesgo y escenarios de exposición"
@@ -421,7 +421,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Resolución autónoma de garantías; Inspección visual de partículas basada en IA; Recomendaciones proactivas para la resolución de incidencias",
+        "cases": "Recomendaciones de resolución de incidencias; Detección proactiva de fraude",
         "advanced": "IA apoya la investigación con análisis multifuente, clustering de incidentes, recomendaciones de respuesta y aprendizaje preventivo sobre causas recurrentes.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.4 Investigación, respuesta y aprendizaje sobre incidentes de riesgo"
