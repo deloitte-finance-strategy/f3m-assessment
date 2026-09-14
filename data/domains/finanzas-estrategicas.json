@@ -122,7 +122,7 @@
         "2": "KPIs estratégicos definidos parcialmente, con reporting periódico pero análisis limitado de causas, riesgos y acciones.",
         "3": "Modelo de performance estratégica con KPIs financieros/no financieros, objetivos, owners, desviaciones y reporting ejecutivo.",
         "4": "Monitorización integrada de salud financiera con escenarios, riesgos, oportunidades, acciones y seguimiento de impacto.",
-        "5": "Executive financial health overview basado en IA, con alertas tempranas, explicación automática de drivers y recomendaciones para dirección."
+        "5": "Panorámica ejecutiva de la salud financiera basada en IA, con alertas tempranas, explicación automática de los drivers y recomendaciones para la dirección."
       },
       "scores": {
         "procesos": null,
@@ -142,7 +142,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Visión ejecutiva de la salud financiera; Analista digital de Finanzas bajo demanda; Patrones históricos para predecir el rendimiento",
-        "advanced": "Executive financial health overview basado en IA, con alertas tempranas, explicación automática de drivers y recomendaciones para dirección.",
+        "advanced": "Panorámica ejecutiva de la salud financiera basada en IA, con alertas tempranas, explicación automática de los drivers y recomendaciones para la dirección.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.4 Gobierno de performance estratégica y salud financiera"
       }
@@ -157,7 +157,7 @@
         "2": "Roadmap básico de proyectos financieros, aunque con gobierno limitado, dependencias poco visibles y seguimiento principalmente operativo.",
         "3": "Estrategia de transformación financiera definida con portfolio, governance, objetivos, beneficios, owners y cadencia de seguimiento.",
         "4": "Gobierno integrado de transformación con prioridades, recursos, dependencias, riesgos, beneficios y reporting ejecutivo del avance.",
-        "5": "Transformation office basado en IA, con priorización dinámica, recomendación de acciones, detección de riesgos y simulación de impacto del portfolio."
+        "5": "Oficina de transformación apoyada en IA, con priorización dinámica, recomendación de acciones, detección de riesgos y simulación del impacto de la cartera de iniciativas."
       },
       "scores": {
         "procesos": null,
@@ -177,7 +177,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Recomendaciones de acción a nivel de proyecto; Asistente de código para la transformación; Analista digital de Finanzas bajo demanda",
-        "advanced": "Transformation office basado en IA, con priorización dinámica, recomendación de acciones, detección de riesgos y simulación de impacto del portfolio.",
+        "advanced": "Oficina de transformación apoyada en IA, con priorización dinámica, recomendación de acciones, detección de riesgos y simulación del impacto de la cartera de iniciativas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.1 Estrategia y gobierno de transformación financiera"
       }
@@ -227,7 +227,7 @@
         "2": "Herramientas y automatizaciones parciales, con integración limitada y casos de uso priorizados de forma no homogénea.",
         "3": "Roadmap digital financiero con arquitectura, datos, automatización, casos de uso, ownership y criterios de priorización definidos.",
         "4": "Plataforma integrada de datos y automatización, con gobierno de datos, estándares, autoservicio, controles y medición de beneficios.",
-        "5": "Finance digital backbone basado en IA, con automatización inteligente, agentes, copilots, analítica avanzada y recomendaciones proactivas."
+        "5": "Columna vertebral digital de Finanzas basada en IA, con automatización inteligente, agentes, asistentes, analítica avanzada y recomendaciones proactivas."
       },
       "scores": {
         "procesos": null,
@@ -247,7 +247,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Asistente de código para la transformación; Agentes de IA para ingeniería de software; Consulta del dato en lenguaje natural",
-        "advanced": "Finance digital backbone basado en IA, con automatización inteligente, agentes, copilots, analítica avanzada y recomendaciones proactivas.",
+        "advanced": "Columna vertebral digital de Finanzas basada en IA, con automatización inteligente, agentes, asistentes, analítica avanzada y recomendaciones proactivas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.3 Digitalización, datos y automatización de Finanzas"
       }
@@ -297,7 +297,7 @@
         "2": "Participación financiera en iniciativas relevantes, aunque con rol variable según proyecto y baja homogeneidad de criterios.",
         "3": "Rol de Finanzas definido en transformaciones empresariales, con criterios de business case, funding, control, riesgos y reporting.",
         "4": "Finanzas co-lidera transformaciones críticas, integrando valor, recursos, riesgos, dependencias, beneficios y decisiones de portfolio.",
-        "5": "Finance as strategic transformation partner, con IA para identificar oportunidades, riesgos, impactos, dependencias y recomendaciones de acción."
+        "5": "Finanzas como socio estratégico de la transformación, con IA para identificar oportunidades, riesgos, impactos, dependencias y acciones recomendadas."
       },
       "scores": {
         "procesos": null,
@@ -317,7 +317,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Recomendaciones de acción a nivel de proyecto; Análisis del clean room de M&A; Visión ejecutiva de la salud financiera",
-        "advanced": "Finance as strategic transformation partner, con IA para identificar oportunidades, riesgos, impactos, dependencias y recomendaciones de acción.",
+        "advanced": "Finanzas como socio estratégico de la transformación, con IA para identificar oportunidades, riesgos, impactos, dependencias y acciones recomendadas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.1 Alineamiento de Finanzas con la transformación empresarial"
       }
@@ -332,7 +332,7 @@
         "2": "Portfolio básico con seguimiento de proyectos principales, aunque la priorización se basa en criterios parciales o cualitativos.",
         "3": "Modelo de portfolio definido con criterios de valor, esfuerzo, riesgo, dependencias, capacidad y alineamiento estratégico.",
         "4": "Portfolio integrado con planificación financiera, recursos, roadmap, beneficios, escenarios y revisión periódica de prioridades.",
-        "5": "IA recomienda priorización del portfolio, detecta dependencias y riesgos, simula escenarios de ejecución y propone reasignación de recursos."
+        "5": "La IA recomienda la priorización de la cartera de iniciativas, detecta dependencias y riesgos, simula escenarios de ejecución y propone la reasignación de recursos."
       },
       "scores": {
         "procesos": null,
@@ -352,7 +352,7 @@
       "status": "No iniciado",
       "ai": {
         "cases": "Recomendaciones de acción a nivel de proyecto; Resumen y puntuación de propuestas de inversión; Patrones históricos para predecir el rendimiento",
-        "advanced": "IA recomienda priorización del portfolio, detecta dependencias y riesgos, simula escenarios de ejecución y propone reasignación de recursos.",
+        "advanced": "La IA recomienda la priorización de la cartera de iniciativas, detecta dependencias y riesgos, simula escenarios de ejecución y propone la reasignación de recursos.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.2 Gestión de portfolio de iniciativas estratégicas"
       }
