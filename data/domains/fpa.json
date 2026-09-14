@@ -36,7 +36,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Desarrollo de flujos guiados para la elaboración de presupuestos; Previsión y modelización de escenarios bajo demanda",
+        "cases": "Flujos guiados de elaboración presupuestaria; Previsión y escenarios bajo demanda",
         "advanced": "IA guía el calendario presupuestario, detecta retrasos y dependencias entre áreas y propone la replanificación cuando cambian los supuestos.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.1 Gobierno del proceso presupuestario y forecast"
@@ -71,7 +71,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Desarrollo de flujos guiados para la elaboración de presupuestos; Asignación presupuestaria asistida por IA; Identificación de patrones para predecir el rendimiento financiero futuro",
+        "cases": "Flujos guiados de elaboración presupuestaria; Asignación presupuestaria asistida por IA; Patrones históricos para predecir el rendimiento",
         "advanced": "IA identifica los drivers que mejor explican el resultado, propone sus valores de partida y cuantifica la sensibilidad de cada uno.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.2 Modelo presupuestario y drivers de planificación"
@@ -107,7 +107,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Previsión y modelización de escenarios bajo demanda; Identificación de patrones para predecir el rendimiento financiero futuro",
+        "cases": "Previsión y escenarios bajo demanda; Patrones históricos para predecir el rendimiento",
         "advanced": "IA genera el forecast de forma continua, construye escenarios alternativos bajo demanda y alerta cuando la desviación esperada supera el umbral.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.3 Integración de escenarios y rolling forecast"
@@ -142,7 +142,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Desarrollo de flujos guiados para la elaboración de presupuestos; FinanceAI Insights Platform",
+        "cases": "Flujos guiados de elaboración presupuestaria; Analista digital de Finanzas bajo demanda",
         "advanced": "IA guía la aportación de cada responsable, valida su coherencia con los drivers acordados y da seguimiento a los compromisos adquiridos.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.4 Colaboración y accountability presupuestaria"
@@ -177,7 +177,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Informes de gestión con real, plan, desviación y comentario; FinanceAI Insights Platform",
+        "cases": "Informes de gestión con comentario automático; Analista digital de Finanzas bajo demanda",
         "advanced": "IA produce el informe de gestión con la desviación calculada y el comentario redactado, y ajusta el nivel de detalle a cada destinatario.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.1 Modelo de reporting de performance"
@@ -212,7 +212,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de análisis de desviaciones de cuentas con explicaciones inteligentes; Identificación de patrones para predecir el rendimiento financiero futuro",
+        "cases": "Análisis de desviaciones con explicación automática; Patrones históricos para predecir el rendimiento",
         "advanced": "IA descompone la desviación por driver, identifica la causa raíz y anticipa si la brecha se va a cerrar o a ampliar.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.2 Análisis de desviaciones y causa-raíz"
@@ -247,7 +247,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "FinanceAI Insights Platform; Búsqueda y acceso a datos en toda la compañía",
+        "cases": "Analista digital de Finanzas bajo demanda; Consulta del dato en lenguaje natural",
         "advanced": "IA acompaña el cuadro de mando con conclusiones automáticas, alertas y respuesta a preguntas en lenguaje natural sobre el propio dato.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.3 Cuadros de mando y visualización ejecutiva"
@@ -282,7 +282,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Informes de gestión con real, plan, desviación y comentario; Recomendaciones a nivel de proyecto",
+        "cases": "Informes de gestión con comentario automático; Recomendaciones de acción a nivel de proyecto; Reporting estandarizado de revisión de desempeño",
         "advanced": "IA prepara la reunión de seguimiento con las desviaciones relevantes, las acciones pendientes y una recomendación priorizada para cada una.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.4 Rutinas de performance y toma de acciones"
@@ -317,7 +317,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Resumen y puntuación de propuestas de proyecto",
+        "cases": "Resumen y puntuación de propuestas de inversión; Recomendaciones de acción a nivel de proyecto",
         "advanced": "IA revisa que cada business case cumpla la plantilla corporativa, resume su propuesta y señala los supuestos que quedan sin justificar.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.1 Metodología de business case"
@@ -352,7 +352,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Previsión y modelización de escenarios bajo demanda; Resumen y puntuación de propuestas de proyecto",
+        "cases": "Previsión y escenarios bajo demanda; Resumen y puntuación de propuestas de inversión",
         "advanced": "IA construye los escenarios del business case, prueba la sensibilidad de los supuestos y compara el modelo con iniciativas anteriores comparables.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.2 Modelización financiera de iniciativas"
@@ -387,7 +387,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Resumen y puntuación de propuestas de proyecto; Asignación presupuestaria asistida por IA",
+        "cases": "Resumen y puntuación de propuestas de inversión; Asignación presupuestaria asistida por IA",
         "advanced": "IA puntúa y ordena la cartera de iniciativas por valor ajustado a riesgo y propone cómo repartir el capital disponible entre ellas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.3 Priorización y asignación de capital"
@@ -422,7 +422,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recomendaciones a nivel de proyecto; Identificación de patrones para predecir el rendimiento financiero futuro",
+        "cases": "Recomendaciones de acción a nivel de proyecto; Patrones históricos para predecir el rendimiento",
         "advanced": "IA compara el beneficio real con el comprometido, explica la diferencia y devuelve el aprendizaje a los supuestos de los siguientes business cases.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.4 Seguimiento de beneficios y post-mortem"
@@ -457,7 +457,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Búsqueda y acceso a datos en toda la compañía; Realización de análisis e investigación con conclusiones bajo demanda",
+        "cases": "Consulta del dato en lenguaje natural; Analista digital de Finanzas bajo demanda",
         "advanced": "IA localiza el dato en cualquier sistema, indica de qué fuente oficial procede y responde en lenguaje natural sobre la cifra que sustenta la decisión.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.1 Modelo de información para la decisión"
@@ -492,7 +492,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Previsión y modelización de escenarios bajo demanda; Identificación de patrones para predecir el rendimiento financiero futuro",
+        "cases": "Previsión y escenarios bajo demanda; Patrones históricos para predecir el rendimiento; Modelos retadores para contrastar escenarios",
         "advanced": "IA simula el impacto financiero de cada alternativa, estima su probabilidad y recomienda la opción con mejor relación entre valor y riesgo.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.2 Análisis avanzado y escenarios para decisión"
@@ -527,7 +527,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Realización de análisis e investigación con conclusiones bajo demanda; Acceso a datos para toda la organización",
+        "cases": "Analista digital de Finanzas bajo demanda; Consulta del dato en lenguaje natural",
         "advanced": "IA prepara el contraste con negocio: reúne la evidencia, cuestiona los supuestos optimistas y propone las preguntas que conviene plantear.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.3 Finance business partnering y challenge al negocio"
@@ -562,7 +562,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de análisis de desviaciones de cuentas con explicaciones inteligentes; FinanceAI Insights Platform",
+        "cases": "Análisis de desviaciones con explicación automática; Analista digital de Finanzas bajo demanda",
         "advanced": "IA redacta el mensaje ejecutivo a partir de las cifras: drivers, riesgos, decisiones que se piden y acciones propuestas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.4 Narrativa financiera y comunicación ejecutiva"
@@ -632,7 +632,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Previsión y modelización de escenarios bajo demanda; Generación de estrategias de inversión",
+        "cases": "Previsión y escenarios bajo demanda; Generación de estrategias de inversión",
         "advanced": "IA simula escenarios disruptivos, cuantifica su impacto en resultado, caja y solvencia, y propone el plan de contingencia asociado.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.2 Escenarios estratégicos y stress testing"
@@ -667,7 +667,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Planificación integrada de negocio; Recomendaciones a nivel de proyecto",
+        "cases": "Planificación integrada de negocio; Recomendaciones de acción a nivel de proyecto",
         "advanced": "IA conecta objetivos estratégicos, presupuesto e iniciativas, detecta dónde se rompe la cadena y propone la reasignación de recursos.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.3 Conexión entre estrategia, presupuesto y ejecución"
@@ -702,7 +702,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identificación de patrones para predecir el rendimiento financiero futuro; Generación de estrategias de inversión",
+        "cases": "Patrones históricos para predecir el rendimiento; Generación de estrategias de inversión",
         "advanced": "IA mide la creación de valor de cada plan, la anticipa con indicadores adelantados y recomienda reasignar capital antes de que se deteriore.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "5.4 Seguimiento de creación de valor a largo plazo"

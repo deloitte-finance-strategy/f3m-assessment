@@ -36,7 +36,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de una visión ejecutiva de la salud financiera de la compañía; Generación de estrategias de inversión a partir de las condiciones de mercado consolidadas, el rendimiento financiero interno y los objetivos de la firma; Inteligencia de mercado de nueva generación",
+        "cases": "Visión ejecutiva de la salud financiera; Generación de estrategias de inversión; Inteligencia de mercado",
         "advanced": "Visión financiera dinámica y basada en IA, con actualización basada en señales internas/externas, escenarios, salud financiera y recomendaciones estratégicas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.1 Narrativa financiera y ambición estratégica de Finanzas"
@@ -71,7 +71,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de estrategias de inversión a partir de las condiciones de mercado consolidadas, el rendimiento financiero interno y los objetivos de la firma; Valoración predictiva de la compañía a partir del análisis de datos financieros; Recomendaciones a nivel de proyecto",
+        "cases": "Generación de estrategias de inversión; Valoración predictiva de la compañía; Recomendaciones de acción a nivel de proyecto",
         "advanced": "Modelo basado en IA de asignación dinámica de capital, con simulación de escenarios, recomendaciones de inversión/desinversión y aprendizaje sobre retornos reales.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.2 Modelo de creación de valor y capital allocation"
@@ -106,7 +106,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Inteligencia de mercado de nueva generación; Generación de estrategias de inversión a partir de las condiciones de mercado consolidadas; Inteligencia más avanzada",
+        "cases": "Inteligencia de mercado; Generación de estrategias de inversión; Síntesis multifuente para informes de análisis",
         "advanced": "IA monitoriza fuentes internas/externas, sintetiza señales de mercado, identifica implicaciones financieras y recomienda acciones estratégicas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.3 Inteligencia de mercado, competitiva y financiera"
@@ -141,7 +141,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de una visión ejecutiva de la salud financiera de la compañía; FinanceAI Insights Platform; Identificación de patrones históricos para predecir y mejorar el rendimiento financiero futuro",
+        "cases": "Visión ejecutiva de la salud financiera; Analista digital de Finanzas bajo demanda; Patrones históricos para predecir el rendimiento",
         "advanced": "Executive financial health overview basado en IA, con alertas tempranas, explicación automática de drivers y recomendaciones para dirección.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.4 Gobierno de performance estratégica y salud financiera"
@@ -176,7 +176,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recomendaciones a nivel de proyecto; Asistente de código para la transformación digital; FinanceAI Insights Platform",
+        "cases": "Recomendaciones de acción a nivel de proyecto; Asistente de código para la transformación; Analista digital de Finanzas bajo demanda",
         "advanced": "Transformation office basado en IA, con priorización dinámica, recomendación de acciones, detección de riesgos y simulación de impacto del portfolio.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.1 Estrategia y gobierno de transformación financiera"
@@ -211,7 +211,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Asistente de código para la transformación digital; Agentes de IA para ingeniería de software; Automatización de datos financieros de fuentes diversas",
+        "cases": "Asistente de código para la transformación; Agentes de IA para ingeniería de software; Integración automatizada de datos financieros",
         "advanced": "Modelo operativo adaptable y basado en IA, con automatización de tareas, reasignación dinámica de capacidad y roles orientados a análisis, control y valor.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.2 Rediseño del modelo operativo financiero"
@@ -246,7 +246,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Asistente de código para la transformación digital; Agentes de IA para ingeniería de software; Búsqueda y acceso a datos en toda la compañía; Acceso a datos para toda la organización",
+        "cases": "Asistente de código para la transformación; Agentes de IA para ingeniería de software; Consulta del dato en lenguaje natural",
         "advanced": "Finance digital backbone basado en IA, con automatización inteligente, agentes, copilots, analítica avanzada y recomendaciones proactivas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.3 Digitalización, datos y automatización de Finanzas"
@@ -281,7 +281,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Acceso y extracción documental impulsados por IA; Búsqueda y acceso a datos en toda la compañía; Asistente de código para la transformación digital",
+        "cases": "Acceso y extracción documental; Consulta del dato en lenguaje natural; Asistente de código para la transformación",
         "advanced": "IA apoya adopción y aprendizaje personalizado, detecta barreras de cambio, recomienda intervenciones y mide uso/impacto de nuevas capacidades.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.4 Gestión del cambio, adopción y capacidades digitales"
@@ -316,7 +316,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recomendaciones a nivel de proyecto; Recomendación, resumen y detección de riesgos a partir de los datos del clean room de M&A; Generación de una visión ejecutiva de la salud financiera de la compañía",
+        "cases": "Recomendaciones de acción a nivel de proyecto; Análisis del clean room de M&A; Visión ejecutiva de la salud financiera",
         "advanced": "Finance as strategic transformation partner, con IA para identificar oportunidades, riesgos, impactos, dependencias y recomendaciones de acción.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.1 Alineamiento de Finanzas con la transformación empresarial"
@@ -351,7 +351,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recomendaciones a nivel de proyecto; Resumen y puntuación de propuestas de proyecto en toda la organización; Identificación de patrones históricos para predecir y mejorar el rendimiento financiero futuro",
+        "cases": "Recomendaciones de acción a nivel de proyecto; Resumen y puntuación de propuestas de inversión; Patrones históricos para predecir el rendimiento",
         "advanced": "IA recomienda priorización del portfolio, detecta dependencias y riesgos, simula escenarios de ejecución y propone reasignación de recursos.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.2 Gestión de portfolio de iniciativas estratégicas"
@@ -386,7 +386,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recomendación, resumen y detección de riesgos a partir de los datos del clean room de M&A; Valoración predictiva de la compañía a partir del análisis de datos financieros; Generación de estrategias de inversión",
+        "cases": "Análisis del clean room de M&A; Valoración predictiva de la compañía; Generación de estrategias de inversión",
         "advanced": "IA analiza información de clean room, resume riesgos, identifica sinergias, modeliza escenarios y recomienda focos de decisión/integración.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.3 M&A, integración y decisiones corporativas complejas"
@@ -421,7 +421,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Recomendaciones a nivel de proyecto; Generación de una visión ejecutiva de la salud financiera de la compañía; FinanceAI Insights Platform",
+        "cases": "Recomendaciones de acción a nivel de proyecto; Visión ejecutiva de la salud financiera; Analista digital de Finanzas bajo demanda",
         "advanced": "IA compara beneficios esperados/reales, detecta patrones de captura de valor, recomienda acciones y retroalimenta futuros business cases.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.4 Seguimiento de beneficios, valor y aprendizaje empresarial"

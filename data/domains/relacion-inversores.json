@@ -36,7 +36,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de borradores de informes regulatorios; Generación de borradores de secciones de 10Q / 10K; Consolidación de informes financieros en un único informe conforme a normativa",
+        "cases": "Borrador de informes regulatorios; Borrador de secciones 10Q y 10K; Consolidación de informes en un único documento",
         "advanced": "Reporting regulatorio basado en IA con generación asistida de borradores, validación de consistencia, alertas regulatorias y trazabilidad completa de revisión humana.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.1 Gobierno de reporting regulatorio e información al mercado"
@@ -71,7 +71,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Monitorización de la regulación emergente y evaluación del cumplimiento actual; Seguimiento de políticas globales; Resumen de documentos legislativos",
+        "cases": "Vigilancia de regulación emergente; Seguimiento de políticas y regulación global; Resumen de documentos legislativos",
         "advanced": "IA monitoriza regulación global, sintetiza cambios, evalúa impacto preliminar y recomienda acciones de cumplimiento o comunicación.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.2 Monitorización normativa y cumplimiento de obligaciones de mercado"
@@ -106,7 +106,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Interpretación de normas y regulación financiera; Generación de borradores de informes regulatorios; Gestión de riesgos y cumplimiento regulatorio impulsados por IA",
+        "cases": "Interpretación de normativa financiera; Borrador de informes regulatorios; Vigilancia continua de riesgo y cumplimiento",
         "advanced": "IA revisa consistencia entre comunicaciones, detecta posibles inconsistencias o riesgos de disclosure y recomienda validaciones previas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.3 Gobierno de información privilegiada, consistencia y disclosure controls"
@@ -141,7 +141,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de una visión ejecutiva de la salud financiera de la compañía; FinanceAI Insights Platform; Consolidación de informes financieros en un único informe conforme a normativa",
+        "cases": "Visión ejecutiva de la salud financiera; Analista digital de Finanzas bajo demanda; Consolidación de informes en un único documento",
         "advanced": "IA sintetiza inputs internos, identifica inconsistencias, prepara briefs ejecutivos y facilita la alineación de mensajes antes de interacciones externas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.4 Coordinación con órganos de gobierno, auditoría y stakeholders internos"
@@ -176,7 +176,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Asistente de contenidos de marketing; Inteligencia de mercado de nueva generación; Generación de una visión ejecutiva de la salud financiera de la compañía",
+        "cases": "Asistente de contenidos de comunicación; Inteligencia de mercado; Visión ejecutiva de la salud financiera",
         "advanced": "IA analiza mercado, feedback, preguntas de inversores y tendencias para ajustar equity story, mensajes y prioridades de engagement.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.1 Estrategia de relación con inversores y posicionamiento equity story"
@@ -211,7 +211,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Asistente de contenidos de marketing; Generación de una visión ejecutiva de la salud financiera de la compañía; Consolidación de informes financieros en un único informe conforme a normativa",
+        "cases": "Asistente de contenidos de comunicación; Visión ejecutiva de la salud financiera; Consolidación de informes en un único documento; Generación de contenido para el earnings call",
         "advanced": "IA genera briefs, Q&A, resúmenes de feedback, propuestas de mensajes y materiales base para eventos y comunicaciones financieras.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.2 Calendario de comunicación financiera y eventos con mercado"
@@ -246,7 +246,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "FinanceAI Insights Platform; Inteligencia más avanzada; Búsqueda y acceso a datos en toda la compañía",
+        "cases": "Analista digital de Finanzas bajo demanda; Síntesis multifuente para informes de análisis; Consulta del dato en lenguaje natural",
         "advanced": "IA sintetiza feedback de inversores/analistas, identifica temas recurrentes, riesgos de percepción y recomendaciones de engagement.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.3 Gestión de inversores, analistas y feedback del mercado"
@@ -281,7 +281,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Inteligencia de mercado de nueva generación; FinanceAI Insights Platform; Generación de una visión ejecutiva de la salud financiera de la compañía",
+        "cases": "Inteligencia de mercado; Analista digital de Finanzas bajo demanda; Visión ejecutiva de la salud financiera",
         "advanced": "IA identifica relaciones entre actividad RI, percepción de mercado, narrativa, preguntas y recomendaciones para mejorar efectividad.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.4 Métricas de efectividad, percepción y mejora continua de RI"
@@ -316,7 +316,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Valoración predictiva de la compañía a partir del análisis de datos financieros; Generación de estrategias de inversión; Inteligencia de mercado de nueva generación",
+        "cases": "Valoración predictiva de la compañía; Generación de estrategias de inversión; Inteligencia de mercado",
         "advanced": "IA analiza datos financieros y de mercado, predice valoración relativa, identifica drivers y recomienda focos de comunicación o acción.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.1 Análisis de valoración, múltiplos y percepción del mercado"
@@ -351,7 +351,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de estrategias de inversión; Generación de informes de investigación / KYC; Generación de una visión ejecutiva de la salud financiera de la compañía",
+        "cases": "Generación de estrategias de inversión; Informes de investigación y KYC; Visión ejecutiva de la salud financiera",
         "advanced": "IA sintetiza información financiera, mercado y riesgos, prepara materiales base y recomienda mensajes según operación y audiencia.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.2 Soporte financiero a operaciones de mercado y financiación corporativa"
@@ -386,7 +386,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de una visión ejecutiva de la salud financiera de la compañía; FinanceAI Insights Platform; Identificación de patrones históricos para predecir y mejorar el rendimiento financiero futuro",
+        "cases": "Visión ejecutiva de la salud financiera; Analista digital de Finanzas bajo demanda; Patrones históricos para predecir el rendimiento",
         "advanced": "IA compara consensus vs forecast, identifica gaps de expectativa, explica drivers y recomienda puntos de comunicación preventiva.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.3 Gestión de consensus, guidance y expectativas del mercado"
@@ -421,7 +421,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Generación de una visión ejecutiva de la salud financiera de la compañía; Inteligencia de mercado de nueva generación; FinanceAI Insights Platform",
+        "cases": "Visión ejecutiva de la salud financiera; Inteligencia de mercado; Analista digital de Finanzas bajo demanda",
         "advanced": "IA genera overview ejecutivo del mercado de capitales, resume feedback, identifica riesgos/oportunidades y recomienda acciones estratégicas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.4 Reporting estratégico a dirección sobre mercado, inversores y capital"

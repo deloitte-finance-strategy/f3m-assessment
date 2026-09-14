@@ -36,7 +36,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Diseño de producto orquestado por IA; Ensayos clínicos más inteligentes; Descubrimiento y desarrollo de fármacos autónomo de extremo a extremo",
+        "cases": "Diseño de producto orquestado por IA; Ensayos clínicos más inteligentes; Descubrimiento autónomo de fármacos",
         "advanced": "Portfolio de innovación dinámico y basado en IA, con priorización basada en escenarios, señales de mercado, probabilidad de éxito, ROI esperado y recomendaciones de asignación de capital.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.1 Gobierno y portfolio de iniciativas de I+D"
@@ -71,7 +71,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Diseño de producto orquestado por IA; Ensayos clínicos más inteligentes; Descubrimiento y desarrollo de fármacos autónomo de extremo a extremo",
+        "cases": "Diseño de producto orquestado por IA; Ensayos clínicos más inteligentes; Descubrimiento autónomo de fármacos",
         "advanced": "Planificación predictiva de costes y avance de I+D, con simulación de escenarios, detección temprana de desviaciones y recomendaciones sobre continuidad, aceleración o cancelación.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.2 Planificación y control económico de proyectos de I+D"
@@ -106,7 +106,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Cumplimiento regulatorio automatizado; Interpretación de normas y regulación financiera; Diseño de producto orquestado por IA",
+        "cases": "Cumplimiento regulatorio automatizado; Interpretación de normativa financiera; Diseño de producto orquestado por IA; Determinación de elegibilidad para incentivos",
         "advanced": "Motor inteligente de identificación y optimización de incentivos, con screening normativo, elegibilidad predictiva, generación asistida de documentación y alertas de cumplimiento.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.3 Financiación, subvenciones e incentivos de I+D"
@@ -141,7 +141,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Descubrimiento y desarrollo de fármacos autónomo de extremo a extremo; Diseño de producto orquestado por IA; Recomendaciones a nivel de proyecto",
+        "cases": "Descubrimiento autónomo de fármacos; Diseño de producto orquestado por IA; Recomendaciones de acción a nivel de proyecto",
         "advanced": "Medición avanzada de valor con modelos predictivos, análisis de contribución, escenarios de monetización y recomendaciones de inversión/desinversión en innovación.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "1.4 Medición de valor y retorno de la innovación"
@@ -176,7 +176,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Asistente de RFP y de conocimiento impulsado por IA; Operaciones comerciales inteligentes; Asistente de IA para la compra y el leasing de vehículos",
+        "cases": "Asistente de RFP y de conocimiento comercial; Operaciones comerciales inteligentes",
         "advanced": "Asistente IA para propuestas comerciales que recomienda condiciones, identifica riesgos, estima rentabilidad y guía aprobaciones según margen, cliente y probabilidad de conversión.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.1 Gobierno financiero de propuestas y condiciones comerciales"
@@ -211,7 +211,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Asistente de RFP y de conocimiento impulsado por IA; Operaciones comerciales inteligentes; Asistente hiperpersonalizado de ventas y marketing",
+        "cases": "Asistente de RFP y de conocimiento comercial; Operaciones comerciales inteligentes; Personalización de ventas y marketing",
         "advanced": "IA/RFP assistant que resume requerimientos, estima economics, identifica riesgos, propone respuestas y prioriza oportunidades según valor ajustado por probabilidad y riesgo.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.2 Evaluación financiera de oportunidades, RFPs y ofertas"
@@ -246,7 +246,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Agentes de IA para el análisis de riesgo crediticio; Recomendación de condiciones de pago óptimas para mejorar el DSO; Operaciones comerciales inteligentes",
+        "cases": "Agentes de IA para análisis de riesgo crediticio; Condiciones de pago óptimas para el DSO; Operaciones comerciales inteligentes",
         "advanced": "Scoring predictivo de riesgo comercial y exposición, con recomendaciones de condiciones, garantías, límites, pricing y acciones preventivas por cliente u oportunidad.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.3 Gestión de riesgos comerciales y exposición financiera"
@@ -281,7 +281,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Operaciones comerciales inteligentes; Asistente hiperpersonalizado de ventas y marketing; Identificación y corrección proactiva de fugas de ingresos",
+        "cases": "Operaciones comerciales inteligentes; Personalización de ventas y marketing; Detección de fugas de ingresos",
         "advanced": "IA genera insights de performance comercial, identifica oportunidades de mejora, riesgos de margen, leakage y acciones personalizadas por cliente, canal o producto.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "2.4 Seguimiento de performance comercial y rentabilidad de ventas"
@@ -351,7 +351,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Mantenimiento predictivo basado en IA; Gestión autónoma de operaciones de campo; Recomendación de planificación de demanda, coste de producto y fijación de precios",
+        "cases": "Mantenimiento predictivo de activos; Recomendación de demanda, coste y precio",
         "advanced": "IA identifica patrones de coste, anomalías operativas, mantenimiento predictivo y oportunidades de eficiencia con recomendaciones cuantificadas.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.2 Control de costes de fabricación, logística y servicio"
@@ -386,7 +386,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Gestión dinámica de inventario; Operaciones autónomas de cadena de suministro; Herramienta predictiva de previsión de flujo de caja",
+        "cases": "Gestión dinámica de inventario; Operaciones autónomas de cadena de suministro; Previsión predictiva de flujo de caja",
         "advanced": "Optimización predictiva de inventario y working capital con IA, anticipando demanda, obsolescencia, rupturas, exceso de stock y necesidades de caja.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.3 Gestión financiera de inventarios y capital circulante operativo"
@@ -421,7 +421,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Logística y planificación resilientes; Operaciones autónomas de cadena de suministro; Inspección autónoma de infraestructuras con drones",
+        "cases": "Planificación logística resiliente; Operaciones autónomas de cadena de suministro",
         "advanced": "IA monitoriza señales internas/externas de riesgo, simula impactos financieros y recomienda acciones de mitigación, sourcing, inventario o red logística.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "3.4 Resiliencia, riesgo y eficiencia de la cadena de suministro"
@@ -456,7 +456,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Precios dinámicos y optimización de inventario; Examen de tendencias de mercado, comportamiento de proveedores y otros factores para determinar precios óptimos; Recomendación de planificación de demanda, coste de producto y fijación de precios",
+        "cases": "Precio dinámico y optimización de inventario; Precio óptimo a partir de señales de mercado; Recomendación de demanda, coste y precio",
         "advanced": "Pricing dinámico basado en IA que recomienda precios y condiciones según demanda, elasticidad, inventario, cliente, competencia, costes y objetivos de margen.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.1 Estrategia y gobierno de pricing"
@@ -491,7 +491,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identificación y corrección proactiva de fugas de ingresos; Agentes de IA para el éxito del cliente; Asistente hiperpersonalizado de ventas y marketing",
+        "cases": "Detección de fugas de ingresos; Agentes de IA para el éxito del cliente; Personalización de ventas y marketing",
         "advanced": "Modelos IA identifican patrones de rentabilidad, leakage, cross-sell/upsell y recomendaciones de mix, cliente, canal y nivel de servicio.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.2 Modelos de rentabilidad por cliente, producto y canal"
@@ -526,7 +526,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Planificación de promociones; Precios dinámicos y optimización de inventario; Recomendación de planificación de demanda, coste de producto y fijación de precios",
+        "cases": "Planificación de promociones; Precio dinámico y optimización de inventario; Recomendación de demanda, coste y precio",
         "advanced": "IA recomienda promociones, descuentos y condiciones óptimas, simulando elasticidad, canibalización, inventario, margen incremental y probabilidad de conversión.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.3 Optimización de promociones, descuentos y condiciones"
@@ -561,7 +561,7 @@
       "owner": "",
       "status": "No iniciado",
       "ai": {
-        "cases": "Identificación y corrección proactiva de fugas de ingresos; FinanceAI Insights Platform; Generación de análisis de desviaciones de cuentas con explicaciones inteligentes",
+        "cases": "Detección de fugas de ingresos; Analista digital de Finanzas bajo demanda; Análisis de desviaciones con explicación automática",
         "advanced": "IA detecta leakage y desviaciones tempranas, explica drivers de margen, recomienda acciones de precio/mix/coste y cuantifica impacto esperado en valor.",
         "source": "F3M_AI_Mapping_Consolidado_v1.xlsx",
         "subcapacidad": "4.4 Seguimiento de margen, leakage y creación de valor"
