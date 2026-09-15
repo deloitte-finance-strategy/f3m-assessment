@@ -35,7 +35,16 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
 - Revisar roadmap ordenado por prioridad y gap.
 - Guardar una copia del trabajo en un archivo y volver a abrirla más adelante, desde el menú
   **Escenario** de la cabecera.
-- Exportar resumen y roadmap en CSV, y un informe completo en PDF.
+- Exportar resumen y roadmap en CSV.
+- Exportar **el informe**: un PDF con forma de presentación, en página 16:9, que abre con la lectura
+  de la función financiera completa, sigue con el diagnóstico del dominio —escala de madurez,
+  perfil por palanca, radares, heatmap y brechas— y cierra con el roadmap por oleadas y las
+  oportunidades de inteligencia artificial que aplican al dominio.
+
+  Al imprimir, elegir **«Guardar como PDF»** y activar **«Gráficos de fondo»**: las portadas van a
+  sangre y la escala de color del heatmap es información, no adorno, y sin eso salen en blanco. El
+  tamaño de página lo fija el propio informe (338×190mm, la diapositiva 16:9 de PowerPoint), así que
+  no hay que tocar el selector de papel.
 
 ## Reglas de cálculo
 

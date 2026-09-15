@@ -34,13 +34,16 @@ navegador. Cualquier servidor estático equivalente sirve.
 | Archivo | Rol | Líneas |
 |---|---|---|
 | `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 776 |
-| `app.js` | Estado, DOM, Firebase, filtros, render de las cinco vistas | 6.464 |
+| `app.js` | Estado, DOM, Firebase, filtros, render de las cinco vistas | 6.911 |
 | `styles.css` | Estilos | 3.845 |
-| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 374 |
+| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 435 |
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 453 |
 | `core/presentacion.js` | Escapado, formato de números y colores de marca | 105 |
-| `informe/pdf.js` | El informe PDF: de los datos al HTML imprimible | 825 |
-| `tests/` | Pruebas de `core/` y del espejo con las reglas, sin dependencias | — |
+| `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 369 |
+| `informe/secciones.js` | Una función por diapositiva | 822 |
+| `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 302 |
+| `informe/estilos.js` | La paleta del informe y su hoja de estilos | 970 |
+| `tests/` | Pruebas de `core/`, de `informe/graficos.js` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
 | `data/domains/*.json` | Datos del assessment, un archivo por dominio | — |
@@ -116,6 +119,50 @@ qué compartir objetivo. La caché de objetivos va indexada por la pareja domini
 Cuidado al pasar cualquiera de las dos a un `map()`: su segundo argumento es el dominio, y `map`
 pasa el índice. Por eso `agregarPorCapacidad()` las envuelve en lambdas, y el motor también
 (`core/calculo.js`). Esas lambdas no son redundantes.
+
+### El informe PDF es un deck, no un documento
+
+La página mide **338×190mm**, que es exactamente la diapositiva 16:9 de PowerPoint (13,33×7,5
+pulgadas). No es una proporción aproximada: con esa medida el PDF se proyecta a pantalla completa
+sin bandas y se inserta en una presentación sin reescalar. Es lo más cerca de una `.pptx` sin
+generar una `.pptx`, que habría sido una dependencia vendorizada y un motor de maquetación distinto.
+
+El informe abre con **la función financiera entera** —los nueve dominios, los datos del Overview— y
+después entra al dominio activo. Eso significa que el PDF hereda la excepción del Overview: **la
+parte global no aplica los filtros y la de dominio sí.** El informe lo dice en pantalla, igual que
+la aplicación, para que el descuadre no se lea como un fallo.
+
+El reparto de `informe/`:
+
+- `pdf.js` decide **qué diapositivas y en qué orden**. El plan se arma entero antes de dibujar nada,
+  porque el índice necesita los números de las demás y esos dependen de los filtros y del dominio.
+- `secciones.js` pinta cada diapositiva. `graficos.js` dibuja. `estilos.js` tiene la paleta y la hoja.
+
+Los gráficos van en **SVG generado por funciones puras**, no en Chart.js: la ventana del informe se
+escribe con `document.write()` y **no lleva scripts a propósito**, así que no hay dónde arrancar una
+librería. De paso imprimen en vectorial y se pueden probar sin navegador. Los **radares siguen
+siendo PNG capturados de Chart.js** —seis ahora, no tres: los del Dashboard y los del Overview—
+porque un radar a mano sale peor y ese camino ya estaba probado.
+
+**Ninguna diapositiva puede desbordar.** Lleva `overflow: hidden`, y está ahí a propósito: sin él,
+un milímetro de más genera una página en blanco detrás de cada una y el PDF sale con veinte páginas
+vacías intercaladas. Pero recortar en silencio es el fallo que más caro sale en una sesión con
+cliente, así que la red es que nada llegue a recortarse nunca:
+
+- Las secciones largas se **reparten** en varias diapositivas con `paginar()`, no se truncan.
+  Cuántas filas caben está en `POR_DIAPOSITIVA`, en `informe/secciones.js`.
+- `tests/comprobar-desbordes.js` mide cada diapositiva en el navegador y dice lo que sobra. **Al
+  tocar `informe/estilos.js`, el tamaño de letra de una tabla o `POR_DIAPOSITIVA`, hay que volver a
+  pasarlo**, y sobre los nueve dominios: Controlling tiene 24 subcapacidades y es el que aprieta.
+
+Los números de `POR_DIAPOSITIVA` y el relleno de fila de `.tabla` están cuadrados entre sí. Apretar
+las filas no es gratis en la otra dirección: con ellas más juntas, la tabla de nueve dominios
+ocupaba dos tercios de la diapositiva y dejaba una franja blanca debajo que, proyectada, parece una
+diapositiva a medio terminar.
+
+Un SVG con `viewBox` y `height: auto` mide lo que diga su proporción **por ancho**: el mismo bullet
+ocupa 4mm en una celda de tabla y 20mm en una tarjeta. Cada uso fija su altura en `estilos.js`; si
+se añade un gráfico nuevo, hay que fijársela también.
 
 ## Reglas de negocio F3M
 
@@ -322,7 +369,12 @@ Las reglas de negocio, el contrato de escenario y el espejo con `database.rules.
 - **Desde la línea de comandos**, si hay Node: `node tests/ejecutar.mjs`. Sale con código `1` si
   falla algo, listo para CI.
 
-Los dos ejecutan los mismos casos. Al tocar `core/` **o `database.rules.json`**, ejecutarlas.
+Los dos ejecutan los mismos casos. Al tocar `core/`, `informe/graficos.js` **o
+`database.rules.json`**, ejecutarlas.
+
+`tests/comprobar-desbordes.js` no va con esos: mide si una diapositiva del informe se recorta, y
+para eso hace falta un navegador que maquete. Se pega en la consola **de la ventana del informe**,
+antes de imprimir.
 
 Ojo con el navegador: los módulos ES se cachean con ganas, y un cambio en `core/` puede no verse al
 recargar. Si un resultado no cuadra con lo que acabas de editar, sirve en un puerto distinto —origen
@@ -349,13 +401,19 @@ resto se comprueba a mano:
 4. Con un filtro puesto, comprobar que **KPIs, tabla, radares, heatmap, roadmap, CSV y PDF dan el
    mismo recuento** — y que el **Overview no cambia**, que es lo suyo.
 5. Ir y volver entre Overview y Dashboard: los radares de los dos siguen correctos (5 ejes de
-   capacidad y 9 de dominio). Exportar el PDF desde el Overview y comprobar que sale del dominio
-   activo y **con sus tres radares**, no en blanco.
-6. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
+   capacidad y 9 de dominio).
+6. **El informe.** Exportar desde **cada una de las cinco vistas**, incluido el Roadmap sin haber
+   pasado por Dashboard ni Overview: los **seis** radares tienen que salir pintados, los 3 de
+   dominio y los 3 de la parte global. En el diálogo, «Guardar como PDF» con **«Gráficos de fondo»
+   activado** —sin eso las portadas y el heatmap salen en blanco—, y comprobar que **ninguna
+   diapositiva desborda** a una segunda página. Pasar `tests/comprobar-desbordes.js` en la consola
+   de la ventana del informe, y hacerlo también sobre **Controlling**, que con 24 subcapacidades es
+   el dominio que aprieta.
+7. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
    la fila de Fiscal. Tesorería tiene una capacidad con el mismo nombre y no debe moverse.
-7. Cambiar de dominio y confirmar que los datos se recargan.
-8. Recargar la página y confirmar que el escenario persiste.
-9. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
+8. Cambiar de dominio y confirmar que los datos se recargan.
+9. Recargar la página y confirmar que el escenario persiste.
+10. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
    uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
    guardado se pone **rojo**.
 
