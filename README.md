@@ -89,6 +89,26 @@ La lista de dominios vive en **`data/domains.json`**, que es la fuente única: d
 el script de conversión como la aplicación. Añadir un dominio es añadir una entrada ahí y volver a
 ejecutar los dos comandos de arriba.
 
+### Los casos de uso de IA
+
+Los títulos de los casos viven en la hoja `AI Overlay` de cada Excel de dominio, y de ahí pasan al
+campo `ai.cases` de los JSON. **Lo que cada caso hace y sus dos etiquetas** —tipo de IA y tipo de
+valor— viven aparte, en **`data/casos-ia.json`**: son 100 fichas que la aplicación cruza con las 413
+apariciones al pintar, en vez de repetirlas dentro de cada subcapacidad.
+
+`check_domains_sync.py` cruza las dos listas en cada ejecución, en las dos direcciones. El cruce es
+por texto exacto, así que un título que se renombra en un sitio y no en el otro pone el CI en rojo
+en vez de dejar una ficha sin etiquetas en pantalla.
+
+El documento de trabajo del equipo se genera desde ahí, y no al revés:
+
+```powershell
+python scripts/generar_excel_casos_ia.py    # -> Casos_de_uso_IA_Finance_Strategy.xlsx
+```
+
+Ese Excel no se versiona, porque es una salida. Si el equipo corrige una etiqueta en su copia, hay
+que llevarla a `data/casos-ia.json`: la siguiente regeneración pisa el cambio.
+
 ## Pruebas
 
 Las reglas de cálculo y el contrato de los escenarios se prueban sin instalar nada:

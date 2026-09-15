@@ -566,6 +566,25 @@
                   </div>
                 </section>
               </div>
+
+              <!--
+                Los casos de IA, aqui y no solo en el modal del roadmap.
+
+                El roadmap solo lista subcapacidades ya puntuadas, asi que en una
+                sesion recien abierta los 100 casos del catalogo no se veian por
+                ningun sitio. Este bloque los pone donde el consultor trabaja,
+                sin tener que haber puntuado nada antes.
+
+                Ocupa las dos columnas: cada ficha lleva titulo, dos etiquetas y
+                una frase, y en media rejilla se parte en tres lineas.
+              -->
+              <section class="assessment-detail-block ai-detail-block" hidden>
+                <h4>
+                  Casos de uso de IA
+                  <span class="ai-case-count" hidden></span>
+                </h4>
+                <div class="ai-case-cards"></div>
+              </section>
             </div>
         </details>
       </article>
@@ -729,8 +748,11 @@
       </div>
 
       <div class="ai-modal-section">
-        <h4>Casos de uso de IA asociados</h4>
-        <p id="aiModalCases"></p>
+        <h4>
+          Casos de uso de IA asociados
+          <span class="ai-case-count" id="aiModalCasesCount" hidden></span>
+        </h4>
+        <div class="ai-case-cards" id="aiModalCases"></div>
       </div>
 
       <div class="ai-modal-section">

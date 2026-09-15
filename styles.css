@@ -1118,7 +1118,9 @@ display: none;
 .capability-chip,
 .priority-badge,
 .level-badge,
-.status-chip {
+.status-chip,
+.ai-tag,
+.ai-case-count {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
@@ -2264,6 +2266,146 @@ border-color: #eef0ed;
   font-size: 0.8rem;
   font-weight: 450;
   line-height: 1.5;
+}
+
+
+/* ==================================================
+   FICHAS DE CASO DE IA
+
+   Las comparten el modal del roadmap y el bloque de la tarjeta de assessment.
+
+   Sin familia de color nueva, y a proposito: el sistema ya esta lleno. El
+   verde, el naranja y el azul marino son las tres palancas y no significan
+   ninguna otra cosa; el rojo, el ambar y el verde son la prioridad; el teal es
+   el nivel de madurez y el azul es el estado. Una sexta familia no significaria
+   nada por si misma y le restaria significado a las cinco que si lo tienen.
+
+   Las dos etiquetas se distinguen por peso dentro de la familia neutra: el tipo
+   de valor lleva relleno porque es el eje que ordena la conversacion con el
+   cliente, y el tipo de IA va con borde y sin fondo porque es un calificativo
+   tecnico. Las dos excepciones —Agéntica y Automatización— son tonales, no
+   cromaticas.
+   ================================================== */
+
+/* auto-fit y no auto-fill: ninguna subcapacidad trae mas de cuatro casos —el
+   reparto real es 2, 3 o 4, y tres es lo normal—, asi que con auto-fill la
+   rejilla ancha de la tarjeta reservaba columnas vacias y las fichas se
+   quedaban arrinconadas a la izquierda. Con auto-fit las columnas sobrantes se
+   colapsan y las fichas reparten el ancho entre las que hay. */
+.ai-case-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin: 0;
+  padding: 0;
+  gap: 10px;
+  list-style: none;
+}
+
+.ai-case {
+  display: grid;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fafbf8;
+  gap: 7px;
+  align-content: start;
+}
+
+/* Los tres van anidados bajo .ai-case, y no es adorno: dentro del modal compiten
+   con ".ai-modal-section p", que le gana por especificidad a una clase sola. Sin
+   el anidamiento el titulo del caso salia con el mismo peso y el mismo tamano
+   que su descripcion, y la ficha se quedaba sin jerarquia justo en la superficie
+   donde se ensena al cliente. */
+.ai-case .ai-case-title {
+  /* #1f2723 sobre #fafbf8 da 14,73:1. */
+  margin: 0;
+  color: #1f2723;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ai-case .ai-case-tags {
+  display: flex;
+  margin: 0;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ai-case .ai-case-description {
+  /* #3f4842 sobre #fafbf8 da 9,12:1. */
+  margin: 0;
+  color: #3f4842;
+  font-size: 0.86rem;
+  font-weight: 450;
+  line-height: 1.5;
+}
+
+/* Las dos etiquetas llevan la definicion en el title: en una sesion, la
+   pregunta que sigue a "Agéntica" es siempre "y eso que quiere decir". */
+.ai-tag[title] {
+  cursor: help;
+}
+
+/* Tipo de valor: relleno neutro. #2f3732 sobre #e8ebe6 da 10,19:1. */
+.ai-tag-valor {
+  border: 1px solid transparent;
+  background: #e8ebe6;
+  color: #2f3732;
+}
+
+/* Tipo de IA: borde y fondo transparente. #4f5952 sobre #fafbf8 da 7,01:1. */
+.ai-tag-ia {
+  border: 1px solid #c2ccc0;
+  background: transparent;
+  color: #4f5952;
+}
+
+/* Agéntica es lo que todo el mundo pregunta ahora mismo, y se busca con la
+   vista. Oscuro de alto contraste: blanco sobre #2f3732 da 12,26:1. */
+.ai-tag-ia.es-agentica {
+  border-color: #2f3732;
+  background: #2f3732;
+  color: #ffffff;
+}
+
+/* Automatización es la etiqueta honesta de "esto no es IA de verdad" y no debe
+   lucir como si lo fuera: el tratamiento mas apagado del conjunto. Apagado no
+   es ilegible —#5c665e sobre #fafbf8 da 5,75:1—; lo que baja es el borde. */
+.ai-tag-ia.es-automatizacion {
+  border-color: #dfe4dc;
+  border-style: dashed;
+  color: #5c665e;
+  font-weight: 700;
+}
+
+/* Cuantos casos trae la subcapacidad, junto al titulo de la seccion. El titulo
+   va en versalitas y con tracking; el numero no. */
+.ai-case-count {
+  margin-left: 8px;
+  background: #e8ebe6;
+  /* #4f5952 sobre #e8ebe6 da 6,05:1. */
+  color: #4f5952;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  text-transform: none;
+  vertical-align: middle;
+}
+
+/* La geometria de los chips trae display: inline-flex, que le gana al
+   display: none del atributo hidden. Sin esto, el contador vacio se veria. */
+.ai-case-count[hidden] {
+  display: none;
+}
+
+/* El bloque de la tarjeta ocupa las dos columnas del detalle: cada ficha lleva
+   titulo, dos etiquetas y una frase, y en media rejilla se parte en tres
+   lineas. La linea lateral va en gris porque es de lo que hablan los chips: la
+   familia neutra, sin pisar el azul, el verde ni el ambar de los otros tres
+   bloques. */
+.ai-detail-block {
+  grid-column: 1 / -1;
+  border-left: 3px solid rgba(79, 89, 82, 0.75);
 }
 
 

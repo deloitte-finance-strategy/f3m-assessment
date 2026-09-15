@@ -44,6 +44,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
 | `data/domains/*.json` | Datos del assessment, un archivo por dominio | — |
+| `data/casos-ia.json` | **Fuente única de los 100 casos de uso de IA** y sus dos etiquetas | — |
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
 | `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
 | `vendor/` | Chart.js, servido desde aquí y no desde un CDN. **Se versiona** | — |
@@ -58,6 +59,7 @@ Flujo de arranque, en `init()` de `app.js`:
 ```
 cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScenarioModeNotice()
   → cargarCatalogoDeDominios()   // data/domains.json + pinta el conmutador
+  → cargarCatalogoDeCasosDeIa()  // data/casos-ia.json; si falla, se sigue sin fichas
   → loadCoreDomains()            // Promise.allSettled de los 9 dominios
   → setActiveDomain("fpa")
   → applyStoredScenario()        // copia local de localStorage
@@ -254,6 +256,26 @@ python scripts/convert_domains.py
 Requiere `openpyxl`. Consecuencia práctica: si se editan los JSON a mano, la siguiente ejecución del
 script sobrescribe esos cambios.
 
+## Los casos de uso de IA van por otro camino
+
+El **título** de cada caso viene de la hoja `AI Overlay` del Excel de dominio y acaba en `ai.cases`,
+una cadena `"a; b; c"` dentro de cada subcapacidad. Lo que el caso **hace** y sus **dos etiquetas**
+—tipo de IA y tipo de valor— viven en `data/casos-ia.json`, y la aplicación las cruza al pintar.
+
+**El cruce es por el título, exacto.** Son 100 fichas para 413 apariciones: meterlas dentro de cada
+subcapacidad serían 413 copias repartidas por los nueve archivos de datos, y renombrar un caso
+obligaría a tocarlas todas.
+
+Aquí la dirección del flujo se invierte respecto a todo lo demás: **el repositorio es la fuente y el
+Excel del equipo es la salida**, que se regenera con `scripts/generar_excel_casos_ia.py` y por eso
+no se versiona. `scripts/bootstrap_casos_ia.py` es el arranque de una sola vez que trajo los tres
+campos al repositorio; se conserva por trazabilidad. Si el equipo corrige una etiqueta en su copia,
+hay que traerla al JSON a conciencia.
+
+Un título que se renombre en un sitio y no en el otro no rompe nada visiblemente: la ficha se pinta
+con el título solo, sin etiquetas ni frase, y eso no se distingue de un caso sin clasificar. Por eso
+`check_domains_sync.py` cruza las dos listas en las dos direcciones y pone el CI en rojo.
+
 ## Añadir un dominio nuevo
 
 **Un solo sitio**: una entrada en `data/domains.json`, con `id`, `label`, `title`, `group`, `source`
@@ -271,7 +293,8 @@ Los tres `group` válidos están en `groups`, dentro del mismo archivo: `Transac
 `Técnicos y especializados`, `Estratégicos y de negocio`.
 
 `check_domains_sync.py` detecta lo que suele fallar: un Excel que no existe, un campo que falta, un
-grupo inventado, un id repetido y un JSON huérfano que el catálogo no menciona.
+grupo inventado, un id repetido y un JSON huérfano que el catálogo no menciona. También cruza el
+catálogo de casos de IA con los títulos que usan las subcapacidades, en las dos direcciones.
 
 ## Convenciones
 
@@ -288,8 +311,8 @@ grupo inventado, un id repetido y un JSON huérfano que el catálogo no menciona
 python scripts/check_domains_sync.py
 ```
 
-Verifica el catálogo de dominios y que los 9 JSON coinciden con sus Excel. Código de salida `1` si
-algo falla.
+Verifica el catálogo de dominios, el catálogo de casos de IA y que los 9 JSON coinciden con sus
+Excel. Código de salida `1` si algo falla.
 
 Las reglas de negocio, el contrato de escenario y el espejo con `database.rules.json` se prueban en
 `tests/`, sin dependencias:
@@ -318,7 +341,9 @@ resto se comprueba a mano:
      ejes. Cambiar de dominio en el conmutador **no** debe cambiar ninguna cifra del Overview.
    - **Dashboard**: KPIs, titulares ejecutivos, barras de prioridad y palanca, y los 3 radares.
    - **Assessment**: cambiar un score y comprobar que se recalculan nivel, gap, prioridad y oleada,
-     **sin perder el foco ni cerrar los paneles de detalle abiertos**.
+     **sin perder el foco ni cerrar los paneles de detalle abiertos**. En «Ver detalle», el bloque
+     de casos de IA trae de 2 a 4 fichas, cada una con sus dos etiquetas y su frase: un título
+     suelto, sin etiquetas, es un cruce roto.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos.
 4. Con un filtro puesto, comprobar que **KPIs, tabla, radares, heatmap, roadmap, CSV y PDF dan el

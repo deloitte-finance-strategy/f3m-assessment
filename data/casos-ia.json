@@ -1,0 +1,949 @@
+{
+  "_comentario": "Fuente unica de los casos de uso de IA: que hace cada uno y sus dos etiquetas. Lo lee app.js (para las fichas del modal de IA y de la tarjeta de assessment), scripts/check_domains_sync.py (que cruza estos titulos con los de ai.cases de data/domains/*.json, en las dos direcciones) y scripts/generar_excel_casos_ia.py (que regenera el documento del equipo). El cruce con las subcapacidades se hace por 'titulo', que coincide exactamente con cada entrada de ai.cases. Los campos 'poc' y 'origen' no los usa la aplicacion: estan para que el Excel del equipo se pueda regenerar sin perder nada.",
+  "tiposDeIa": [
+    {
+      "valor": "Analítica",
+      "definicion": "Modelos que detectan patrones, predicen o puntúan sobre datos históricos."
+    },
+    {
+      "valor": "Generativa",
+      "definicion": "Modelos que redactan, resumen o interpretan lenguaje y documentos."
+    },
+    {
+      "valor": "Analítica + generativa",
+      "definicion": "Combina la predicción con la explicación en lenguaje de negocio."
+    },
+    {
+      "valor": "Agéntica",
+      "definicion": "Varios agentes especializados que se coordinan y ejecutan sin intervención paso a paso."
+    },
+    {
+      "valor": "Automatización",
+      "definicion": "No hay IA propiamente dicha: es automatización de proceso. Se marca a propósito para no venderlo como IA."
+    }
+  ],
+  "tiposDeValor": [
+    {
+      "valor": "Eficiencia operativa",
+      "definicion": "Hace lo mismo con menos esfuerzo o menos tiempo."
+    },
+    {
+      "valor": "Control y cumplimiento",
+      "definicion": "Reduce error, fraude o incumplimiento."
+    },
+    {
+      "valor": "Analítica y decisión",
+      "definicion": "Produce conocimiento para decidir."
+    },
+    {
+      "valor": "Valor de negocio",
+      "definicion": "Mueve una palanca de P&L o de caja directamente."
+    },
+    {
+      "valor": "Habilitador transversal",
+      "definicion": "Infraestructura que hace posibles a los demás: acceso al dato, calidad del maestro, plataforma analítica."
+    }
+  ],
+  "casos": [
+    {
+      "id": "IA-001",
+      "titulo": "Checklist inteligente de cierre",
+      "descripcion": "La IA genera y mantiene la lista de tareas del cierre, controla las dependencias entre ellas y avisa de los pasos pendientes o fuera de plazo.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Automated closing checklists"
+    },
+    {
+      "id": "IA-002",
+      "titulo": "Cierre sin intervención sobre P2P y O2C",
+      "descripcion": "La IA captura las variaciones y excepciones de los ciclos P2P y O2C para que el cierre avance sin intervención manual salvo en las excepciones reales.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Capture variations and exceptions in P2P/O2C enabling touchless close"
+    },
+    {
+      "id": "IA-003",
+      "titulo": "Minería de procesos del cierre",
+      "descripcion": "La IA reconstruye el proceso real de cierre a partir de las trazas de sistema y localiza cuellos de botella y excepciones recurrentes.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — AI-enabled process mining"
+    },
+    {
+      "id": "IA-004",
+      "titulo": "Detección de provisiones omitidas",
+      "descripcion": "La IA compara el devengo del periodo con la tendencia histórica y señala las provisiones que deberían estar registradas y no lo están.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "FinanceAI — Identify missing monthly accruals based on historic trends"
+    },
+    {
+      "id": "IA-005",
+      "titulo": "Automatización de asientos y previsión del cierre",
+      "descripcion": "La IA propone los asientos recurrentes del periodo y estima el valor de cierre antes de que el periodo termine.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Journal Entry Automation & Close Value prediction"
+    },
+    {
+      "id": "IA-006",
+      "titulo": "Detección de asientos inusuales en el cierre",
+      "descripcion": "La IA puntúa los asientos del periodo y señala para revisión los que se desvían del patrón contable habitual.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "FinanceAI — Identify unusual entries recorded during the close period"
+    },
+    {
+      "id": "IA-007",
+      "titulo": "Vigilancia en tiempo real de asientos sospechosos",
+      "descripcion": "La IA analiza los asientos según se registran y alerta de los potencialmente fraudulentos antes de que consoliden.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "FinanceAI — Monitor potentially suspect or fraudulent journal entries in real time"
+    },
+    {
+      "id": "IA-008",
+      "titulo": "Detección de errores de clasificación de gasto",
+      "descripcion": "La IA agrupa y clasifica los apuntes de gasto y señala los imputados a una cuenta o centro que no corresponde.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "FinanceAI — Identify expense classification errors"
+    },
+    {
+      "id": "IA-009",
+      "titulo": "Detección proactiva de fraude",
+      "descripcion": "La IA cruza operaciones, contrapartes y patrones de comportamiento para detectar actividad fraudulenta antes de que se materialice la pérdida.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "FinanceAI — Proactive detection of fraudulent activities"
+    },
+    {
+      "id": "IA-010",
+      "titulo": "Conciliación a nivel de transacción",
+      "descripcion": "La IA casa saldos contables contra facturas, pedidos de compra y extractos bancarios, y explica las diferencias que no cuadran.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Reconcile account balances at transaction level to invoices, purchase orders and bank statements"
+    },
+    {
+      "id": "IA-015",
+      "titulo": "Consolidación multinorma y multidivisa",
+      "descripcion": "La IA consolida registros contables llevados bajo normas y divisas distintas y señala los ajustes que requieren criterio.",
+      "tipoIa": "Automatización",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Consolidate accounting records under different standards and currencies"
+    },
+    {
+      "id": "IA-016",
+      "titulo": "Detección de inconsistencias en datos maestros",
+      "descripcion": "La IA revisa los registros maestros y localiza duplicados, campos incoherentes y valores fuera de dominio antes de que contaminen el reporting.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Habilitador transversal",
+      "poc": false,
+      "origen": "FinanceAI — Identify inconsistencies in master data records"
+    },
+    {
+      "id": "IA-017",
+      "titulo": "Flujos guiados de cambio en datos maestros",
+      "descripcion": "La IA guía el alta y la modificación de datos maestros, valida la información aportada y encamina las aprobaciones.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Habilitador transversal",
+      "poc": false,
+      "origen": "FinanceAI — Guided adaptable workflows for master data record changes"
+    },
+    {
+      "id": "IA-018",
+      "titulo": "Generación de documentación de metadatos",
+      "descripcion": "La IA redacta la descripción de cuentas, campos y objetos de datos a partir de su uso real.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Habilitador transversal",
+      "poc": false,
+      "origen": "FinanceAI — Generate metadata documentation"
+    },
+    {
+      "id": "IA-019",
+      "titulo": "Integración automatizada de datos financieros",
+      "descripcion": "La IA normaliza e integra información financiera procedente de sistemas y formatos distintos para dejarla lista para reporting.",
+      "tipoIa": "Automatización",
+      "tipoValor": "Habilitador transversal",
+      "poc": false,
+      "origen": "FinanceAI — Automate financial data across diverse sources"
+    },
+    {
+      "id": "IA-025",
+      "titulo": "Preparación asistida de estados financieros",
+      "descripcion": "La IA prepara el borrador de los estados financieros y valida su consistencia interna antes de la revisión humana.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Automated financial statement preparation"
+    },
+    {
+      "id": "IA-026",
+      "titulo": "Consolidación de informes en un único documento",
+      "descripcion": "La IA unifica informes financieros redactados en formatos distintos en un solo documento conforme a normativa.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Consolidate written financial reports into one compliant report"
+    },
+    {
+      "id": "IA-027",
+      "titulo": "Borrador de informes regulatorios",
+      "descripcion": "La IA redacta el primer borrador de los informes regulatorios a partir de los datos del periodo y de la normativa aplicable.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Generate draft regulatory filings"
+    },
+    {
+      "id": "IA-028",
+      "titulo": "Borrador de secciones 10Q y 10K",
+      "descripcion": "La IA redacta secciones concretas de los informes 10Q y 10K y deja trazabilidad de la cifra que sustenta cada párrafo.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Draft sections of 10Q / 10K generation"
+    },
+    {
+      "id": "IA-029",
+      "titulo": "Borrador narrativo del MD&A",
+      "descripcion": "La IA redacta el análisis narrativo de la dirección sobre resultados y situación financiera a partir de las cifras del periodo.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Narrative MD&A draft generation"
+    },
+    {
+      "id": "IA-030",
+      "titulo": "Interpretación de normativa financiera",
+      "descripcion": "La IA localiza la norma aplicable a un hecho concreto, la resume y señala las implicaciones contables o de reporting.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "FinanceAI — Financial rules and regulations interpretations"
+    },
+    {
+      "id": "IA-031",
+      "titulo": "Vigilancia de regulación emergente",
+      "descripcion": "La IA monitoriza los cambios normativos publicados y evalúa el grado de cumplimiento actual frente a ellos.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "FinanceAI — Monitor emerging regulations and evaluate current state compliance"
+    },
+    {
+      "id": "IA-032",
+      "titulo": "Seguimiento de políticas y regulación global",
+      "descripcion": "La IA rastrea de forma continua los desarrollos regulatorios de múltiples países y avisa de los que afectan a la compañía.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "Dossier — Global policy tracking (p. 123, Government & Public Services)"
+    },
+    {
+      "id": "IA-033",
+      "titulo": "Resumen de documentos legislativos",
+      "descripcion": "La IA procesa y resume propuestas normativas y documentación legislativa extensa.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "Dossier — Summarizing legislative documents (p. 121, Government & Public Services)"
+    },
+    {
+      "id": "IA-034",
+      "titulo": "Cumplimiento regulatorio automatizado",
+      "descripcion": "La IA procesa volúmenes grandes de documentación regulatoria de varias geografías y extrae las obligaciones aplicables.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "Dossier — Automated regulatory compliance (p. 151, Life Sciences & Health Care)"
+    },
+    {
+      "id": "IA-040",
+      "titulo": "Análisis de desviaciones con explicación automática",
+      "descripcion": "La IA calcula las desviaciones por cuenta, identifica los drivers y redacta la explicación en lenguaje de gestión.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": true,
+      "origen": "FinanceAI — Generate account variance analysis and intelligent explanations"
+    },
+    {
+      "id": "IA-041",
+      "titulo": "Informes de gestión con comentario automático",
+      "descripcion": "La IA produce el informe de real frente a plan con la desviación calculada y el comentario de gestión ya redactado.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "FinanceAI — Mgmt Reporting Actuals Plan Variance + Commentary"
+    },
+    {
+      "id": "IA-042",
+      "titulo": "Analista digital de Finanzas bajo demanda",
+      "descripcion": "Un analista digital responde preguntas sobre los datos de Finanzas, investiga en varias fuentes y devuelve las primeras conclusiones sin pasar por el equipo de análisis.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Habilitador transversal",
+      "poc": true,
+      "origen": "FinanceAI — FinanceAI Insights Platform / Digital Analyst"
+    },
+    {
+      "id": "IA-043",
+      "titulo": "Patrones históricos para predecir el rendimiento",
+      "descripcion": "La IA identifica patrones en la serie histórica para anticipar el rendimiento financiero futuro y señalar desviaciones tempranas.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": true,
+      "origen": "FinanceAI — Identify past data patterns to predict and improve future financial performance"
+    },
+    {
+      "id": "IA-044",
+      "titulo": "Visión ejecutiva de la salud financiera",
+      "descripcion": "La IA compone una lectura ejecutiva del estado financiero de la compañía con sus drivers y sus señales de alerta.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "FinanceAI — Generate executive level overview of company financial health"
+    },
+    {
+      "id": "IA-045",
+      "titulo": "Consulta del dato en lenguaje natural",
+      "descripcion": "La IA permite preguntar por los datos de la compañía en lenguaje natural y devuelve la respuesta sin pasar por un analista.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Habilitador transversal",
+      "poc": false,
+      "origen": "Dossier — Enterprise-wide data search and access (p. 79, FS) / Data access for all (p. 23, Consumer) / Insights for all (p. 109, GPS)"
+    },
+    {
+      "id": "IA-046",
+      "titulo": "Síntesis multifuente para informes de análisis",
+      "descripcion": "La IA recopila y cruza información de fuentes internas y externas y produce un informe de análisis con las conclusiones ordenadas.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "Dossier — Smarter intelligence (p. 103, Government & Public Services)"
+    },
+    {
+      "id": "IA-047",
+      "titulo": "Recomendaciones de acción a nivel de proyecto",
+      "descripcion": "La IA compara el avance económico de cada proyecto con su plan y propone acciones concretas de corrección o reasignación.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": true,
+      "origen": "FinanceAI — Project-level recommendations"
+    },
+    {
+      "id": "IA-048",
+      "titulo": "Recomendaciones de resolución de incidencias",
+      "descripcion": "La IA agrupa las incidencias operativas recurrentes, identifica su causa y propone la corrección antes de que se repitan.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Proactive defect resolution recommendations"
+    },
+    {
+      "id": "IA-049",
+      "titulo": "Acceso y extracción documental",
+      "descripcion": "La IA localiza documentos en archivos históricos, extrae su contenido y lo deja indexado y consultable.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Habilitador transversal",
+      "poc": false,
+      "origen": "Dossier — AI-powered archive access and extraction (p. 187, Technology, Media & Telecommunications)"
+    },
+    {
+      "id": "IA-050",
+      "titulo": "Flujos guiados de elaboración presupuestaria",
+      "descripcion": "La IA guía al responsable de presupuesto por el proceso, propone las cifras de partida y valida la coherencia de lo introducido.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Develop guided workflows for creating budgets"
+    },
+    {
+      "id": "IA-051",
+      "titulo": "Previsión y escenarios bajo demanda",
+      "descripcion": "La IA genera previsiones y escenarios alternativos cuando el usuario los pide, sin depender de un ciclo de planificación cerrado.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": true,
+      "origen": "FinanceAI — On demand forecasting and scenario modeling"
+    },
+    {
+      "id": "IA-052",
+      "titulo": "Asignación presupuestaria asistida por IA",
+      "descripcion": "La IA propone cómo repartir el presupuesto entre centros, marcas y canales según el retorno observado de cada asignación.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — AI-supported budget allocation (p. 167, Technology, Media & Telecommunications)"
+    },
+    {
+      "id": "IA-053",
+      "titulo": "Resumen y puntuación de propuestas de inversión",
+      "descripcion": "La IA resume las propuestas de proyecto recibidas, las puntúa con criterios comunes y facilita compararlas entre sí.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "FinanceAI — Summarize and score project proposals across the organization"
+    },
+    {
+      "id": "IA-054",
+      "titulo": "Planificación integrada de negocio",
+      "descripcion": "La IA consolida en tiempo real datos de ventas, demanda y suministro de todas las funciones para planificar sobre una única fuente de verdad.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "Dossier — Integrated business planning (p. 35, Consumer)"
+    },
+    {
+      "id": "IA-060",
+      "titulo": "Previsión predictiva de flujo de caja",
+      "descripcion": "La IA anticipa los cobros y pagos esperados a partir del histórico, los vencimientos y las señales de comportamiento de cliente y proveedor.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": true,
+      "origen": "FinanceAI — Predictive cash flow forecasting tool"
+    },
+    {
+      "id": "IA-061",
+      "titulo": "Análisis de caja y riesgo de liquidez",
+      "descripcion": "La IA mejora el análisis del flujo de caja para reducir el riesgo de liquidez, afinar la previsión y rentabilizar los excedentes.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "FinanceAI — Enhance cash flow analysis, minimizing liquidity risks, improving forecasting accuracy, and maximizing returns on cash holdings"
+    },
+    {
+      "id": "IA-062",
+      "titulo": "Optimización de la liquidez intradía",
+      "descripcion": "La IA concilia los desfases de posición según se producen para liberar caja atrapada y operar con un colchón menor.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — Intraday liquidity optimization (p. 75, Financial Services)"
+    },
+    {
+      "id": "IA-063",
+      "titulo": "Optimización de operaciones de divisa",
+      "descripcion": "La IA evalúa los datos de tipo de cambio, identifica patrones y propone la cobertura o el momento de ejecución que reduce la exposición.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "FinanceAI — Optimize foreign exchange operations by evaluating foreign exchange data and identifying patterns and trends to reduce financial risks"
+    },
+    {
+      "id": "IA-064",
+      "titulo": "Agentes de IA para trading y simulación de mercado",
+      "descripcion": "Varios agentes especializados simulan el mercado y coordinan decisiones de negociación con tiempos de reacción menores.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — AI agents for algorithmic trading and market simulation (p. 71, Financial Services)"
+    },
+    {
+      "id": "IA-065",
+      "titulo": "Agentes de IA para análisis de riesgo crediticio",
+      "descripcion": "Varios agentes agregan datos del solicitante, puntúan el riesgo de forma dinámica y verifican el encaje normativo de la decisión.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "Dossier — AI agents for credit underwriting (p. 73, Financial Services)"
+    },
+    {
+      "id": "IA-066",
+      "titulo": "Valoración predictiva de la compañía",
+      "descripcion": "La IA estima el valor de la compañía a partir del análisis de sus datos financieros y de la comparación con referencias de mercado.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": true,
+      "origen": "FinanceAI — Predictive company valuation analyzing financial data"
+    },
+    {
+      "id": "IA-067",
+      "titulo": "Generación de estrategias de inversión",
+      "descripcion": "La IA cruza las condiciones de mercado, el rendimiento financiero interno y los objetivos de la compañía para proponer estrategias de inversión.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "FinanceAI — Generate investing strategies from consolidated market conditions, internal financial performance, and firm objectives"
+    },
+    {
+      "id": "IA-070",
+      "titulo": "Generación de informes fiscales",
+      "descripcion": "La IA prepara los informes fiscales a partir del dato contable y verifica su consistencia antes de la revisión.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Accurate tax report generation"
+    },
+    {
+      "id": "IA-071",
+      "titulo": "Automatización de la presentación de impuestos",
+      "descripcion": "La IA prepara y presenta las declaraciones, analiza el dato financiero de soporte y genera los informes fiscales asociados.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Automate tax filing processes, analyze financial data, and generate accurate tax reports"
+    },
+    {
+      "id": "IA-072",
+      "titulo": "Evaluación normativa y recomendación fiscal",
+      "descripcion": "La IA evalúa la normativa fiscal aplicable y emite recomendaciones de planificación, cumplimiento y gestión del riesgo.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "FinanceAI — Evaluate tax laws and regulations and provide recommendations for tax planning, compliance, and risk management"
+    },
+    {
+      "id": "IA-073",
+      "titulo": "Planificación fiscal predictiva",
+      "descripcion": "La IA anticipa el impacto fiscal de las decisiones previstas y señala los riesgos de cumplimiento antes de que se materialicen.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "FinanceAI — Predictive tax planning, compliance, and risk management"
+    },
+    {
+      "id": "IA-080",
+      "titulo": "Detección y corrección de errores en facturas",
+      "descripcion": "La IA detecta los errores de facturación antes de su emisión o registro y propone la corrección.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": true,
+      "origen": "FinanceAI — Automated invoice error detection & correction"
+    },
+    {
+      "id": "IA-081",
+      "titulo": "Facturación de pedidos no estándar",
+      "descripcion": "La IA genera la factura de pedidos que se salen del catálogo estándar interpretando las condiciones pactadas.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "FinanceAI — Generate customized invoices for nonstandard customer orders"
+    },
+    {
+      "id": "IA-082",
+      "titulo": "Gestión asistida del recobro",
+      "descripcion": "La IA identifica las brechas de cobro y automatiza el contacto con el cliente según su perfil de pago.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": true,
+      "origen": "FinanceAI — Facilitate payment collection to identify collections gaps and automate outreach"
+    },
+    {
+      "id": "IA-083",
+      "titulo": "Condiciones de pago óptimas para el DSO",
+      "descripcion": "La IA recomienda las condiciones de pago que reducen el DSO sin comprometer la relación comercial.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "FinanceAI — Recommend optimal payment terms to improve DSO"
+    },
+    {
+      "id": "IA-084",
+      "titulo": "Momento óptimo de pago a proveedores",
+      "descripcion": "La IA recomienda cuándo pagar cada factura equilibrando descuento por pronto pago, posición de caja y relación con el proveedor.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": true,
+      "origen": "FinanceAI — Recommend most optimal payment timing"
+    },
+    {
+      "id": "IA-085",
+      "titulo": "Predicción de retraso e impago",
+      "descripcion": "La IA anticipa qué clientes pagarán tarde o dejarán de pagar a partir de su comportamiento histórico.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "FinanceAI — Predicts late payments or defaults"
+    },
+    {
+      "id": "IA-086",
+      "titulo": "Lectura de contratos y obligaciones de desempeño",
+      "descripcion": "La IA lee los contratos de cliente e identifica las obligaciones de desempeño relevantes para el reconocimiento de ingresos.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": true,
+      "origen": "FinanceAI — Read customer contracts and identify performance obligations"
+    },
+    {
+      "id": "IA-087",
+      "titulo": "Previsión del gasto contratado con terceros",
+      "descripcion": "La IA proyecta el gasto mensual de los contratos con terceros a partir del sistema de gestión de contratos.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "FinanceAI — Using data from contract management system, forecast monthly expense for all third-party contracts"
+    },
+    {
+      "id": "IA-088",
+      "titulo": "Redacción de contratos y pliegos",
+      "descripcion": "La IA redacta borradores de contrato y de SoW, y analiza las respuestas recibidas a una RFP.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "Dossier — Drafting contracts and SoWs (p. 117, Government & Public Services)"
+    },
+    {
+      "id": "IA-089",
+      "titulo": "Evaluación de proveedores con IA",
+      "descripcion": "La IA puntúa a los proveedores combinando desempeño, riesgo y señales externas para apoyar la decisión de adjudicación.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "Dossier — Supplier assessment, dentro de Resilient logistics and planning (p. 61, Energy, Resources & Industrials)"
+    },
+    {
+      "id": "IA-090",
+      "titulo": "Planificación logística resiliente",
+      "descripcion": "La IA simula y modeliza la cadena de suministro para anticipar disrupciones y recomendar alternativas.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "Dossier — Resilient logistics and planning (p. 61, Energy, Resources & Industrials)"
+    },
+    {
+      "id": "IA-091",
+      "titulo": "Redacción de recursos ante denegaciones",
+      "descripcion": "La IA redacta el escrito de recurso frente a una denegación apoyándose en el expediente y en la normativa aplicable.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — Denial appeal letters (p. 139, Life Sciences & Health Care)"
+    },
+    {
+      "id": "IA-096",
+      "titulo": "Mantenimiento predictivo de activos",
+      "descripcion": "La IA anticipa el fallo de un activo a partir de su telemetría y programa la intervención antes de que se produzca la parada.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — AI-driven predictive maintenance (p. 41, Energy, Resources & Industrials)"
+    },
+    {
+      "id": "IA-100",
+      "titulo": "Detección de fugas de ingresos",
+      "descripcion": "La IA localiza los ingresos que se pierden por errores de precio, descuento o facturación y propone la corrección.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "FinanceAI — Identify & proactively correct revenue leakage"
+    },
+    {
+      "id": "IA-101",
+      "titulo": "Recomendación de demanda, coste y precio",
+      "descripcion": "La IA propone de forma conjunta la planificación de demanda, el coste de producto y el precio de venta.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": true,
+      "origen": "FinanceAI — Recommend demand planning, product costing, and pricing setting"
+    },
+    {
+      "id": "IA-102",
+      "titulo": "Precio óptimo a partir de señales de mercado",
+      "descripcion": "La IA examina tendencias de mercado y comportamiento de proveedores para determinar el precio óptimo.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "FinanceAI — Examine market trends, supplier behavior, and other factors to determine optimal prices"
+    },
+    {
+      "id": "IA-103",
+      "titulo": "Precio dinámico y optimización de inventario",
+      "descripcion": "Agentes de IA ajustan precio, promoción e inventario en tiempo real según las señales internas y externas.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — Dynamic pricing and inventory optimization (p. 7, Consumer)"
+    },
+    {
+      "id": "IA-104",
+      "titulo": "Planificación de promociones",
+      "descripcion": "La IA prepara los planes de promoción, el material de negociación y la argumentación comercial.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — Planning for promotions (p. 21, Consumer)"
+    },
+    {
+      "id": "IA-105",
+      "titulo": "Operaciones comerciales inteligentes",
+      "descripcion": "Agentes de IA automatizan la preparación de ofertas, el pricing de contrato y la previsión de demanda asociada.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — Intelligent commercial operations (p. 47, Energy, Resources & Industrials)"
+    },
+    {
+      "id": "IA-106",
+      "titulo": "Asistente de RFP y de conocimiento comercial",
+      "descripcion": "La IA redacta respuestas a RFP y da acceso al conocimiento interno necesario para preparar una oferta.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "Dossier — AI-powered RFP and knowledge assistant (p. 181, Technology, Media & Telecommunications)"
+    },
+    {
+      "id": "IA-107",
+      "titulo": "Personalización de ventas y marketing",
+      "descripcion": "La IA genera material comercial y de marketing adaptado a cada cliente a partir de su perfil y su histórico.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — Hyper-personalized sales and marketing assistant (p. 87, Financial Services)"
+    },
+    {
+      "id": "IA-108",
+      "titulo": "Agentes de IA para el éxito del cliente",
+      "descripcion": "Agentes de IA cubren el soporte posventa, vigilan la salud de la cuenta y preparan la renovación o la ampliación.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — AI agents for customer success (p. 159, Technology, Media & Telecommunications)"
+    },
+    {
+      "id": "IA-110",
+      "titulo": "Gestión dinámica de inventario",
+      "descripcion": "Agentes de IA coordinan previsión de demanda, aprovisionamiento, producción y distribución para ajustar el nivel de inventario.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — Dynamic inventory management (p. 135, Life Sciences & Health Care)"
+    },
+    {
+      "id": "IA-111",
+      "titulo": "Operaciones autónomas de cadena de suministro",
+      "descripcion": "Agentes de IA prevén demanda, optimizan la planificación, detectan disrupciones y ajustan la operación sin intervención.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — Autonomous supply chain operations (p. 13, Consumer)"
+    },
+    {
+      "id": "IA-112",
+      "titulo": "Diseño de producto orquestado por IA",
+      "descripcion": "Agentes de IA cubren el ciclo de diseño de producto desde la lectura del mercado hasta la iteración del prototipo.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — AI-orchestrated product design (p. 9, Consumer)"
+    },
+    {
+      "id": "IA-113",
+      "titulo": "Ensayos clínicos más inteligentes",
+      "descripcion": "Agentes de IA optimizan el diseño del protocolo, la selección de centros y el reclutamiento de participantes.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — Smarter clinical trials (p. 133, Life Sciences & Health Care)"
+    },
+    {
+      "id": "IA-114",
+      "titulo": "Descubrimiento autónomo de fármacos",
+      "descripcion": "Agentes de IA cubren el descubrimiento y desarrollo de fármacos desde el diseño molecular hasta la presentación regulatoria.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier — End-to-end autonomous drug discovery and development (p. 137, Life Sciences & Health Care)"
+    },
+    {
+      "id": "IA-120",
+      "titulo": "Monitorización predictiva del cumplimiento",
+      "descripcion": "La IA anticipa dónde va a fallar el cumplimiento a partir del histórico de incidencias y del comportamiento de los controles.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "FinanceAI — Predictive compliance monitoring"
+    },
+    {
+      "id": "IA-121",
+      "titulo": "Vigilancia continua de riesgo y cumplimiento",
+      "descripcion": "Agentes de IA vigilan riesgo y cumplimiento de forma permanente, siguen los cambios normativos y ejecutan pruebas de tensión.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "Dossier — AI-powered risk management and regulatory compliance (p. 67, Financial Services)"
+    },
+    {
+      "id": "IA-122",
+      "titulo": "Apoyo a exámenes e inspecciones regulatorias",
+      "descripcion": "Agentes de IA analizan datos y revisan volúmenes grandes de documentación para acelerar un examen o una inspección.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "Dossier — AI-supported regulatory examinations and inspections (p. 97, Government & Public Services)"
+    },
+    {
+      "id": "IA-123",
+      "titulo": "Generación de datos sintéticos",
+      "descripcion": "La IA genera datos sintéticos para entrenar modelos y ampliar la detección de anomalías sin exponer información real.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Habilitador transversal",
+      "poc": false,
+      "origen": "Dossier — Synthetic data generation (p. 81, Financial Services)"
+    },
+    {
+      "id": "IA-124",
+      "titulo": "Gestión de vulnerabilidades con IA",
+      "descripcion": "La IA evalúa las alertas de seguridad y prioriza las que corresponden a una amenaza real.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Habilitador transversal",
+      "poc": false,
+      "origen": "Dossier — AI-driven vulnerability management (p. 93, Financial Services)"
+    },
+    {
+      "id": "IA-127",
+      "titulo": "Informes de investigación y KYC",
+      "descripcion": "La IA investiga y resume la información de un cliente nuevo para sustentar la decisión de onboarding.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "Dossier — Research-based report generation / KYC (p. 83, Financial Services)"
+    },
+    {
+      "id": "IA-130",
+      "titulo": "Análisis del clean room de M&A",
+      "descripcion": "La IA analiza la información del clean room de una operación, resume los hallazgos y señala los riesgos detectados.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "FinanceAI — Recommend, summarize, and detect risk from M&A cleanroom data"
+    },
+    {
+      "id": "IA-131",
+      "titulo": "Asistente de código para la transformación",
+      "descripcion": "La IA asiste en el desarrollo y mantenimiento del software financiero para acelerar la digitalización.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Habilitador transversal",
+      "poc": false,
+      "origen": "Dossier — Code assistant for digital transformation (p. 77, Financial Services)"
+    },
+    {
+      "id": "IA-132",
+      "titulo": "Agentes de IA para ingeniería de software",
+      "descripcion": "Agentes de IA generan, prueban, depuran y despliegan código a lo largo del ciclo de desarrollo.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Habilitador transversal",
+      "poc": false,
+      "origen": "Dossier — AI agents for software engineering (p. 161, Technology, Media & Telecommunications)"
+    },
+    {
+      "id": "IA-133",
+      "titulo": "Inteligencia de mercado",
+      "descripcion": "La IA lee y sintetiza grandes volúmenes de información de mercado y devuelve conclusiones accionables para la estrategia.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "Dossier — Next-level market intelligence (p. 33, Consumer)"
+    },
+    {
+      "id": "IA-134",
+      "titulo": "Asistente de contenidos de comunicación",
+      "descripcion": "La IA genera contenidos de comunicación en varios formatos manteniendo el mensaje y el cumplimiento.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "Dossier — Marketing content assistant (p. 19, Consumer)"
+    },
+    {
+      "id": "IA-135",
+      "titulo": "Generación de contenido para el earnings call",
+      "descripcion": "La IA prepara el guion de la presentación de resultados, anticipa las preguntas probables de analistas y propone las respuestas a partir de las cifras del periodo.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": true,
+      "origen": "Slide FinanceAI «What AI Use Cases exist for Finance?», Investor Relations"
+    },
+    {
+      "id": "IA-136",
+      "titulo": "Reporting estandarizado de revisión de desempeño",
+      "descripcion": "La IA produce el paquete de revisión de desempeño con el mismo formato para todas las unidades, de modo que la comparación entre ellas sea inmediata.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Analítica y decisión",
+      "poc": true,
+      "origen": "Slide FinanceAI, Strategic Finance"
+    },
+    {
+      "id": "IA-137",
+      "titulo": "Detección de facturas duplicadas",
+      "descripcion": "La IA detecta la factura que ya se ha registrado o pagado antes de que vuelva a pagarse, aun cuando llega con otro número o desde otro proveedor.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Control y cumplimiento",
+      "poc": true,
+      "origen": "Slide FinanceAI, Source-to-Pay"
+    },
+    {
+      "id": "IA-138",
+      "titulo": "Insights sobre el dato de proveedor",
+      "descripcion": "La IA explota el maestro de proveedores y el histórico de gasto para sacar a la luz concentración, condiciones dispares y oportunidades de consolidación.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Analítica y decisión",
+      "poc": true,
+      "origen": "Slide FinanceAI, Source-to-Pay"
+    },
+    {
+      "id": "IA-139",
+      "titulo": "Modelos retadores para contrastar escenarios",
+      "descripcion": "Un modelo predictivo independiente contrasta la previsión oficial y señala dónde difiere y por qué, para que la cifra se defienda o se corrija.",
+      "tipoIa": "Analítica",
+      "tipoValor": "Analítica y decisión",
+      "poc": false,
+      "origen": "Catálogo maestro F3M_AI_Mapping_Consolidado_v1, fila 39, encaje Alto"
+    },
+    {
+      "id": "IA-140",
+      "titulo": "Asistente financiero para el cliente",
+      "descripcion": "Un asistente virtual resuelve las consultas del cliente sobre facturas, saldos y estado de sus cobros, y escala al equipo solo lo que no puede cerrar.",
+      "tipoIa": "Agéntica",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "Catálogo maestro, fila 82; dossier p. 85, Financial Services"
+    },
+    {
+      "id": "IA-141",
+      "titulo": "Respuesta asistida a requerimientos fiscales",
+      "descripcion": "La IA interpreta el requerimiento de la autoridad fiscal, localiza la evidencia en los sistemas y prepara el borrador de respuesta con su soporte documental.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "Slide FinanceAI, Tax"
+    },
+    {
+      "id": "IA-142",
+      "titulo": "Borrador de informe de auditoría",
+      "descripcion": "La IA redacta el borrador del informe a partir de los papeles de trabajo, enlaza cada hallazgo con su evidencia y propone la recomendación asociada.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Eficiencia operativa",
+      "poc": false,
+      "origen": "Slide FinanceAI, Internal Audit"
+    },
+    {
+      "id": "IA-143",
+      "titulo": "Generación de casos de prueba de control",
+      "descripcion": "La IA propone los casos de prueba de cada control a partir de su diseño y detecta las lagunas de cobertura del programa de pruebas.",
+      "tipoIa": "Generativa",
+      "tipoValor": "Control y cumplimiento",
+      "poc": false,
+      "origen": "Dossier p. 183, Technology, Media & Telecommunications"
+    },
+    {
+      "id": "IA-144",
+      "titulo": "Determinación de elegibilidad para incentivos",
+      "descripcion": "La IA contrasta el proyecto contra los requisitos de cada ayuda o deducción y estima la probabilidad de que sea elegible antes de preparar el expediente.",
+      "tipoIa": "Analítica + generativa",
+      "tipoValor": "Valor de negocio",
+      "poc": false,
+      "origen": "Dossier p. 101, Government & Public Services"
+    }
+  ]
+}
