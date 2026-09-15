@@ -21,6 +21,8 @@ import {
   normalizeTargetValue,
   oleadaDesdePrioridad,
   priorityFromGap,
+  rankingDeBrechas,
+  rankingDePalancas,
   round2,
   toScore,
   unique,
@@ -489,6 +491,124 @@ export const casos = [
       t.igual(agregados[1].id, "fiscal", "orden de entrada");
       t.igual(agregados[0].gap, 0, "en el objetivo, gap 0");
       t.igual(agregados[1].total, 2, "cada uno con sus items");
+    },
+  },
+
+  // ------------------------------------------------------------- los rankings
+  //
+  // Los usan el titular del Dashboard, el del Overview y el informe PDF. Antes
+  // eran tres copias del mismo calculo y solo se veian en una frase de pantalla,
+  // asi que una diferencia entre ellas no la notaba nadie.
+  {
+    grupo: "Ranking de brechas",
+    nombre: "ordena los grupos por brecha media, de mayor a menor",
+    ejecutar: (t) => {
+      const entradas = [
+        { item: { capacidad: "A" }, metrics: { isPending: false, gap: 1 } },
+        { item: { capacidad: "B" }, metrics: { isPending: false, gap: 3 } },
+        { item: { capacidad: "C" }, metrics: { isPending: false, gap: 2 } },
+      ];
+
+      const ranking = rankingDeBrechas(entradas, (entrada) => entrada.item.capacidad);
+
+      t.igual(ranking.length, 3, "tres grupos");
+      t.igual(ranking[0].grupo, "B", "la mayor brecha primero");
+      t.igual(ranking[0].gap, 3, "con su gap");
+      t.igual(ranking[2].grupo, "A", "la menor al final");
+    },
+  },
+  {
+    grupo: "Ranking de brechas",
+    nombre: "promedia las subcapacidades de cada grupo",
+    ejecutar: (t) => {
+      const entradas = [
+        { item: { capacidad: "A" }, metrics: { isPending: false, gap: 1 } },
+        { item: { capacidad: "A" }, metrics: { isPending: false, gap: 3 } },
+        { item: { capacidad: "B" }, metrics: { isPending: false, gap: 1.5 } },
+      ];
+
+      const ranking = rankingDeBrechas(entradas, (entrada) => entrada.item.capacidad);
+
+      t.igual(ranking[0].grupo, "A", "2 de media gana a 1,5");
+      t.igual(ranking[0].gap, 2, "media de 1 y 3");
+    },
+  },
+  {
+    grupo: "Ranking de brechas",
+    nombre: "una subcapacidad pendiente no cuenta como brecha cero",
+    ejecutar: (t) => {
+      // Contarla como cero diria que el grupo esta bien, cuando lo que pasa es
+      // que no se ha mirado.
+      const entradas = [
+        { item: { capacidad: "A" }, metrics: { isPending: false, gap: 2 } },
+        { item: { capacidad: "A" }, metrics: { isPending: true, gap: null } },
+        { item: { capacidad: "B" }, metrics: { isPending: true, gap: null } },
+      ];
+
+      const ranking = rankingDeBrechas(entradas, (entrada) => entrada.item.capacidad);
+
+      t.igual(ranking.length, 1, "B entera sin puntuar no sale");
+      t.igual(ranking[0].gap, 2, "en A solo cuenta la puntuada");
+    },
+  },
+  {
+    grupo: "Ranking de brechas",
+    nombre: "dos grupos empatados salen en el orden en que aparecen",
+    ejecutar: (t) => {
+      // Sin un desempate estable, el titular del Dashboard cambiaria de
+      // capacidad entre repintados sin que hubiera cambiado ningun dato. El
+      // orden es el de primera aparicion sobre TODAS las entradas, tambien las
+      // pendientes: si no, bastaria puntuar una celda para que se invirtiera.
+      const entradas = [
+        { item: { capacidad: "Primera" }, metrics: { isPending: true, gap: null } },
+        { item: { capacidad: "Segunda" }, metrics: { isPending: false, gap: 2 } },
+        { item: { capacidad: "Primera" }, metrics: { isPending: false, gap: 2 } },
+      ];
+
+      const ranking = rankingDeBrechas(entradas, (entrada) => entrada.item.capacidad);
+
+      t.igual(ranking[0].grupo, "Primera", "la que aparece antes");
+      t.igual(ranking[1].grupo, "Segunda", "aunque se puntuara antes");
+    },
+  },
+  {
+    grupo: "Ranking de palancas",
+    nombre: "ordena de la palanca mas floja a la mas fuerte",
+    ejecutar: (t) => {
+      const ranking = rankingDePalancas([
+        { scores: { procesos: 4, tecnologia: 2, organizacion: 3 } },
+      ]);
+
+      t.igual(ranking.length, 3, "las tres palancas");
+      t.igual(ranking[0].label, "Tecnología", "la mas floja primero");
+      t.igual(ranking[0].media, 2, "con su media");
+      t.igual(ranking[2].label, "Procesos", "la mas fuerte al final");
+    },
+  },
+  {
+    grupo: "Ranking de palancas",
+    nombre: "un score sin informar no es un cero",
+    ejecutar: (t) => {
+      // Con el null contando como cero, la media de [4, null] seria 2 y esa
+      // palanca pasaria a ser "la mas debil" por no haberse evaluado.
+      const ranking = rankingDePalancas([
+        { scores: { procesos: 4, tecnologia: 3, organizacion: 3 } },
+        { scores: { procesos: null, tecnologia: 3, organizacion: 3 } },
+      ]);
+
+      t.igual(ranking[2].label, "Procesos", "sigue siendo la mas fuerte");
+      t.igual(ranking[2].media, 4, "media solo de lo informado");
+    },
+  },
+  {
+    grupo: "Ranking de palancas",
+    nombre: "sin ningun score no hay palanca mas debil que ensenar",
+    ejecutar: (t) => {
+      const ranking = rankingDePalancas([
+        { scores: { procesos: null, tecnologia: null, organizacion: null } },
+      ]);
+
+      t.igual(ranking.length, 0, "lista vacia, no tres ceros");
     },
   },
 ];

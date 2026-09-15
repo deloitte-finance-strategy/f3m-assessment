@@ -372,3 +372,64 @@ export function agregarPorDominio(dominios, metricasDe, objetivosDe) {
     };
   });
 }
+
+
+/**
+ * Los grupos ordenados por brecha, del mayor al menor.
+ *
+ * Cada entrada es { item, metrics } y `claveDeGrupo` dice a que grupo pertenece:
+ * la capacidad en el Dashboard, el dominio en el Overview. Solo entran las
+ * entradas puntuadas, porque una pendiente no tiene gap y contarla como cero
+ * diria que ese grupo esta bien cuando lo que pasa es que no se ha mirado.
+ *
+ * Se extrajo de renderTitularesEjecutivos() y renderOverviewHeadline() en
+ * app.js, que calculaban esto mismo con distinto sujeto. El informe PDF
+ * necesitaba el mismo calculo y habria sido la tercera copia.
+ */
+export function rankingDeBrechas(entradas, claveDeGrupo) {
+  const porGrupo = new Map();
+
+  // Dos pasadas, y la primera no sobra: fija el orden de los grupos por su
+  // primera aparicion entre TODAS las entradas, tambien las pendientes. Con una
+  // sola pasada sobre las puntuadas, dos capacidades con el mismo gap podrian
+  // intercambiarse al desempatar, y el titular del Dashboard cambiaria de
+  // capacidad sin que hubiera cambiado ningun dato.
+  entradas.forEach((entrada) => {
+    const grupo = claveDeGrupo(entrada);
+
+    if (!porGrupo.has(grupo)) {
+      porGrupo.set(grupo, []);
+    }
+  });
+
+  entradas
+    .filter((entrada) => entrada.metrics && !entrada.metrics.isPending)
+    .forEach((entrada) => {
+      porGrupo.get(claveDeGrupo(entrada)).push(entrada.metrics.gap);
+    });
+
+  return [...porGrupo.entries()]
+    .map(([grupo, gaps]) => ({ grupo, gap: average(gaps) }))
+    .filter((fila) => Number.isFinite(fila.gap))
+    .sort((a, b) => b.gap - a.gap);
+}
+
+
+/**
+ * Las palancas ordenadas por media, de la mas floja a la mas fuerte.
+ *
+ * Solo cuentan los scores informados, igual que en todo el motor: un score
+ * ausente no es un cero. La lista puede salir vacia si no hay ninguno, y
+ * entonces no hay palanca mas debil que ensenar.
+ */
+export function rankingDePalancas(items) {
+  return PALANCAS.map((palanca) => ({
+    key: palanca.key,
+    label: palanca.label,
+    media: average(
+      items.map((item) => item.scores?.[palanca.key]).filter(Number.isFinite),
+    ),
+  }))
+    .filter((fila) => Number.isFinite(fila.media))
+    .sort((a, b) => a.media - b.media);
+}

@@ -25,6 +25,8 @@ import {
   getMaturityLevel,
   getMaturityLevelNumber,
   normalizeTargetValue,
+  rankingDeBrechas,
+  rankingDePalancas,
   toScore,
   unique,
 } from "./core/calculo.js";
@@ -2272,34 +2274,18 @@ function renderTitularesEjecutivos(items, metrics) {
 
   const titulares = [];
 
-  // Capacidad con mayor brecha
-  const porCapacidad = unique(items.map((item) => item.capacidad))
-    .map((capacidad) => ({
-      capacidad,
-      gap: average(
-        evaluadas
-          .filter((entrada) => entrada.item.capacidad === capacidad)
-          .map((entrada) => entrada.metrics.gap),
-      ),
-    }))
-    .filter((fila) => Number.isFinite(fila.gap))
-    .sort((a, b) => b.gap - a.gap);
+  // Capacidad con mayor brecha y palanca mas floja. El calculo vive en
+  // core/calculo.js porque el Overview y el informe PDF hacen el mismo con
+  // distinto sujeto, y eran tres copias.
+  const porCapacidad = rankingDeBrechas(metrics, (entrada) => entrada.item.capacidad);
 
   if (porCapacidad.length) {
     titulares.push(
-      `Mayor brecha: ${porCapacidad[0].capacidad} (gap ${formatNumber(porCapacidad[0].gap)})`,
+      `Mayor brecha: ${porCapacidad[0].grupo} (gap ${formatNumber(porCapacidad[0].gap)})`,
     );
   }
 
-  // Palanca mas floja del dominio
-  const porPalanca = LEVERS.map((lever) => ({
-    label: lever.label,
-    media: average(
-      items.map((item) => item.scores[lever.key]).filter(Number.isFinite),
-    ),
-  }))
-    .filter((fila) => Number.isFinite(fila.media))
-    .sort((a, b) => a.media - b.media);
+  const porPalanca = rankingDePalancas(items);
 
   if (porPalanca.length) {
     titulares.push(
@@ -3017,8 +3003,13 @@ function renderOverview() {
  *
  * Hermana de renderTitularesEjecutivos() y no la misma funcion: alli el sujeto
  * es la capacidad y hay un mensaje entero para cuando los filtros no dejan ver
- * nada, que aqui seria falso. Lo unico repetido son dos average, y unificarlas
- * costaria dos condicionales de modo.
+ * nada, que aqui seria falso. Unificarlas costaria dos condicionales de modo.
+ *
+ * Lo que si comparten es el calculo, que vive en core/calculo.js desde que el
+ * informe PDF necesito el mismo y habria sido la tercera copia. La brecha por
+ * dominio no pasa por rankingDeBrechas(): aqui ya viene promediada en `filas`
+ * por agregarPorDominio(), y volver a calcularla desde las subcapacidades seria
+ * hacer dos veces lo mismo con dos codigos distintos.
  */
 function renderOverviewHeadline(filas, entradas) {
   if (!els.overviewHeadline) {
@@ -3049,16 +3040,7 @@ function renderOverviewHeadline(filas, entradas) {
     );
   }
 
-  const porPalanca = LEVERS.map((lever) => ({
-    label: lever.label,
-    media: average(
-      entradas
-        .map((entrada) => entrada.item.scores[lever.key])
-        .filter(Number.isFinite),
-    ),
-  }))
-    .filter((fila) => Number.isFinite(fila.media))
-    .sort((a, b) => a.media - b.media);
+  const porPalanca = rankingDePalancas(entradas.map((entrada) => entrada.item));
 
   if (porPalanca.length) {
     titulares.push(
@@ -5787,12 +5769,22 @@ function exportPdfReport() {
     return;
   }
 
-  const reportData = conElDashboardVisible(buildEnhancedPdfReportData);
+  const reportData = conLasVistasDelInformeVisibles(buildEnhancedPdfReportData);
   const reportHtml = buildEnhancedPdfReportHtml(reportData);
 
   reportWindow.document.open();
   reportWindow.document.write(reportHtml);
   reportWindow.document.close();
+
+  // La portada y los separadores son a sangre y la escala de color del heatmap
+  // es informacion, no adorno. Sin "Graficos de fondo" el navegador los deja en
+  // blanco y el PDF que se entrega pierde justo lo que lo hace legible. El
+  // aviso se queda en la aplicacion, no en el informe: dentro saldria impreso.
+  showNotice(
+    "Informe generado. En el diálogo de impresión, elige «Guardar como PDF» y activa "
+      + "«Gráficos de fondo»: sin eso las portadas y el heatmap salen en blanco.",
+    "info",
+  );
 
   setTimeout(() => {
     const images = [...reportWindow.document.images];
@@ -5823,28 +5815,37 @@ function exportPdfReport() {
 
 
 /**
- * Ejecuta algo con el Dashboard a la vista y lo deja como estaba.
+ * Ejecuta algo con el Dashboard y el Overview a la vista, y los deja como estaban.
  *
  * El informe incorpora los radares capturados del canvas, y un canvas oculto no
  * tiene tamano: si se exporta desde el Roadmap sin haber pasado por el
  * Dashboard, las imagenes saldrian en blanco.
+ *
+ * Son los dos y no solo el Dashboard desde que el informe abre con la parte
+ * global, que lleva los radares de nueve ejes del Overview. Cada uno se
+ * restaura por separado: el usuario puede estar en cualquiera de las dos, y
+ * dejar oculta la que estaba a la vista se lleva la pantalla por delante.
  */
-function conElDashboardVisible(accion) {
-  const seccion = document.getElementById("dashboard");
-  const estabaOculto = seccion?.hidden;
+function conLasVistasDelInformeVisibles(accion) {
+  const vistas = [
+    { seccion: document.getElementById("dashboard"), pintar: renderDashboard },
+    { seccion: document.getElementById("overview"), pintar: renderOverview },
+  ];
 
-  if (estabaOculto) {
-    seccion.hidden = false;
-  }
+  const ocultas = vistas.filter((vista) => vista.seccion?.hidden);
 
-  renderDashboard();
+  ocultas.forEach((vista) => {
+    vista.seccion.hidden = false;
+  });
+
+  vistas.forEach((vista) => vista.pintar());
 
   try {
     return accion();
   } finally {
-    if (estabaOculto) {
-      seccion.hidden = true;
-    }
+    ocultas.forEach((vista) => {
+      vista.seccion.hidden = true;
+    });
   }
 }
 
@@ -5915,8 +5916,179 @@ function buildEnhancedPdfReportData() {
     commentItems,
     scoreGlobal: average(scored.map((entry) => entry.metrics.scoreMedio)),
     gapMedio: average(scored.map((entry) => entry.metrics.gap)),
+    objetivoMedio: average(scored.map((entry) => entry.metrics.targetMedio)),
     highCount: scored.filter((entry) => entry.metrics.prioridad === "Alta").length,
     radarImages: getRadarImagesForPdf(),
+
+    titulares: construirTitularesDelDominio(visibleItems, metrics),
+    global: construirBloqueGlobalParaInforme(),
+    ia: construirCasosDeIaParaInforme(visibleItems),
+  };
+}
+
+
+/**
+ * El titular del dominio, en datos y no en texto.
+ *
+ * Lo redacta informe/secciones.js, que es donde se decide como suena. Aqui solo
+ * se distingue "no hay nada puntuado" de "los filtros no dejan ver nada": decir
+ * lo primero cuando pasa lo segundo es afirmar algo falso delante del cliente,
+ * porque el trabajo esta hecho, solo que fuera del filtro.
+ */
+function construirTitularesDelDominio(items, metrics) {
+  if (!items.length) {
+    return {
+      aviso:
+        `Ninguna de las ${state.items.length} subcapacidades de este dominio pasa los filtros `
+        + "activos al generar el informe.",
+    };
+  }
+
+  const evaluadas = metrics.filter((entrada) => !entrada.metrics.isPending);
+
+  if (!evaluadas.length) {
+    return { aviso: "Todavia no hay ninguna subcapacidad puntuada en este dominio." };
+  }
+
+  const brechas = rankingDeBrechas(metrics, (entrada) => entrada.item.capacidad);
+  const palancas = rankingDePalancas(items);
+
+  return {
+    mayorBrecha: brechas[0] || null,
+    palancaMasDebil: palancas[0] || null,
+    pendientes: metrics.length - evaluadas.length,
+  };
+}
+
+
+/**
+ * La parte global del informe: los nueve dominios, como en el Overview.
+ *
+ * Devuelve null si no hay ningun dominio cargado, y entonces el informe se
+ * salta la parte entera en vez de abrir con tres diapositivas vacias.
+ *
+ * No aplica los filtros, igual que el Overview y por el mismo motivo: son del
+ * dominio abierto y a nivel global no significan nada. La diapositiva lo dice
+ * en pantalla para que el descuadre con la parte de dominio no se lea como un
+ * fallo.
+ */
+function construirBloqueGlobalParaInforme() {
+  const dominios = getDominiosDelOverview();
+
+  if (!dominios.length) {
+    return null;
+  }
+
+  const filas = agregarPorDominio(dominios);
+
+  // Igual que en renderOverview(): no se aplanan a secas, porque un item no
+  // sabe de que dominio es y de eso dependen sus objetivos y por tanto su gap.
+  const entradas = filas.flatMap((fila) =>
+    fila.items.map((item, indice) => ({
+      item,
+      domainId: fila.id,
+      metrics: fila.metricas[indice],
+    })),
+  );
+
+  const evaluadas = entradas.filter((entrada) => !entrada.metrics.isPending);
+
+  const porGap = filas
+    .filter((fila) => Number.isFinite(fila.gap))
+    .sort((a, b) => b.gap - a.gap);
+
+  const palancas = rankingDePalancas(entradas.map((entrada) => entrada.item));
+
+  return {
+    filas,
+    dominios: filas.length,
+    dominiosTotales: Object.keys(DOMAINS).length,
+    subcapacidades: entradas.length,
+    evaluadas: evaluadas.length,
+
+    scoreGlobal: average(evaluadas.map((entrada) => entrada.metrics.scoreMedio)),
+    gapMedio: average(evaluadas.map((entrada) => entrada.metrics.gap)),
+    objetivoMedio: average(evaluadas.map((entrada) => entrada.metrics.targetMedio)),
+    highCount: evaluadas.filter((entrada) => entrada.metrics.prioridad === "Alta").length,
+
+    titulares: evaluadas.length
+      ? {
+          mayorBrecha: porGap.length ? { grupo: porGap[0].label, gap: porGap[0].gap } : null,
+          palancaMasDebil: palancas[0] || null,
+          pendientes: entradas.length - evaluadas.length,
+        }
+      : { aviso: "Todavia no hay ninguna subcapacidad puntuada en ningun dominio." },
+
+    radarImages: getOverviewRadarImagesForPdf(),
+  };
+}
+
+
+/**
+ * Los casos de uso de IA de las subcapacidades visibles, deduplicados.
+ *
+ * Deduplicar es lo que hace viable la seccion: Transacciones tiene unas 54
+ * apariciones de solo 31 casos distintos, y sin agrupar serian cinco
+ * diapositivas de fichas repetidas. Cada caso se queda con la lista de
+ * subcapacidades en las que aparece, que es mas util que la repeticion.
+ *
+ * Devuelve null si no hay ninguno —catalogo que no cargo, o filtros que no
+ * dejan pasar nada—, y entonces el informe omite la seccion entera: una
+ * seccion vacia no distingue "este dominio no tiene casos" de "el catalogo no
+ * llego".
+ */
+function construirCasosDeIaParaInforme(items) {
+  const porTitulo = new Map();
+
+  items.forEach((item) => {
+    const ai = getAiDataForItem(item);
+
+    (ai?.casos || []).forEach((caso) => {
+      if (!caso?.titulo) {
+        return;
+      }
+
+      if (!porTitulo.has(caso.titulo)) {
+        porTitulo.set(caso.titulo, { ...caso, subcapacidades: [] });
+      }
+
+      porTitulo.get(caso.titulo).subcapacidades.push(item.subcapacidad);
+    });
+  });
+
+  const casos = [...porTitulo.values()];
+
+  if (!casos.length) {
+    return null;
+  }
+
+  const agrupar = (campo, campoDeDefinicion) => {
+    const grupos = new Map();
+
+    casos.forEach((caso) => {
+      const valor = caso[campo];
+
+      if (!valor) {
+        return;
+      }
+
+      if (!grupos.has(valor)) {
+        grupos.set(valor, { valor, definicion: caso[campoDeDefinicion] || "", cuenta: 0 });
+      }
+
+      grupos.get(valor).cuenta += 1;
+    });
+
+    return [...grupos.values()].sort((a, b) => b.cuenta - a.cuenta);
+  };
+
+  return {
+    // Primero los que aplican a mas subcapacidades: son los que mas rendimiento
+    // dan por iniciativa y los que interesa ensenar si la seccion se corta.
+    casos: casos.sort((a, b) => b.subcapacidades.length - a.subcapacidades.length),
+    porTipoDeValor: agrupar("tipoValor", "definicionTipoValor"),
+    porTipoDeIa: agrupar("tipoIa", "definicionTipoIa"),
+    total: casos.length,
   };
 }
 
@@ -5969,6 +6141,21 @@ function getRadarImagesForPdf() {
   };
 }
 
+
+/**
+ * Los radares de nueve ejes del Overview, para la parte global del informe.
+ *
+ * Son canvas distintos y registro distinto de los del Dashboard —seis canvas,
+ * dos registros— y hasta ahora no llegaban al PDF.
+ */
+function getOverviewRadarImagesForPdf() {
+  return {
+    procesos: getCanvasImageDataUrl("procesos", els.overviewRadarProcessesChart, overviewRadarCharts),
+    tecnologia: getCanvasImageDataUrl("tecnologia", els.overviewRadarTechnologyChart, overviewRadarCharts),
+    organizacion: getCanvasImageDataUrl("organizacion", els.overviewRadarOrganizationChart, overviewRadarCharts),
+  };
+}
+
 /**
  * La imagen de un radar para el informe, o cadena vacia si no hay radar.
  *
@@ -5981,8 +6168,8 @@ function getRadarImagesForPdf() {
  * unico que distingue "aqui no se ha pintado nada" de "se ha pintado un radar
  * sin datos", que son casos distintos.
  */
-function getCanvasImageDataUrl(palanca, canvas) {
-  if (!canvas || !capabilityRadarCharts[palanca]) {
+function getCanvasImageDataUrl(palanca, canvas, registro = capabilityRadarCharts) {
+  if (!canvas || !registro[palanca]) {
     return "";
   }
 
