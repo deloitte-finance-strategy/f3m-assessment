@@ -23,6 +23,13 @@ out/
 .env.local
 *.log
 
+# El documento de trabajo del equipo con los 100 casos de uso de IA. Este SI es
+# una salida, al reves que los nueve F3M_*.xlsx de dominio, que son la fuente:
+# se genera con scripts/generar_excel_casos_ia.py a partir de data/casos-ia.json
+# y de data/domains/*.json. Versionarlo invitaria a editarlo y a que la copia
+# commiteada dejara de coincidir con los datos sin que nadie lo notara.
+Casos_de_uso_IA_Finance_Strategy.xlsx
+
 # Copias de escenarios que hace scripts/delete_scenario.py antes de borrar.
 # Son datos reales de cliente y este repositorio es publico: no pueden entrar.
 copias/

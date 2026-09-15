@@ -122,6 +122,23 @@ const CATALOGO_URL = "data/domains.json";
 
 
 /**
+ * Las fichas de los casos de uso de IA, indexadas por su titulo.
+ *
+ * Los JSON de dominio guardan en ai.cases una cadena "titulo; titulo; titulo",
+ * y el titulo es la clave del cruce: coincide exactamente con el del catalogo.
+ * Que siga coincidiendo lo comprueba scripts/check_domains_sync.py en cada PR,
+ * en las dos direcciones.
+ *
+ * Se carga una sola vez y se cruza al pintar. La alternativa era meter la ficha
+ * dentro de cada subcapacidad al convertir los Excel, y serian 413 copias de
+ * 100 fichas repartidas por los nueve archivos de datos.
+ */
+const CASOS_DE_IA = new Map();
+
+const CASOS_DE_IA_URL = "data/casos-ia.json";
+
+
+/**
  * La copia local se guarda por escenario, no bajo una clave unica.
  *
  * Con una sola clave, abrir el escenario de un cliente y despues el de otro en
@@ -233,6 +250,49 @@ async function cargarCatalogoDeDominios() {
   });
 
   renderDomainSwitcher();
+}
+
+
+/**
+ * Lee el catalogo de casos de uso de IA.
+ *
+ * Misma forma que cargarCatalogoDeDominios() y distinto trato en init(): sin
+ * catalogo de dominios no hay aplicacion, y sin fichas de casos si la hay. Por
+ * eso esto lanza y quien llama decide, en vez de tragarse el fallo aqui.
+ */
+async function cargarCatalogoDeCasosDeIa() {
+  const response = await fetch(CASOS_DE_IA_URL);
+
+  if (!response.ok) {
+    throw new Error(`No se ha podido leer ${CASOS_DE_IA_URL}: ${response.status}`);
+  }
+
+  const catalogo = await response.json();
+
+  // La definicion de cada etiqueta va al title del chip: en una sesion, la
+  // pregunta que sigue a "Agéntica" es siempre "y eso que quiere decir".
+  const definiciones = new Map(
+    [...(catalogo.tiposDeIa || []), ...(catalogo.tiposDeValor || [])].map((entrada) => [
+      entrada.valor,
+      entrada.definicion,
+    ]),
+  );
+
+  (catalogo.casos || []).forEach((caso) => {
+    if (!caso.titulo) {
+      return;
+    }
+
+    CASOS_DE_IA.set(caso.titulo, {
+      id: caso.id || "",
+      titulo: caso.titulo,
+      descripcion: caso.descripcion || "",
+      tipoIa: caso.tipoIa || "",
+      tipoValor: caso.tipoValor || "",
+      definicionTipoIa: definiciones.get(caso.tipoIa) || "",
+      definicionTipoValor: definiciones.get(caso.tipoValor) || "",
+    });
+  });
 }
 
 
@@ -488,6 +548,23 @@ async function init() {
     // Lo primero: sin catalogo no se sabe ni que dominios hay ni de donde salen.
     await cargarCatalogoDeDominios();
 
+    // Las fichas de los casos de IA no pueden tumbar el arranque: son metadata
+    // de apoyo, y sin ellas cada caso se sigue viendo por su titulo, que es
+    // exactamente lo que se enseñaba antes de que existiera el catalogo. Lo que
+    // no se hace es callarselo, porque un catalogo que no carga se parece mucho
+    // a un catalogo sin clasificar.
+    try {
+      await cargarCatalogoDeCasosDeIa();
+    } catch (error) {
+      console.warn(error);
+
+      showNotice(
+        "No se han podido leer las fichas de los casos de uso de IA. Se siguen viendo los "
+          + "títulos, sin su descripción ni sus etiquetas.",
+        "aviso",
+      );
+    }
+
     const { cargados, fallidos } = await loadCoreDomains();
 
     // Ningún dominio disponible: casi siempre es que se ha abierto el archivo
@@ -611,6 +688,7 @@ function cacheElements() {
     "aiModalCapability",
     "aiModalSubcapability",
     "aiModalCases",
+    "aiModalCasesCount",
     "aiModalAdvanced",
     "aiModalSource",
     "dialogModal",
@@ -1552,13 +1630,118 @@ function setupBackToTopButton() {
  * usaba: las 152 subcapacidades traen su propio bloque ai desde el Excel, y para
  * los otros ocho dominios los nombres de capacidad no coincidian de todas
  * formas.
+ *
+ * Devuelve el bloque ai con un campo mas, `casos`: la cadena de ai.cases ya
+ * partida y cruzada con las fichas del catalogo. Se cruza aqui y no al cargar
+ * los dominios porque el catalogo de casos puede no haber llegado, y entonces
+ * lo que se pinta es el titulo solo.
  */
 function getAiDataForItem(item) {
   if (item?.ai?.cases || item?.ai?.advanced) {
-    return item.ai;
+    return { ...item.ai, casos: fichasDeCasosDeIa(item.ai.cases) };
   }
 
   return null;
+}
+
+
+/**
+ * Cruza cada titulo de ai.cases con su ficha del catalogo.
+ *
+ * Si un titulo no esta en el catalogo se devuelve solo el titulo, sin texto de
+ * relleno: una ficha sin etiquetas dice la verdad —ese caso no esta
+ * clasificado— y un "sin clasificar" inventado no. Que eso no ocurra es trabajo
+ * de scripts/check_domains_sync.py, que cruza las dos listas en cada PR.
+ */
+function fichasDeCasosDeIa(cases) {
+  return String(cases || "")
+    .split(";")
+    .map((titulo) => titulo.trim())
+    .filter(Boolean)
+    .map((titulo) => CASOS_DE_IA.get(titulo) || { titulo });
+}
+
+
+/**
+ * Las dos etiquetas de un caso no estrenan familia de color, y no es una
+ * limitacion: el sistema ya esta lleno. El verde, el naranja y el azul marino
+ * son las palancas; el rojo, el ambar y el verde son la prioridad; el teal es
+ * el nivel de madurez y el azul es el estado. Una sexta familia no significaria
+ * nada y le quitaria significado a las cinco que ya lo tienen.
+ *
+ * Se diferencian por peso dentro de la familia neutra. El tipo de valor lleva
+ * chip relleno porque es el eje que ordena la conversacion con el cliente
+ * —coste, riesgo, decision o P&L—, y el tipo de IA va con borde y fondo
+ * transparente porque es un calificativo tecnico.
+ *
+ * Y dos excepciones tonales, no cromaticas, que es lo que permite destacar sin
+ * romper nada:
+ *
+ * - "Agéntica" en oscuro de alto contraste, porque es lo que todo el mundo
+ *   pregunta ahora mismo y se busca con la vista.
+ * - "Automatización" en el tratamiento mas apagado del conjunto. Es la etiqueta
+ *   honesta de "esto no es IA de verdad" y no debe lucir como si lo fuera.
+ */
+const CLASE_DE_TIPO_DE_IA = {
+  Agéntica: "es-agentica",
+  Automatización: "es-automatizacion",
+};
+
+
+function aiCaseTag(valor, definicion, clases) {
+  if (!valor) {
+    return "";
+  }
+
+  const titulo = definicion ? ` title="${escapeAttr(definicion)}"` : "";
+
+  return `<span class="${clases}"${titulo}>${escapeHtml(valor)}</span>`;
+}
+
+
+/** Una ficha de caso: titulo, las dos etiquetas y la frase de que hace. */
+function aiCaseCard(caso) {
+  const etiquetas = [
+    aiCaseTag(caso.tipoValor, caso.definicionTipoValor, "ai-tag ai-tag-valor"),
+    aiCaseTag(
+      caso.tipoIa,
+      caso.definicionTipoIa,
+      `ai-tag ai-tag-ia ${CLASE_DE_TIPO_DE_IA[caso.tipoIa] || ""}`.trim(),
+    ),
+  ].join("");
+
+  return `
+    <li class="ai-case">
+      <p class="ai-case-title">${escapeHtml(caso.titulo)}</p>
+      ${etiquetas ? `<p class="ai-case-tags">${etiquetas}</p>` : ""}
+      ${
+        caso.descripcion
+          ? `<p class="ai-case-description">${escapeHtml(caso.descripcion)}</p>`
+          : ""
+      }
+    </li>
+  `;
+}
+
+
+/** La lista de fichas, igual en el modal del roadmap y en la tarjeta. */
+function aiCaseCards(casos) {
+  if (!casos?.length) {
+    return `<p class="small-note">Sin casos de uso de IA asociados informados.</p>`;
+  }
+
+  return `<ul class="ai-case-list">${casos.map(aiCaseCard).join("")}</ul>`;
+}
+
+
+/** El contador que acompaña al titulo de la seccion. */
+function pintarContadorDeCasos(elemento, casos) {
+  if (!elemento) {
+    return;
+  }
+
+  elemento.textContent = casos.length ? String(casos.length) : "";
+  elemento.hidden = !casos.length;
 }
 
 function openAiInitiativeModal(itemId) {
@@ -1578,7 +1761,8 @@ function openAiInitiativeModal(itemId) {
 
   els.aiModalCapability.textContent = item.capacidad;
   els.aiModalSubcapability.textContent = `Subcapacidad relacionada: ${item.subcapacidad}`;
-  els.aiModalCases.textContent = aiData.cases || "Sin casos de IA asociados informados.";
+  els.aiModalCases.innerHTML = aiCaseCards(aiData.casos);
+  pintarContadorDeCasos(els.aiModalCasesCount, aiData.casos);
   els.aiModalAdvanced.textContent = aiData.advanced || "Sin aplicación avanzada informada.";
   els.aiModalSource.textContent = aiData.source ? `Fuente: ${aiData.source}` : "";
 
@@ -3468,6 +3652,19 @@ function renderAssessments() {
       .join("");
 
     fragment.querySelector(".evidence-text").textContent = getItemEvidenceText(item);
+
+    // El bloque de casos se oculta entero cuando la subcapacidad no trae
+    // ninguno, en vez de enseñar un recuadro con un "sin casos": un hueco
+    // vacio en la tarjeta se lee como algo que no ha cargado.
+    const bloqueDeCasos = fragment.querySelector(".ai-detail-block");
+    const casos = getAiDataForItem(item)?.casos || [];
+
+    bloqueDeCasos.hidden = !casos.length;
+
+    if (casos.length) {
+      bloqueDeCasos.querySelector(".ai-case-cards").innerHTML = aiCaseCards(casos);
+      pintarContadorDeCasos(bloqueDeCasos.querySelector(".ai-case-count"), casos);
+    }
 
 
     const details = fragment.querySelector("details");

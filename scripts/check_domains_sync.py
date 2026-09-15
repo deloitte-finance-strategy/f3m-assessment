@@ -1,6 +1,6 @@
 """Verifica el catalogo de dominios y que los JSON coinciden con los Excel.
 
-Tres comprobaciones, en este orden:
+Cuatro comprobaciones, en este orden:
 
 1. El catalogo (data/domains.json) esta completo y es coherente: cada dominio
    tiene los campos que la aplicacion espera, su Excel de origen existe, su
@@ -11,7 +11,11 @@ Tres comprobaciones, en este orden:
 2. Cada subcapacidad encuentra SU fila de casos de IA en la hoja AI Overlay,
    y ninguna fila de esa hoja se queda sin subcapacidad que la use.
 
-3. Cada JSON generado coincide con su Excel: se regenera el payload en memoria
+3. El catalogo de casos de IA (data/casos-ia.json) cuadra con los titulos que
+   usan las subcapacidades, en las dos direcciones, y cada caso trae sus dos
+   etiquetas con un valor de los declarados.
+
+4. Cada JSON generado coincide con su Excel: se regenera el payload en memoria
    y se compara con el archivo commiteado. No escribe nada.
 
 Devuelve codigo de salida 1 si algo falla, para poder usarse en CI o antes de
@@ -31,6 +35,10 @@ from convert_domains import CATALOGO, FILES, ROOT, build_payload, clean, seriali
 CAMPOS_DE_DOMINIO = ("id", "label", "title", "group", "source", "dataUrl")
 
 DIRECTORIO_DE_DATOS = ROOT / "data" / "domains"
+
+CATALOGO_DE_CASOS = ROOT / "data" / "casos-ia.json"
+
+CAMPOS_DE_CASO = ("id", "titulo", "descripcion", "tipoIa", "tipoValor")
 
 
 def check_catalogo():
@@ -152,6 +160,108 @@ def check_overlay(config):
     return problemas
 
 
+def titulos_de_casos(cadena):
+    """Los titulos de un campo ai.cases, que es una lista separada por '; '."""
+    return [titulo.strip() for titulo in clean(cadena).split(";") if titulo.strip()]
+
+
+def check_casos_ia():
+    """Devuelve (problemas, resumen) del catalogo de casos de IA.
+
+    El mismo tipo de guardarrail que check_overlay(), y por el mismo motivo: el
+    cruce entre los titulos de ai.cases y las fichas de data/casos-ia.json se
+    hace en tiempo de render y por texto exacto. Si una tilde se mueve, la
+    aplicacion pinta el titulo sin etiquetas y sin frase, y eso no se distingue
+    a simple vista de un caso que aun no se ha clasificado. Aqui deja de ser
+    silencioso.
+
+    Se cruza contra los JSON de data/domains/ y no contra los Excel a proposito:
+    son los que lee la aplicacion, y que coincidan con su Excel ya lo comprueba
+    check_domain(). Asi esto sigue diciendo la verdad aunque falte openpyxl.
+
+    Las dos direcciones importan. Un titulo sin ficha es una ficha que no se ve;
+    una ficha que no usa nadie es un caso que se quedo fuera del modelo al
+    renombrar una entrada de ai.cases.
+    """
+    if not CATALOGO_DE_CASOS.exists():
+        return [f"falta {CATALOGO_DE_CASOS.relative_to(ROOT).as_posix()}"], ""
+
+    try:
+        catalogo = json.loads(CATALOGO_DE_CASOS.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        return [f"data/casos-ia.json no es JSON valido: {error}"], ""
+
+    casos = catalogo.get("casos", [])
+
+    if not casos:
+        return ["data/casos-ia.json no declara ningun caso"], ""
+
+    problemas = []
+
+    tipos_de_ia = {entrada.get("valor") for entrada in catalogo.get("tiposDeIa", [])}
+    tipos_de_valor = {entrada.get("valor") for entrada in catalogo.get("tiposDeValor", [])}
+
+    vistos_id = set()
+    declarados = {}
+
+    for caso in casos:
+        titulo = clean(caso.get("titulo")) or "(sin titulo)"
+
+        faltan = [campo for campo in CAMPOS_DE_CASO if not clean(caso.get(campo))]
+
+        if faltan:
+            problemas.append(f'"{titulo}": le faltan campos: {", ".join(faltan)}')
+            continue
+
+        if caso["id"] in vistos_id:
+            problemas.append(f'"{titulo}": el id {caso["id"]} esta repetido')
+        vistos_id.add(caso["id"])
+
+        if caso["titulo"] in declarados:
+            problemas.append(f'"{titulo}": el titulo esta repetido, y es la clave del cruce')
+        declarados[caso["titulo"]] = caso
+
+        if tipos_de_ia and caso["tipoIa"] not in tipos_de_ia:
+            problemas.append(f'"{titulo}": «{caso["tipoIa"]}» no esta en tiposDeIa')
+
+        if tipos_de_valor and caso["tipoValor"] not in tipos_de_valor:
+            problemas.append(f'"{titulo}": «{caso["tipoValor"]}» no esta en tiposDeValor')
+
+    usados = {}
+
+    for dominio in CATALOGO.get("domains", []):
+        ruta = ROOT / dominio["dataUrl"]
+
+        if not ruta.exists():
+            continue
+
+        datos = json.loads(ruta.read_text(encoding="utf-8"))
+
+        for item in datos.get("subcapacities", []):
+            for titulo in titulos_de_casos((item.get("ai") or {}).get("cases")):
+                usados.setdefault(titulo, []).append(item.get("id", "(sin id)"))
+
+    for titulo in sorted(set(usados) - set(declarados)):
+        donde = ", ".join(usados[titulo][:3])
+        problemas.append(
+            f'"{titulo}": lo usa {donde} y no tiene ficha en data/casos-ia.json; '
+            "se pintaria sin etiquetas ni descripcion"
+        )
+
+    for titulo in sorted(set(declarados) - set(usados)):
+        problemas.append(
+            f'"{titulo}" ({declarados[titulo]["id"]}): esta en el catalogo y no lo usa '
+            "ninguna subcapacidad"
+        )
+
+    resumen = (
+        f"{len(declarados)} casos, {sum(len(ids) for ids in usados.values())} apariciones "
+        f"en {len(CATALOGO.get('domains', []))} dominios"
+    )
+
+    return problemas, resumen
+
+
 def check_domain(config):
     """Devuelve (estado, detalle) para un dominio."""
     destino = config["output"]
@@ -223,6 +333,17 @@ def main():
         print(f"  OK    los {len(FILES)} dominios cruzan al 100%")
 
     print()
+    print("Catalogo de casos de IA (data/casos-ia.json <-> ai.cases)")
+
+    problemas_de_casos, resumen_de_casos = check_casos_ia()
+
+    if problemas_de_casos:
+        for problema in problemas_de_casos:
+            print(f"  ERROR {problema}")
+    else:
+        print(f"  OK    {resumen_de_casos}")
+
+    print()
 
     fallos = 0
 
@@ -248,13 +369,20 @@ def main():
             "Revisa data/domains.json."
         )
 
+    if problemas_de_casos:
+        print(
+            f"{len(problemas_de_casos)} problema(s) en el catalogo de casos de IA. "
+            "Alinea el titulo en data/casos-ia.json y en la hoja AI Overlay del Excel: "
+            "el cruce es por texto exacto."
+        )
+
     if fallos:
         print(
             f"{fallos} dominio(s) desincronizado(s). "
             "Ejecuta 'python scripts/convert_domains.py' para regenerarlos."
         )
 
-    if problemas_de_catalogo or problemas_de_overlay or fallos:
+    if problemas_de_catalogo or problemas_de_overlay or problemas_de_casos or fallos:
         return 1
 
     print(f"Los {len(FILES)} dominios coinciden con sus Excel.")
