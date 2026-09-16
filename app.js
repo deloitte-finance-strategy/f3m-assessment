@@ -4,12 +4,12 @@ import {
   getDatabase,
   ref,
   get,
-  set,
   update,
   onValue,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 import {
   getAuth,
+  onAuthStateChanged,
   signInAnonymously,
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
@@ -207,11 +207,35 @@ let isApplyingRemoteScenario = false; // NUEVO: evita guardar de vuelta mientras
 let pendingScenarioWrites = 0;
 let snapshotRemotoPendiente = null; // Snapshot que llegó mientras guardábamos, para aplicarlo después
 
+// Si hay canal de vuelta desde Firebase, es decir, si onValue esta vivo.
+//
+// No es un detalle interno: separa "guardado" de "guardado Y recibiendo". Las
+// escrituras suben por su cuenta aunque la suscripcion este muerta, asi que sin
+// esta bandera el chip se ponia verde mientras los cambios del resto del equipo
+// no llegaban. Quien puntuaba creia estar colaborando y estaba pisando trabajo
+// ajeno sin verlo.
+//
+// Tres estados, no dos: null es "todavia no lo sabemos" y solo false dispara el
+// aviso. Con un booleano a secas, el arranque contaba como canal muerto y una
+// puntuacion muy temprana salia marcada como "sin recibir" sin motivo.
+let canalDeVueltaVivo = null;
+
+// Para poder cancelar la suscripcion anterior antes de abrir otra. Sin esto,
+// cada reintento de conexion dejaba un listener mas escuchando, y cada snapshot
+// repintaba la aplicacion tantas veces como reintentos hubiera habido.
+let cancelarSuscripcionRemota = null;
+
+// Para retirar el chip de guardado cuando el estado ya no pide nada.
+let temporizadorDelChip = null;
+
 const NOMBRE_STORAGE_KEY = "f3m-nombre-editor";
 
 // Identidad de quien edita. Queda a null si la autenticación no está disponible:
 // la app debe seguir funcionando aunque Anonymous Auth no esté activado en la consola.
 let usuarioActual = null;
+
+// Baja del vigilante de sesion, para no registrarlo dos veces al reconectar.
+let vigilanciaDeIdentidad = null;
 
 let scoringCriteriaTrigger = null;
 let aiInitiativeTrigger = null;
@@ -588,9 +612,14 @@ async function init() {
 
       const nombres = fallidos.map((id) => DOMAINS[id]?.label || id).join(", ");
 
+      // Se dice explicitamente que sus datos no se tocan. Este aviso decia solo
+      // "el resto funciona con normalidad", que era cierto en pantalla y falso
+      // en el servidor: la siguiente escritura completa borraba la rama del
+      // dominio ausente para todo el equipo. Ya no lo hace —se escribe una ruta
+      // por dominio cargado— y el aviso puede prometerlo.
       showNotice(
-        `No se han podido cargar estos dominios: ${nombres}. El resto funciona con normalidad; `
-          + "recarga la página para volver a intentarlo.",
+        `No se han podido cargar estos dominios: ${nombres}. El resto funciona con normalidad y los `
+          + "datos de estos no se tocarán; recarga la página para volver a intentarlo.",
         "aviso",
       );
     }
@@ -656,6 +685,7 @@ function cacheElements() {
     "loadNoticeText",
     "loadNoticeIcon",
     "loadNoticeClose",
+    "loadNoticeAction",
     "initialLoadingState", // NUEVO: estado visual de carga inicial
     "sourceNote",
     "overviewSourceNote",
@@ -822,6 +852,7 @@ function bindGlobalEvents() {
   enganchar("editorNameButton", "click", pedirNombreEditor);
   enganchar("heatmapExpandToggle", "click", handleHeatmapExpandToggleAll);
   enganchar("loadNoticeClose", "click", ocultarAviso);
+  window.addEventListener("beforeunload", avisarSiQuedaAlgoSinGuardar);
   setupMenuDeEscenario();
   setupVistas();
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
@@ -4393,6 +4424,28 @@ function handleRoadmapFieldInput(event) {
 }
 
 
+/**
+ * Frena el cierre de la pestana si hay algo escrito y sin guardar.
+ *
+ * Los campos del Roadmap se guardan 600 ms despues de la ultima pulsacion.
+ * Cerrar la pestana justo despues de escribir un comentario —o de que Firebase
+ * acepte la escritura, que tampoco es instantaneo— lo perdia sin dejar rastro.
+ *
+ * El navegador ignora el texto que se le pase y enseña el suyo; lo unico que
+ * cuenta es preventDefault(). Y solo se interrumpe si de verdad queda algo:
+ * un dialogo de "¿seguro que quieres salir?" en cada cierre es ruido que se
+ * aprende a ignorar, y entonces ya no frena nada.
+ */
+function avisarSiQuedaAlgoSinGuardar(event) {
+  if (!guardadosPendientes.size && pendingScenarioWrites === 0) {
+    return;
+  }
+
+  event.preventDefault();
+  event.returnValue = "";
+}
+
+
 function cancelarGuardadoDiferido(itemId, campo) {
   const clave = `${itemId}:${campo}`;
 
@@ -4538,9 +4591,11 @@ function getStoredScenario() {
  * invitados— la aplicacion se quedaba en "Preparando datos" para siempre, que
  * es la peor forma de fallar delante de un cliente.
  *
- * readScenarioFromFirebase() y saveScenarioToFirebase() traen su propia copia
- * de este patron. No se tocan aqui: estan en el camino del guardado, funcionan,
- * y unificarlas no es lo que se venia a hacer.
+ * Lo comparten ya los cuatro caminos que hablan con Firebase: leer, crear,
+ * escribir el escenario completo y escribir una ruta suelta. Cada uno traia su
+ * propia copia del patron, y la de persistGranularChange() sencillamente no
+ * existia: un update() que no resolvia dejaba los snapshots remotos aparcados
+ * sin limite.
  */
 function conLimiteDeEspera(promesa, mensaje, timeoutMs = 8000) {
   let timeoutId;
@@ -4558,22 +4613,11 @@ function conLimiteDeEspera(promesa, mensaje, timeoutMs = 8000) {
 
 
 function readScenarioFromFirebase(timeoutMs = 8000) {
-  const firebaseRead = get(scenarioDatabaseRef);
-
-  const timeout = new Promise((_, reject) => {
-    window.setTimeout(() => {
-      reject(
-        new Error(
-          "Tiempo de espera agotado al leer Firebase",
-        ),
-      );
-    }, timeoutMs);
-  });
-
-  return Promise.race([
-    firebaseRead,
-    timeout,
-  ]);
+  return conLimiteDeEspera(
+    get(scenarioDatabaseRef),
+    "Tiempo de espera agotado al leer Firebase",
+    timeoutMs,
+  );
 }
 
 
@@ -4597,6 +4641,19 @@ async function initializeSharedScenario() {
     snapshot = await readScenarioFromFirebase();
   } catch (error) {
     avisarDeFalloDeLectura(error);
+
+    // Suscribirse IGUALMENTE, que es lo contrario de lo que se hacia.
+    //
+    // Antes este catch retornaba, y ahi se rompia todo: las escrituras no
+    // comprueban si la lectura inicial funciono, asi que seguian subiendo,
+    // mientras que sin onValue no bajaba nada nunca. Al primer cambio el chip
+    // se ponia verde y la sincronizacion quedaba en un solo sentido, en
+    // silencio: el consultor creia estar colaborando y estaba pisando el
+    // trabajo del resto del equipo sin verlo.
+    //
+    // Y onValue es justo el camino por el que el SDK se recupera solo cuando
+    // vuelve la red, asi que se renunciaba a el cuando mas falta hacia.
+    subscribeToSharedScenario();
     return;
   }
 
@@ -4683,6 +4740,7 @@ async function initializeSharedScenario() {
       "Se ha leído el escenario compartido, pero la herramienta no ha podido aplicarlo en pantalla. " +
         "La conexión funciona, así que cambiar de red no lo arregla: el problema está en los datos o " +
         "en el pintado. Recarga la página; si sigue igual, avisa a quien mantiene la herramienta.",
+      { avisar: false },
     );
 
     showNotice(
@@ -4691,6 +4749,29 @@ async function initializeSharedScenario() {
       "aviso",
     );
   }
+}
+
+
+/**
+ * Distingue un rechazo por permisos de una caida de red.
+ *
+ * Decir "comprueba la conexion" cuando el problema son los permisos es un
+ * consejo falso, y de los que hacen perder media hora delante de un cliente:
+ * repetir el cambio no arregla nada y la red esta perfecta. Con `auth != null`
+ * en las reglas, este es el error que sale cuando la sesion anonima no ha
+ * llegado o ha dejado de valer, y el arreglo es recargar, no cambiar de wifi.
+ *
+ * Vivia dentro de avisarDeFalloDeLectura(), asi que solo la ruta de lectura
+ * sabia distinguirlos: al escribir y al perder la suscripcion se seguia
+ * mandando a mirar el wifi. Ahora lo comparten los tres caminos.
+ */
+function esFalloDePermisos(error) {
+  return (
+    error?.code === "PERMISSION_DENIED" ||
+    String(error?.code || "").toLowerCase().includes("permission") ||
+    String(error?.message || "").toLowerCase().includes("permission_denied") ||
+    !usuarioActual
+  );
 }
 
 
@@ -4704,19 +4785,16 @@ function avisarDeFalloDeLectura(error) {
   isApplyingRemoteScenario = false;
   pendingScenarioWrites = 0;
 
+  // Ahora mismo no hay canal de vuelta. Si la suscripcion que se abre justo
+  // despues llega a entregar un snapshot, vuelve a true por su cuenta.
+  canalDeVueltaVivo = false;
+
   console.warn(
     "Firebase no está disponible. Se conserva la copia local.",
     error,
   );
 
-  // Un rechazo por permisos no es una caida de red, y decir "sin conexion"
-  // manda a mirar el wifi cuando el problema es otro. Con `auth != null` en
-  // las reglas este es el error que sale cuando la autenticacion no ha
-  // llegado a tiempo, y el arreglo es recargar, no cambiar de red.
-  const esPermiso =
-    error?.code === "PERMISSION_DENIED" ||
-    String(error?.message || "").toLowerCase().includes("permission_denied") ||
-    !usuarioActual;
+  const esPermiso = esFalloDePermisos(error);
 
   marcarFalloDeSincronia(
     esPermiso
@@ -4728,11 +4806,13 @@ function avisarDeFalloDeLectura(error) {
         "si sigue igual, exporta una copia antes de cerrar."
       : "No se ha podido conectar con el escenario compartido. Estás trabajando sobre la copia de este navegador " +
         "y tus cambios no le llegan al resto del equipo. Si vas a trabajar así, exporta una copia antes de cerrar.",
+    { avisar: false },
   );
 
-  showNotice(
+  avisarConReconexion(
     esPermiso
-      ? "Este navegador no ha podido identificarse y el escenario compartido no le deja entrar. Recarga la página."
+      ? "Este navegador no ha podido identificarse y el escenario compartido no le deja entrar. Tus cambios se "
+        + "guardan aquí, pero el resto del equipo no los ve."
       : "No se ha podido conectar con el escenario compartido. Tus cambios se guardan en este navegador, "
         + "pero el resto del equipo no los ve.",
     "aviso",
@@ -4746,9 +4826,34 @@ function subscribeToSharedScenario() {
     return;
   }
 
-  onValue(
+  // Una suscripcion anterior se cancela antes de abrir la nueva. Desde que se
+  // puede reintentar la conexion sin recargar, llamar aqui dos veces es normal,
+  // y dos listeners vivos repintan la aplicacion dos veces por cada snapshot.
+  if (cancelarSuscripcionRemota) {
+    cancelarSuscripcionRemota();
+    cancelarSuscripcionRemota = null;
+  }
+
+  cancelarSuscripcionRemota = onValue(
     scenarioDatabaseRef,
     (snapshot) => {
+      // Que llegue un snapshot es la unica prueba de que hay canal de vuelta.
+      // Se marca aqui, y no al suscribirse, porque suscribirse no garantiza
+      // nada: onValue acepta el listener aunque la conexion nunca llegue.
+      const seHabiaCaido = canalDeVueltaVivo === false;
+
+      canalDeVueltaVivo = true;
+
+      // Un aviso de "no se ha podido conectar" que sigue en pantalla cuando ya
+      // hay conexion es peor que no avisar: manda a buscar un problema que ya
+      // no existe. Ahora que la aplicacion se recupera sola, hay que decirlo.
+      if (seHabiaCaido) {
+        showNotice(
+          "Conexión con el escenario compartido restablecida. Vuelves a ver los cambios del resto del equipo.",
+          "exito",
+        );
+      }
+
       const remoteScenario = snapshot.val();
 
       if (!remoteScenario) {
@@ -4766,18 +4871,75 @@ function subscribeToSharedScenario() {
       aplicarEscenarioRemoto(remoteScenario);
     },
     (error) => {
+      // Un listener cancelado no se vuelve a llamar nunca, asi que a partir de
+      // aqui no llega nada del resto del equipo hasta que alguien reconecte.
+      canalDeVueltaVivo = false;
+      cancelarSuscripcionRemota = null;
+
       console.warn(
         "Se perdió la conexión con Firebase.",
         error,
       );
 
+      const esPermiso = esFalloDePermisos(error);
+
       marcarFalloDeSincronia(
-        "Se ha perdido la conexión",
-        "Se ha perdido la conexión con el escenario compartido. Tus cambios se siguen guardando en este navegador, " +
-          "pero no le llegan al resto del equipo. Recarga la página cuando vuelvas a tener conexión.",
+        esPermiso
+          ? "Sin permiso: no se está compartiendo"
+          : "Se ha perdido la conexión",
+        esPermiso
+          ? "El escenario compartido ha dejado de aceptar a este navegador. La conexión funciona, así que " +
+            "cambiar de red no lo arregla. Tus cambios se siguen guardando aquí y no se han perdido: usa " +
+            "«Reconectar» en el aviso, y si sigue igual recarga la página."
+          : "Se ha perdido la conexión con el escenario compartido. Tus cambios se siguen guardando en este " +
+            "navegador y no se han perdido, pero no le llegan al resto del equipo y tampoco ves los suyos. " +
+            "Usa «Reconectar» en el aviso cuando vuelvas a tener conexión.",
+        { avisar: false },
+      );
+
+      avisarConReconexion(
+        esPermiso
+          ? "El escenario compartido ha dejado de aceptar a este navegador. Tus cambios se guardan aquí, pero " +
+            "ni salen ni entran."
+          : "Se ha perdido la conexión con el escenario compartido. Tus cambios se guardan en este navegador, " +
+            "pero ni le llegan al resto del equipo ni ves los suyos.",
       );
     },
   );
+}
+
+
+/**
+ * Aviso persistente con un boton para reintentar la conexion.
+ *
+ * Hasta ahora el unico camino de vuelta era recargar la pagina, y recargar en
+ * mitad de un taller cuesta el contexto entero: filtros, capacidades
+ * desplegadas, posicion en la tabla y el detalle que estuviera abierto.
+ */
+function avisarConReconexion(mensaje, tipo = "error") {
+  showNotice(mensaje, tipo, true, {
+    texto: "Reconectar",
+    alHacerClic: reconectarEscenarioCompartido,
+  });
+}
+
+
+/** Reintenta la conexión con el escenario compartido sin recargar la página. */
+async function reconectarEscenarioCompartido() {
+  if (!scenarioDatabaseRef) {
+    return;
+  }
+
+  ocultarAviso();
+  updateSaveStatus("saving", "Reconectando...");
+
+  // La identidad se rehace primero: si el fallo era de permisos, volver a leer
+  // con la misma sesion invalida da exactamente el mismo error.
+  if (!usuarioActual) {
+    await inicializarIdentidad();
+  }
+
+  await initializeSharedScenario();
 }
 
 
@@ -4844,11 +5006,25 @@ function updateSaveStatus(status, message, detalle = "") {
   els.saveStatus.textContent = message;
 
   // El detalle explica qué ha pasado, qué implica y qué puede hacer el usuario.
-  // No cabe en el chip, así que va al tooltip.
+  // No cabe en el chip, así que va también al tooltip; desde que
+  // marcarFalloDeSincronia() lo publica en el banner, el tooltip dejó de ser el
+  // único sitio donde se podía leer.
   if (detalle) {
     els.saveStatus.title = detalle;
   } else {
     els.saveStatus.removeAttribute("title");
+  }
+
+  // El chip verde se retira solo. Se quedaba puesto indefinidamente sobre la
+  // esquina inferior derecha, asi que salia en cualquier captura de pantalla y
+  // en cualquier proyeccion. Los estados que piden algo —error, parcial— y el
+  // de "guardando" no se van: ahi el chip es la unica senal que hay.
+  window.clearTimeout(temporizadorDelChip);
+
+  if (status === "saved") {
+    temporizadorDelChip = window.setTimeout(() => {
+      els.saveStatus.hidden = true;
+    }, 4000);
   }
 }
 
@@ -4859,9 +5035,49 @@ function updateSaveStatus(status, message, detalle = "") {
  * Antes todos los caminos de error terminaban en "Guardado local ✓" y en verde:
  * con la conexión caída o con las reglas rechazando un campo, el consultor creía
  * que el escenario estaba sincronizado cuando no lo estaba.
+ *
+ * El detalle sale tambien en el banner, no solo en el tooltip del chip. En el
+ * chip solo cabe "Se ha perdido la conexion"; el "tus cambios siguen guardados
+ * aqui" —que es justo lo que calma en mitad de una sesion— vivia en un `title`,
+ * invisible por teclado y en tactil. `avisar: false` es para los llamantes que
+ * ya publican su propio aviso, mas corto y adaptado a su caso.
  */
-function marcarFalloDeSincronia(mensaje, detalle) {
+function marcarFalloDeSincronia(mensaje, detalle, { avisar = true } = {}) {
   updateSaveStatus("error", mensaje, detalle);
+
+  if (avisar && detalle) {
+    showNotice(detalle, "error");
+  }
+}
+
+
+/**
+ * El chip despues de una escritura que ha ido bien.
+ *
+ * Que la escritura funcione no significa estar sincronizado: sube por su cuenta
+ * aunque onValue este muerto. Antes cualquier `update()` con exito ponia
+ * "Guardado ✓" en verde sin condiciones, y eso borraba el aviso rojo anterior:
+ * bastaba tocar un score para que la herramienta volviera a decir que todo iba
+ * bien mientras no llegaba nada del resto del equipo.
+ */
+function marcarEscrituraCorrecta() {
+  if (!scenarioDatabaseRef) {
+    updateSaveStatus("saved", "Guardado local ✓");
+    return;
+  }
+
+  if (canalDeVueltaVivo === false) {
+    updateSaveStatus(
+      "parcial",
+      "Guardado, sin recibir",
+      "Tu cambio ha subido al escenario compartido, pero esta pestaña no está recibiendo los cambios del resto " +
+        "del equipo, así que puede que no estés viendo lo último. Usa «Reconectar» en el aviso.",
+    );
+
+    return;
+  }
+
+  updateSaveStatus("saved", "Guardado ✓");
 }
 
 
@@ -4896,6 +5112,39 @@ function hayIdentidadParaEscribir() {
 
 
 
+/**
+ * Una escritura completa, repartida en una ruta por dominio.
+ *
+ * Antes era un set() de la raiz, y ahi estaba el problema: buildScenarioPayload()
+ * solo serializa los dominios que estan en memoria, asi que un dominio cuyo JSON
+ * no hubiera cargado no viajaba en el payload... y un set() de raiz borra lo que
+ * no viene. Es decir, que a un consultor le fallara la descarga de un archivo
+ * BORRABA ese dominio en Firebase para todo el equipo, mientras la pantalla
+ * decia "el resto funciona con normalidad".
+ *
+ * Con un update() multi-ruta, cada dominio cargado se reemplaza entero —que es
+ * lo que se quiere al importar o al restaurar— y la rama de un dominio ausente
+ * se queda intacta. Las claves raiz son exactamente las cuatro que admiten las
+ * reglas, que rechazan cualquier otra con `$otroCampoRaiz: false`.
+ */
+function rutasDeEscrituraCompleta(sanitizado) {
+  const rutas = {
+    version: sanitizado.version,
+    updatedAt: sanitizado.updatedAt,
+  };
+
+  if (sanitizado.activeDomainId !== undefined) {
+    rutas.activeDomainId = sanitizado.activeDomainId;
+  }
+
+  Object.entries(sanitizado.domains || {}).forEach(([domainId, dominio]) => {
+    rutas[`domains/${domainId}`] = dominio;
+  });
+
+  return rutas;
+}
+
+
 function saveScenarioToFirebase(
   payload,
   timeoutMs = 8000,
@@ -4907,31 +5156,14 @@ function saveScenarioToFirebase(
   const sanitizedPayload =
     sanitizeScenarioForFirebase(payload);
 
-  let timeoutId;
-
-  const firebaseSave = set(
-    scenarioDatabaseRef,
-    sanitizedPayload,
+  return conLimiteDeEspera(
+    update(
+      scenarioDatabaseRef,
+      rutasDeEscrituraCompleta(sanitizedPayload),
+    ),
+    "Tiempo de espera agotado al guardar en Firebase",
+    timeoutMs,
   );
-
-  const timeout = new Promise(
-    (_, reject) => {
-      timeoutId = window.setTimeout(() => {
-        reject(
-          new Error(
-            "Tiempo de espera agotado al guardar en Firebase",
-          ),
-        );
-      }, timeoutMs);
-    },
-  );
-
-  return Promise.race([
-    firebaseSave,
-    timeout,
-  ]).finally(() => {
-    window.clearTimeout(timeoutId);
-  });
 }
 
 
@@ -4976,9 +5208,17 @@ function persistGranularChange(rutas) {
     updatedAt: new Date().toISOString(),
   };
 
-  update(scenarioDatabaseRef, carga)
+  // Con limite de espera, igual que saveScenarioToFirebase(). Sin el, un
+  // update() que no resuelve deja pendingScenarioWrites por encima de cero, y
+  // mientras tanto TODOS los snapshots remotos se aparcan sin aplicarse: la red
+  // degradada dejaba el chip en "Guardando..." y los cambios del equipo
+  // invisibles, sin decir por que.
+  conLimiteDeEspera(
+    update(scenarioDatabaseRef, carga),
+    "Tiempo de espera agotado al guardar el cambio en Firebase",
+  )
     .then(() => {
-      updateSaveStatus("saved", "Guardado ✓");
+      marcarEscrituraCorrecta();
     })
     .catch((error) => {
       console.warn(
@@ -4986,10 +5226,18 @@ function persistGranularChange(rutas) {
         error,
       );
 
+      const esPermiso = esFalloDePermisos(error);
+
       marcarFalloDeSincronia(
-        "El último cambio no se ha compartido",
-        "El cambio está guardado en este navegador, pero no se ha podido enviar al escenario compartido y el resto " +
-          "del equipo no lo ve. Comprueba la conexión y vuelve a hacer el cambio.",
+        esPermiso
+          ? "Sin permiso: el cambio no se ha compartido"
+          : "El último cambio no se ha compartido",
+        esPermiso
+          ? "El cambio está guardado en este navegador, pero el escenario compartido lo ha rechazado por " +
+            "permisos. La conexión funciona, así que repetir el cambio no lo arregla: usa «Reconectar» en el " +
+            "aviso, y si sigue igual recarga la página."
+          : "El cambio está guardado en este navegador, pero no se ha podido enviar al escenario compartido y el " +
+            "resto del equipo no lo ve. Comprueba la conexión y vuelve a hacer el cambio.",
       );
     })
     .finally(() => {
@@ -5092,10 +5340,7 @@ function persistScenario() {
     8000,
   )
     .then(() => {
-      updateSaveStatus(
-        "saved",
-        "Guardado ✓",
-      );
+      marcarEscrituraCorrecta();
     })
     .catch((error) => {
       console.warn(
@@ -5103,10 +5348,17 @@ function persistScenario() {
         error,
       );
 
+      const esPermiso = esFalloDePermisos(error);
+
       marcarFalloDeSincronia(
-        "Los cambios no se han compartido",
-        "Los cambios están guardados en este navegador, pero no se han podido enviar al escenario compartido. " +
-          "Comprueba la conexión y vuelve a intentarlo.",
+        esPermiso
+          ? "Sin permiso: los cambios no se han compartido"
+          : "Los cambios no se han compartido",
+        esPermiso
+          ? "Los cambios están guardados en este navegador, pero el escenario compartido los ha rechazado por " +
+            "permisos. La conexión funciona: usa «Reconectar» en el aviso, y si sigue igual recarga la página."
+          : "Los cambios están guardados en este navegador, pero no se han podido enviar al escenario compartido. " +
+            "Comprueba la conexión y vuelve a intentarlo.",
       );
     })
     .finally(() => {
@@ -5555,11 +5807,51 @@ function buildScenarioPayload() {
 
 
 /**
+ * Tope de tamano del archivo a importar.
+ *
+ * Un escenario completo de los nueve dominios no llega al megabyte. El limite
+ * no esta para acotar escenarios de verdad, sino para que elegir el archivo
+ * equivocado —un volcado, un video— no congele la pestana dentro de
+ * readAsText(), que es sincrono para el hilo de pintado una vez arranca.
+ */
+const LIMITE_DE_IMPORTACION_BYTES = 8 * 1024 * 1024;
+
+
+/** El archivo como texto, o un rechazo. FileReader no devuelve promesas. */
+function leerArchivoComoTexto(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onerror = () => reject(reader.error || new Error("No se pudo leer el archivo"));
+    reader.onload = () => resolve(reader.result);
+
+    reader.readAsText(file);
+  });
+}
+
+
+/**
+ * Que dominios de los cargados va a reemplazar este archivo, por su nombre.
+ *
+ * applyScenarioPayload() salta los dominios que no estan en memoria, asi que la
+ * lista honesta es la interseccion, no las claves del archivo.
+ */
+function dominiosQueReemplazaElArchivo(payload) {
+  return Object.keys(payload?.domains || {})
+    .filter((domainId) => state.domains[domainId])
+    .map((domainId) => DOMAINS[domainId]?.label || domainId);
+}
+
+
+/**
  * Importar es la acción más destructiva de la herramienta.
  *
- * En un escenario compartido escribe el payload completo, así que reemplaza los
- * nueve dominios para todo el mundo. Antes lo hacia sin preguntar y, si el
- * archivo no casaba con nada, informaba igualmente de que todo había ido bien.
+ * Reemplaza de golpe los dominios que traiga el archivo, y en un escenario
+ * compartido lo hace para todo el mundo. De ahi el orden: primero se lee y se
+ * revisa el archivo, luego se dice EN EL DIALOGO que dominios va a reemplazar,
+ * y solo entonces se pide escribir SUSTITUIR. Antes la confirmacion iba primero
+ * —y solo en modo compartido—, asi que en local no habia ninguna red, y si el
+ * archivo no casaba con nada se informaba igualmente de que todo habia ido bien.
  */
 async function importScenario(event) {
   const file = event.target.files?.[0];
@@ -5568,17 +5860,103 @@ async function importScenario(event) {
     return;
   }
 
-  if (scenarioDatabaseRef) {
+  // Todo lo que sigue termina devolviendo el input a su sitio: sin esto, elegir
+  // el mismo archivo otra vez despues de cancelar no dispara ningun evento.
+  try {
+    if (file.size > LIMITE_DE_IMPORTACION_BYTES) {
+      showNotice(
+        `El archivo ${file.name} ocupa demasiado para ser un escenario de esta herramienta. ` +
+          "Comprueba que es el JSON que exportaste con Escenario → Guardar una copia.",
+        "error",
+      );
+
+      return;
+    }
+
+    // Se lee y se revisa ANTES de preguntar nada.
+    //
+    // Antes la confirmacion iba primero, asi que se escribia SUSTITUIR y solo
+    // despues se descubria que el archivo no valia. Y de paso permite decir en
+    // el dialogo QUE dominios se van a reemplazar, que es justo lo que se
+    // necesita saber para decidir.
+    let texto;
+
+    // No poder abrir el archivo y que el archivo no sea un escenario son dos
+    // problemas distintos, con dos arreglos distintos. Compartian un try, asi
+    // que un archivo movido o sin permisos se anunciaba como "tiene que ser un
+    // JSON exportado desde esta herramienta", que no lleva a ninguna parte.
+    try {
+      texto = await leerArchivoComoTexto(file);
+    } catch (error) {
+      console.error(error);
+
+      showNotice(
+        "No se ha podido leer el archivo. Comprueba que sigue disponible y vuelve a intentarlo.",
+        "error",
+      );
+
+      return;
+    }
+
+    let payload;
+
+    try {
+      payload = JSON.parse(texto);
+    } catch (error) {
+      console.error(error);
+
+      showNotice(
+        "El archivo no se ha podido leer como escenario. Tiene que ser un JSON exportado con " +
+          "Exportar JSON desde esta misma herramienta.",
+        "error",
+      );
+
+      return;
+    }
+
+    const revision = revisarEscenario(payload);
+
+    if (!revision.valido) {
+      showNotice(
+        `No se ha importado nada. ${revision.motivo}`,
+        "error",
+      );
+
+      return;
+    }
+
+    const dominios = dominiosQueReemplazaElArchivo(payload);
+
+    if (!dominios.length) {
+      showNotice(
+        "El archivo se ha leído, pero no trae ningún dominio de los que hay cargados, así que no se " +
+          "ha cambiado nada. Comprueba que es un escenario exportado desde F3M Assessment.",
+        "aviso",
+      );
+
+      return;
+    }
+
+    // La confirmacion ya no depende del modo. Vivia dentro de
+    // `if (scenarioDatabaseRef)`, asi que en local —donde no hay ninguna red y
+    // el unico respaldo es el propio navegador— se reemplazaba el trabajo de
+    // los nueve dominios sin preguntar.
+    const compartido = Boolean(scenarioDatabaseRef);
+
     const confirmado = await abrirDialogo({
       eyebrow: "Acción irreversible",
-      titulo: "Sustituir el escenario compartido",
+      titulo: compartido
+        ? "Sustituir el escenario compartido"
+        : "Sustituir el trabajo de este navegador",
       parrafos: [
-        `Vas a reemplazar el contenido del escenario compartido con el del archivo ${file.name}.`,
-        "Afecta a los nueve dominios y a todas las personas que trabajen con este enlace: sus puntuaciones, comentarios y estados quedarán reemplazados por los del archivo.",
+        `Vas a reemplazar el contenido de ${dominios.length === 1 ? "este dominio" : "estos dominios"} con el del archivo ${file.name}: ${dominios.join(", ")}.`,
+        compartido
+          ? "Afecta a todas las personas que trabajen con este enlace: sus puntuaciones, comentarios y estados quedarán reemplazados por los del archivo."
+          : "Se reemplazan las puntuaciones, los comentarios y los estados guardados en este navegador.",
         "No se puede deshacer. Si quieres conservar lo que hay ahora, expórtalo antes con el botón de abajo.",
       ],
       tono: "peligro",
-      confirmar: "Sustituir el escenario",
+      confirmar: compartido ? "Sustituir el escenario" : "Sustituir el trabajo",
       confirmacionEscrita: "SUSTITUIR",
       accionSecundaria: {
         texto: "Exportar JSON antes",
@@ -5587,89 +5965,47 @@ async function importScenario(event) {
     });
 
     if (!confirmado) {
-      event.target.value = "";
       return;
     }
-  }
 
-  const reader = new FileReader();
+    const resultado = applyScenarioPayload(payload, {
+      seguirDominioDelEscenario: true,
+    });
 
-  reader.onerror = () => {
-    showNotice(
-      "No se ha podido leer el archivo. Comprueba que sigue disponible y vuelve a intentarlo.",
-      "error",
-    );
+    if (!resultado.aplicadas) {
+      showNotice(
+        "El archivo se ha leído, pero ninguna de sus subcapacidades coincide con las de esta " +
+          "herramienta, así que no se ha cambiado nada. Comprueba que es un escenario exportado " +
+          "desde F3M Assessment.",
+        "aviso",
+      );
 
-    event.target.value = "";
-  };
+      return;
+    }
 
-  reader.onload = () => {
-    try {
-      const payload = JSON.parse(reader.result);
+    escribirAlmacenamiento(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
 
-      // Se revisa ANTES de aplicar nada. Un archivo que no es un escenario ya
-      // no llega a tocar los datos cargados, y lo que si se puede arreglar al
-      // vuelo se cuenta en vez de corregirse en silencio.
-      const revision = revisarEscenario(payload);
+    populateCapacityFilter();
+    renderAll();
+    persistScenario();
 
-      if (!revision.valido) {
-        showNotice(
-          `No se ha importado nada. ${revision.motivo}`,
-          "error",
-        );
-
-        return;
-      }
-
-      const resultado = applyScenarioPayload(payload, {
-        seguirDominioDelEscenario: true,
-      });
-
-      if (!resultado.aplicadas) {
-        showNotice(
-          "El archivo se ha leído, pero ninguna de sus subcapacidades coincide con las de esta " +
-            "herramienta, así que no se ha cambiado nada. Comprueba que es un escenario exportado " +
-            "desde F3M Assessment.",
-          "aviso",
-        );
-
-        return;
-      }
-
-      escribirAlmacenamiento(STORAGE_KEY, JSON.stringify(buildScenarioPayload()));
-
-      populateCapacityFilter();
-      renderAll();
-      persistScenario();
-
-      const parciales =
-        resultado.aplicadas < resultado.total
-          ? ` ${resultado.total - resultado.aplicadas} del archivo no corresponden a ninguna subcapacidad y se han ignorado.`
-          : "";
-
-      const corregido = revision.problemas.length
-        ? ` Se ha corregido lo siguiente al importar: ${revision.problemas.join("; ")}.`
+    const parciales =
+      resultado.aplicadas < resultado.total
+        ? ` ${resultado.total - resultado.aplicadas} del archivo no corresponden a ninguna subcapacidad y se han ignorado.`
         : "";
 
-      showNotice(
-        `Escenario importado: ${resultado.aplicadas} subcapacidades actualizadas en ` +
-          `${resultado.dominios} ${resultado.dominios === 1 ? "dominio" : "dominios"}.${parciales}${corregido}`,
-        revision.problemas.length ? "aviso" : "exito",
-      );
-    } catch (error) {
-      showNotice(
-        "El archivo no se ha podido leer como escenario. Tiene que ser un JSON exportado con " +
-          "Exportar JSON desde esta misma herramienta.",
-        "error",
-      );
+    const corregido = revision.problemas.length
+      ? ` Se ha corregido lo siguiente al importar: ${revision.problemas.join("; ")}.`
+      : "";
 
-      console.error(error);
-    } finally {
-      event.target.value = "";
-    }
-  };
-
-  reader.readAsText(file);
+    showNotice(
+      `Escenario importado: ${resultado.aplicadas} subcapacidades actualizadas en ` +
+        `${resultado.dominios} ${resultado.dominios === 1 ? "dominio" : "dominios"}.${parciales}${corregido}`,
+      revision.problemas.length ? "aviso" : "exito",
+    );
+  } finally {
+    event.target.value = "";
+  }
 }
 
 
@@ -6200,10 +6536,8 @@ function buildSummaryRows() {
     ScoreMedio: capacidad.scoreMedio ?? "",
     ObjetivoMedio: capacidad.targetMedio ?? "",
 
-    Nivel:
-      capacidad.scoreMedio === null
-        ? ""
-        : getMaturityLevel(capacidad.scoreMedio),
+    // La guarda de "sin score" vive ahora dentro de getMaturityLevel().
+    Nivel: getMaturityLevel(capacidad.scoreMedio) ?? "",
 
     Gap: capacidad.gap ?? "",
     Prioridad: capacidad.prioridad,
@@ -6535,6 +6869,9 @@ const ICONO_POR_TIPO = {
 
 let temporizadorDeAviso = null;
 
+// Manejador del boton de accion del aviso, guardado para poder retirarlo.
+let accionDeAvisoActual = null;
+
 
 /**
  * Muestra un aviso donde se pueda leer y con el tono que le corresponde.
@@ -6544,7 +6881,7 @@ let temporizadorDeAviso = null;
  * el mismo amarillo de advertencia tanto para "Escenario importado" como para
  * "No se pudo aplicar el escenario remoto".
  */
-function showNotice(message, tipo = "info", persistente = null) {
+function showNotice(message, tipo = "info", persistente = null, accion = null) {
   if (!els.loadNotice) {
     return;
   }
@@ -6559,6 +6896,8 @@ function showNotice(message, tipo = "info", persistente = null) {
   els.loadNotice.className = `notice notice-${tipo}`;
   els.loadNotice.hidden = false;
 
+  ponerAccionDeAviso(accion);
+
   window.clearTimeout(temporizadorDeAviso);
 
   if (seQueda) {
@@ -6571,8 +6910,42 @@ function showNotice(message, tipo = "info", persistente = null) {
 }
 
 
+/**
+ * Pone —o quita— el boton de accion del aviso.
+ *
+ * El manejador se guarda aparte para poder retirarlo: sin eso, cada aviso con
+ * accion dejaba un listener encima del anterior y un clic disparaba todos los
+ * que hubieran pasado por ahi.
+ */
+function ponerAccionDeAviso(accion) {
+  const boton = els.loadNoticeAction;
+
+  if (!boton) {
+    return;
+  }
+
+  if (accionDeAvisoActual) {
+    boton.removeEventListener("click", accionDeAvisoActual);
+    accionDeAvisoActual = null;
+  }
+
+  if (!accion?.texto || typeof accion.alHacerClic !== "function") {
+    boton.hidden = true;
+    boton.textContent = "";
+    return;
+  }
+
+  accionDeAvisoActual = accion.alHacerClic;
+
+  boton.textContent = accion.texto;
+  boton.hidden = false;
+  boton.addEventListener("click", accionDeAvisoActual);
+}
+
+
 function ocultarAviso() {
   window.clearTimeout(temporizadorDeAviso);
+  ponerAccionDeAviso(null);
   els.loadNotice.hidden = true;
 }
 
@@ -6730,6 +7103,40 @@ function showScenarioModeNotice() {
 
 
 /**
+ * Mantiene `usuarioActual` al dia con lo que dice Firebase.
+ *
+ * Sin esto, `usuarioActual` se fijaba UNA vez al arrancar y no volvia a null
+ * nunca. Si la sesion anonima se invalidaba a mitad de taller,
+ * hayIdentidadParaEscribir() seguia dando el visto bueno, la escritura salia,
+ * las reglas la rechazaban por `auth != null`, y el rechazo llegaba disfrazado
+ * de fallo de red. La puerta de identidad estaba abierta con la llave rota.
+ *
+ * Se registra una sola vez: reconectar vuelve a llamar a inicializarIdentidad()
+ * y dos vigilantes escribirian `usuarioActual` dos veces por cada cambio.
+ */
+function vigilarIdentidad() {
+  if (vigilanciaDeIdentidad || !firebaseAuth) {
+    return;
+  }
+
+  vigilanciaDeIdentidad = onAuthStateChanged(firebaseAuth, (user) => {
+    if (user) {
+      // El nombre es cosa del navegador, no de Firebase: se relee de su sitio
+      // para no perderlo cuando el SDK refresca la sesion.
+      usuarioActual = {
+        uid: user.uid,
+        nombre: usuarioActual?.nombre || getNombreEditor(),
+      };
+    } else {
+      usuarioActual = null;
+    }
+
+    actualizarIndicadorDeIdentidad();
+  });
+}
+
+
+/**
  * Autentica de forma anónima para tener un identificador estable de quien edita.
  *
  * "Anónima" quiere decir sin pedir credenciales: Firebase asigna un uid propio a
@@ -6744,6 +7151,8 @@ async function inicializarIdentidad() {
   if (!scenarioDatabaseRef) {
     return;
   }
+
+  vigilarIdentidad();
 
   try {
     const credencial = await conLimiteDeEspera(
@@ -6773,6 +7182,7 @@ async function inicializarIdentidad() {
       "Este navegador no ha podido identificarse contra Firebase. Los cambios se siguen guardando y "
         + "compartiendo, pero sin atribución en la columna \"Último cambio\". Avisa a quien mantiene "
         + "la herramienta.",
+      { avisar: false },
     );
 
     showNotice(

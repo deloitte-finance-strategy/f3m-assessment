@@ -79,7 +79,23 @@ export function normalizeTargetValue(
 }
 
 
+/**
+ * El nivel que corresponde a un score medio, o null si no hay score.
+ *
+ * La guarda de Number.isFinite no es defensiva por costumbre: sin ella, esta
+ * funcion premiaba lo que no se ha medido. `getMaturityLevel(undefined)`
+ * devolvia "5 - Avanzado/Referente", porque toda comparacion con NaN es falsa
+ * y el valor se escurria hasta el ultimo return; y `getMaturityLevel(null)`
+ * devolvia "1 - Inicial", porque null < 1.5 es cierto. Dos respuestas
+ * inventadas y opuestas para el mismo caso, que es "aqui no hay nada".
+ *
+ * Su hermana getMaturityLevelNumber() ya se protegia asi. Los llamantes se
+ * guardaban por fuera, cada uno a su manera, asi que era una trampa armada
+ * esperando a un llamante nuevo.
+ */
 export function getMaturityLevel(score) {
+  if (!Number.isFinite(score)) return null;
+
   if (score < 1.5) return "1 - Inicial";
   if (score < 2.5) return "2 - Estructurado";
   if (score < 3.5) return "3 - Estandarizado";
