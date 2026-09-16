@@ -63,7 +63,17 @@
     -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23012169'/%3E%3Crect x='7' y='19' width='5' height='7' rx='1.5' fill='%2386BC25'/%3E%3Crect x='13.5' y='14' width='5' height='12' rx='1.5' fill='%2386BC25'/%3E%3Crect x='20' y='8' width='5' height='18' rx='1.5' fill='%2386BC25'/%3E%3C/svg%3E">
 
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=11">
+
+    <!--
+      Resuelve el tema y la densidad antes del primer pintado. Va aqui, sincrono
+      y sin defer, a proposito: desde app.js —que es un modulo— la pagina llega
+      a pintarse en claro y da un salto a oscuro, y proyectado lo ve la sala.
+
+      En linea no puede ir: la CSP no admite scripts sin archivo, que es
+      justamente la directiva que cierra la inyeccion de codigo.
+    -->
+    <script src="tema.js?v=11"></script>
   </head>
   <body>
     <!--
@@ -104,6 +114,21 @@
             title="Agranda la tipografía y las tablas para proyectar en sala"
           >
             Presentación
+          </button>
+
+          <!--
+            Tema oscuro. Arranca siguiendo la preferencia del sistema; pulsarlo
+            fija una elección que manda sobre ella, en los dos sentidos.
+            aria-pressed, como «Presentación»: los dos son conmutadores.
+          -->
+          <button
+            class="header-secondary-action"
+            id="themeButton"
+            type="button"
+            aria-pressed="false"
+            title="Sigue la preferencia del sistema hasta que lo pulses"
+          >
+            Oscuro
           </button>
 
           <div class="header-menu">
@@ -834,9 +859,21 @@
       minutos tras desplegar puede darse justo esa mezcla. Con la version en la
       URL, cada index.html pide su app.js y nunca uno anterior.
 
-      AL DESPLEGAR UN CAMBIO EN EL JAVASCRIPT, SUBIR ESTE NUMERO.
+      La hoja de estilos y tema.js llevan el mismo numero, y no es de adorno:
+      styles.css iba sin version, asi que un cambio de estilos podia quedarse
+      sin verse hasta una recarga forzada. Los tres numeros se suben a la vez.
+
+      AVISO: los imports de app.js —./core/*.js, ./informe/*.js— NO llevan
+      version, porque la sintaxis de modulos ES resuelve rutas relativas sin
+      pasar por aqui. Es decir, que un app.js nuevo puede venir con un
+      core/calculo.js viejo en cache. Mientras core/ cambie poco se ha ido
+      sosteniendo, pero es una superficie abierta y se cierra al repartir
+      app.js en modulos, con un importmap.
+
+      AL DESPLEGAR UN CAMBIO EN EL JAVASCRIPT O EN LOS ESTILOS, SUBIR ESTE
+      NUMERO EN LOS TRES SITIOS.
     -->
-    <script type="module" src="app.js?v=10"></script>
+    <script type="module" src="app.js?v=11"></script>
   </body>
 </html>
 

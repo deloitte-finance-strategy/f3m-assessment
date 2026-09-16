@@ -33,9 +33,10 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 842 |
-| `app.js` | Estado, DOM, Firebase, filtros, render de las cinco vistas | 7.175 |
-| `styles.css` | Estilos, y las escalas de tipografía, espaciado y densidad | 4.212 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 879 |
+| `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
+| `app.js` | Estado, DOM, Firebase, filtros, render de las cinco vistas | 7.346 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.421 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 127 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 166 |
@@ -90,6 +91,40 @@ Dependencias de terceros, sin bundler:
 - **Firebase Realtime Database y Auth 12.15.0** importados desde `gstatic.com` (cabecera de
   `app.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
   ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
+
+### El tema y la densidad se deciden antes de pintar
+
+`tema.js` va **síncrono en `<head>`**, sin `defer` y sin `type="module"`, y escribe `data-tema` y
+`data-densidad` en `<html>` leyendo `localStorage`. Va ahí por dos motivos que no son negociables:
+
+- `app.js` es un módulo, así que corre **después** de analizar el HTML: la página llega a pintarse
+  en claro y da un salto a oscuro. Proyectado en una sala, ese salto lo ve todo el mundo.
+- Un `<script>` en línea sería lo natural para diez líneas, pero **la CSP no los admite** — es la
+  directiva que cierra la inyección de código. `script-src 'self'` sí admite un archivo.
+
+Y tiene una tercera ventaja: como el tema llega resuelto en un atributo, `styles.css` necesita **un
+solo bloque** `:root[data-tema="oscuro"]`. La alternativa —consulta de medios para el caso por
+defecto más un selector para la elección explícita— obliga a escribir los cuarenta y tantos valores
+dos veces, y dos copias que se mantienen a mano acaban separándose.
+
+Sin elección guardada manda el sistema, y `app.js` escucha `prefers-color-scheme` para seguirlo en
+vivo. Con elección guardada manda ella, en los dos sentidos.
+
+**Tres cosas que no siguen al tema, y cada una por su motivo:**
+
+- **El verde de marca y los tres colores de palanca.** Son identidad. Un verde de Procesos distinto
+  en oscuro dejaría de significar "Procesos".
+- **Los radares.** Chart.js no lee CSS: sus colores van en la configuración. Por eso existe
+  `PALETA_DE_RADAR` en `app.js`, con las versiones aclaradas para dibujar sobre fondo oscuro — el
+  azul de Organización, `#012169`, sobre una tarjeta oscura es invisible.
+- **El informe PDF.** Sale claro siempre, con el tema que sea. Se imprime, y un deck oscuro gasta
+  tinta y se proyecta peor. `conLasVistasDelInformeVisibles()` fuerza el tema claro mientras dura la
+  captura: los radares del informe son PNG capturados del canvas, y en oscuro salían con rótulos
+  gris claro sobre una diapositiva blanca.
+
+Los contrastes están comprobados **pareja a pareja en los dos temas**, sobre el DOM real y
+componiendo el alfa. Al tocar un color hay que rehacer esa cuenta: en una celda del heatmap, un
+contraste mal puesto no es un problema estético, es un dato que no se lee.
 
 ### Las cinco pestañas son vistas, no anclas
 
@@ -407,7 +442,11 @@ resto se comprueba a mano:
 1. `python -m http.server 8000` → `http://localhost:8000/`.
 2. Consola del navegador **en silencio**. Un arranque correcto no imprime nada: lo que aparezca
    ahí es un `warn` o un `error` de verdad, y hay que mirarlo.
-3. Recorrer las cinco vistas:
+3. **Los dos temas y las dos densidades.** El conmutador «Oscuro» y el de «Presentación» son
+   independientes y se combinan: probar las cuatro combinaciones al menos en Overview y Heatmap,
+   que son las que codifican datos en color y en tamaño. Sin elección guardada, cambiar el tema del
+   sistema con la pestaña abierta tiene que arrastrar la herramienta.
+4. Recorrer las cinco vistas:
    - **Overview**: los 4 KPIs, el titular, las barras, la tabla por dominio y los 3 radares de 9
      ejes. Cambiar de dominio en el conmutador **no** debe cambiar ninguna cifra del Overview.
    - **Dashboard**: KPIs, titulares ejecutivos, barras de prioridad y palanca, y los 3 radares.
@@ -417,22 +456,22 @@ resto se comprueba a mano:
      suelto, sin etiquetas, es un cruce roto.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos.
-4. Con un filtro puesto, comprobar que **KPIs, tabla, radares, heatmap, roadmap, CSV y PDF dan el
+5. Con un filtro puesto, comprobar que **KPIs, tabla, radares, heatmap, roadmap, CSV y PDF dan el
    mismo recuento** — y que el **Overview no cambia**, que es lo suyo.
-5. Ir y volver entre Overview y Dashboard: los radares de los dos siguen correctos (5 ejes de
+6. Ir y volver entre Overview y Dashboard: los radares de los dos siguen correctos (5 ejes de
    capacidad y 9 de dominio).
-6. **El informe.** Exportar desde **cada una de las cinco vistas**, incluido el Roadmap sin haber
+7. **El informe.** Exportar desde **cada una de las cinco vistas**, incluido el Roadmap sin haber
    pasado por Dashboard ni Overview: los **seis** radares tienen que salir pintados, los 3 de
    dominio y los 3 de la parte global. En el diálogo, «Guardar como PDF» con **«Gráficos de fondo»
    activado** —sin eso las portadas y el heatmap salen en blanco—, y comprobar que **ninguna
    diapositiva desborda** a una segunda página. Para eso, abrir con `?comprobar=desbordes` y volver
    a exportar: el aviso dice si alguna se recorta y cuál va más justa. Hacerlo también sobre
    **Controlling**, que con 24 subcapacidades es el dominio que aprieta.
-7. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
+8. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
    la fila de Fiscal. Tesorería tiene una capacidad con el mismo nombre y no debe moverse.
-8. Cambiar de dominio y confirmar que los datos se recargan.
-9. Recargar la página y confirmar que el escenario persiste.
-10. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
+9. Cambiar de dominio y confirmar que los datos se recargan.
+10. Recargar la página y confirmar que el escenario persiste.
+11. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
    uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
    guardado se pone **rojo**.
 

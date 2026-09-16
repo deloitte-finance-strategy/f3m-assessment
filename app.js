@@ -253,6 +253,7 @@ let temporizadorDelChip = null;
 
 const NOMBRE_STORAGE_KEY = "f3m-nombre-editor";
 const MODO_PRESENTACION_KEY = "f3m-modo-presentacion";
+const TEMA_KEY = "f3m-tema";
 
 // Identidad de quien edita. Queda a null si la autenticación no está disponible:
 // la app debe seguir funcionando aunque Anonymous Auth no esté activado en la consola.
@@ -600,9 +601,12 @@ function updateActiveDomainUi() {
 async function init() {
   cacheElements();
   bindGlobalEvents();
-  // Antes de pintar nada: si el taller de ayer quedo en modo presentacion, la
-  // pantalla no debe empezar pequena y dar un salto al aplicarlo.
+  // El tema y la densidad ya vienen puestos de tema.js, que corre antes del
+  // primer pintado. Aqui solo se ponen al dia los dos conmutadores y se engancha
+  // el seguimiento del sistema.
   restaurarModoPresentacion();
+  actualizarBotonDeTema();
+  seguirAlSistemaSiNoHayEleccion();
   setInitialLoading(true); // NUEVO: muestra estado de carga mientras se inicializa la app
   showScenarioModeNotice();
   avisarDeElementosAusentes();
@@ -725,6 +729,7 @@ function cacheElements() {
     "loadNoticeClose",
     "loadNoticeAction",
     "presentationModeButton",
+    "themeButton",
     "initialLoadingState", // NUEVO: estado visual de carga inicial
     "sourceNote",
     "overviewSourceNote",
@@ -892,6 +897,7 @@ function bindGlobalEvents() {
   enganchar("heatmapExpandToggle", "click", handleHeatmapExpandToggleAll);
   enganchar("loadNoticeClose", "click", ocultarAviso);
   enganchar("presentationModeButton", "click", alternarModoPresentacion);
+  enganchar("themeButton", "click", alternarTema);
   window.addEventListener("beforeunload", avisarSiQuedaAlgoSinGuardar);
   setupMenuDeEscenario();
   setupVistas();
@@ -2440,6 +2446,64 @@ function hayLibreriaDeGraficos() {
 }
 
 
+/**
+ * La paleta de los radares, por tema.
+ *
+ * Chart.js no lee CSS: sus colores van en la configuracion, asi que los tokens
+ * del tema oscuro no le llegan. Y ahi no es un detalle: el azul de
+ * Organizacion, #012169, sobre una tarjeta oscura es practicamente invisible.
+ *
+ * Los tres colores de palanca SON identidad y no cambian: lo que hay aqui son
+ * las versiones aclaradas para dibujar sobre fondo oscuro, que siguen siendo
+ * verde, naranja y azul y se siguen reconociendo. El informe PDF no pasa por
+ * aqui —usa COLOR_DE_PALANCA directamente— porque sale claro siempre.
+ */
+const PALETA_DE_RADAR = {
+  claro: {
+    procesos: COLOR_DE_PALANCA.procesos,
+    tecnologia: COLOR_DE_PALANCA.tecnologia,
+    organizacion: COLOR_DE_PALANCA.organizacion,
+    areaProcesos: "rgba(134, 188, 37, 0.24)",
+    areaTecnologia: "rgba(237, 139, 0, 0.22)",
+    areaOrganizacion: "rgba(1, 33, 105, 0.18)",
+    objetivo: "#4f5952",
+    leyenda: "#3a433d",
+    marcas: "#5c665e",
+    ejes: "#323a35",
+    rejilla: "#d9dfd4",
+    vertice: "#ffffff",
+  },
+  oscuro: {
+    procesos: "#a8dc4e",
+    tecnologia: "#f0a93a",
+    organizacion: "#7aa6e8",
+    areaProcesos: "rgba(168, 220, 78, 0.26)",
+    areaTecnologia: "rgba(240, 169, 58, 0.24)",
+    areaOrganizacion: "rgba(122, 166, 232, 0.22)",
+    objetivo: "#b3bdb6",
+    leyenda: "#cfd8d1",
+    marcas: "#a2aca5",
+    ejes: "#cfd8d1",
+    rejilla: "#39423c",
+    // El borde del vertice es del color de la TARJETA, para que el punto
+    // resalte sobre el area de color. En claro es blanco; en oscuro, la
+    // superficie oscura.
+    vertice: "#1a201c",
+  },
+};
+
+
+/** El tema que hay puesto, que tema.js resuelve antes del primer pintado. */
+function temaActual() {
+  return document.documentElement.dataset.tema === "oscuro" ? "oscuro" : "claro";
+}
+
+
+function paletaDeRadar() {
+  return PALETA_DE_RADAR[temaActual()];
+}
+
+
 function renderCapabilityRadar() {
   if (!hayLibreriaDeGraficos()) {
     return;
@@ -2453,8 +2517,8 @@ function renderCapabilityRadar() {
     label: "Procesos",
     values: radarData.procesos,
     targetValues: radarData.objetivoProcesos,
-    color: COLOR_DE_PALANCA.procesos,
-    backgroundColor: "rgba(134, 188, 37, 0.24)",
+    color: paletaDeRadar().procesos,
+    backgroundColor: paletaDeRadar().areaProcesos,
     radarData,
   });
 
@@ -2464,8 +2528,8 @@ function renderCapabilityRadar() {
     label: "Tecnología",
     values: radarData.tecnologia,
     targetValues: radarData.objetivoTecnologia,
-    color: COLOR_DE_PALANCA.tecnologia,
-    backgroundColor: "rgba(237, 139, 0, 0.22)",
+    color: paletaDeRadar().tecnologia,
+    backgroundColor: paletaDeRadar().areaTecnologia,
     radarData,
   });
 
@@ -2475,8 +2539,8 @@ function renderCapabilityRadar() {
     label: "Organización",
     values: radarData.organizacion,
     targetValues: radarData.objetivoOrganizacion,
-    color: COLOR_DE_PALANCA.organizacion,
-    backgroundColor: "rgba(1, 33, 105, 0.18)",
+    color: paletaDeRadar().organizacion,
+    backgroundColor: paletaDeRadar().areaOrganizacion,
     radarData,
   });
 }
@@ -2506,8 +2570,9 @@ function renderSingleCapabilityRadar({
   // Estos dos colores se nombran porque ahora aparecen en dos sitios cada uno
   // —la serie y su marca de leyenda, y `labels.color` y el `fontColor` de cada
   // item— y tenerlos escritos dos veces era pedir que se descuadraran.
-  const colorDelObjetivo = "#4f5952";
-  const colorDelTextoDeLeyenda = "#3a433d";
+  const paleta = paletaDeRadar();
+  const colorDelObjetivo = paleta.objetivo;
+  const colorDelTextoDeLeyenda = paleta.leyenda;
 
   const chartData = {
     labels: radarData.displayLabels,
@@ -2521,11 +2586,11 @@ function renderSingleCapabilityRadar({
         borderColor: color,
         borderWidth: 2.5,
         pointBackgroundColor: color,
-        pointBorderColor: "#ffffff",
+        pointBorderColor: paleta.vertice,
         pointBorderWidth: 2,
         pointRadius: 3.5,
         pointHoverRadius: 6,
-        pointHoverBackgroundColor: "#ffffff",
+        pointHoverBackgroundColor: paleta.vertice,
         pointHoverBorderColor: color,
         order: 2,
 
@@ -2546,13 +2611,13 @@ function renderSingleCapabilityRadar({
         borderColor: colorDelObjetivo,
         borderWidth: 2.25,
         borderDash: [7, 5],
-        pointBackgroundColor: "#ffffff",
+        pointBackgroundColor: paleta.vertice,
         pointBorderColor: colorDelObjetivo,
         pointBorderWidth: 2,
         pointRadius: 3,
         pointHoverRadius: 5,
         pointHoverBackgroundColor: colorDelObjetivo,
-        pointHoverBorderColor: "#ffffff",
+        pointHoverBorderColor: paleta.vertice,
         order: 1,
 
         marcaDeLeyenda: {
@@ -2638,7 +2703,7 @@ function renderSingleCapabilityRadar({
         ticks: {
           stepSize: 1,
           backdropColor: "transparent",
-          color: "#5c665e",
+          color: paleta.marcas,
 
           font: {
             size: tamanoDeLetraDeGrafico(),
@@ -2647,7 +2712,7 @@ function renderSingleCapabilityRadar({
         },
 
         pointLabels: {
-          color: "#323a35",
+          color: paleta.ejes,
           padding: 8,
 
           font: {
@@ -2657,11 +2722,11 @@ function renderSingleCapabilityRadar({
         },
 
         grid: {
-          color: "#d9dfd4",
+          color: paleta.rejilla,
         },
 
         angleLines: {
-          color: "#d9dfd4",
+          color: paleta.rejilla,
         },
       },
     },
@@ -3105,8 +3170,8 @@ function renderOverviewRadar(filas) {
     label: "Procesos",
     values: radarData.procesos,
     targetValues: radarData.objetivoProcesos,
-    color: COLOR_DE_PALANCA.procesos,
-    backgroundColor: "rgba(134, 188, 37, 0.24)",
+    color: paletaDeRadar().procesos,
+    backgroundColor: paletaDeRadar().areaProcesos,
     radarData,
     registro: overviewRadarCharts,
   });
@@ -3117,8 +3182,8 @@ function renderOverviewRadar(filas) {
     label: "Tecnología",
     values: radarData.tecnologia,
     targetValues: radarData.objetivoTecnologia,
-    color: COLOR_DE_PALANCA.tecnologia,
-    backgroundColor: "rgba(237, 139, 0, 0.22)",
+    color: paletaDeRadar().tecnologia,
+    backgroundColor: paletaDeRadar().areaTecnologia,
     radarData,
     registro: overviewRadarCharts,
   });
@@ -3129,8 +3194,8 @@ function renderOverviewRadar(filas) {
     label: "Organización",
     values: radarData.organizacion,
     targetValues: radarData.objetivoOrganizacion,
-    color: COLOR_DE_PALANCA.organizacion,
-    backgroundColor: "rgba(1, 33, 105, 0.18)",
+    color: paletaDeRadar().organizacion,
+    backgroundColor: paletaDeRadar().areaOrganizacion,
     radarData,
     registro: overviewRadarCharts,
   });
@@ -4358,6 +4423,89 @@ function avisarSiQuedaAlgoSinGuardar(event) {
 }
 
 
+/* ------------------------------------------------------------------ tema */
+
+/**
+ * Deja el conmutador de tema diciendo lo que hay puesto.
+ *
+ * El tema ya esta aplicado: lo resuelve tema.js antes del primer pintado. Aqui
+ * solo se pone al dia el boton, que app.js es quien conoce los elementos.
+ */
+function actualizarBotonDeTema() {
+  const boton = els.themeButton;
+
+  if (!boton) {
+    return;
+  }
+
+  const oscuro = temaActual() === "oscuro";
+
+  boton.setAttribute("aria-pressed", String(oscuro));
+
+  // El title dice de donde viene el tema, que no es lo mismo que cual es: sin
+  // eleccion guardada lo pone el sistema y cambia solo si el sistema cambia.
+  boton.title = leerAlmacenamiento(TEMA_KEY)
+    ? "Tema elegido a mano. Vuelve a pulsarlo para cambiarlo."
+    : "Sigue la preferencia del sistema hasta que lo pulses";
+}
+
+
+/**
+ * Aplica un tema y repinta.
+ *
+ * Repintar no es cosmetico: los radares son canvas y Chart.js no lee CSS, asi
+ * que sus colores se fijan al construirlos. Sin esto, la interfaz cambiaria de
+ * tema y los seis graficos se quedarian con la paleta anterior.
+ */
+function aplicarTema(tema) {
+  document.documentElement.dataset.tema = tema === "oscuro" ? "oscuro" : "claro";
+
+  actualizarBotonDeTema();
+  renderAll();
+}
+
+
+function alternarTema() {
+  const siguiente = temaActual() === "oscuro" ? "claro" : "oscuro";
+
+  escribirAlmacenamiento(TEMA_KEY, siguiente);
+  aplicarTema(siguiente);
+}
+
+
+/**
+ * Sigue al sistema mientras no haya una eleccion guardada.
+ *
+ * Quien no ha tocado el boton espera que la herramienta acompane a su sistema,
+ * tambien si lo cambia con la pestana abierta. Quien si lo ha tocado espera lo
+ * contrario: que se quede como lo dejo.
+ */
+function seguirAlSistemaSiNoHayEleccion() {
+  if (!window.matchMedia) {
+    return;
+  }
+
+  const consulta = window.matchMedia("(prefers-color-scheme: dark)");
+
+  const alCambiar = (evento) => {
+    if (leerAlmacenamiento(TEMA_KEY)) {
+      return;
+    }
+
+    aplicarTema(evento.matches ? "oscuro" : "claro");
+  };
+
+  // addEventListener en MediaQueryList es lo moderno; addListener es lo que
+  // entienden Safari antiguos, y esta herramienta se abre en el portatil que
+  // haya en la sala.
+  if (consulta.addEventListener) {
+    consulta.addEventListener("change", alCambiar);
+  } else if (consulta.addListener) {
+    consulta.addListener(alCambiar);
+  }
+}
+
+
 /* ---------------------------------------------------------- presentacion */
 
 /** Si la herramienta esta en modo presentacion, para proyectarla en sala. */
@@ -4416,6 +4564,14 @@ function alternarModoPresentacion() {
 }
 
 
+/**
+ * Pone el conmutador de presentacion al dia.
+ *
+ * El atributo ya lo escribio tema.js antes del primer pintado; esto solo repite
+ * la lectura para dejar el aria-pressed en su sitio. Se conserva la llamada a
+ * aplicarModoPresentacion() y no se lee el atributo directamente para que el
+ * estado siga saliendo de un unico sitio, la preferencia guardada.
+ */
 function restaurarModoPresentacion() {
   aplicarModoPresentacion(leerAlmacenamiento(MODO_PRESENTACION_KEY) === "1");
 }
@@ -6059,10 +6215,17 @@ function comprobarDesbordesSiSePide(reportWindow) {
  */
 function conLasVistasDelInformeVisibles(accion) {
   const densidadPrevia = document.documentElement.dataset.densidad;
+  const temaPrevio = document.documentElement.dataset.tema;
 
   if (densidadPrevia) {
     delete document.documentElement.dataset.densidad;
   }
+
+  // Y en claro. Los radares del informe son PNG capturados del canvas, y
+  // Chart.js fija sus colores al construirlos: en tema oscuro se capturaban con
+  // la paleta oscura —rotulos gris claro, rejilla oscura— y acababan pegados
+  // sobre una diapositiva blanca, donde no se ven.
+  document.documentElement.dataset.tema = "claro";
 
   const vistas = [
     { seccion: document.getElementById("dashboard"), pintar: renderDashboard },
@@ -6085,12 +6248,20 @@ function conLasVistasDelInformeVisibles(accion) {
       vista.seccion.hidden = true;
     });
 
+    if (temaPrevio) {
+      document.documentElement.dataset.tema = temaPrevio;
+    } else {
+      delete document.documentElement.dataset.tema;
+    }
+
     if (densidadPrevia) {
       document.documentElement.dataset.densidad = densidadPrevia;
+    }
 
-      // Los radares se quedaron construidos a tamano de informe: hay que
-      // devolverlos a los de pantalla o el consultor vuelve al taller con tres
-      // graficos encogidos.
+    // Los radares quedaron construidos con la paleta y el tamano del informe:
+    // hay que devolverlos a los de pantalla, o el consultor vuelve al taller
+    // con tres graficos claros y encogidos sobre fondo oscuro.
+    if (temaPrevio === "oscuro" || densidadPrevia) {
       vistas.forEach((vista) => vista.pintar());
       redimensionarRadares();
     }
