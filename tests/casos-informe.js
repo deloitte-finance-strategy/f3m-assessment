@@ -14,7 +14,7 @@
  */
 
 import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=11";
-import { paginar } from "../informe/secciones.js?v=11";
+import { deTantas, paginar } from "../informe/secciones.js?v=11";
 import { resumenDeDesbordes } from "../informe/desbordes.js?v=11";
 
 
@@ -134,6 +134,35 @@ export const casos = [
     nombre: "una lista justo del tamano de la tanda no genera una vacia detras",
     ejecutar: (t) => {
       t.igual(paginar([1, 2, 3], 3).length, 1);
+    },
+  },
+  {
+    grupo: "Reparto en diapositivas",
+    nombre: "con una sola tanda no se rotula, que \"1 de 1\" es ruido",
+    ejecutar: (t) => {
+      t.igual(deTantas(0, 1), "");
+    },
+  },
+  {
+    grupo: "Reparto en diapositivas",
+    nombre: "con varias se numera desde 1, no desde el indice del array",
+    ejecutar: (t) => {
+      // Recibe el indice, y el rotulo lo lee una persona en el titulo de la
+      // diapositiva: empezar en 0 daria un "0 de 3" en el entregable.
+      t.igual(deTantas(0, 3), "1 de 3");
+      t.igual(deTantas(2, 3), "3 de 3");
+    },
+  },
+  {
+    grupo: "Reparto en diapositivas",
+    nombre: "el rotulo cuadra con lo que devuelve paginar",
+    ejecutar: (t) => {
+      // Los dos van juntos en cada seccion larga. Si el total no sale de
+      // tandas.length, el deck promete mas diapositivas de las que trae.
+      const tandas = paginar([1, 2, 3, 4, 5, 6, 7], 3);
+      const rotulos = tandas.map((_, indice) => deTantas(indice, tandas.length));
+
+      t.igual(rotulos.join(" · "), "1 de 3 · 2 de 3 · 3 de 3");
     },
   },
 
