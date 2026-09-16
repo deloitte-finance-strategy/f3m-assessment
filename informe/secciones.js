@@ -40,7 +40,15 @@ import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } fr
 const POR_DIAPOSITIVA = {
   calor: 10,
   capacidades: 10,
-  roadmap: 6,
+  // Cinco y no seis. Con seis, la primera diapositiva del roadmap se pasaba 10
+  // px y recortaba en silencio: las iniciativas sugeridas son de largo variable
+  // y una que envuelve a tres lineas se come el margen. Lo encontro
+  // informe/desbordes.js en su primera pasada, y estaba asi desde antes.
+  //
+  // Con quince filas el reparto sigue siendo de tres diapositivas —5+5+5 en vez
+  // de 6+6+3—, asi que no cuesta ninguna pagina de mas y ademas quedan mejor
+  // equilibradas.
+  roadmap: 5,
   brechas: 10,
   casosDeIa: 9,
   comentarios: 6,

@@ -17,6 +17,15 @@
  * IMPORTANTE: si cambia database.rules.json, hay que cambiar esto tambien.
  */
 
+import {
+  DEFAULT_TARGET_MATURITY,
+  normalizeTargetValue,
+  toScore,
+} from "./calculo.js";
+
+import { serializeTargetsForFirebase } from "./objetivos.js";
+
+
 
 /** Longitudes maximas de texto. Espejo de database.rules.json. */
 export const LIMITES_DE_TEXTO = {
@@ -122,14 +131,10 @@ export function normalizarAutoria(valor) {
 }
 
 
-/** Un score valido para las reglas: entero de 1 a 5, o null. */
-function normalizarScore(valor) {
-  const numero = Number(valor);
-
-  return Number.isInteger(numero) && numero >= 1 && numero <= 5
-    ? numero
-    : null;
-}
+// El score valido —entero de 1 a 5, o null— estaba escrito aqui otra vez, byte
+// a byte igual que toScore() del motor. Dos definiciones del mismo rango: si
+// algun dia el modelo admitiera un 0, una de las dos se habria quedado atras y
+// el desajuste solo se veria al rechazar Firebase una escritura.
 
 
 function esObjeto(valor) {
@@ -260,7 +265,7 @@ export function revisarEscenario(payload) {
           bruto !== undefined &&
           bruto !== null &&
           bruto !== "" &&
-          normalizarScore(bruto) === null
+          toScore(bruto) === null
         ) {
           contar("alguna puntuacion no es un entero del 1 al 5 y queda sin puntuar");
         }
@@ -316,7 +321,58 @@ export function revisarEscenario(payload) {
  * `serializarTargets` se recibe de fuera porque depende de los items del
  * dominio, que solo conoce la aplicacion.
  */
-export function normalizarEscenarioParaFirebase(payload, serializarTargets) {
+/**
+ * Una subcapacidad recien cargada, con los campos editables ya dentro de sus
+ * limites.
+ *
+ * Es la contraparte de entrada de normalizarItemParaFirebase(): una recorta al
+ * leer y la otra al escribir, y las dos usan los mismos limites. Recortar ya al
+ * cargar importa porque un escenario importado puede traer un comentario de
+ * 3.000 caracteres: entra sin problema, se pinta sin problema, y la escritura
+ * se rechaza entera mucho despues.
+ */
+export function normalizarItemCargado(item) {
+  return {
+    ...item,
+    scores: {
+      procesos: toScore(item.scores?.procesos),
+      tecnologia: toScore(item.scores?.tecnologia),
+      organizacion: toScore(item.scores?.organizacion),
+    },
+    owner: recortarAlLimite("owner", item.owner || ""),
+    status: item.status || ESTADOS_VALIDOS[0],
+    comentario: recortarAlLimite(
+      "comentario",
+      item.comentario || item.comentariosHallazgos || "",
+    ),
+  };
+}
+
+
+/**
+ * Como se serializan los objetivos de un dominio, salvo que se diga otra cosa.
+ *
+ * Esto se le INYECTABA desde app.js, que es la dependencia del reves: el
+ * contrato de escenario tenia que pedirle a la aplicacion algo que no necesita
+ * nada de ella. Vivia asi porque normalizeDomainTargets() estaba en app.js;
+ * desde que esta en core/objetivos.js, ya no hace falta.
+ *
+ * El parametro sigue existiendo para que las pruebas puedan sustituirlo por uno
+ * de mentira y comprobar solo que se le llama.
+ */
+function serializarTargetsPorDefecto(items, targets, meta) {
+  return serializeTargetsForFirebase(
+    items,
+    targets,
+    normalizeTargetValue(meta?.targetMaturity, DEFAULT_TARGET_MATURITY),
+  );
+}
+
+
+export function normalizarEscenarioParaFirebase(
+  payload,
+  serializarTargets = serializarTargetsPorDefecto,
+) {
   if (!esObjeto(payload)) {
     return payload;
   }
@@ -433,9 +489,9 @@ function normalizarItemParaFirebase(item) {
     subcapacidad: recortarAlLimite("subcapacidad", item.subcapacidad),
 
     scores: {
-      procesos: normalizarScore(scores.procesos),
-      tecnologia: normalizarScore(scores.tecnologia),
-      organizacion: normalizarScore(scores.organizacion),
+      procesos: toScore(scores.procesos),
+      tecnologia: toScore(scores.tecnologia),
+      organizacion: toScore(scores.organizacion),
     },
 
     owner: recortarAlLimite("owner", item.owner),

@@ -22,14 +22,39 @@ import {
   agregarPorDominio as agregarPorDominioCore,
   average,
   calcularMetricas,
-  getMaturityLevel,
   getMaturityLevelNumber,
   normalizeTargetValue,
+  ordenarPorPrioridadYGap,
+  priorityFromGap,
   rankingDeBrechas,
   rankingDePalancas,
+  resumenGlobal,
   toScore,
   unique,
 } from "./core/calculo.js";
+
+// Objetivos de madurez por capacidad y palanca: la mitad de todo gap.
+import {
+  createDefaultTargets,
+  normalizeDomainTargets,
+  serializeTargetsForFirebase,
+} from "./core/objetivos.js";
+
+// Reconocer el trabajo guardado. Si esto falla, una puntuacion no aparece y no
+// se rompe nada visiblemente, que es la peor forma de fallar.
+import {
+  findMatchingScenarioItem,
+  getSavedField,
+  getSavedScore,
+  getScenarioItemsFromPayload,
+} from "./core/coincidencias.js";
+
+// El CSV que se abre en Excel y se le envia al cliente.
+import {
+  filasDeResumen,
+  filasDeRoadmap,
+  toCsv,
+} from "./core/exportacion.js";
 
 // El contrato de un escenario: que campos admite Firebase y con que limites.
 // Espejo de database.rules.json, para no enviar nunca algo que sera rechazado.
@@ -39,6 +64,7 @@ import {
   normalizarAutoria,
   normalizarEscenarioParaFirebase,
   normalizarEstado,
+  normalizarItemCargado,
   recortarAlLimite,
   revisarEscenario,
 } from "./core/escenario.js";
@@ -55,6 +81,10 @@ import {
 
 // El informe PDF: entra el objeto de datos, sale el documento imprimible.
 import { buildEnhancedPdfReportHtml } from "./informe/pdf.js";
+
+// La red que impide que una diapositiva recorte contenido en silencio. Se
+// dispara con ?comprobar=desbordes; ver informe/desbordes.js.
+import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js";
 
 // Configuración de Firebase del proyecto fpa-assessment-mvp
 const firebaseConfig = {
@@ -165,13 +195,6 @@ const LEVERS = PALANCAS.map((palanca) => ({
   ...palanca,
   color: COLOR_DE_PALANCA[palanca.key],
 }));
-
-const PRIORITY_ORDER = {
-  Alta: 1,
-  Media: 2,
-  Baja: 3,
-  Pendiente: 4,
-};
 
 // Los estados y los limites de longitud de los campos editables los define el
 // contrato del escenario, que es el espejo de database.rules.json.
@@ -383,7 +406,7 @@ async function loadDomainData(domainId) {
 
   const data = await response.json();
 
-  const items = data.subcapacities.map(normalizeItem);
+  const items = data.subcapacities.map(normalizarItemCargado);
 
   const defaultTarget = normalizeTargetValue(
     data.meta?.targetMaturity,
@@ -880,135 +903,12 @@ function bindGlobalEvents() {
 
 
 
-function createDefaultTargets(items, defaultTarget = DEFAULT_TARGET_MATURITY) {
-  const targets = {};
-
-  unique(items.map((item) => item.capacidad)).forEach((capability) => {
-    targets[capability] = {
-      procesos: defaultTarget,
-      tecnologia: defaultTarget,
-      organizacion: defaultTarget,
-    };
-  });
-
-  return targets;
-}
 
 
 
-function normalizeDomainTargets(
-  items,
-  savedTargets = {},
-  defaultTarget = DEFAULT_TARGET_MATURITY,
-) {
-  const targets = createDefaultTargets(
-    items,
-    defaultTarget,
-  );
-
-  const savedTargetsArray = Array.isArray(savedTargets)
-    ? savedTargets
-    : Object.entries(savedTargets || {}).map(
-        ([capabilityKey, capabilityTargets]) => {
-          let capability = capabilityKey;
-
-          try {
-            capability = decodeURIComponent(
-              capabilityKey,
-            );
-          } catch (error) {
-            capability = capabilityKey;
-          }
-
-          return {
-            capacidad:
-              capabilityTargets?.capacidad ||
-              capability,
-            procesos:
-              capabilityTargets?.procesos,
-            tecnologia:
-              capabilityTargets?.tecnologia,
-            organizacion:
-              capabilityTargets?.organizacion,
-          };
-        },
-      );
-
-  savedTargetsArray.forEach((savedTarget) => {
-    const savedCapability =
-      savedTarget?.capacidad;
-
-    if (!savedCapability) {
-      return;
-    }
-
-    const matchingCapability =
-      Object.keys(targets).find(
-        (capability) =>
-          normalizeMatchKey(capability) ===
-          normalizeMatchKey(savedCapability),
-      );
-
-    if (!matchingCapability) {
-      return;
-    }
-
-    targets[matchingCapability] = {
-      procesos: normalizeTargetValue(
-        savedTarget.procesos,
-        defaultTarget,
-      ),
-      tecnologia: normalizeTargetValue(
-        savedTarget.tecnologia,
-        defaultTarget,
-      ),
-      organizacion: normalizeTargetValue(
-        savedTarget.organizacion,
-        defaultTarget,
-      ),
-    };
-  });
-
-  return targets;
-}
 
 
 
-function serializeTargetsForFirebase(
-  items,
-  targets,
-  defaultTarget = DEFAULT_TARGET_MATURITY,
-) {
-  const normalizedTargets =
-    normalizeDomainTargets(
-      items,
-      targets,
-      defaultTarget,
-    );
-
-  return Object.entries(
-    normalizedTargets,
-  ).map(
-    ([capability, capabilityTargets]) => ({
-      capacidad: capability,
-
-      procesos: normalizeTargetValue(
-        capabilityTargets.procesos,
-        defaultTarget,
-      ),
-
-      tecnologia: normalizeTargetValue(
-        capabilityTargets.tecnologia,
-        defaultTarget,
-      ),
-
-      organizacion: normalizeTargetValue(
-        capabilityTargets.organizacion,
-        defaultTarget,
-      ),
-    }),
-  );
-}
 
 
 
@@ -1020,18 +920,7 @@ function serializeTargetsForFirebase(
  * escritura ENTERA. Ahora se construye desde cero con los campos permitidos.
  */
 function sanitizeScenarioForFirebase(payload) {
-  return normalizarEscenarioParaFirebase(
-    payload,
-    (items, targets, meta) =>
-      serializeTargetsForFirebase(
-        items,
-        targets,
-        normalizeTargetValue(
-          meta?.targetMaturity,
-          DEFAULT_TARGET_MATURITY,
-        ),
-      ),
-  );
+  return normalizarEscenarioParaFirebase(payload);
 }
 
 
@@ -1113,22 +1002,6 @@ function getCapabilityTargets(capability, domainId = state.activeDomainId) {
 
 
 
-function normalizeItem(item) {
-  return {
-    ...item,
-    scores: {
-      procesos: toScore(item.scores?.procesos),
-      tecnologia: toScore(item.scores?.tecnologia),
-      organizacion: toScore(item.scores?.organizacion),
-    },
-    owner: recortarAlLimite("owner", item.owner || ""),
-    status: item.status || "No iniciado",
-    comentario: recortarAlLimite(
-      "comentario",
-      item.comentario || item.comentariosHallazgos || "",
-    ),
-  };
-}
 
 /**
  * Metricas de una subcapacidad.
@@ -2268,9 +2141,7 @@ function renderDashboard() {
   const items = getScopedItems();
   const metrics = items.map((item) => ({ item, metrics: calculate(item) }));
   const scored = metrics.filter((entry) => !entry.metrics.isPending);
-  const scoreGlobal = average(scored.map((entry) => entry.metrics.scoreMedio));
-  const gapMedio = average(scored.map((entry) => entry.metrics.gap));
-  const highCount = scored.filter((entry) => entry.metrics.prioridad === "Alta").length;
+  const { scoreGlobal, gapMedio, prioridadAlta: highCount } = resumenGlobal(metrics);
 
 
 els.kpiGrid.innerHTML = [
@@ -3008,13 +2879,13 @@ function renderOverview() {
     })),
   );
 
+  const resumenDelOverview = resumenGlobal(entradas);
+
   const evaluadas = entradas.filter(
     (entrada) => !entrada.metrics.isPending,
   );
 
-  const prioridadAlta = evaluadas.filter(
-    (entrada) => entrada.metrics.prioridad === "Alta",
-  ).length;
+  const prioridadAlta = resumenDelOverview.prioridadAlta;
 
   const sinCargar = Object.keys(DOMAINS).length - filas.length;
 
@@ -3032,9 +2903,7 @@ function renderOverview() {
   els.overviewKpiGrid.innerHTML = [
     kpiCard(
       "Score global F3M",
-      formatNumber(
-        average(evaluadas.map((entrada) => entrada.metrics.scoreMedio)),
-      ),
+      formatNumber(resumenDelOverview.scoreGlobal),
       evaluadas.length
         // Se dice "subcapacidades" y no "dominios" a proposito: si no, alguien
         // promedia a mano las nueve cifras de la tabla y no le cuadra.
@@ -3044,9 +2913,7 @@ function renderOverview() {
     ),
     kpiCard(
       "Gap medio vs objetivo",
-      formatNumber(
-        average(evaluadas.map((entrada) => entrada.metrics.gap)),
-      ),
+      formatNumber(resumenDelOverview.gapMedio),
       "Cada dominio contra sus propios objetivos por capacidad y palanca",
       "gap",
     ),
@@ -4125,17 +3992,9 @@ function renderRoadmap() {
 
   const roadmapItems = getVisibleItems(); // Roadmap respeta filtros activos
 
-  const rows = roadmapItems
-    .map((item) => ({ item, metrics: calculate(item) }))
-    .sort((a, b) => {
-      const priorityDiff = PRIORITY_ORDER[a.metrics.prioridad] - PRIORITY_ORDER[b.metrics.prioridad];
-
-      if (priorityDiff) {
-        return priorityDiff;
-      }
-
-      return (b.metrics.gap || 0) - (a.metrics.gap || 0);
-    })
+  const rows = ordenarPorPrioridadYGap(
+    roadmapItems.map((item) => ({ item, metrics: calculate(item) })),
+  )
     .map(({ item, metrics }) => `
       <tr>
         <td>${escapeHtml(item.capacidad)}</td>
@@ -4604,14 +4463,29 @@ function heatScoreCell(value) {
     return `<td class="heat-cell heat-blank">-</td>`;
   }
 
-  return `<td class="heat-cell heat-${Math.max(1, Math.min(5, Math.round(number)))}">${formatNumber(number)}</td>`;
+  // El nivel sale de getMaturityLevelNumber(), que es donde vive el redondeo
+  // acotado del modelo. Aqui estaba reimplementado en linea, asi que eran dos
+  // definiciones de "que nivel es un 3,5" a dos lineas de distancia.
+  return `<td class="heat-cell heat-${getMaturityLevelNumber(number)}">${formatNumber(number)}</td>`;
 }
+
+/**
+ * La clase de color de una celda de gap.
+ *
+ * Los cortes los pone priorityFromGap(), que es la regla de negocio. Estaban
+ * repetidos aqui como 2 y 1 sueltos: mover el umbral de Alta en el motor habria
+ * dejado el heatmap pintando de rojo un gap que la tabla llamaba Media.
+ */
+const CLASE_DE_GAP = {
+  Alta: "gap-high",
+  Media: "gap-mid",
+  Baja: "gap-low",
+};
 
 function gapClass(value) {
   if (!Number.isFinite(value)) return "heat-blank";
-  if (value >= 2) return "gap-high";
-  if (value >= 1) return "gap-mid";
-  return "gap-low";
+
+  return CLASE_DE_GAP[priorityFromGap(value)] || "gap-low";
 }
 
 function priorityBadge(priority) {
@@ -5505,57 +5379,13 @@ function applyStoredScenario() {
   }
 }
 
-function normalizeMatchKey(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
 
 
 
 
 
-function getSavedField(savedItem, fieldNames) {
-  for (const fieldName of fieldNames) {
-    if (savedItem?.[fieldName] !== undefined && savedItem?.[fieldName] !== null) {
-      return savedItem[fieldName];
-    }
-  }
 
-  return undefined;
-}
 
-function getSavedScore(savedItem, leverKey) {
-  const scoreFieldMap = {
-    procesos: ["procesos", "Procesos", "Score Procesos", "ScoreProcesos"],
-    tecnologia: ["tecnologia", "Tecnologia", "Tecnología", "Score Tecnología", "Score Tecnologia", "ScoreTecnologia"],
-    organizacion: ["organizacion", "Organizacion", "Organización", "Score Organización", "Score Organizacion", "ScoreOrganizacion"],
-  };
-
-  if (savedItem?.scores?.[leverKey] !== undefined) {
-    return savedItem.scores[leverKey];
-  }
-
-  return getSavedField(savedItem, scoreFieldMap[leverKey] || []);
-}
-
-function toSavedItemsArray(value) {
-  if (!value) {
-    return [];
-  }
-
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  if (typeof value === "object") {
-    return Object.values(value);
-  }
-
-  return [];
-}
 
 
 
@@ -5585,67 +5415,7 @@ function getScenarioTargetsFromPayload(payload, domainId) {
 
 
 
-function getScenarioItemsFromPayload(payload, domainId) {
-  if (!payload) {
-    return [];
-  }
 
-  if (Array.isArray(payload)) {
-    return payload;
-  }
-
-  if (payload.domains?.[domainId]?.items) {
-    return toSavedItemsArray(payload.domains[domainId].items);
-  }
-
-  if (payload.domains?.[domainId]?.subcapacities) {
-    return toSavedItemsArray(payload.domains[domainId].subcapacities);
-  }
-
-  if (payload[domainId]?.items) {
-    return toSavedItemsArray(payload[domainId].items);
-  }
-
-  if (payload.items) {
-    return toSavedItemsArray(payload.items);
-  }
-
-  if (payload.subcapacities) {
-    return toSavedItemsArray(payload.subcapacities);
-  }
-
-  if (payload.state?.items) {
-    return toSavedItemsArray(payload.state.items);
-  }
-
-  return [];
-}
-
-function findMatchingScenarioItem(items, savedItem) {
-  if (!savedItem) {
-    return null;
-  }
-
-  const savedId = savedItem.id || savedItem.ID || savedItem.Id;
-  const byId = items.find((item) => item.id === savedId);
-
-  if (byId) {
-    return byId;
-  }
-
-  const savedCapability = normalizeMatchKey(
-    savedItem.capacidad || savedItem.Capacidad || savedItem.capacity || savedItem.Capability,
-  );
-
-  const savedSubcapability = normalizeMatchKey(
-    savedItem.subcapacidad || savedItem.Subcapacidad || savedItem.subcapacity || savedItem.Subcapability,
-  );
-
-  return items.find((item) => (
-    normalizeMatchKey(item.capacidad) === savedCapability &&
-    normalizeMatchKey(item.subcapacidad) === savedSubcapability
-  ));
-}
 
 /**
  * Vuelca las subcapacidades guardadas sobre las cargadas.
@@ -6155,46 +5925,16 @@ function exportScenarioJson() {
 
 
 function exportCsv() {
-  const summaryRows = buildSummaryRows();
-  const roadmapRows = getScopedItems()
-    .map((item) => {
-      const metrics = calculate(item);
-      return {
-        Tipo: "Roadmap",
-        Capacidad: item.capacidad,
-        Subcapacidad: item.subcapacidad,
-        Procesos: item.scores.procesos ?? "",
-        ObjetivoProcesos:
-          metrics.targets.procesos,
+  const roadmapRows = filasDeRoadmap(
+    getScopedItems().map((item) => ({ item, metrics: calculate(item) })),
+  );
 
-        Tecnologia: item.scores.tecnologia ?? "",
-        ObjetivoTecnologia:
-          metrics.targets.tecnologia,
-
-        Organizacion: item.scores.organizacion ?? "",
-        ObjetivoOrganizacion:
-          metrics.targets.organizacion,
-
-        ScoreMedio: metrics.scoreMedio ?? "",
-        ObjetivoMedio: metrics.targetMedio ?? "",
-        Nivel: metrics.nivel,
-        Gap: metrics.gap ?? "",
-
-        Prioridad: metrics.prioridad,
-        Oleada: metrics.oleada,
-        IniciativaSugerida: item.iniciativaSugerida,
-        Owner: item.owner,
-        Estado: item.status,
-        Comentarios: item.comentario,
-      };
-    });
-    
   const activeDomain = getActiveDomainConfig();
   const domainFileName = toSafeFileName(activeDomain.id || activeDomain.label);
 
   downloadFile(
     `f3m_${domainFileName}_assessment_export.csv`,
-    toCsv([...summaryRows, ...roadmapRows]),
+    toCsv([...buildSummaryRows(), ...roadmapRows]),
     "text/csv;charset=utf-8",
   );
 }
@@ -6239,6 +5979,10 @@ function exportPdfReport() {
   );
 
   setTimeout(() => {
+    // Antes de imprimir, porque el dialogo de impresion bloquea el hilo y
+    // despues ya no se mide nada.
+    comprobarDesbordesSiSePide(reportWindow);
+
     const images = [...reportWindow.document.images];
 
     if (!images.length) {
@@ -6263,6 +6007,35 @@ function exportPdfReport() {
       reportWindow.print();
     });
   }, 900);
+}
+
+
+/**
+ * Mide el informe recien escrito, si se ha pedido con ?comprobar=desbordes.
+ *
+ * Solo con el parametro puesto: es una comprobacion de mantenimiento, y quien
+ * exporta delante de un cliente no tiene por que ver un aviso sobre pixeles.
+ *
+ * Se mide desde aqui y no dentro del informe porque la ventana del informe no
+ * lleva scripts a proposito, y ademas hereda una CSP que no admite scripts en
+ * linea. Desde aqui el documento esta a mano: lo acabamos de escribir.
+ */
+function comprobarDesbordesSiSePide(reportWindow) {
+  const parametros = new URLSearchParams(window.location.search);
+
+  if (parametros.get("comprobar") !== "desbordes") {
+    return;
+  }
+
+  try {
+    const medidas = medirDiapositivas(reportWindow.document);
+    const resumen = resumenDeDesbordes(medidas);
+
+    console.table(medidas);
+    showNotice(resumen.mensaje, resumen.tono, true);
+  } catch (error) {
+    console.warn("No se ha podido medir el informe.", error);
+  }
 }
 
 
@@ -6357,30 +6130,13 @@ function buildEnhancedPdfReportData() {
   // El informe es ejecutivo: una tabla de 152 filas no se lee. Pero la poda
   // tiene que verse, porque el titulo decia "Roadmap e iniciativas sugeridas" y
   // parecia el roadmap entero.
-  const evaluadasOrdenadas = [...metrics]
-    .filter((entry) => !entry.metrics.isPending)
-    .sort((a, b) => {
-      const priorityDiff = PRIORITY_ORDER[a.metrics.prioridad] - PRIORITY_ORDER[b.metrics.prioridad];
-
-      if (priorityDiff) {
-        return priorityDiff;
-      }
-
-      return (b.metrics.gap || 0) - (a.metrics.gap || 0);
-    });
+  const evaluadasOrdenadas = ordenarPorPrioridadYGap(
+    metrics.filter((entry) => !entry.metrics.isPending),
+  );
 
   const topPriorities = evaluadasOrdenadas.slice(0, PDF_MAX_PRIORIDADES);
 
-  const roadmapOrdenado = [...metrics]
-    .sort((a, b) => {
-      const priorityDiff = PRIORITY_ORDER[a.metrics.prioridad] - PRIORITY_ORDER[b.metrics.prioridad];
-
-      if (priorityDiff) {
-        return priorityDiff;
-      }
-
-      return (b.metrics.gap || 0) - (a.metrics.gap || 0);
-    });
+  const roadmapOrdenado = ordenarPorPrioridadYGap(metrics);
 
   const roadmapItems = roadmapOrdenado.slice(0, PDF_MAX_ROADMAP);
 
@@ -6406,10 +6162,7 @@ function buildEnhancedPdfReportData() {
     roadmapItems,
     roadmapTotal: roadmapOrdenado.length,
     commentItems,
-    scoreGlobal: average(scored.map((entry) => entry.metrics.scoreMedio)),
-    gapMedio: average(scored.map((entry) => entry.metrics.gap)),
-    objetivoMedio: average(scored.map((entry) => entry.metrics.targetMedio)),
-    highCount: scored.filter((entry) => entry.metrics.prioridad === "Alta").length,
+    ...cifrasDeCabecera(metrics),
     radarImages: getRadarImagesForPdf(),
 
     titulares: construirTitularesDelDominio(visibleItems, metrics),
@@ -6498,10 +6251,7 @@ function construirBloqueGlobalParaInforme() {
     subcapacidades: entradas.length,
     evaluadas: evaluadas.length,
 
-    scoreGlobal: average(evaluadas.map((entrada) => entrada.metrics.scoreMedio)),
-    gapMedio: average(evaluadas.map((entrada) => entrada.metrics.gap)),
-    objetivoMedio: average(evaluadas.map((entrada) => entrada.metrics.targetMedio)),
-    highCount: evaluadas.filter((entrada) => entrada.metrics.prioridad === "Alta").length,
+    ...cifrasDeCabecera(entradas),
 
     titulares: evaluadas.length
       ? {
@@ -6583,6 +6333,26 @@ function construirCasosDeIaParaInforme(items) {
     total: casos.length,
   };
 }
+
+/**
+ * Las cuatro cifras de cabecera con los nombres que usa el informe.
+ *
+ * El motor las calcula; aqui solo se renombra prioridadAlta -> highCount, que
+ * es el nombre con el que viajan a informe/. Antes las dos mitades del informe
+ * —la global y la del dominio— las calculaban por su cuenta, con las mismas
+ * cuatro expresiones copiadas.
+ */
+function cifrasDeCabecera(entradas) {
+  const resumen = resumenGlobal(entradas);
+
+  return {
+    scoreGlobal: resumen.scoreGlobal,
+    gapMedio: resumen.gapMedio,
+    objetivoMedio: resumen.objetivoMedio,
+    highCount: resumen.prioridadAlta,
+  };
+}
+
 
 function buildPdfSummaryRowsFromItems(items) {
   return agregarPorCapacidad(items).map((capacidad) => ({
@@ -6674,111 +6444,19 @@ function getCanvasImageDataUrl(palanca, canvas, registro = capabilityRadarCharts
 }
 
 
+/**
+ * Las filas de resumen del CSV, para el ambito visible.
+ *
+ * Es la capa fina que conoce el estado: filasDeResumen() vive en core/ porque
+ * es pura, y aqui solo se le dice sobre que subcapacidades trabajar.
+ */
 function buildSummaryRows() {
-  return agregarPorCapacidad(getScopedItems()).map((capacidad) => ({
-    Tipo: "Resumen",
-    Capacidad: capacidad.capacidad,
-    Subcapacidad: "",
-
-    Procesos: capacidad.procesos ?? "",
-    ObjetivoProcesos: capacidad.objetivos.procesos,
-
-    Tecnologia: capacidad.tecnologia ?? "",
-    ObjetivoTecnologia: capacidad.objetivos.tecnologia,
-
-    Organizacion: capacidad.organizacion ?? "",
-    ObjetivoOrganizacion: capacidad.objetivos.organizacion,
-
-    ScoreMedio: capacidad.scoreMedio ?? "",
-    ObjetivoMedio: capacidad.targetMedio ?? "",
-
-    // La guarda de "sin score" vive ahora dentro de getMaturityLevel().
-    Nivel: getMaturityLevel(capacidad.scoreMedio) ?? "",
-
-    Gap: capacidad.gap ?? "",
-    Prioridad: capacidad.prioridad,
-    Oleada: "",
-    IniciativaSugerida: "",
-    Owner: "",
-    Estado: "",
-    Comentarios: "",
-  }));
+  return filasDeResumen(agregarPorCapacidad(getScopedItems()));
 }
 
 
 
-// Excel con configuración regional española espera punto y coma, no coma: con
-// comas volcaba todas las columnas en una sola celda. csvEscape ya entrecomilla
-// los campos que contienen ";", así que el separador es seguro.
-const CSV_SEPARATOR = ";";
 
-// Marca de orden de bytes. Sin ella Excel abre el archivo como ANSI y
-// "Tecnología" llega ilegible.
-const CSV_BOM = "\uFEFF";
-
-function toCsv(rows) {
-  if (!rows.length) {
-    return "";
-  }
-
-  const headers = Object.keys(rows[0]);
-  const csvRows = [headers.join(CSV_SEPARATOR)];
-
-  rows.forEach((row) => {
-    csvRows.push(
-      headers.map((header) => csvEscape(row[header])).join(CSV_SEPARATOR),
-    );
-  });
-
-  // Fin de línea CRLF: es lo que espera Excel.
-  return CSV_BOM + csvRows.join("\r\n");
-}
-
-// Excel y LibreOffice tratan como formula cualquier celda que empiece por =, +,
-// - o @. En los campos de texto libre —comentarios, responsable— eso da dos
-// problemas a la vez:
-//
-// - Seguridad: una celda como =HYPERLINK(...) o una llamada DDE se evalua al
-//   abrir el archivo, y estos CSV se abren en el equipo del consultor y se
-//   envian al cliente. En un escenario compartido, cualquiera con el enlace
-//   puede dejar ese comentario.
-// - Presentacion: un comentario que empieza por un guion —"- Falta gobierno"—
-//   se ensena hoy como #NAME? en vez de como el texto que se escribio.
-//
-// El apostrofo delante es la mitigacion habitual: marca la celda como texto y
-// la hoja de calculo no lo muestra. Ningun campo numerico de la exportacion
-// empieza por esos caracteres, asi que no les afecta.
-const INICIO_DE_FORMULA = /^[=+\-@\t\r]/;
-
-// Los numeros, con coma decimal y sin separador de miles.
-//
-// El resto del archivo esta hecho a proposito para Excel en espanol —el punto y
-// coma y la marca de orden de bytes estan aqui por eso—, pero los numeros salian
-// con punto: "3.17". Excel en espanol no lo lee como el numero 3,17, asi que las
-// columnas de score, objetivo y gap llegaban como TEXTO. Quien recibia el CSV no
-// podia sumarlas, ni ordenarlas, ni llevarlas a una tabla dinamica.
-//
-// Sin separador de miles a proposito: un punto de millar volveria a romper la
-// lectura. Con scores del 1 al 5 no se llega ahi, pero no depende de eso.
-const FORMATO_DE_NUMERO_CSV = new Intl.NumberFormat("es-ES", {
-  maximumFractionDigits: 2,
-  useGrouping: false,
-});
-
-function csvEscape(value) {
-  // Un numero se escribe como numero. Y no pasa por la proteccion de formulas,
-  // que es para el texto que escribe la gente: un numero no puede ser una.
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return FORMATO_DE_NUMERO_CSV.format(value);
-  }
-
-  const text = String(value ?? "");
-  const seguro = INICIO_DE_FORMULA.test(text) ? `'${text}` : text;
-
-  // La coma ya no obliga a entrecomillar: el separador es el punto y coma, y
-  // entrecomillar "3,17" hacia que Excel volviera a tratarlo como texto.
-  return /["\r\n;]/.test(seguro) ? `"${seguro.replace(/"/g, '""')}"` : seguro;
-}
 
 
 function downloadFile(filename, content, type) {
