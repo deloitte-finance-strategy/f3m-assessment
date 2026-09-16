@@ -863,15 +863,21 @@
       styles.css iba sin version, asi que un cambio de estilos podia quedarse
       sin verse hasta una recarga forzada. Los tres numeros se suben a la vez.
 
-      AVISO: los imports de app.js —./core/*.js, ./informe/*.js— NO llevan
-      version, porque la sintaxis de modulos ES resuelve rutas relativas sin
-      pasar por aqui. Es decir, que un app.js nuevo puede venir con un
-      core/calculo.js viejo en cache. Mientras core/ cambie poco se ha ido
-      sosteniendo, pero es una superficie abierta y se cierra al repartir
-      app.js en modulos, con un importmap.
+      Los imports relativos —./app/*.js, ./core/*.js, ./informe/*.js— llevan
+      la version TAMBIEN. La sintaxis de modulos ES resuelve rutas relativas
+      sin pasar por aqui, asi que sin version un app.js nuevo podia venir con
+      un core/calculo.js viejo en cache: la misma mezcla que este numero
+      existe para impedir, una capa mas abajo.
+
+      Lo evidente seria un importmap, con las rutas versionadas en un solo
+      sitio. No sirve aqui: un importmap en linea esta sujeto a script-src, y
+      la CSP no lleva 'unsafe-inline' a proposito —es la directiva que cierra
+      la inyeccion de codigo—. Comprobado en el navegador, no de memoria: se
+      bloquea.
 
       AL DESPLEGAR UN CAMBIO EN EL JAVASCRIPT O EN LOS ESTILOS, SUBIR ESTE
-      NUMERO EN LOS TRES SITIOS.
+      NUMERO AQUI Y EN TODOS LOS IMPORTS. Lo comprueba el CI:
+      python scripts/check_module_version.py
     -->
     <script type="module" src="app.js?v=11"></script>
   </body>
