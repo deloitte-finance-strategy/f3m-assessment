@@ -90,6 +90,22 @@
             Exportar CSV
           </button>
 
+          <!--
+            Modo presentacion. La herramienta se usa proyectada en taller, y a
+            0,88rem las tablas no se leen desde el fondo de la sala. Redefine
+            los tokens de tipografia y densidad; no toca ni una regla de
+            maquetacion. aria-pressed porque es un conmutador, no una accion.
+          -->
+          <button
+            class="header-secondary-action"
+            id="presentationModeButton"
+            type="button"
+            aria-pressed="false"
+            title="Agranda la tipografía y las tablas para proyectar en sala"
+          >
+            Presentación
+          </button>
+
           <div class="header-menu">
             <button
               class="header-menu-button"
@@ -115,8 +131,15 @@
                 <span>Trátalo como una credencial</span>
               </button>
 
+              <!--
+                Este es el unico elemento del menu cuyo texto cambia en
+                ejecucion, y por eso lleva el rotulo en su propio span: al
+                escribirlo con textContent sobre el boton entero se llevaba por
+                delante la linea de abajo, y la entrada se quedaba sin
+                explicacion mientras sus hermanas la conservaban.
+              -->
               <button class="header-menu-item" id="editorNameButton" type="button" hidden>
-                Poner mi nombre
+                <span id="editorNameLabel">Poner mi nombre</span>
                 <span>Así se atribuyen tus cambios</span>
               </button>
 
@@ -296,6 +319,15 @@
           </div>
           <p class="small-note" id="sourceNote"></p>
         </div>
+
+        <!--
+          El Dashboard SI aplica los filtros, y era la unica de las cuatro
+          vistas filtrables que no los ensenaba con chips: solo una linea de
+          texto ambar en #sourceNote. Ensenarle al cliente "Score global 2,8"
+          con un filtro de capacidad olvidado puesto es un error silencioso, y
+          de los que no se descubren hasta que alguien rehace el numero.
+        -->
+        <div class="active-filters active-filters-block" data-active-filters hidden></div>
 
         <div class="kpi-grid" id="kpiGrid"></div>
 

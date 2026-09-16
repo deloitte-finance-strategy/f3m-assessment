@@ -229,6 +229,7 @@ let cancelarSuscripcionRemota = null;
 let temporizadorDelChip = null;
 
 const NOMBRE_STORAGE_KEY = "f3m-nombre-editor";
+const MODO_PRESENTACION_KEY = "f3m-modo-presentacion";
 
 // Identidad de quien edita. Queda a null si la autenticación no está disponible:
 // la app debe seguir funcionando aunque Anonymous Auth no esté activado en la consola.
@@ -346,7 +347,8 @@ function renderDomainSwitcher() {
               class="domain-button${dominio.id === state.activeDomainId ? " active" : ""}"
               type="button"
               data-domain-id="${escapeAttr(dominio.id)}"
-            >${escapeHtml(dominio.label)}</button>
+              ${dominio.id === state.activeDomainId ? 'aria-current="true"' : ""}
+            ><span class="domain-button-label">${escapeHtml(dominio.label)}</span></button>
           `,
         )
         .join("");
@@ -540,7 +542,17 @@ function updateActiveDomainUi() {
   const domain = DOMAINS[state.activeDomainId];
 
   document.querySelectorAll("[data-domain-id]").forEach((button) => {
-    button.classList.toggle("active", button.dataset.domainId === state.activeDomainId);
+    const esElAbierto = button.dataset.domainId === state.activeDomainId;
+
+    button.classList.toggle("active", esElAbierto);
+
+    // Cual esta abierto se decia SOLO con una clase, es decir, solo en verde.
+    // Con lector de pantalla no habia forma de saber en que dominio se estaba.
+    if (esElAbierto) {
+      button.setAttribute("aria-current", "true");
+    } else {
+      button.removeAttribute("aria-current");
+    }
   });
 
   const title = document.getElementById("activeDomainTitle");
@@ -565,6 +577,9 @@ function updateActiveDomainUi() {
 async function init() {
   cacheElements();
   bindGlobalEvents();
+  // Antes de pintar nada: si el taller de ayer quedo en modo presentacion, la
+  // pantalla no debe empezar pequena y dar un salto al aplicarlo.
+  restaurarModoPresentacion();
   setInitialLoading(true); // NUEVO: muestra estado de carga mientras se inicializa la app
   showScenarioModeNotice();
   avisarDeElementosAusentes();
@@ -686,6 +701,7 @@ function cacheElements() {
     "loadNoticeIcon",
     "loadNoticeClose",
     "loadNoticeAction",
+    "presentationModeButton",
     "initialLoadingState", // NUEVO: estado visual de carga inicial
     "sourceNote",
     "overviewSourceNote",
@@ -852,6 +868,7 @@ function bindGlobalEvents() {
   enganchar("editorNameButton", "click", pedirNombreEditor);
   enganchar("heatmapExpandToggle", "click", handleHeatmapExpandToggleAll);
   enganchar("loadNoticeClose", "click", ocultarAviso);
+  enganchar("presentationModeButton", "click", alternarModoPresentacion);
   window.addEventListener("beforeunload", avisarSiQuedaAlgoSinGuardar);
   setupMenuDeEscenario();
   setupVistas();
@@ -1855,10 +1872,23 @@ function actualizarAvanceDeDominios() {
     contador.classList.toggle("sin-empezar", puntuadas === 0);
     contador.classList.toggle("completo", puntuadas === total && total > 0);
 
-    boton.title =
+    const avance =
       puntuadas === 0
-        ? "Sin empezar"
+        ? "sin empezar"
         : `${puntuadas} de ${total} subcapacidades puntuadas`;
+
+    // El contador se pinta pero no se lee: al meterlo dentro del boton, su
+    // nombre accesible pasaba a ser "Controlling12/40", sin separador y sin
+    // decir que son esos dos numeros. Ahora el nombre lo pone el aria-label y
+    // el "12/40" visible queda como lo que es, una marca grafica.
+    contador.setAttribute("aria-hidden", "true");
+
+    boton.setAttribute(
+      "aria-label",
+      `${DOMAINS[domainId]?.label || domainId}, ${avance}`,
+    );
+
+    boton.title = puntuadas === 0 ? "Sin empezar" : avance;
   });
 }
 
@@ -1873,15 +1903,30 @@ function updateNavigationBadges() {
   const totalCount = state.items.length;
   const highPriorityCount = metrics.filter((entry) => entry.prioridad === "Alta").length;
 
+  // Los badges son marcas graficas, no parte del nombre del enlace: sin
+  // aria-hidden, "Assessment" se anunciaba como "Assessment 12/40" y "Roadmap"
+  // como "Roadmap 5 Alta", con el significado escondido en un title que ni el
+  // teclado ni el tacto alcanzan. El texto que si se lee va al aria-label del
+  // enlace, que es quien lo necesita.
   els.assessmentTabBadge.textContent = `${scoredCount}/${totalCount}`;
-  els.assessmentTabBadge.title =
+  els.assessmentTabBadge.setAttribute("aria-hidden", "true");
+
+  els.roadmapTabBadge.textContent = `${highPriorityCount} Alta`;
+  els.roadmapTabBadge.setAttribute("aria-hidden", "true");
+
+  const avance =
     `${scoredCount} de ${totalCount} subcapacidades puntuadas en este dominio. ` +
     "No depende de los filtros activos.";
 
-  els.roadmapTabBadge.textContent = `${highPriorityCount} Alta`;
-  els.roadmapTabBadge.title =
+  const altas =
     `${highPriorityCount} subcapacidades de prioridad alta en este dominio. ` +
     "No depende de los filtros activos.";
+
+  els.assessmentTabBadge.closest("a")?.setAttribute("aria-label", `Assessment · ${avance}`);
+  els.roadmapTabBadge.closest("a")?.setAttribute("aria-label", `Roadmap · ${altas}`);
+
+  els.assessmentTabBadge.title = avance;
+  els.roadmapTabBadge.title = altas;
 
   els.roadmapTabBadge.classList.toggle("tab-badge-alert", highPriorityCount > 0);
 }
@@ -2399,11 +2444,14 @@ function renderLeverBars(items = getScopedItems(), destino = els.leverBars) {
 
 
 function barRow(label, value, width, color) {
+  // La barra es un grafico, y sin role ni nombre era un span vacio: un lector
+  // de pantalla leia la etiqueta y la cifra sueltas, sin nada que las uniera.
+  // El aria-hidden del track evita que la barra se anuncie dos veces.
   return `
-    <div class="bar-row">
-      <span class="bar-label">${escapeHtml(label)}</span>
-      <span class="bar-track"><span class="bar-fill" style="width:${width}%;background:${color}"></span></span>
-      <span class="bar-value">${escapeHtml(String(value))}</span>
+    <div class="bar-row" role="img" aria-label="${escapeAttr(`${label}: ${value}`)}">
+      <span class="bar-label" aria-hidden="true">${escapeHtml(label)}</span>
+      <span class="bar-track" aria-hidden="true"><span class="bar-fill" style="width:${width}%;background:${color}"></span></span>
+      <span class="bar-value" aria-hidden="true">${escapeHtml(String(value))}</span>
     </div>
   `;
 }
@@ -2667,7 +2715,7 @@ function renderSingleCapabilityRadar({
           color: colorDelTextoDeLeyenda,
 
           font: {
-            size: 11,
+            size: tamanoDeLetraDeGrafico(),
             weight: "700",
           },
 
@@ -2722,7 +2770,7 @@ function renderSingleCapabilityRadar({
           color: "#5c665e",
 
           font: {
-            size: 11,
+            size: tamanoDeLetraDeGrafico(),
             weight: "700",
           },
         },
@@ -2732,7 +2780,7 @@ function renderSingleCapabilityRadar({
           padding: 8,
 
           font: {
-            size: 11,
+            size: tamanoDeLetraDeGrafico(),
             weight: "800",
           },
         },
@@ -4319,8 +4367,12 @@ function contadorDeComentario(item) {
     return "";
   }
 
+  // role="status" y no aria-hidden. Era invisible para un lector de pantalla,
+  // asi que quien no ve la cuenta se enteraba del limite al perderlo: se pasa
+  // de 2.000, las reglas rechazan la escritura entera y el comentario no llega.
+  // El aria-live es polite para no interrumpir mientras se escribe.
   return `
-    <span class="roadmap-comment-count" aria-hidden="true">
+    <span class="roadmap-comment-count" role="status" aria-live="polite">
       ${usados} / ${limite}
     </span>
   `;
@@ -4360,7 +4412,8 @@ function actualizarContadorDeComentario(event) {
   if (!contador) {
     contador = document.createElement("span");
     contador.className = "roadmap-comment-count";
-    contador.setAttribute("aria-hidden", "true");
+    contador.setAttribute("role", "status");
+    contador.setAttribute("aria-live", "polite");
     celda.appendChild(contador);
   }
 
@@ -4443,6 +4496,69 @@ function avisarSiQuedaAlgoSinGuardar(event) {
 
   event.preventDefault();
   event.returnValue = "";
+}
+
+
+/* ---------------------------------------------------------- presentacion */
+
+/** Si la herramienta esta en modo presentacion, para proyectarla en sala. */
+function enModoPresentacion() {
+  return document.documentElement.dataset.densidad === "presentacion";
+}
+
+
+/**
+ * Tamano de letra de los radares.
+ *
+ * Chart.js no lee CSS: sus tipografias van en la configuracion, asi que el
+ * modo presentacion no le llega por los tokens como al resto. Sin esto, los
+ * nueve ejes del radar global se quedaban en 11 px mientras la tabla de al lado
+ * crecia un 20%, que es peor que no agrandar nada.
+ *
+ * Sube a 13 y no a 15, que es lo que pedia la proporcion. El ancho del lienzo
+ * lo fija la rejilla de tres columnas y NO crece con el modo, asi que a 15 px
+ * los rotulos de un solo eje se salian: "Estrategicas" y "Auditoria Interna"
+ * aparecian cortados por la mitad. Un rotulo recortado en un radar proyectado
+ * es justo el fallo que este modo venia a evitar. La legibilidad la pone
+ * sobre todo el lienzo, que si crece de 380 a 480 px.
+ */
+function tamanoDeLetraDeGrafico() {
+  return enModoPresentacion() ? 13 : 11;
+}
+
+
+/**
+ * Aplica el modo presentacion, sin repintar.
+ *
+ * Se llama tambien en el arranque, antes de que haya nada que repintar, de ahi
+ * que la decision de llamar a renderAll() sea de quien alterna.
+ */
+function aplicarModoPresentacion(activo) {
+  if (activo) {
+    document.documentElement.dataset.densidad = "presentacion";
+  } else {
+    delete document.documentElement.dataset.densidad;
+  }
+
+  els.presentationModeButton?.setAttribute("aria-pressed", String(Boolean(activo)));
+}
+
+
+function alternarModoPresentacion() {
+  const activo = !enModoPresentacion();
+
+  aplicarModoPresentacion(activo);
+  escribirAlmacenamiento(MODO_PRESENTACION_KEY, activo ? "1" : "0");
+
+  // Repintar es obligatorio, no cosmetico: los radares son canvas y su
+  // tipografia se fija al construirlos, asi que la tabla se agrandaria y los
+  // tres graficos de al lado se quedarian como estaban.
+  renderAll();
+}
+
+
+function restaurarModoPresentacion() {
+  aplicarModoPresentacion(leerAlmacenamiento(MODO_PRESENTACION_KEY) === "1");
 }
 
 
@@ -6161,8 +6277,20 @@ function exportPdfReport() {
  * global, que lleva los radares de nueve ejes del Overview. Cada uno se
  * restaura por separado: el usuario puede estar en cualquiera de las dos, y
  * dejar oculta la que estaba a la vista se lleva la pantalla por delante.
+ *
+ * Y se sale del modo presentacion mientras dura la captura. El informe es el
+ * entregable: no puede salir de una forma u otra segun como estuviera la
+ * pantalla al pulsar el boton. En modo presentacion los radares del Overview
+ * van a una sola columna, asi que se capturaban a 734x480 en vez de 414x380, y
+ * la diapositiva que los coloca en fila esta medida para los segundos.
  */
 function conLasVistasDelInformeVisibles(accion) {
+  const densidadPrevia = document.documentElement.dataset.densidad;
+
+  if (densidadPrevia) {
+    delete document.documentElement.dataset.densidad;
+  }
+
   const vistas = [
     { seccion: document.getElementById("dashboard"), pintar: renderDashboard },
     { seccion: document.getElementById("overview"), pintar: renderOverview },
@@ -6175,6 +6303,7 @@ function conLasVistasDelInformeVisibles(accion) {
   });
 
   vistas.forEach((vista) => vista.pintar());
+  redimensionarRadares();
 
   try {
     return accion();
@@ -6182,7 +6311,34 @@ function conLasVistasDelInformeVisibles(accion) {
     ocultas.forEach((vista) => {
       vista.seccion.hidden = true;
     });
+
+    if (densidadPrevia) {
+      document.documentElement.dataset.densidad = densidadPrevia;
+
+      // Los radares se quedaron construidos a tamano de informe: hay que
+      // devolverlos a los de pantalla o el consultor vuelve al taller con tres
+      // graficos encogidos.
+      vistas.forEach((vista) => vista.pintar());
+      redimensionarRadares();
+    }
   }
+}
+
+
+/**
+ * Obliga a los seis radares a medirse otra vez, ahora mismo.
+ *
+ * Chart.js es responsive por ResizeObserver, que es asincrono: quitar el modo
+ * presentacion cambia la rejilla de una a tres columnas, pero el canvas conserva
+ * su tamano anterior durante ese tick, y la captura del informe ocurre dentro
+ * del mismo. Sin esto, exportar con el modo puesto metia en el PDF unos radares
+ * de 734x480 en una diapositiva medida para 414x380.
+ */
+function redimensionarRadares() {
+  [
+    ...Object.values(capabilityRadarCharts),
+    ...Object.values(overviewRadarCharts),
+  ].forEach((grafico) => grafico?.resize());
 }
 
 
@@ -6733,6 +6889,16 @@ function abrirDialogo({
       .join("");
 
     els.dialogModal.className = `modal-backdrop dialog-${tono}`;
+
+    // alertdialog solo cuando de verdad es una alerta. El marcado lo traia
+    // fijo, asi que "Poner mi nombre" —un campo de texto sin ninguna urgencia—
+    // se anunciaba con el mismo enfasis que "vas a borrar el trabajo de los
+    // nueve dominios", y ese enfasis deja de significar nada si vale para todo.
+    els.dialogModal.setAttribute(
+      "role",
+      tono === "peligro" ? "alertdialog" : "dialog",
+    );
+
     els.dialogConfirm.textContent = confirmar;
     els.dialogCancel.textContent = cancelar;
 
@@ -7255,7 +7421,12 @@ function actualizarIndicadorDeIdentidad() {
 
   const nombre = getNombreEditor();
 
-  boton.textContent = nombre
+  // Se escribe SOLO el rotulo, no el boton entero. Con textContent sobre el
+  // boton desaparecia la linea "Asi se atribuyen tus cambios", asi que la
+  // entrada se quedaba sin explicacion mientras sus hermanas la conservaban.
+  const rotulo = boton.querySelector("#editorNameLabel") || boton;
+
+  rotulo.textContent = nombre
     ? `Editas como: ${nombre}`
     : "Poner mi nombre";
 
