@@ -35,7 +35,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 |---|---|---|
 | `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 879 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, cableado, y lo que aún no se ha repartido | 3.891 |
+| `app.js` | Raíz de composición: `init()`, cableado, y lo que aún no se ha repartido | 2.075 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 159 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 332 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
@@ -51,6 +51,12 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 140 |
 | `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 753 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
+| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas | 121 |
+| `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 318 |
+| `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 221 |
+| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 716 |
+| `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 221 |
+| `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 408 |
 | `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.421 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 127 |
@@ -112,10 +118,10 @@ Dependencias de terceros, sin bundler:
 
 `app.js` tenía 7.346 líneas y 205 funciones sin un solo marcador de sección. El reparto va por
 tandas, y **cada una se verifica antes de seguir**: consola en silencio, las pruebas, el informe y
-el A/B contra `main` sobre los nueve dominios. Hoy están fuera quince módulos: el estado, los
-avisos, el almacenamiento, las preferencias, los gráficos, las métricas, los dominios, los
-filtros, la lectura de subcapacidades, el escenario, Firebase, la identidad, el indicador de
-guardado, la persistencia y el repintado.
+el A/B contra `main` sobre los nueve dominios. Hoy están fuera veintiún módulos: los quince de
+infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, métricas, dominios,
+filtros, subcapacidad, escenario, Firebase, identidad, indicador, persistencia y repintado—,
+**las cinco vistas** en `app/vistas/`, y `app/celdas.js` con lo que comparten entre ellas.
 
 Dos reglas que han salido del propio reparto y conviene respetar:
 
@@ -128,9 +134,13 @@ Dos reglas que han salido del propio reparto y conviene respetar:
   vistas, y un ciclo que hoy funciona por cómo se *hoistean* las funciones es una trampa para quien
   lo toque mañana.
 
-**Lo que queda** —las cinco vistas, los modales y el informe— es la parte donde el
-desenredo pesa más, porque todo cruza con el orquestador de repintado. Cada uno necesitará la misma
-decisión: inyectar el repintado o recibir los datos ya calculados, como se hizo con los radares.
+**Lo que queda** son los modales y el informe. Las vistas ya no: el cruce con el orquestador se
+resolvió con `app/repintado.js`, que es por donde `app/vistas/assessment.js` pide repintar en vez
+de llamar a `renderAll()`. Esa es la decisión que necesitará también lo que falte.
+
+Y una regla más, que salió de repartir las vistas: **lo que use más de una vista no puede quedarse
+en `app.js`.** `app/` no puede importar de `app.js` sin cerrar un ciclo con el orquestador, así que
+va a `app/celdas.js`. Medir qué comparten antes de mover nada es lo que hace barata cada tanda.
 
 ### La versión va en cada import, y el CI lo comprueba
 
