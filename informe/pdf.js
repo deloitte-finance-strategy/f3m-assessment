@@ -21,9 +21,9 @@
  * reescalar, que es lo mas cerca de una ppt sin generar una ppt.
  */
 
-import { escapeHtml } from "../core/presentacion.js";
+import { escapeHtml } from "../core/presentacion.js?v=11";
 
-import { getEnhancedPdfReportStyles } from "./estilos.js";
+import { getEnhancedPdfReportStyles } from "./estilos.js?v=11";
 
 import {
   POR_DIAPOSITIVA,
@@ -46,7 +46,7 @@ import {
   resumenPorCapacidad,
   roadmap,
   separador,
-} from "./secciones.js";
+} from "./secciones.js?v=11";
 
 
 const PARTE_GLOBAL = "La funcion financiera";

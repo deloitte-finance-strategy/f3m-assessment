@@ -55,6 +55,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `data/casos-ia.json` | **Fuente única de los 100 casos de uso de IA** y sus dos etiquetas | — |
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
 | `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
+| `scripts/check_module_version.py` | Que todos los módulos se pidan con la misma `?v=`. **En CI** | — |
 | `vendor/` | Chart.js, servido desde aquí y no desde un CDN. **Se versiona** | — |
 | `SECURITY.md` | Modelo de amenazas, qué protege y qué no, y los procedimientos | — |
 
@@ -91,6 +92,30 @@ Dependencias de terceros, sin bundler:
 - **Firebase Realtime Database y Auth 12.15.0** importados desde `gstatic.com` (cabecera de
   `app.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
   ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
+
+### La versión va en cada import, y el CI lo comprueba
+
+`index.html` carga `styles.css`, `tema.js` y `app.js` con `?v=N`, y ese número existe por un motivo
+concreto: GitHub Pages sirve cada archivo con su propia caché, así que tras desplegar puede darse la
+mezcla «HTML nuevo + JavaScript viejo».
+
+Los imports de un módulo ES **no pasan por `index.html`**: resuelven rutas relativas por su cuenta.
+Así que `import "./core/calculo.js"` se pedía sin versión, y un `app.js` nuevo podía venir con un
+`core/calculo.js` viejo en caché — justo la mezcla que el `?v=` existe para impedir, una capa más
+abajo. Ahora **cada import relativo lleva la versión**, también los de `tests/`.
+
+**Lo evidente sería un `importmap`**, con las rutas versionadas en un solo sitio. No sirve aquí:
+un importmap en línea está sujeto a `script-src`, y la CSP **no lleva `'unsafe-inline'` a propósito**
+— es la directiva que cierra la inyección de código. Comprobado en el navegador, no de memoria: se
+bloquea. Y un importmap externo depende de soporte reciente, que no se puede dar por hecho en el
+portátil que haya en la sala.
+
+Al desplegar hay que subir el número **en `index.html` y en todos los imports**. Olvidarlo es un CI
+rojo, no un fallo silencioso en casa de un cliente:
+
+```powershell
+python scripts/check_module_version.py
+```
 
 ### El tema y la densidad se deciden antes de pintar
 

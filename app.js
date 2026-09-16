@@ -31,14 +31,14 @@ import {
   resumenGlobal,
   toScore,
   unique,
-} from "./core/calculo.js";
+} from "./core/calculo.js?v=11";
 
 // Objetivos de madurez por capacidad y palanca: la mitad de todo gap.
 import {
   createDefaultTargets,
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "./core/objetivos.js";
+} from "./core/objetivos.js?v=11";
 
 // Reconocer el trabajo guardado. Si esto falla, una puntuacion no aparece y no
 // se rompe nada visiblemente, que es la peor forma de fallar.
@@ -47,14 +47,14 @@ import {
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
-} from "./core/coincidencias.js";
+} from "./core/coincidencias.js?v=11";
 
 // El CSV que se abre en Excel y se le envia al cliente.
 import {
   filasDeResumen,
   filasDeRoadmap,
   toCsv,
-} from "./core/exportacion.js";
+} from "./core/exportacion.js?v=11";
 
 // El contrato de un escenario: que campos admite Firebase y con que limites.
 // Espejo de database.rules.json, para no enviar nunca algo que sera rechazado.
@@ -67,7 +67,7 @@ import {
   normalizarItemCargado,
   recortarAlLimite,
   revisarEscenario,
-} from "./core/escenario.js";
+} from "./core/escenario.js?v=11";
 
 // Escapado, formato y colores de marca. Los comparten la aplicacion y el
 // informe PDF, que desde que vive aparte ya no puede leerlos de aqui.
@@ -77,14 +77,14 @@ import {
   escapeHtml,
   formatNumber,
   priorityColor,
-} from "./core/presentacion.js";
+} from "./core/presentacion.js?v=11";
 
 // El informe PDF: entra el objeto de datos, sale el documento imprimible.
-import { buildEnhancedPdfReportHtml } from "./informe/pdf.js";
+import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=11";
 
 // La red que impide que una diapositiva recorte contenido en silencio. Se
 // dispara con ?comprobar=desbordes; ver informe/desbordes.js.
-import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js";
+import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=11";
 
 // Configuración de Firebase del proyecto fpa-assessment-mvp
 const firebaseConfig = {

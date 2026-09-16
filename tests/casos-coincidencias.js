@@ -14,7 +14,7 @@ import {
   getScenarioItemsFromPayload,
   normalizeMatchKey,
   toSavedItemsArray,
-} from "../core/coincidencias.js";
+} from "../core/coincidencias.js?v=11";
 
 
 const CARGADOS = [

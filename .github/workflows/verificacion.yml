@@ -1,4 +1,4 @@
-# Las dos verificaciones que ya existian en el repositorio y no ejecutaba nadie.
+# Las verificaciones que no necesitan build ni dependencias que instalar.
 #
 # No hay build ni dependencias que instalar: las pruebas usan modulos ES nativos
 # y el comprobador de dominios solo necesita openpyxl. Por eso este workflow es
@@ -51,3 +51,10 @@ jobs:
 
       - name: Catálogo de dominios y JSON generados
         run: python scripts/check_domains_sync.py
+
+      # Que todos los modulos se pidan con la misma version. Olvidar una al
+      # desplegar dejaba que un app.js nuevo viniera con un core/ viejo en
+      # cache: la mezcla que el ?v= existe para impedir. No necesita nada
+      # instalado, asi que va aqui y no en su propio paso con dependencias.
+      - name: Versión de los módulos
+        run: python scripts/check_module_version.py
