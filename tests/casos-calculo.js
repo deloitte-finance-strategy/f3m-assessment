@@ -217,6 +217,22 @@ export const casos = [
   },
   {
     grupo: "Nivel de madurez",
+    nombre: "sin score no se inventa un nivel",
+    ejecutar: (t) => {
+      // Este caso existe por un fallo concreto y silencioso: sin la guarda de
+      // Number.isFinite, undefined se escurria hasta el ultimo return y una
+      // subcapacidad sin evaluar salia como "5 - Avanzado/Referente". Con null
+      // pasaba lo contrario —null < 1.5 es cierto— y salia "1 - Inicial". Dos
+      // respuestas inventadas y opuestas para el mismo "aqui no hay nada".
+      t.igual(getMaturityLevel(undefined), null, "undefined no es un 5");
+      t.igual(getMaturityLevel(null), null, "null no es un 1");
+      t.igual(getMaturityLevel(NaN), null, "NaN no es un 5");
+      t.igual(getMaturityLevel("4"), null, "un texto no es un score");
+      t.igual(getMaturityLevel(Infinity), null, "infinito tampoco");
+    },
+  },
+  {
+    grupo: "Nivel de madurez",
     nombre: "el nivel numerico del radar se acota entre 1 y 5",
     ejecutar: (t) => {
       t.igual(getMaturityLevelNumber(1.2), 1);

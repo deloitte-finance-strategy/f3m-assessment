@@ -344,6 +344,21 @@ h4 {
   background: var(--green);
 }
 
+/* Escrito, pero sin canal de vuelta: el cambio ha subido y los del resto del
+   equipo no bajan. No puede parecerse a "Guardado ✓" en verde, que es justo la
+   mentira que dejaba a dos consultores pisandose creyendose sincronizados.
+   Comparte la pareja de color con .saving —#725000 sobre #fff8e8, ya
+   auditada— y se distingue de ella por el punto, que aqui no gira. */
+.save-status.parcial {
+  border-color: rgba(200, 121, 0, 0.55);
+  background: #fff8e8;
+  color: #725000;
+}
+
+.save-status.parcial::before {
+  background: var(--amber);
+}
+
 .save-status.error {
   border-color: rgba(187, 49, 40, 0.75);
   background: #fde7e3;
@@ -628,6 +643,32 @@ transform: translateY(-1px);
   font-size: 0.76rem;
   font-weight: 900;
   line-height: 1;
+}
+
+/* La accion del aviso. Va antes del aspa y con aspecto de boton de verdad:
+   es lo que hay que pulsar, y el aspa es lo que hay que ignorar. */
+.notice-action {
+  flex: 0 0 auto;
+  align-self: center;
+  min-height: 30px;
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.notice-action[hidden] {
+  display: none;
+}
+
+.notice-action:hover {
+  border-color: var(--graphite);
+  background: var(--surface-muted);
 }
 
 .notice-close {
