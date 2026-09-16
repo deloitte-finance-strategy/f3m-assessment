@@ -236,6 +236,12 @@ import {
   persistTargetsDelDominioActivo,
 } from "./app/persistencia.js?v=11";
 
+// Los fragmentos de HTML que comparten varias vistas.
+import { buildFilteredEmptyState, priorityBadge } from "./app/celdas.js?v=11";
+
+// El Heatmap, primera vista que sale de aqui.
+import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=11";
+
 
 let scoringCriteriaTrigger = null;
 let aiInitiativeTrigger = null;
@@ -1755,28 +1761,6 @@ function renderOverviewSummaryTable(filas) {
 }
 
 
-function buildFilteredEmptyState() {
-  return `
-    <div class="filtered-empty-state">
-      <strong>No hay resultados para los filtros actuales</strong>
-
-      <p>
-        Prueba con otros criterios o limpia los filtros para volver a mostrar
-        toda la información.
-      </p>
-
-      <button
-        class="clear-filters-button empty-state-clear-button"
-        type="button"
-        data-clear-filters
-      >
-        Limpiar filtros
-      </button>
-    </div>
-  `;
-}
-
-
 function renderCapabilityTargets() {
   if (!els.capabilityTargetsPanel) {
     return;
@@ -2368,159 +2352,6 @@ function actualizarTarjetaDeAssessment(item) {
 }
 
 
-function renderHeatmap() {
-  const capabilityRows = agregarPorCapacidad(getScopedItems());
-
-  const rows = capabilityRows
-    .map((entry) => {
-      const isExpanded = expandedHeatmapCapabilities.has(entry.capacidad);
-
-      const detailRows = entry.items
-        .map((item, indice) => {
-          const metrics = entry.metricas[indice];
-
-          return `
-            <tr class="heatmap-detail-row ${isExpanded ? "" : "is-hidden"}" data-capability-detail="${escapeAttr(entry.capacidad)}">
-              <td class="heatmap-detail-capability">${escapeHtml(item.capacidad)}</td>
-              <td>${escapeHtml(item.subcapacidad)}</td>
-              ${LEVERS.map((lever) => heatScoreCell(item.scores[lever.key])).join("")}
-              ${heatScoreCell(metrics.scoreMedio)}
-              <td class="heat-cell ${gapClass(metrics.gap)}">${formatNumber(metrics.gap)}</td>
-              <td>${priorityBadge(metrics.prioridad)}</td>
-            </tr>
-          `;
-        })
-        .join("");
-
-      return `
-        <tr class="heatmap-capability-row">
-          <td>
-            <strong>${escapeHtml(entry.capacidad)}</strong>
-          </td>
-          <td>
-            <button
-              class="heatmap-toggle"
-              type="button"
-              data-capability-toggle="${escapeAttr(entry.capacidad)}"
-              aria-expanded="${String(isExpanded)}"
-            >
-              ${isExpanded ? "Ocultar subcapacidades" : `Ver subcapacidades (${entry.items.length})`}
-            </button>
-          </td>
-          ${heatScoreCell(entry.procesos)}
-          ${heatScoreCell(entry.tecnologia)}
-          ${heatScoreCell(entry.organizacion)}
-          ${heatScoreCell(entry.scoreMedio)}
-          <td class="heat-cell ${gapClass(entry.gap)}">${formatNumber(entry.gap)}</td>
-          <td>${priorityBadge(entry.prioridad)}</td>
-        </tr>
-        ${detailRows}
-      `;
-    })
-    .join("");
-
-  els.heatmapTable.innerHTML = `
-    <caption class="solo-lectores">Heatmap de madurez por capacidad, desplegable a subcapacidad.</caption>
-
-    <thead>
-      <tr>
-        <th scope="col">Capacidad</th>
-        <th scope="col">Subcapacidades</th>
-        <th scope="col" class="number">Procesos</th>
-        <th scope="col" class="number">Tecnología</th>
-        <th scope="col" class="number">Organización</th>
-        <th scope="col" class="number">Score medio</th>
-        <th scope="col" class="number">Gap vs objetivo</th>
-        <th scope="col">Prioridad</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${rows || `
-        <tr>
-          <td colspan="8" class="table-empty-cell">
-            ${buildFilteredEmptyState()}
-          </td>
-        </tr>
-      `}
-    </tbody>
-  `;
-
-  els.heatmapTable.querySelectorAll(".heatmap-toggle").forEach((button) => {
-    button.addEventListener("click", handleHeatmapToggle);
-  });
-
-  updateHeatmapExpandAllButton(capabilityRows); // NUEVO: sincroniza texto Expandir/Colapsar todo
-
-}
-
-
-function handleHeatmapToggle(event) {
-  const button = event.currentTarget;
-  const capability = button.dataset.capabilityToggle;
-  const isExpanded = button.getAttribute("aria-expanded") === "true";
-  const nextExpanded = !isExpanded;
-
-  if (nextExpanded) {
-    expandedHeatmapCapabilities.add(capability);
-  } else {
-    expandedHeatmapCapabilities.delete(capability);
-  }
-
-  const detailRows = els.heatmapTable.querySelectorAll(
-    `[data-capability-detail="${CSS.escape(capability)}"]`,
-  );
-
-  button.setAttribute("aria-expanded", String(nextExpanded));
-  button.textContent = nextExpanded
-    ? "Ocultar subcapacidades"
-    : `Ver subcapacidades (${detailRows.length})`;
-
-  detailRows.forEach((row) => {
-    row.classList.toggle("is-hidden", !nextExpanded);
-  });
-}
-
-
-function handleHeatmapExpandToggleAll() {
-  const capabilityRows = agregarPorCapacidad(getScopedItems());
-  const visibleCapabilities = capabilityRows.map((entry) => entry.capacidad);
-
-  if (!visibleCapabilities.length) {
-    return;
-  }
-
-  const allExpanded = visibleCapabilities.every((capability) =>
-    expandedHeatmapCapabilities.has(capability),
-  );
-
-  if (allExpanded) {
-    visibleCapabilities.forEach((capability) => {
-      expandedHeatmapCapabilities.delete(capability);
-    });
-  } else {
-    visibleCapabilities.forEach((capability) => {
-      expandedHeatmapCapabilities.add(capability);
-    });
-  }
-
-  renderHeatmap();
-}
-
-function updateHeatmapExpandAllButton(capabilityRows) {
-  if (!els.heatmapExpandToggle) {
-    return;
-  }
-
-  const visibleCapabilities = capabilityRows.map((entry) => entry.capacidad);
-  const allExpanded =
-    visibleCapabilities.length > 0 &&
-    visibleCapabilities.every((capability) => expandedHeatmapCapabilities.has(capability));
-
-  els.heatmapExpandToggle.textContent = allExpanded ? "Colapsar todo" : "Expandir todo";
-  els.heatmapExpandToggle.disabled = visibleCapabilities.length === 0;
-}
-
-
 function getWaveShortLabel(wave) {
   const match = String(wave || "").match(/\d+/);
 
@@ -2922,57 +2753,6 @@ function guardarCampoDeRoadmap(item, campo, valor) {
   item[campo] = valor;
 
   persistItemChange(item.id, campo, valor);
-}
-
-
-/**
- * Una celda del heatmap. Sin puntuar es un guion, nunca un cero.
- *
- * Number(null) es 0, y 0 pasa Number.isFinite. Por eso una capacidad sin
- * ninguna subcapacidad puntuada se pintaba con un 0 en las cuatro columnas
- * numericas, y en rojo, porque 0 cae en el tramo mas bajo de la escala.
- *
- * Delante de un cliente eso afirma algo que no es cierto: que esa capacidad
- * esta evaluada y con la peor nota posible, cuando lo que pasa es que todavia
- * no se ha evaluado. La tabla resumen del Dashboard, con los mismos datos,
- * enseña un guion. Dos vistas de la misma herramienta decian cosas distintas.
- */
-function heatScoreCell(value) {
-  const sinValor = value === null || value === undefined || value === "";
-  const number = sinValor ? NaN : Number(value);
-
-  if (!Number.isFinite(number)) {
-    return `<td class="heat-cell heat-blank">-</td>`;
-  }
-
-  // El nivel sale de getMaturityLevelNumber(), que es donde vive el redondeo
-  // acotado del modelo. Aqui estaba reimplementado en linea, asi que eran dos
-  // definiciones de "que nivel es un 3,5" a dos lineas de distancia.
-  return `<td class="heat-cell heat-${getMaturityLevelNumber(number)}">${formatNumber(number)}</td>`;
-}
-
-/**
- * La clase de color de una celda de gap.
- *
- * Los cortes los pone priorityFromGap(), que es la regla de negocio. Estaban
- * repetidos aqui como 2 y 1 sueltos: mover el umbral de Alta en el motor habria
- * dejado el heatmap pintando de rojo un gap que la tabla llamaba Media.
- */
-const CLASE_DE_GAP = {
-  Alta: "gap-high",
-  Media: "gap-mid",
-  Baja: "gap-low",
-};
-
-function gapClass(value) {
-  if (!Number.isFinite(value)) return "heat-blank";
-
-  return CLASE_DE_GAP[priorityFromGap(value)] || "gap-low";
-}
-
-function priorityBadge(priority) {
-  const safePriority = priority || "Pendiente";
-  return `<span class="priority-badge ${safePriority.toLowerCase()}">${escapeHtml(safePriority)}</span>`;
 }
 
 
