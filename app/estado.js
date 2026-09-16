@@ -135,7 +135,7 @@ export const scenarioId = getScenarioIdFromUrl();
  * trabajo al desplegar esto. En modo compartido la primera carga no encuentra
  * copia y baja de Firebase, que es la fuente de verdad de todos modos.
  */
-const STORAGE_KEY_BASE = "f3m-fpa-assessment-scenario";
+export const STORAGE_KEY_BASE = "f3m-fpa-assessment-scenario";
 
 export const STORAGE_KEY = scenarioId
   ? `${STORAGE_KEY_BASE}:${scenarioId}`
@@ -144,3 +144,16 @@ export const STORAGE_KEY = scenarioId
 export const NOMBRE_STORAGE_KEY = "f3m-nombre-editor";
 export const MODO_PRESENTACION_KEY = "f3m-modo-presentacion";
 export const TEMA_KEY = "f3m-tema";
+
+
+
+
+export function syncActiveDomainState() {
+  if (!state.activeDomainId || !state.domains[state.activeDomainId]) {
+    return;
+  }
+
+  state.domains[state.activeDomainId].items = state.items;
+  state.domains[state.activeDomainId].meta = state.meta;
+  state.domains[state.activeDomainId].targets = state.targets;
+}

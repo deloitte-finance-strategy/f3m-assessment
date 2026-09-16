@@ -58,3 +58,10 @@ jobs:
       # instalado, asi que va aqui y no en su propio paso con dependencias.
       - name: Versión de los módulos
         run: python scripts/check_module_version.py
+
+      # Que los modulos encajen entre si. Las pruebas de tests/ solo cargan
+      # core/ e informe/: app.js y app/ necesitan un navegador, asi que un
+      # import mal puesto pasaba el CI en verde y reventaba en la consola de
+      # alguien. Paso dos veces repartiendo app.js.
+      - name: Los módulos encajan entre sí
+        run: python scripts/check_modules.py

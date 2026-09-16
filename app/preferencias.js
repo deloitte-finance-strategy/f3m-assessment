@@ -11,22 +11,16 @@
  * y Chart.js fija sus colores y su tipografia al construirlos. Sin repintar, la
  * interfaz cambiaria y los seis graficos se quedarian como estaban.
  *
- * El repintado se INYECTA en vez de importarse. Importarlo crearia un ciclo con
- * el orquestador de vistas, y un ciclo que hoy funciona por como se hoistean
- * las funciones es una trampa para quien lo toque manana.
+ * El repintado se pide por app/repintado.js y no se importa del orquestador de
+ * vistas: eso cerraria un ciclo, y un ciclo que hoy funciona por como se
+ * hoistean las funciones es una trampa para quien lo toque manana.
  */
 
 import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=11";
 import { MODO_PRESENTACION_KEY, TEMA_KEY, els } from "./estado.js?v=11";
 import { escribirAlmacenamiento, leerAlmacenamiento } from "./almacenamiento.js?v=11";
+import { repintarTodo } from "./repintado.js?v=11";
 
-
-/** Lo que hay que volver a pintar cuando cambia una preferencia. */
-let repintar = () => {};
-
-export function configurarPreferencias({ alCambiar }) {
-  repintar = alCambiar;
-}
 
 
 /**
@@ -125,7 +119,7 @@ function aplicarTema(tema) {
   document.documentElement.dataset.tema = tema === "oscuro" ? "oscuro" : "claro";
 
   actualizarBotonDeTema();
-  repintar();
+  repintarTodo();
 }
 
 
@@ -228,7 +222,7 @@ export function alternarModoPresentacion() {
   // Repintar es obligatorio, no cosmetico: los radares son canvas y su
   // tipografia se fija al construirlos, asi que la tabla se agrandaria y los
   // tres graficos de al lado se quedarian como estaban.
-  repintar();
+  repintarTodo();
 }
 
 
@@ -242,4 +236,18 @@ export function alternarModoPresentacion() {
  */
 export function restaurarModoPresentacion() {
   aplicarModoPresentacion(leerAlmacenamiento(MODO_PRESENTACION_KEY) === "1");
+}
+
+
+/**
+ * Como desplazarse: suave, salvo que el sistema pida lo contrario.
+ *
+ * El CSS ya anula las transiciones con prefers-reduced-motion, pero un
+ * scrollTo({ behavior: "smooth" }) escrito en JavaScript no lo mira: hay que
+ * preguntarlo aqui.
+ */
+export function comportamientoDeDesplazamiento() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "auto"
+    : "smooth";
 }
