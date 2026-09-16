@@ -113,6 +113,65 @@ export function getMaturityLevelNumber(score) {
 }
 
 
+/**
+ * El orden en que se atiende cada prioridad. Pendiente va al final: no es una
+ * prioridad baja, es que todavia no se sabe.
+ */
+export const ORDEN_DE_PRIORIDAD = {
+  Alta: 1,
+  Media: 2,
+  Baja: 3,
+  Pendiente: 4,
+};
+
+
+/**
+ * Las cuatro cifras de cabecera, desde una lista de [{ item, metrics }].
+ *
+ * Estaban escritas cuatro veces —el Dashboard, el Overview y las dos mitades
+ * del informe— con las mismas expresiones copiadas. Que coincidieran dependia
+ * de que nadie tocara una sola de las cuatro, y el Dashboard ya se habia
+ * quedado sin objetivoMedio por el camino.
+ *
+ * Solo entra lo evaluado: un dominio con dos subcapacidades de veinticuatro
+ * puntuadas ensena la media de esas dos, no una media diluida con dieciocho
+ * ceros que nadie ha medido.
+ */
+export function resumenGlobal(entradas) {
+  const evaluadas = entradas.filter((entrada) => !entrada.metrics.isPending);
+
+  return {
+    total: entradas.length,
+    evaluadas: evaluadas.length,
+    scoreGlobal: average(evaluadas.map((entrada) => entrada.metrics.scoreMedio)),
+    gapMedio: average(evaluadas.map((entrada) => entrada.metrics.gap)),
+    objetivoMedio: average(evaluadas.map((entrada) => entrada.metrics.targetMedio)),
+    prioridadAlta: evaluadas.filter((entrada) => entrada.metrics.prioridad === "Alta").length,
+  };
+}
+
+
+/**
+ * Ordena por prioridad y, dentro de cada una, por brecha descendente.
+ *
+ * Es el orden del Roadmap en pantalla y el de las dos tablas del informe, que
+ * tenian tres copias literales del mismo comparador. Devuelve una lista nueva:
+ * ordenar en el sitio la del llamante reordenaba state.items sin pedirlo.
+ */
+export function ordenarPorPrioridadYGap(entradas) {
+  return [...entradas].sort((a, b) => {
+    const porPrioridad =
+      ORDEN_DE_PRIORIDAD[a.metrics.prioridad] - ORDEN_DE_PRIORIDAD[b.metrics.prioridad];
+
+    if (porPrioridad) {
+      return porPrioridad;
+    }
+
+    return (b.metrics.gap || 0) - (a.metrics.gap || 0);
+  });
+}
+
+
 export function priorityFromGap(gap) {
   if (!Number.isFinite(gap)) return "Pendiente";
   if (gap >= 2) return "Alta";

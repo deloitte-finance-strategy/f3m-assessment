@@ -11,15 +11,23 @@ import { casos as casosDeEscenario } from "./casos-escenario.js";
 import { casos as casosDeReglas } from "./casos-reglas.js";
 import { casos as casosDePresentacion } from "./casos-presentacion.js";
 import { casos as casosDeGraficos } from "./casos-graficos.js";
+import { casos as casosDeObjetivos } from "./casos-objetivos.js";
+import { casos as casosDeCoincidencias } from "./casos-coincidencias.js";
+import { casos as casosDeExportacion } from "./casos-exportacion.js";
+import { casos as casosDeInforme } from "./casos-informe.js";
 
 
 /** Todos los casos, en el orden en que se quieren leer. */
 export const casos = [
   ...casosDeCalculo,
+  ...casosDeObjetivos,
+  ...casosDeCoincidencias,
   ...casosDeEscenario,
   ...casosDeReglas,
   ...casosDePresentacion,
+  ...casosDeExportacion,
   ...casosDeGraficos,
+  ...casosDeInforme,
 ];
 
 

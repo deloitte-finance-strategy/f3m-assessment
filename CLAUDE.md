@@ -33,17 +33,21 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 776 |
-| `app.js` | Estado, DOM, Firebase, filtros, render de las cinco vistas | 6.911 |
-| `styles.css` | Estilos | 3.845 |
-| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 435 |
-| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 453 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 842 |
+| `app.js` | Estado, DOM, Firebase, filtros, render de las cinco vistas | 7.175 |
+| `styles.css` | Estilos, y las escalas de tipografía, espaciado y densidad | 4.212 |
+| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
+| `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 127 |
+| `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 166 |
+| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 509 |
+| `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
 | `core/presentacion.js` | Escapado, formato de números y colores de marca | 105 |
 | `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 369 |
-| `informe/secciones.js` | Una función por diapositiva | 822 |
+| `informe/secciones.js` | Una función por diapositiva | 830 |
 | `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 302 |
 | `informe/estilos.js` | La paleta del informe y su hoja de estilos | 970 |
-| `tests/` | Pruebas de `core/`, de `informe/graficos.js` y del espejo con las reglas | — |
+| `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 112 |
+| `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
 | `data/domains/*.json` | Datos del assessment, un archivo por dominio | — |
@@ -53,9 +57,15 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `vendor/` | Chart.js, servido desde aquí y no desde un CDN. **Se versiona** | — |
 | `SECURITY.md` | Modelo de amenazas, qué protege y qué no, y los procedimientos | — |
 
-La regla de reparto: **en `core/` no hay DOM, ni Firebase, ni estado global, ni imports.** Todo son
-funciones puras, y por eso se pueden probar sin levantar la aplicación. `app.js` es quien conoce el
-estado y le pasa a `core/` lo que necesita.
+La regla de reparto: **en `core/` no hay DOM, ni Firebase, ni estado global, ni nada de fuera de
+`core/`.** Todo son funciones puras, y por eso se pueden probar sin levantar la aplicación. `app.js`
+es quien conoce el estado y le pasa a `core/` lo que necesita.
+
+Los módulos de `core/` **sí se importan entre sí**. La regla decía "ni imports" a secas, y con ella
+la validación de un score estaba escrita tres veces y `core/escenario.js` tenía que pedirle a
+`app.js` que le inyectara cómo serializar los objetivos — la dependencia del revés, porque esa
+función también era pura y solo vivía en el sitio equivocado. Importar dentro de `core/` no rompe lo
+que la regla protegía: se siguen probando sin navegador.
 
 Flujo de arranque, en `init()` de `app.js`:
 
@@ -151,9 +161,16 @@ cliente, así que la red es que nada llegue a recortarse nunca:
 
 - Las secciones largas se **reparten** en varias diapositivas con `paginar()`, no se truncan.
   Cuántas filas caben está en `POR_DIAPOSITIVA`, en `informe/secciones.js`.
-- `tests/comprobar-desbordes.js` mide cada diapositiva en el navegador y dice lo que sobra. **Al
-  tocar `informe/estilos.js`, el tamaño de letra de una tabla o `POR_DIAPOSITIVA`, hay que volver a
-  pasarlo**, y sobre los nueve dominios: Controlling tiene 24 subcapacidades y es el que aprieta.
+- `informe/desbordes.js` mide cada diapositiva en el navegador y dice lo que sobra. Se dispara
+  abriendo la herramienta con **`?comprobar=desbordes`** y exportando el informe: la medida sale en
+  el aviso de la aplicación, y la tabla completa en la consola. **Al tocar `informe/estilos.js`, el
+  tamaño de letra de una tabla o `POR_DIAPOSITIVA`, hay que volver a pasarlo**, y sobre los nueve
+  dominios: Controlling tiene 24 subcapacidades y es el que aprieta.
+
+  Se mide **desde la aplicación**, no desde dentro del informe, y no es un capricho: la ventana del
+  informe no lleva scripts a propósito y además hereda una CSP que no admite scripts en línea, así
+  que un botón ahí dentro no es posible. Desde la aplicación el documento está a mano, porque lo
+  acaba de escribir ella.
 
 Los números de `POR_DIAPOSITIVA` y el relleno de fila de `.tabla` están cuadrados entre sí. Apretar
 las filas no es gratis en la otra dirección: con ellas más juntas, la tabla de nueve dominios
@@ -361,20 +378,22 @@ python scripts/check_domains_sync.py
 Verifica el catálogo de dominios, el catálogo de casos de IA y que los 9 JSON coinciden con sus
 Excel. Código de salida `1` si algo falla.
 
-Las reglas de negocio, el contrato de escenario y el espejo con `database.rules.json` se prueban en
-`tests/`, sin dependencias:
+Se prueban en `tests/`, sin dependencias, todos los módulos que no necesitan navegador: las reglas
+de negocio, los objetivos, la coincidencia de subcapacidades, el contrato de escenario y su espejo
+con `database.rules.json`, el formato de presentación, la exportación a CSV y el informe —el deck
+que arma `informe/pdf.js`, las primitivas SVG y la lectura de las medidas de desborde.
 
 - **En el navegador**: con el servidor en marcha, abrir `http://localhost:8000/tests/`. Es la forma
   que funciona en cualquier equipo, sin instalar nada.
 - **Desde la línea de comandos**, si hay Node: `node tests/ejecutar.mjs`. Sale con código `1` si
   falla algo, listo para CI.
 
-Los dos ejecutan los mismos casos. Al tocar `core/`, `informe/graficos.js` **o
-`database.rules.json`**, ejecutarlas.
+Los dos ejecutan los mismos casos. Al tocar `core/`, `informe/` **o `database.rules.json`**,
+ejecutarlas.
 
-`tests/comprobar-desbordes.js` no va con esos: mide si una diapositiva del informe se recorta, y
-para eso hace falta un navegador que maquete. Se pega en la consola **de la ventana del informe**,
-antes de imprimir.
+La medida de desbordes del informe no va con esos: necesita un navegador que maquete de verdad. Se
+pasa con **`?comprobar=desbordes`** en la dirección, exportando el informe. Su parte pura —la
+lectura de las medidas— sí está en `tests/casos-informe.js`.
 
 Ojo con el navegador: los módulos ES se cachean con ganas, y un cambio en `core/` puede no verse al
 recargar. Si un resultado no cuadra con lo que acabas de editar, sirve en un puerto distinto —origen
@@ -406,9 +425,9 @@ resto se comprueba a mano:
    pasado por Dashboard ni Overview: los **seis** radares tienen que salir pintados, los 3 de
    dominio y los 3 de la parte global. En el diálogo, «Guardar como PDF» con **«Gráficos de fondo»
    activado** —sin eso las portadas y el heatmap salen en blanco—, y comprobar que **ninguna
-   diapositiva desborda** a una segunda página. Pasar `tests/comprobar-desbordes.js` en la consola
-   de la ventana del informe, y hacerlo también sobre **Controlling**, que con 24 subcapacidades es
-   el dominio que aprieta.
+   diapositiva desborda** a una segunda página. Para eso, abrir con `?comprobar=desbordes` y volver
+   a exportar: el aviso dice si alguna se recorta y cuál va más justa. Hacerlo también sobre
+   **Controlling**, que con 24 subcapacidades es el dominio que aprieta.
 7. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
    la fila de Fiscal. Tesorería tiene una capacidad con el mismo nombre y no debe moverse.
 8. Cambiar de dominio y confirmar que los datos se recargan.
