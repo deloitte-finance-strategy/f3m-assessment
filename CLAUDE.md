@@ -35,7 +35,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 |---|---|---|
 | `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 879 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, cableado, y lo que aún no se ha repartido | 2.075 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.401 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 159 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 332 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
@@ -52,6 +52,8 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 753 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas | 121 |
+| `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
+| `app/informe.js` | Lo que la aplicación le pasa al informe: datos, radares y tema | 487 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 318 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 221 |
 | `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 716 |
@@ -114,14 +116,15 @@ Dependencias de terceros, sin bundler:
   `app.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
   ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
 
-### `app/` es el reparto de `app.js`, y está a medias
+### `app/` es el reparto de `app.js`
 
 `app.js` tenía 7.346 líneas y 205 funciones sin un solo marcador de sección. El reparto va por
 tandas, y **cada una se verifica antes de seguir**: consola en silencio, las pruebas, el informe y
-el A/B contra `main` sobre los nueve dominios. Hoy están fuera veintiún módulos: los quince de
-infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, métricas, dominios,
-filtros, subcapacidad, escenario, Firebase, identidad, indicador, persistencia y repintado—,
-**las cinco vistas** en `app/vistas/`, y `app/celdas.js` con lo que comparten entre ellas.
+el A/B contra `main` sobre los nueve dominios. **El reparto está terminado**: fuera quedan los
+quince módulos de infraestructura —estado, avisos, almacenamiento, preferencias, gráficos,
+métricas, dominios, filtros, subcapacidad, escenario, Firebase, identidad, indicador,
+persistencia y repintado—, las cinco vistas en `app/vistas/`, `app/celdas.js` con lo que
+comparten, `app/modales.js` y `app/informe.js`. `app.js` pasó de 7.346 líneas a 1.401.
 
 Dos reglas que han salido del propio reparto y conviene respetar:
 
@@ -134,9 +137,10 @@ Dos reglas que han salido del propio reparto y conviene respetar:
   vistas, y un ciclo que hoy funciona por cómo se *hoistean* las funciones es una trampa para quien
   lo toque mañana.
 
-**Lo que queda** son los modales y el informe. Las vistas ya no: el cruce con el orquestador se
-resolvió con `app/repintado.js`, que es por donde `app/vistas/assessment.js` pide repintar en vez
-de llamar a `renderAll()`. Esa es la decisión que necesitará también lo que falte.
+En `app.js` se queda lo que de verdad es raíz de composición: `init()`, `cacheElements()`,
+`bindGlobalEvents()`, `renderAll()`, el conmutador de vistas y el escenario —importar, exportar,
+crear y restaurar—. El cruce con el orquestador se resolvió con `app/repintado.js`, que es por
+donde `app/vistas/assessment.js` pide repintar en vez de llamar a `renderAll()`.
 
 Y una regla más, que salió de repartir las vistas: **lo que use más de una vista no puede quedarse
 en `app.js`.** `app/` no puede importar de `app.js` sin cerrar un ciclo con el orquestador, así que
