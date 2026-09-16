@@ -1,12 +1,82 @@
+/* ------------------------------------------------------------------ color
+
+   Aqui habia 17 variables y, fuera de ellas, 261 colores literales repartidos
+   por la hoja: 87 valores distintos, muchos a dos puntos hexadecimales unos de
+   otros. Ahora estan todos con nombre, y el nombre dice para que sirve el
+   color, no que color es.
+
+   Esto es lo que hace posible el tema oscuro. Mientras los colores estaban
+   escritos en cada regla, cambiar de tema habria sido reescribir la hoja entera.
+
+   Tres familias, y no se mezclan:
+
+   - ESTRUCTURA: superficies, lineas y tintas. Cambian enteras con el tema.
+   - MARCA Y PALANCA: el verde Deloitte y los tres colores de palanca. NO
+     cambian con el tema: son identidad, y un verde de Procesos distinto en
+     oscuro dejaria de significar "Procesos".
+   - TONOS: exito, aviso, error e informacion, cada uno con su fondo de chip
+     (saturado), su fondo de panel (casi blanco en claro) y su tinta. Y la
+     escala de madurez, que es SU PROPIA escala: reutilizar ahi el rojo de error
+     y el verde de exito confundia dos cosas distintas, y en oscuro hay que
+     poder ajustar la escala sin tocar los avisos.
+
+   Los contrastes estan comprobados pareja a pareja, en los dos temas. Al tocar
+   un color de aqui hay que rehacer esa cuenta: en una celda del heatmap, un
+   contraste mal puesto no es un problema estetico, es un dato que no se lee. */
 :root {
   color-scheme: light;
+
+  /* --- estructura */
   --bg: #f6f7f3;
   --surface: #ffffff;
   --surface-muted: #f1f4ec;
-  --ink: #161a18;
-  --muted: #5c665e;
+  /* Casi blanco con una pizca de verde: filas alternas y zonas hundidas. */
+  --surface-hundida: #fafbf8;
+  /* El realce al pasar el raton por una fila. */
+  --surface-realce: #f3f8ea;
+  --surface-realce-tenue: #eaeee3;
+
   --line: #d9dfd4;
-  /* Identidad de palanca. Estos tres colores significan una sola cosa: de que
+  --line-tenue: #e8ebe6;
+  --line-fuerte: #b9c1b5;
+
+  --ink: #161a18;
+  /* Titulos. */
+  --ink-2: #202622;
+  /* Texto secundario que todavia es texto de lectura. */
+  --ink-3: #323a35;
+  --muted: #5c665e;
+  --muted-2: #747c76;
+  --neutral: #8a9189;
+  --graphite: #4f5952;
+  /* Lo que va ENCIMA del verde de marca. */
+  --sobre-marca: #10140e;
+
+  /* La cabecera es oscura tambien en tema claro: es la banda de marca. */
+  --cabecera-bg: #121614;
+  --cabecera-texto: #cfd6d0;
+  --cabecera-fantasma: #e6ebe6;
+  /* El texto principal sobre la banda negra. */
+  --cabecera-claro: #ffffff;
+
+  /* Superficies translucidas: el conmutador de dominios, las pestanas y el
+     boton de volver arriba se apoyan sobre el fondo y dejan pasar un poco.
+     Estaban escritas como rgba(255,255,255,0.9x) y en oscuro seguian siendo
+     blancas, con texto claro encima. */
+  --surface-translucida-alta: rgba(255, 255, 255, 0.96);
+  --surface-translucida: rgba(255, 255, 255, 0.92);
+  --surface-translucida-baja: rgba(255, 255, 255, 0.78);
+  /* Velos: una linea y dos fondos de fila que se apoyan en el de debajo. */
+  --line-velo: rgba(217, 223, 212, 0.9);
+  --fila-alterna: rgba(241, 244, 236, 0.28);
+  --fila-realce: rgba(241, 244, 236, 0.35);
+  /* El unico velo que no sigue al tema: va sobre el verde de marca. */
+  --velo-sobre-marca: rgba(255, 255, 255, 0.78);
+
+  --shadow: 0 12px 30px rgba(22, 26, 24, 0.08);
+
+  /* --- marca y palanca: no cambian con el tema
+     Identidad de palanca. Estos tres colores significan una sola cosa: de que
      palanca se habla. No deben usarse para ningun otro significado. */
   --lever-procesos: #86bc25;
   --lever-tecnologia: #ed8b00;
@@ -15,6 +85,7 @@
   /* Semantica de interfaz. Otra familia y otro significado, aunque el acento de
      marca comparta el verde de Procesos por identidad visual de Deloitte. */
   --green: #86bc25;
+  --green-claro: #9bd734;
   --green-dark: #3e6f11;
   --teal: #007c89;
   /* El teal de marca da 4,35:1 sobre el fondo de .level-badge, por debajo
@@ -22,10 +93,40 @@
   --teal-dark: #00636d;
   --amber: #c87900;
   --red: #bb3128;
+  --red-oscuro: #a02a22;
   --blue: #255e91;
-  --neutral: #8a9189;
-  --graphite: #4f5952;
-  --shadow: 0 12px 30px rgba(22, 26, 24, 0.08);
+
+  /* --- tonos */
+  --exito-chip: #e8f4df;
+  --exito-panel: #f6fbee;
+  --exito-fg: #315d11;
+
+  --aviso-chip: #fff0d3;
+  --aviso-panel: #fff8e8;
+  --aviso-fg: #725000;
+
+  --error-chip: #f9d2cc;
+  --error-panel: #fde7e3;
+  --error-fg: #7d1f19;
+
+  --info-panel: #f4f7fb;
+
+  /* --- escala de madurez: del 1 (rojo) al 5 (verde), mas el "sin puntuar" */
+  --score-0: #d7dbd7;
+  /* #737a74 daba 4,41:1 sobre blanco, por debajo del 4,5:1 de AA. Y no es un
+     control deshabilitado —el select de "Sin puntuar" se usa—, asi que no
+     entra en la exencion. Este da 4,73:1 y se sigue leyendo como gris apagado. */
+  --score-0-fg: #6e756f;
+  --score-1: #f9d2cc;
+  --score-1-fg: #7d1f19;
+  --score-2: #ffe5ba;
+  --score-2-fg: #7a4700;
+  --score-3: #f4efb5;
+  --score-3-fg: #504b00;
+  --score-4: #d9edc3;
+  --score-4-fg: #315d11;
+  --score-5: #bfe1ce;
+  --score-5-fg: #0f5132;
 
   /* ---------------------------------------------------------------- escalas
 
@@ -65,13 +166,9 @@
      de tarjeta, incluido en un `border-radius: 0 0 var(--radius) var(--radius)`. */
   --radius: var(--r-md);
 
-  --sp-1: 4px;
-  --sp-2: 6px;
-  --sp-3: 8px;
-  --sp-4: 12px;
-  --sp-5: 16px;
-  --sp-6: 24px;
-  --sp-7: 32px;
+  /* Aqui habia una escala --sp-1..7 que no llegaba a usarse en ninguna regla.
+     Un token que nadie usa no es un sistema, es ruido: se retira. La densidad
+     —lo que el modo presentacion necesita mover— si tiene sus tokens abajo. */
 
   /* Densidad. Separada de la escala de espaciado a proposito: son los cuatro
      valores que el modo presentacion necesita mover, y tenerlos con nombre
@@ -84,6 +181,111 @@
   --radar-h: 330px;
   --radar-h-overview: 380px;
 }
+
+/* -------------------------------------------------------------- tema oscuro
+
+   Un solo bloque, y el tema lo decide tema.js antes de que la pagina pinte.
+
+   La alternativa evidente —@media (prefers-color-scheme: dark) para el caso por
+   defecto y un selector aparte para la eleccion explicita— obliga a escribir
+   los cuarenta y tantos valores DOS veces, y dos copias que hay que mantener a
+   mano acaban separandose. Aqui tema.js resuelve la preferencia y escribe
+   data-tema en <html>, asi que el CSS solo necesita este bloque.
+
+   Va sincrono en <head> y en su propio archivo: si esperara al modulo, la
+   pagina pintaria en claro y saltaria a oscuro; y en linea no puede ir, porque
+   la CSP no admite scripts sin archivo.
+
+   Las 28 parejas de texto y fondo estan comprobadas una a una contra AA (4,5:1)
+   en los dos temas. La mas ajustada del oscuro deja 5,36:1, asi que hay margen
+   —pero al tocar un color hay que rehacer la cuenta: en una celda del heatmap,
+   un contraste mal puesto no es un problema estetico, es un dato que no se lee.
+
+   Lo que NO cambia:
+
+   - El verde de marca y los tres colores de palanca, que son identidad.
+   - La cabecera, que ya era oscura; solo baja un punto para separarse del
+     fondo, que en este tema tambien es oscuro.
+   - El informe PDF. Va en su propia ventana con la hoja de informe/estilos.js,
+     que no ve estos tokens, y ademas se imprime: un deck oscuro gasta tinta y
+     se proyecta peor. El entregable sale igual con el tema que sea.
+
+   Los acentos —ambar, rojo, azul, el verde oscuro del antetitulo, el teal del
+   nivel— si se aclaran: son texto y bordes sobre superficie, y en oscuro los
+   valores de tema claro quedan por debajo del minimo o directamente invisibles.
+*/
+:root[data-tema="oscuro"] {
+  color-scheme: dark;
+
+  --bg: #101412;
+  --surface: #1a201c;
+  --surface-muted: #222923;
+  --surface-hundida: #161b18;
+  --surface-realce: #24301f;
+  --surface-realce-tenue: #212823;
+
+  --line: #39423c;
+  --line-tenue: #2b332e;
+  --line-fuerte: #5b665e;
+
+  --ink: #e9eee9;
+  --ink-2: #f4f7f3;
+  --ink-3: #cfd8d1;
+  --muted: #a2aca5;
+  --muted-2: #8b958e;
+  --neutral: #78827a;
+  /* En claro es un gris oscuro para texto; aqui tiene que ser claro por lo
+     mismo: se usa como tinta, no como fondo. */
+  --graphite: #b3bdb6;
+
+  --cabecera-bg: #0b0e0c;
+
+  --surface-translucida-alta: rgba(30, 37, 33, 0.96);
+  --surface-translucida: rgba(30, 37, 33, 0.92);
+  --surface-translucida-baja: rgba(58, 68, 61, 0.78);
+  --line-velo: rgba(57, 66, 60, 0.9);
+  --fila-alterna: rgba(255, 255, 255, 0.035);
+  --fila-realce: rgba(255, 255, 255, 0.06);
+
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+
+  /* Acentos aclarados: son texto y bordes sobre superficie oscura. */
+  --green-dark: #a8dc4e;
+  --teal-dark: #5fc9d6;
+  --amber: #e9a63c;
+  --red: #f08a80;
+  --red-oscuro: #f5a99f;
+  --blue: #8ec2ee;
+
+  --exito-chip: #25391b;
+  --exito-panel: #1a2417;
+  --exito-fg: #bcdf94;
+
+  --aviso-chip: #3e2f11;
+  --aviso-panel: #2a2214;
+  --aviso-fg: #f1c67e;
+
+  --error-chip: #46221e;
+  --error-panel: #2d1b19;
+  --error-fg: #f5a99f;
+
+  --info-panel: #18202a;
+
+  --score-0: #333b36;
+  --score-0-fg: #aab4ad;
+  --score-1: #4a221d;
+  --score-1-fg: #f6aca2;
+  --score-2: #463210;
+  --score-2-fg: #f3c887;
+  --score-3: #3e3b12;
+  --score-3-fg: #e4de90;
+  --score-4: #2c3e1d;
+  --score-4-fg: #c2e29b;
+  --score-5: #1f3b2d;
+  --score-5-fg: #a2dbbe;
+}
+
+
 
 /* ------------------------------------------------------- modo presentacion
 
@@ -202,8 +404,11 @@ summary:focus-visible,
 }
 
 .app-header {
-  background: #121614;
-  color: #ffffff;
+  background: var(--cabecera-bg);
+  /* Claro sobre la banda negra, que es negra en los dos temas. Decia
+     var(--surface) —blanco— y en oscuro --surface pasa a ser oscuro: el titulo
+     desaparecia sobre su propio fondo. */
+  color: var(--cabecera-claro);
   border-bottom: 5px solid var(--green);
 }
 
@@ -258,13 +463,13 @@ h4 {
   margin: 18px 0 8px;
   font-size: var(--fs-xs);
   text-transform: uppercase;
-  color: #323a35;
+  color: var(--ink-3);
 }
 
 .header-copy {
   max-width: 760px;
   margin: 0;
-  color: #cfd6d0;
+  color: var(--cabecera-texto);
 }
 
 
@@ -304,7 +509,7 @@ h4 {
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: var(--r-sm);
   background: transparent;
-  color: #e6ebe6;
+  color: var(--cabecera-fantasma);
   font-weight: var(--fw-medium);
   white-space: nowrap;
 }
@@ -314,7 +519,7 @@ h4 {
 .header-menu-button[aria-expanded="true"] {
   border-color: rgba(255, 255, 255, 0.55);
   background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  color: var(--surface);
 }
 
 /* Un conmutador activo tiene que verse activo aunque el raton este en otra
@@ -323,13 +528,13 @@ h4 {
 .header-secondary-action[aria-pressed="true"] {
   border-color: var(--green);
   background: var(--green);
-  color: #10140e;
+  color: var(--sobre-marca);
 }
 
 .header-secondary-action[aria-pressed="true"]:hover {
-  border-color: #9bd734;
-  background: #9bd734;
-  color: #10140e;
+  border-color: var(--green-claro);
+  background: var(--green-claro);
+  color: var(--sobre-marca);
 }
 
 .header-menu-caret::before {
@@ -403,7 +608,7 @@ h4 {
 }
 
 .header-menu-item-danger:hover {
-  background: #fdf1ee;
+  background: var(--error-panel);
 }
 
 .header-menu-separator {
@@ -427,7 +632,7 @@ h4 {
   /* Radio menor que la píldora original: los mensajes de error ocupan dos
      líneas y una píldora de 999px se deforma al crecer en alto. */
   border-radius: var(--r-lg);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--ink);
   font-size: var(--fs-xs);
   font-weight: var(--fw-bold);
@@ -458,8 +663,8 @@ h4 {
 
 .save-status.saving {
   border-color: rgba(200, 121, 0, 0.55);
-  background: #fff8e8;
-  color: #725000;
+  background: var(--aviso-panel);
+  color: var(--aviso-fg);
 }
 
 .save-status.saving::before {
@@ -471,7 +676,7 @@ h4 {
 
 .save-status.saved {
   border-color: rgba(134, 188, 37, 0.7);
-  background: #edf7df;
+  background: var(--exito-chip);
   color: var(--green-dark);
 }
 
@@ -482,12 +687,12 @@ h4 {
 /* Escrito, pero sin canal de vuelta: el cambio ha subido y los del resto del
    equipo no bajan. No puede parecerse a "Guardado ✓" en verde, que es justo la
    mentira que dejaba a dos consultores pisandose creyendose sincronizados.
-   Comparte la pareja de color con .saving —#725000 sobre #fff8e8, ya
+   Comparte la pareja de color con .saving —var(--aviso-fg) sobre var(--aviso-panel), ya
    auditada— y se distingue de ella por el punto, que aqui no gira. */
 .save-status.parcial {
   border-color: rgba(200, 121, 0, 0.55);
-  background: #fff8e8;
-  color: #725000;
+  background: var(--aviso-panel);
+  color: var(--aviso-fg);
 }
 
 .save-status.parcial::before {
@@ -496,7 +701,7 @@ h4 {
 
 .save-status.error {
   border-color: rgba(187, 49, 40, 0.75);
-  background: #fde7e3;
+  background: var(--error-panel);
   color: var(--red);
 }
 
@@ -523,21 +728,21 @@ h4 {
 
 .primary-button {
   background: var(--green);
-  color: #10140e;
+  color: var(--sobre-marca);
 }
 
 
 .primary-button:hover {
-background: #9bd734;
-border-color: #9bd734;
-color: #10140e;
+background: var(--green-claro);
+border-color: var(--green-claro);
+color: var(--sobre-marca);
 transform: translateY(-1px);
 }
 
 
 .secondary-button {
-  background: #ffffff;
-  color: #10140e;
+  background: var(--surface);
+  color: var(--sobre-marca);
 }
 
 /*
@@ -595,8 +800,8 @@ transform: translateY(-1px);
   align-items: center;
   gap: 7px;
   padding: 9px 0;
-  border-bottom: 1px solid rgba(217, 223, 212, 0.85);
-  background: rgba(246, 247, 243, 0.96);
+  border-bottom: 1px solid var(--line-velo);
+  background: var(--surface-translucida-alta);
   box-shadow: 0 5px 14px rgba(22, 26, 24, 0.04);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -612,8 +817,8 @@ transform: translateY(-1px);
   padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.95);
-  color: #303832;
+  background: var(--surface-translucida);
+  color: var(--ink-3);
   font-size: var(--fs-xs);
   font-weight: var(--fw-medium);
   line-height: 1;
@@ -629,15 +834,15 @@ transform: translateY(-1px);
 
 .tabs a:hover {
   border-color: rgba(134, 188, 37, 0.65);
-  background: #f3f8ea;
+  background: var(--surface-realce);
   color: var(--green-dark);
   transform: translateY(-1px);
 }
 
 .tabs a.active {
   border-color: rgba(134, 188, 37, 0.7);
-  background: #e8f4df;
-  color: #315d11;
+  background: var(--exito-chip);
+  color: var(--exito-fg);
   box-shadow:
     0 4px 10px rgba(22, 26, 24, 0.08),
     inset 0 -2px 0 var(--green);
@@ -661,15 +866,17 @@ transform: translateY(-1px);
 }
 
 .tab-badge-alert {
-  border-color: #f9d2cc;
-  background: #f9d2cc;
-  color: #7d1f19;
+  border-color: var(--error-chip);
+  background: var(--error-chip);
+  color: var(--error-fg);
 }
 
 .tabs a.active .tab-badge {
-  border-color: rgba(255, 255, 255, 0.72);
-  background: rgba(255, 255, 255, 0.88);
-  color: #10140e;
+  border-color: var(--surface-translucida-baja);
+  background: var(--surface-translucida);
+  /* Sigue al tema, al contrario que el contador del dominio: la pastilla de la
+     pestana activa es --exito-chip, que en oscuro es verde oscuro. */
+  color: var(--exito-fg);
 }
 
 
@@ -710,7 +917,7 @@ transform: translateY(-1px);
 }
 
 .section-heading h2 {
-  color: #202622;
+  color: var(--ink-2);
   font-size: var(--fs-2xl);
   line-height: 1.2;
 }
@@ -774,7 +981,7 @@ transform: translateY(-1px);
   height: 20px;
   margin-top: 1px;
   border-radius: 50%;
-  color: #ffffff;
+  color: var(--surface);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-heavy);
   line-height: 1;
@@ -830,7 +1037,7 @@ transform: translateY(-1px);
    para "Escenario importado" y para "No se pudo aplicar el escenario remoto". */
 .notice-exito {
   border-left-color: var(--green);
-  background: #f6fbee;
+  background: var(--exito-panel);
 }
 
 .notice-exito .notice-icon {
@@ -839,7 +1046,7 @@ transform: translateY(-1px);
 
 .notice-info {
   border-left-color: var(--blue);
-  background: #f4f8fb;
+  background: var(--info-panel);
 }
 
 .notice-info .notice-icon {
@@ -848,16 +1055,16 @@ transform: translateY(-1px);
 
 .notice-aviso {
   border-left-color: var(--amber);
-  background: #fff8e8;
+  background: var(--aviso-panel);
 }
 
 .notice-aviso .notice-icon {
-  background: #8a5200;
+  background: var(--aviso-fg);
 }
 
 .notice-error {
   border-left-color: var(--red);
-  background: #fdf1ee;
+  background: var(--error-panel);
 }
 
 .notice-error .notice-icon {
@@ -880,7 +1087,7 @@ box-shadow: var(--shadow);
 .loading-spinner {
 width: 34px;
 height: 34px;
-border: 4px solid #e8ece3;
+border: 4px solid var(--line-tenue);
 border-top-color: var(--green);
 border-radius: 50%;
 animation: spin 0.9s linear infinite;
@@ -960,7 +1167,7 @@ display: none;
 
 .kpi-card-score {
   border-top-color: var(--green);
-  background: linear-gradient(180deg, #f8fced 0%, #ffffff 12%);
+  background: linear-gradient(180deg, var(--exito-panel) 0%, var(--surface) 12%);
 }
 
 .kpi-card-score strong {
@@ -969,16 +1176,16 @@ display: none;
 
 .kpi-card-gap {
   border-top-color: var(--amber);
-  background: linear-gradient(180deg, #fff8e9 0%, #ffffff 12%);
+  background: linear-gradient(180deg, var(--aviso-panel) 0%, var(--surface) 12%);
 }
 
 .kpi-card-gap strong {
-  color: #9a5d00;
+  color: var(--aviso-fg);
 }
 
 .kpi-card-progress {
   border-top-color: var(--blue);
-  background: linear-gradient(180deg, #f0f5fa 0%, #ffffff 12%);
+  background: linear-gradient(180deg, var(--info-panel) 0%, var(--surface) 12%);
 }
 
 .kpi-card-progress strong {
@@ -987,7 +1194,7 @@ display: none;
 
 .kpi-card-alert {
   border-top-color: var(--red);
-  background: linear-gradient(180deg, #fdf0ed 0%, #ffffff 12%);
+  background: linear-gradient(180deg, var(--error-panel) 0%, var(--surface) 12%);
 }
 
 .kpi-card-alert strong {
@@ -1010,7 +1217,7 @@ display: none;
   border-left: 4px solid var(--green);
   border-radius: var(--r-md);
   background: var(--surface);
-  color: #2a302c;
+  color: var(--ink-2);
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
   line-height: 1.5;
@@ -1039,7 +1246,7 @@ display: none;
 }
 
 .split-grid > .panel .panel-heading h3 {
-  color: #252c27;
+  color: var(--ink-2);
   font-size: var(--fs-md);
   font-weight: var(--fw-bold);
 }
@@ -1090,7 +1297,7 @@ display: none;
 }
 
 .bar-label {
-  color: #2a302c;
+  color: var(--ink-2);
   font-size: var(--fs-xs);
   font-weight: var(--fw-medium);
 }
@@ -1099,7 +1306,7 @@ display: none;
   height: 12px;
   overflow: hidden;
   border-radius: var(--r-pill);
-  background: #e8ece3;
+  background: var(--line-tenue);
 }
 
 .bar-fill {
@@ -1143,7 +1350,7 @@ display: none;
   padding: 4px 6px;
   border: 1px solid rgba(134, 188, 37, 0.45);
   border-radius: var(--r-md);
-  background: #f7faef;
+  background: var(--exito-panel);
   color: var(--green-dark);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-medium);
@@ -1178,8 +1385,8 @@ display: none;
   padding: 3px 3px 3px 9px;
   border: 1px solid rgba(134, 188, 37, 0.5);
   border-radius: var(--r-pill);
-  background: #ffffff;
-  color: #2f3732;
+  background: var(--surface);
+  color: var(--ink-3);
   font-size: var(--fs-2xs);
 }
 
@@ -1206,13 +1413,13 @@ display: none;
   border: 0;
   border-radius: 50%;
   background: var(--surface-muted);
-  color: #4f5952;
+  color: var(--graphite);
   font-size: var(--fs-sm);
   line-height: 1;
 }
 
 .filter-chip-remove:hover {
-  background: #e0e6da;
+  background: var(--surface-realce-tenue);
   color: var(--ink);
 }
 
@@ -1221,7 +1428,7 @@ display: none;
   padding: 0 8px;
   border: 1px solid rgba(134, 188, 37, 0.45);
   border-radius: var(--r-sm);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--green-dark);
   font-size: var(--fs-3xs);
   font-weight: var(--fw-bold);
@@ -1230,7 +1437,7 @@ display: none;
 
 .clear-filters-button:hover {
   border-color: var(--green);
-  background: #edf7df;
+  background: var(--exito-chip);
 }
 
 
@@ -1252,7 +1459,7 @@ display: none;
   width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--ink);
 }
 
@@ -1307,8 +1514,8 @@ display: none;
 }
 
 .capability-chip {
-  background: #eef3e7;
-  color: #31401d;
+  background: var(--exito-chip);
+  color: var(--exito-fg);
 }
 
 .score-controls {
@@ -1337,7 +1544,7 @@ display: none;
   padding: 0 8px;
   border: 1px solid var(--line);
   border-left: 4px solid var(--score-accent);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--score-text);
   font-weight: var(--fw-medium);
   transition:
@@ -1348,33 +1555,33 @@ display: none;
 
 
 .score-select.score-value-empty {
-  --score-accent: #d7dbd7;
-  --score-text: #737a74;
+  --score-accent: var(--score-0);
+  --score-text: var(--score-0-fg);
 }
 
 .score-select.score-value-1 {
-  --score-accent: #f9d2cc;
-  --score-text: #7d1f19;
+  --score-accent: var(--score-1);
+  --score-text: var(--score-1-fg);
 }
 
 .score-select.score-value-2 {
-  --score-accent: #ffe5ba;
-  --score-text: #7a4700;
+  --score-accent: var(--score-2);
+  --score-text: var(--score-2-fg);
 }
 
 .score-select.score-value-3 {
-  --score-accent: #f4efb5;
-  --score-text: #504b00;
+  --score-accent: var(--score-3);
+  --score-text: var(--score-3-fg);
 }
 
 .score-select.score-value-4 {
-  --score-accent: #d9edc3;
-  --score-text: #315d11;
+  --score-accent: var(--score-4);
+  --score-text: var(--score-4-fg);
 }
 
 .score-select.score-value-5 {
-  --score-accent: #bfe1ce;
-  --score-text: #0f5132;
+  --score-accent: var(--score-5);
+  --score-text: var(--score-5-fg);
 }
 
 .score-select:focus-visible {
@@ -1396,7 +1603,7 @@ display: none;
   border: 1px solid var(--line);
   border-left: 4px solid var(--neutral);
   border-radius: var(--r-md);
-  background: #ffffff;
+  background: var(--surface);
 }
 
 .score-summary-header {
@@ -1442,7 +1649,7 @@ display: none;
 }
 
 .score-summary-target strong {
-  color: #303832;
+  color: var(--ink-3);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-bold);
 }
@@ -1554,7 +1761,7 @@ display: none;
 
 .assessment-card summary:hover {
   background: rgba(134, 188, 37, 0.09);
-  color: #315d11;
+  color: var(--exito-fg);
 }
 
 .assessment-card summary:focus-visible {
@@ -1588,13 +1795,13 @@ display: none;
   padding: 13px 15px;
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  background: #ffffff;
+  background: var(--surface);
 }
 
 
 .assessment-detail-block h4 {
   margin: 0 0 9px;
-  color: #2f3732;
+  color: var(--ink-3);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-bold);
   letter-spacing: 0.025em;
@@ -1629,7 +1836,7 @@ display: none;
 .question-list li {
   margin-bottom: 9px;
   padding-left: 3px;
-  color: #202622;
+  color: var(--ink-2);
   font-size: var(--fs-md);
   font-weight: var(--fw-normal);
   line-height: 1.3;
@@ -1683,7 +1890,7 @@ display: none;
 
 .evidence-text {
   margin: 0;
-  color: #3a433d;
+  color: var(--ink-3);
   font-size: var(--fs-md);
   font-weight: var(--fw-normal);
   line-height: 1.3;
@@ -1710,7 +1917,7 @@ max-height: calc(100vh - 210px);
 overflow: auto;
 -webkit-overflow-scrolling: touch;
 scrollbar-width: thin;
-scrollbar-color: rgba(134, 188, 37, 0.65) #edf1e8;
+scrollbar-color: rgba(134, 188, 37, 0.65) var(--surface-realce-tenue);
 }
 
 
@@ -1724,7 +1931,7 @@ height: 9px;
 }
 
 .table-wrap::-webkit-scrollbar-track {
-background: #edf1e8;
+background: var(--surface-realce-tenue);
 border-radius: var(--r-pill);
 }
 
@@ -1745,8 +1952,8 @@ border-radius: var(--r-pill);
   padding-top: 10px;
   padding-bottom: 10px;
   border-bottom: 2px solid var(--line);
-  background: #f1f4ec;
-  color: #3a433d;
+  background: var(--surface-muted);
+  color: var(--ink-3);
 }
 
 #summaryTable tbody td:first-child,
@@ -1773,12 +1980,12 @@ border-radius: var(--r-pill);
 
 #summaryTable tbody tr.is-pending:hover,
 #overviewSummaryTable tbody tr.is-pending:hover {
-  background: #eaeee3;
+  background: var(--surface-realce-tenue);
 }
 
 #summaryTable tbody tr:hover,
 #overviewSummaryTable tbody tr:hover {
-  background: #f8faf5;
+  background: var(--surface-hundida);
 }
 
 #summaryTable tbody td,
@@ -1790,7 +1997,7 @@ border-radius: var(--r-pill);
 #summaryTable tbody td:first-child,
 #overviewSummaryTable tbody td:first-child {
   border-left: 3px solid transparent;
-  color: #252c27;
+  color: var(--ink-2);
   font-weight: var(--fw-medium);
 }
 
@@ -1821,7 +2028,7 @@ border-radius: var(--r-pill);
 
 /* Cuando el Dashboard no está mostrando el dominio entero hay que verlo. */
 #sourceNote.has-scope-filter {
-  color: #8a5a00;
+  color: var(--aviso-fg);
   font-weight: var(--fw-medium);
 }
 
@@ -1848,8 +2055,8 @@ border-radius: var(--r-pill);
   position: sticky;
   top: 0;
   z-index: 3;
-  background: #f7f9f4;
-  color: #323a35;
+  background: var(--surface-hundida);
+  color: var(--ink-3);
   font-size: var(--fs-3xs);
   font-weight: var(--fw-bold);
   text-transform: uppercase;
@@ -1905,15 +2112,15 @@ border-radius: var(--r-pill);
 }
 
 .heatmap-capability-row td:not(.heat-cell) {
-  background: #f4f7f1;
-  color: #252c27;
+  background: var(--surface-realce);
+  color: var(--ink-2);
   font-weight: var(--fw-bold);
 }
 
 .heatmap-capability-row td:first-child {
   min-width: 220px;
   border-left: 3px solid var(--green);
-  background: #f4f7f1;
+  background: var(--surface-realce);
 }
 
 .heatmap-capability-row strong {
@@ -1931,7 +2138,7 @@ border-radius: var(--r-pill);
 }
 
 .heatmap-detail-row:hover td:not(.heat-cell) {
-  background: #fafbf8;
+  background: var(--surface-hundida);
 }
 
 .heatmap-capability-row td {
@@ -1946,7 +2153,7 @@ border-radius: var(--r-pill);
 }
 
 .heatmap-detail-row td:nth-child(2) {
-  color: #252c27;
+  color: var(--ink-2);
   font-size: var(--fs-xs);
   font-weight: var(--fw-normal);
   line-height: 1.35;
@@ -1965,7 +2172,7 @@ border-radius: var(--r-pill);
   padding: 0 10px;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--green-dark);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-bold);
@@ -1978,7 +2185,7 @@ border-radius: var(--r-pill);
 
 .heatmap-toggle:hover {
   border-color: rgba(134, 188, 37, 0.7);
-  background: #f3f8ea;
+  background: var(--surface-realce);
 }
 
 .heatmap-toggle[aria-expanded="true"] {
@@ -2032,7 +2239,7 @@ gap: 2px;
   padding: 0 11px;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--green-dark);
   font-size: var(--fs-2xs);
   white-space: nowrap;
@@ -2040,7 +2247,7 @@ gap: 2px;
 
 .heatmap-expand-toggle:hover {
   border-color: var(--green);
-  background: #f3f8ea;
+  background: var(--surface-realce);
 }
 
 
@@ -2059,39 +2266,39 @@ font-size: var(--fs-sm);
 
 /* MODIFICADO: la leyenda usa exactamente los mismos colores que las celdas reales del heatmap */
 .legend-item.heat-1 {
-background: #f9d2cc;
-color: #7d1f19;
-border-color: #f9d2cc;
+background: var(--score-1);
+color: var(--score-1-fg);
+border-color: var(--score-1);
 }
 
 .legend-item.heat-2 {
-background: #ffe5ba;
-color: #7a4700;
-border-color: #ffe5ba;
+background: var(--score-2);
+color: var(--score-2-fg);
+border-color: var(--score-2);
 }
 
 .legend-item.heat-3 {
-background: #f4efb5;
-color: #504b00;
-border-color: #f4efb5;
+background: var(--score-3);
+color: var(--score-3-fg);
+border-color: var(--score-3);
 }
 
 .legend-item.heat-4 {
-background: #d9edc3;
-color: #315d11;
-border-color: #d9edc3;
+background: var(--score-4);
+color: var(--score-4-fg);
+border-color: var(--score-4);
 }
 
 .legend-item.heat-5 {
-background: #bfe1ce;
-color: #0f5132;
-border-color: #bfe1ce;
+background: var(--score-5);
+color: var(--score-5-fg);
+border-color: var(--score-5);
 }
 
 .legend-item.heat-blank {
-background: #eef0ed;
+background: var(--line-tenue);
 color: var(--graphite);
-border-color: #eef0ed;
+border-color: var(--line-tenue);
 }
 
 
@@ -2151,7 +2358,7 @@ border-color: #eef0ed;
 }
 
 .roadmap-table tbody tr:hover {
-  background: #f8faf5;
+  background: var(--surface-hundida);
 }
 
 
@@ -2159,16 +2366,16 @@ border-color: #eef0ed;
   padding-top: 10px;
   padding-bottom: 10px;
   border-bottom: 2px solid var(--line);
-  background: #f1f4ec;
-  color: #3a433d;
+  background: var(--surface-muted);
+  color: var(--ink-3);
 }
 
 .roadmap-table tbody tr:nth-child(even) {
-  background: rgba(241, 244, 236, 0.28);
+  background: var(--fila-alterna);
 }
 
 .roadmap-table tbody tr:hover {
-  background: #f4f8ee;
+  background: var(--surface-realce);
 }
 
 .roadmap-table tbody td {
@@ -2318,7 +2525,7 @@ border-color: #eef0ed;
   resize: vertical;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--ink);
   font: inherit;
   font-size: var(--fs-xs);
@@ -2367,7 +2574,7 @@ border-color: #eef0ed;
 
 .roadmap-ai-button:hover {
   border-color: var(--green);
-  background: #f3f8ea;
+  background: var(--surface-realce);
   color: var(--green-dark);
 }
 
@@ -2391,7 +2598,7 @@ border-color: #eef0ed;
   padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  background: #ffffff;
+  background: var(--surface);
 }
 
 /* Lineas laterales por tipo de contenido */
@@ -2411,7 +2618,7 @@ border-color: #eef0ed;
 .ai-modal-section h3,
 .ai-modal-section h4 {
   margin: 0 0 9px;
-  color: #303832;
+  color: var(--ink-3);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-bold);
   line-height: 1.35;
@@ -2423,7 +2630,7 @@ border-color: #eef0ed;
 .ai-modal-section p,
 .ai-modal-section .small-note {
   margin: 0;
-  color: #303832;
+  color: var(--ink-3);
   font-size: var(--fs-sm);
   font-weight: var(--fw-normal);
   line-height: 1.58;
@@ -2433,12 +2640,12 @@ border-color: #eef0ed;
 .ai-modal-source {
   padding: 10px 14px;
   border-style: dashed;
-  background: #fafbf8;
+  background: var(--surface-hundida);
 }
 
 .ai-modal-source .small-note {
   display: block;
-  color: #4f5952;
+  color: var(--graphite);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-normal);
   line-height: 1.5;
@@ -2482,7 +2689,7 @@ border-color: #eef0ed;
   padding: 11px 13px;
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  background: #fafbf8;
+  background: var(--surface-hundida);
   gap: 7px;
   align-content: start;
 }
@@ -2493,9 +2700,9 @@ border-color: #eef0ed;
    que su descripcion, y la ficha se quedaba sin jerarquia justo en la superficie
    donde se ensena al cliente. */
 .ai-case .ai-case-title {
-  /* #1f2723 sobre #fafbf8 da 14,73:1. */
+  /* var(--ink-2) sobre var(--surface-hundida) da 14,73:1. */
   margin: 0;
-  color: #1f2723;
+  color: var(--ink-2);
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
   line-height: 1.35;
@@ -2509,9 +2716,9 @@ border-color: #eef0ed;
 }
 
 .ai-case .ai-case-description {
-  /* #3f4842 sobre #fafbf8 da 9,12:1. */
+  /* var(--ink-3) sobre var(--surface-hundida) da 9,12:1. */
   margin: 0;
-  color: #3f4842;
+  color: var(--ink-3);
   font-size: var(--fs-xs);
   font-weight: var(--fw-normal);
   line-height: 1.5;
@@ -2523,35 +2730,35 @@ border-color: #eef0ed;
   cursor: help;
 }
 
-/* Tipo de valor: relleno neutro. #2f3732 sobre #e8ebe6 da 10,19:1. */
+/* Tipo de valor: relleno neutro. var(--ink-3) sobre var(--line-tenue) da 10,19:1. */
 .ai-tag-valor {
   border: 1px solid transparent;
-  background: #e8ebe6;
-  color: #2f3732;
+  background: var(--line-tenue);
+  color: var(--ink-3);
 }
 
-/* Tipo de IA: borde y fondo transparente. #4f5952 sobre #fafbf8 da 7,01:1. */
+/* Tipo de IA: borde y fondo transparente. var(--graphite) sobre var(--surface-hundida) da 7,01:1. */
 .ai-tag-ia {
-  border: 1px solid #c2ccc0;
+  border: 1px solid var(--line-fuerte);
   background: transparent;
-  color: #4f5952;
+  color: var(--graphite);
 }
 
 /* Agéntica es lo que todo el mundo pregunta ahora mismo, y se busca con la
-   vista. Oscuro de alto contraste: blanco sobre #2f3732 da 12,26:1. */
+   vista. Oscuro de alto contraste: blanco sobre var(--ink-3) da 12,26:1. */
 .ai-tag-ia.es-agentica {
-  border-color: #2f3732;
-  background: #2f3732;
-  color: #ffffff;
+  border-color: var(--ink-3);
+  background: var(--ink-3);
+  color: var(--surface);
 }
 
 /* Automatización es la etiqueta honesta de "esto no es IA de verdad" y no debe
    lucir como si lo fuera: el tratamiento mas apagado del conjunto. Apagado no
-   es ilegible —#5c665e sobre #fafbf8 da 5,75:1—; lo que baja es el borde. */
+   es ilegible —var(--muted) sobre var(--surface-hundida) da 5,75:1—; lo que baja es el borde. */
 .ai-tag-ia.es-automatizacion {
-  border-color: #dfe4dc;
+  border-color: var(--line-tenue);
   border-style: dashed;
-  color: #5c665e;
+  color: var(--muted);
   font-weight: var(--fw-medium);
 }
 
@@ -2559,9 +2766,9 @@ border-color: #eef0ed;
    va en versalitas y con tracking; el numero no. */
 .ai-case-count {
   margin-left: 8px;
-  background: #e8ebe6;
-  /* #4f5952 sobre #e8ebe6 da 6,05:1. */
-  color: #4f5952;
+  background: var(--line-tenue);
+  /* var(--graphite) sobre var(--line-tenue) da 6,05:1. */
+  color: var(--graphite);
   font-size: var(--fs-3xs);
   letter-spacing: 0;
   text-transform: none;
@@ -2587,35 +2794,35 @@ border-color: #eef0ed;
 
 
 .priority-badge.alta {
-  background: #fde7e3;
+  background: var(--error-panel);
   color: var(--red);
 }
 
-/* #c87900 sobre #fff0d3 daba 3,01:1, por debajo del 4,5 exigido para texto
+/* var(--amber) sobre var(--aviso-chip) daba 3,01:1, por debajo del 4,5 exigido para texto
    pequeno. Este llega a 5,67. */
 .priority-badge.media {
-  background: #fff0d3;
-  color: #8a5200;
+  background: var(--aviso-chip);
+  color: var(--aviso-fg);
 }
 
 .priority-badge.baja {
-  background: #e8f4df;
+  background: var(--exito-chip);
   color: var(--green-dark);
 }
 
 /* El gris neutro daba 2,79:1 sobre su propio fondo. Este llega a 5,16. */
 .priority-badge.pendiente {
-  background: #ecefed;
-  color: #5c665e;
+  background: var(--line-tenue);
+  color: var(--muted);
 }
 
 .level-badge {
-  background: #e9f2f4;
+  background: var(--info-panel);
   color: var(--teal-dark);
 }
 
 .status-chip {
-  background: #eef2f5;
+  background: var(--info-panel);
   color: var(--blue);
 }
 
@@ -2624,49 +2831,49 @@ border-color: #eef0ed;
 
 
 .heat-blank {
-  background: #eef0ed;
-  /* #737a74 daba 3,85:1 sobre este fondo; --graphite da 6,29:1. */
+  background: var(--line-tenue);
+  /* var(--muted-2) daba 3,85:1 sobre este fondo; --graphite da 6,29:1. */
   color: var(--graphite);
 }
 
 .heat-1 {
-  background: #f9d2cc;
-  color: #7d1f19;
+  background: var(--score-1);
+  color: var(--score-1-fg);
 }
 
 .heat-2 {
-  background: #ffe5ba;
-  color: #7a4700;
+  background: var(--score-2);
+  color: var(--score-2-fg);
 }
 
 .heat-3 {
-  background: #f4efb5;
-  color: #504b00;
+  background: var(--score-3);
+  color: var(--score-3-fg);
 }
 
 .heat-4 {
-  background: #d9edc3;
-  color: #315d11;
+  background: var(--score-4);
+  color: var(--score-4-fg);
 }
 
 .heat-5 {
-  background: #bfe1ce;
-  color: #0f5132;
+  background: var(--score-5);
+  color: var(--score-5-fg);
 }
 
 .gap-high {
-  background: #f9d2cc;
-  color: #7d1f19;
+  background: var(--score-1);
+  color: var(--score-1-fg);
 }
 
 .gap-mid {
-  background: #ffe5ba;
-  color: #7a4700;
+  background: var(--score-2);
+  color: var(--score-2-fg);
 }
 
 .gap-low {
-  background: #d9edc3;
-  color: #315d11;
+  background: var(--score-4);
+  color: var(--score-4-fg);
 }
 
 .filtered-empty-state {
@@ -2677,7 +2884,7 @@ border-color: #eef0ed;
   padding: 28px 20px;
   border: 1px dashed var(--line);
   border-radius: var(--r-md);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--muted);
   text-align: center;
 }
@@ -2703,7 +2910,7 @@ border-color: #eef0ed;
 
 .table-empty-cell {
   padding: 16px !important;
-  background: #ffffff;
+  background: var(--surface);
   text-align: center !important;
 }
 
@@ -2721,7 +2928,7 @@ border-color: #eef0ed;
 .criteria-inline-action .small-note {
   flex: 1 1 auto;
   margin: 0;
-  color: #3a433d;
+  color: var(--ink-3);
   font-size: var(--fs-md);
   font-weight: var(--fw-normal);
   line-height: 1.3;
@@ -2734,7 +2941,7 @@ border-color: #eef0ed;
   margin: 0;
   padding: 0 12px;
   border: 1px solid transparent;
-  background: #ffffff;
+  background: var(--surface);
   color: var(--ink);
   transition:
     background-color 150ms ease,
@@ -2783,9 +2990,9 @@ border-color: #eef0ed;
   width: min(860px, 100%);
   max-height: min(86vh, 780px);
   overflow: auto;
-  border: 1px solid rgba(217, 223, 212, 0.95);
+  border: 1px solid var(--line-velo);
   border-radius: var(--r-lg);
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
 }
 
@@ -2799,7 +3006,7 @@ border-color: #eef0ed;
   gap: 20px;
   padding: 20px 24px 17px;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.97);
+  background: var(--surface-translucida-alta);
 }
 
 .criteria-modal-header .eyebrow {
@@ -2808,7 +3015,7 @@ border-color: #eef0ed;
 
 .criteria-modal-header h2 {
   margin: 0;
-  color: #202622;
+  color: var(--ink-2);
   font-size: var(--fs-2xl);
   line-height: 1.2;
 }
@@ -2851,7 +3058,7 @@ border-color: #eef0ed;
 
 .modal-close-button:hover {
   border-color: rgba(134, 188, 37, 0.5);
-  background: #e8f4df;
+  background: var(--exito-chip);
 }
 
 .modal-close-button:hover::before {
@@ -2890,7 +3097,7 @@ border-color: #eef0ed;
 
 .dialog-header h2 {
   margin: 0;
-  color: #202622;
+  color: var(--ink-2);
   font-size: var(--fs-xl);
   line-height: 1.25;
 }
@@ -2912,24 +3119,24 @@ border-color: #eef0ed;
   height: 32px;
   border-radius: 50%;
   background: var(--surface-muted);
-  color: #4f5952;
+  color: var(--graphite);
   font-size: var(--fs-md);
   font-weight: var(--fw-heavy);
 }
 
 /* Las acciones que no se pueden deshacer se anuncian antes de leerlas. */
 .dialog-peligro .dialog-icon {
-  background: #fde7e3;
+  background: var(--error-panel);
   color: var(--red);
 }
 
 .dialog-peligro .dialog-confirm {
   background: var(--red);
-  color: #ffffff;
+  color: var(--surface);
 }
 
 .dialog-peligro .dialog-confirm:hover:not(:disabled) {
-  background: #a02a22;
+  background: var(--red-oscuro);
 }
 
 .dialog-body {
@@ -2938,7 +3145,7 @@ border-color: #eef0ed;
 
 .dialog-message p {
   margin: 0 0 10px;
-  color: #3a433d;
+  color: var(--ink-3);
   font-size: var(--fs-sm);
   line-height: 1.55;
 }
@@ -2967,7 +3174,7 @@ border-color: #eef0ed;
   padding: 0 11px;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--ink);
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
@@ -2999,7 +3206,7 @@ border-color: #eef0ed;
 .dialog-secondary:hover {
   border-style: solid;
   border-color: var(--green);
-  background: #f3f8ea;
+  background: var(--surface-realce);
 }
 
 .dialog-secondary[hidden] {
@@ -3011,13 +3218,13 @@ border-color: #eef0ed;
 }
 
 .dialog-cancel:hover {
-  border-color: #b9c1b5;
+  border-color: var(--line-fuerte);
   background: var(--surface-muted);
 }
 
 .dialog-confirm:disabled {
-  background: #e0e4dd;
-  color: #8a9189;
+  background: var(--line-tenue);
+  color: var(--neutral);
   cursor: not-allowed;
 }
 
@@ -3038,7 +3245,7 @@ border-color: #eef0ed;
 
 .criteria-subcapability h3 {
   margin: 0 0 12px;
-  color: #202622;
+  color: var(--ink-2);
   font-size: var(--fs-lg);
   line-height: 1.3;
 }
@@ -3083,7 +3290,7 @@ border-color: #eef0ed;
   padding: 13px 24px;
   overflow-x: auto;
   border-bottom: 1px solid var(--line);
-  background: rgba(250, 251, 248, 0.97);
+  background: var(--surface-translucida-alta);
 }
 
 .criteria-tab {
@@ -3105,14 +3312,14 @@ border-color: #eef0ed;
 
 .criteria-tab:hover {
   border-color: rgba(134, 188, 37, 0.4);
-  background: #f3f8ea;
+  background: var(--surface-realce);
   color: var(--green-dark);
 }
 
 .criteria-tab.active {
   border-color: rgba(134, 188, 37, 0.65);
-  background: #e8f4df;
-  color: #315d11;
+  background: var(--exito-chip);
+  color: var(--exito-fg);
   box-shadow: inset 0 -2px 0 var(--green);
 }
 
@@ -3127,13 +3334,13 @@ border-color: #eef0ed;
 
 .criteria-panel h3 {
   margin: 0 0 14px;
-  color: #202622;
+  color: var(--ink-2);
   font-size: var(--fs-lg);
 }
 
 .criteria-panel h4 {
   margin: 22px 0 10px;
-  color: #3a433d;
+  color: var(--ink-3);
   font-size: var(--fs-2xs);
   letter-spacing: 0.04em;
 }
@@ -3152,14 +3359,14 @@ border-color: #eef0ed;
   border: 1px solid var(--line);
   border-left: 3px solid rgba(134, 188, 37, 0.75);
   border-radius: var(--r-sm);
-  background: #ffffff;
-  color: #353d37;
+  background: var(--surface);
+  color: var(--ink-3);
   font-size: var(--fs-xs);
   line-height: 1.45;
 }
 
 .criteria-levels li strong {
-  color: #202622;
+  color: var(--ink-2);
 }
 
 .criteria-checklist {
@@ -3178,8 +3385,8 @@ border-color: #eef0ed;
   padding: 9px 12px 9px 34px;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  background: #fafbf8;
-  color: #3f4842;
+  background: var(--surface-hundida);
+  color: var(--ink-3);
   font-size: var(--fs-xs);
 }
 
@@ -3193,7 +3400,7 @@ border-color: #eef0ed;
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  background: #e8f4df;
+  background: var(--exito-chip);
   color: var(--green-dark);
   content: "✓";
   font-size: var(--fs-3xs);
@@ -3227,7 +3434,7 @@ align-items: stretch;
   padding: var(--tarjeta-p);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: 0 6px 18px rgba(22, 26, 24, 0.05);
   transition:
     border-color 150ms ease,
@@ -3252,7 +3459,7 @@ align-items: stretch;
 
 .radar-mini-heading h4 {
   margin: 0;
-  color: #323a35;
+  color: var(--ink-3);
   font-size: var(--fs-sm);
   font-weight: var(--fw-bold);
   text-transform: none;
@@ -3311,7 +3518,7 @@ height: 100% !important;
   scroll-margin-top: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--surface-translucida-alta);
   box-shadow: 0 8px 22px rgba(22, 26, 24, 0.07);
 }
 
@@ -3372,7 +3579,7 @@ height: 100% !important;
   width: 100%;
   margin-bottom: 5px;
   overflow: hidden;
-  color: #4f5952;
+  color: var(--graphite);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-heavy);
   letter-spacing: 0.035em;
@@ -3390,7 +3597,7 @@ height: 100% !important;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--ink);
   font-size: var(--fs-xs);
   font-weight: var(--fw-bold);
@@ -3431,32 +3638,34 @@ height: 100% !important;
 }
 
 .domain-progress.completo {
-  background: #e8f4df;
+  background: var(--exito-chip);
   color: var(--green-dark);
 }
 
 .domain-button.active .domain-progress {
-  background: rgba(255, 255, 255, 0.82);
-  color: #10140e;
+  /* Este velo NO sigue al tema: va sobre el verde de marca, que es el mismo en
+     claro y en oscuro, y el texto de encima es el mismo casi negro. */
+  background: var(--velo-sobre-marca);
+  color: var(--sobre-marca);
 }
 
 .domain-button:not(:disabled):hover {
   border-color: var(--green);
-  background: #f3f8ea;
+  background: var(--surface-realce);
   transform: translateY(-1px);
 }
 
 .domain-button.active {
   border-color: var(--green);
   background: var(--green);
-  color: #10140e;
+  color: var(--sobre-marca);
   box-shadow: 0 4px 10px rgba(134, 188, 37, 0.22);
 }
 
 .domain-button.is-disabled {
   border-style: dashed;
-  background: rgba(255, 255, 255, 0.55);
-  color: #747c76;
+  background: var(--surface-translucida-baja);
+  color: var(--muted-2);
   opacity: 0.72;
   cursor: not-allowed;
 }
@@ -3475,7 +3684,7 @@ height: 100% !important;
   padding: 0 14px;
   border: 1px solid rgba(134, 188, 37, 0.55);
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--surface-translucida-alta);
   color: var(--green-dark);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-bold);
@@ -3494,7 +3703,7 @@ height: 100% !important;
 
 .back-to-top-button:hover {
   border-color: var(--green);
-  background: #f3f8ea;
+  background: var(--surface-realce);
   box-shadow: 0 12px 28px rgba(22, 26, 24, 0.17);
   transform: translateY(-2px);
 }
@@ -3521,7 +3730,7 @@ height: 100% !important;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: var(--shadow);
 }
 
@@ -3537,8 +3746,8 @@ height: 100% !important;
   padding: 18px 20px;
   background: linear-gradient(
     180deg,
-    #f8faf5 0%,
-    #ffffff 100%
+    var(--surface-hundida) 0%,
+    var(--surface) 100%
   );
   cursor: pointer;
   list-style: none;
@@ -3553,7 +3762,7 @@ height: 100% !important;
 }
 
 .capability-targets-header:hover {
-  background: #f4f8ee;
+  background: var(--surface-realce);
 }
 
 .capability-targets-header:focus-visible {
@@ -3586,7 +3795,7 @@ height: 100% !important;
 
 .capability-targets-header h3 {
   margin: 0 0 5px;
-  color: #202622;
+  color: var(--ink-2);
   font-size: var(--fs-lg);
   font-weight: var(--fw-bold);
 }
@@ -3602,7 +3811,7 @@ height: 100% !important;
   padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--green-dark);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-bold);
@@ -3610,7 +3819,7 @@ height: 100% !important;
 
 .reset-targets-button:hover {
   border-color: var(--green);
-  background: #f3f8ea;
+  background: var(--surface-realce);
 }
 
 .capability-targets-table {
@@ -3683,7 +3892,7 @@ height: 100% !important;
 }
 
 .capability-target-row:hover {
-  background: rgba(241, 244, 236, 0.35);
+  background: var(--fila-realce);
 }
 
 .capability-target-name {
@@ -3693,7 +3902,7 @@ height: 100% !important;
 }
 
 .capability-target-name strong {
-  color: #252c27;
+  color: var(--ink-2);
   font-size: var(--fs-sm);
   font-weight: var(--fw-bold);
   line-height: 1.35;
@@ -3721,7 +3930,7 @@ height: 100% !important;
   border: 1px solid var(--line);
   border-left: 4px solid var(--neutral);
   border-radius: var(--r-sm);
-  background: #ffffff;
+  background: var(--surface);
   color: var(--ink);
   font-size: var(--fs-sm);
   font-weight: var(--fw-bold);
@@ -4083,11 +4292,11 @@ height: 100% !important;
    boton vive ahora dentro del menu de escenario, asi que el resalte llevaba
    sin verse desde entonces. Los colores tambien eran los de la cabecera
    negra; el panel del menu es claro, asi que va con la pareja ambar ya
-   auditada, #725000 sobre #fff8e8. */
+   auditada, var(--aviso-fg) sobre var(--aviso-panel). */
 .header-menu-item.sin-nombre {
-  background: #fff8e8;
+  background: var(--aviso-panel);
   box-shadow: inset 0 0 0 1px rgba(200, 121, 0, 0.55);
-  color: #725000;
+  color: var(--aviso-fg);
 }
 
 /*
