@@ -35,7 +35,13 @@ navegador. Cualquier servidor estático equivalente sirve.
 |---|---|---|
 | `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 879 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Estado, DOM, Firebase, filtros, render de las cinco vistas | 7.346 |
+| `app.js` | Raíz de composición: `init()`, cableado, y lo que aún no se ha repartido | 5.977 |
+| `app/estado.js` | El estado compartido y las constantes que lo describen | 146 |
+| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 332 |
+| `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
+| `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 245 |
+| `app/graficos.js` | Los seis radares de Chart.js | 570 |
+| `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 184 |
 | `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.421 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 127 |
@@ -55,6 +61,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `data/casos-ia.json` | **Fuente única de los 100 casos de uso de IA** y sus dos etiquetas | — |
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
 | `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
+| `scripts/check_module_version.py` | Que todos los módulos se pidan con la misma `?v=`. **En CI** | — |
 | `vendor/` | Chart.js, servido desde aquí y no desde un CDN. **Se versiona** | — |
 | `SECURITY.md` | Modelo de amenazas, qué protege y qué no, y los procedimientos | — |
 
@@ -91,6 +98,52 @@ Dependencias de terceros, sin bundler:
 - **Firebase Realtime Database y Auth 12.15.0** importados desde `gstatic.com` (cabecera de
   `app.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
   ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
+
+### `app/` es el reparto de `app.js`, y está a medias
+
+`app.js` tenía 7.346 líneas y 205 funciones sin un solo marcador de sección. El reparto va por
+tandas, y **cada una se verifica antes de seguir**: consola en silencio, las pruebas, el informe y
+el A/B contra `main` sobre los nueve dominios. Hoy están fuera el estado, los avisos, el
+almacenamiento, las preferencias, los gráficos y las métricas.
+
+Dos reglas que han salido del propio reparto y conviene respetar:
+
+- **De `app/estado.js` solo salen objetos y colecciones, nunca valores sueltos.** En módulos ES se
+  puede *leer* lo que otro módulo exporta pero no se le puede asignar: `state.activeDomainId = "x"`
+  vale desde cualquier sitio, `vistaActiva = "roadmap"` no compila. Los valores sueltos que de
+  verdad cambian se quedan en el módulo que los gobierna y salen por una función de lectura.
+- **Lo que necesite repintar, que lo reciba inyectado.** `app/preferencias.js` no importa
+  `renderAll`: se lo pasan una vez al arrancar. Importarlo crearía un ciclo con el orquestador de
+  vistas, y un ciclo que hoy funciona por cómo se *hoistean* las funciones es una trampa para quien
+  lo toque mañana.
+
+**Lo que queda** —persistencia, escenario, las cinco vistas y el informe— es la parte donde el
+desenredo pesa más, porque todo cruza con el orquestador de repintado. Cada uno necesitará la misma
+decisión: inyectar el repintado o recibir los datos ya calculados, como se hizo con los radares.
+
+### La versión va en cada import, y el CI lo comprueba
+
+`index.html` carga `styles.css`, `tema.js` y `app.js` con `?v=N`, y ese número existe por un motivo
+concreto: GitHub Pages sirve cada archivo con su propia caché, así que tras desplegar puede darse la
+mezcla «HTML nuevo + JavaScript viejo».
+
+Los imports de un módulo ES **no pasan por `index.html`**: resuelven rutas relativas por su cuenta.
+Así que `import "./core/calculo.js"` se pedía sin versión, y un `app.js` nuevo podía venir con un
+`core/calculo.js` viejo en caché — justo la mezcla que el `?v=` existe para impedir, una capa más
+abajo. Ahora **cada import relativo lleva la versión**, también los de `tests/`.
+
+**Lo evidente sería un `importmap`**, con las rutas versionadas en un solo sitio. No sirve aquí:
+un importmap en línea está sujeto a `script-src`, y la CSP **no lleva `'unsafe-inline'` a propósito**
+— es la directiva que cierra la inyección de código. Comprobado en el navegador, no de memoria: se
+bloquea. Y un importmap externo depende de soporte reciente, que no se puede dar por hecho en el
+portátil que haya en la sala.
+
+Al desplegar hay que subir el número **en `index.html` y en todos los imports**. Olvidarlo es un CI
+rojo, no un fallo silencioso en casa de un cliente:
+
+```powershell
+python scripts/check_module_version.py
+```
 
 ### El tema y la densidad se deciden antes de pintar
 

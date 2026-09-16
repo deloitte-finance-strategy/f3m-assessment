@@ -12,7 +12,7 @@ import {
   filasDeResumen,
   filasDeRoadmap,
   toCsv,
-} from "../core/exportacion.js";
+} from "../core/exportacion.js?v=11";
 
 
 /** Una capacidad agregada, en la forma que devuelve agregarPorCapacidad(). */
