@@ -86,6 +86,68 @@ import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=11";
 // dispara con ?comprobar=desbordes; ver informe/desbordes.js.
 import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=11";
 
+// El estado compartido y las constantes que lo describen.
+import {
+  CASOS_DE_IA,
+  CASOS_DE_IA_URL,
+  CATALOGO_URL,
+  DEFAULT_DOMAIN_ID,
+  DOMAINS,
+  GRUPOS_DE_DOMINIO,
+  LEVERS,
+  MODO_PRESENTACION_KEY,
+  NOMBRE_STORAGE_KEY,
+  STATUS_OPTIONS,
+  STORAGE_KEY,
+  TEMA_KEY,
+  els,
+  expandedHeatmapCapabilities,
+  scenarioId,
+  state,
+  tarjetasConDetalleAbierto,
+} from "./app/estado.js?v=11";
+
+// El banner de avisos y el dialogo de confirmacion.
+import {
+  abrirDialogo,
+  atraparFoco,
+  ocultarAviso,
+  showNotice,
+  updateModalOpenState,
+} from "./app/avisos.js?v=11";
+
+// El almacenamiento del navegador, que puede fallar y no es motivo para caerse.
+import {
+  borrarDeAlmacenamiento,
+  escribirAlmacenamiento,
+  leerAlmacenamiento,
+} from "./app/almacenamiento.js?v=11";
+
+// Las dos preferencias de vista: el tema y la densidad.
+import {
+  actualizarBotonDeTema,
+  alternarModoPresentacion,
+  alternarTema,
+  configurarPreferencias,
+  enModoPresentacion,
+  paletaDeRadar,
+  restaurarModoPresentacion,
+  seguirAlSistemaSiNoHayEleccion,
+  tamanoDeLetraDeGrafico,
+  temaActual,
+} from "./app/preferencias.js?v=11";
+
+// Los seis radares de Chart.js: tres por capacidad y tres por dominio.
+import {
+  getOverviewRadarImagesForPdf,
+  getRadarImagesForPdf,
+  hayLibreriaDeGraficos,
+  redimensionarRadares,
+  renderCapabilityRadar,
+  renderOverviewRadar,
+} from "./app/graficos.js?v=11";
+
+
 // Configuración de Firebase del proyecto fpa-assessment-mvp
 const firebaseConfig = {
   apiKey: "AIzaSyAyHWPnALB5regOMmeR3C-vVLDTmh6fEio",
@@ -127,103 +189,10 @@ borrarDeAlmacenamiento("firebase:previous_websocket_failure");
 const firebaseDatabase = getDatabase(firebaseApp);
 const firebaseAuth = getAuth(firebaseApp);
 
-// Escenario compartido leído desde la URL
-const scenarioId = getScenarioIdFromUrl();
+
 const scenarioDatabaseRef = scenarioId ? ref(firebaseDatabase, `scenarios/${scenarioId}`) : null;
 
-const DEFAULT_DOMAIN_ID = "fpa";
-
-
-/**
- * La lista de dominios sale de data/domains.json, que es la fuente unica.
- *
- * Estaba escrita tres veces —aqui, en scripts/convert_domains.py y en los
- * botones de index.html— sin nada que detectara el olvido de una de ellas.
- * Ahora anadir un dominio es anadir una entrada al catalogo, y
- * scripts/check_domains_sync.py comprueba que no falta nada.
- *
- * Se rellena en cargarCatalogoDeDominios(), antes de pedir ningun dato. Es un
- * objeto mutable y no una constante reasignada para no obligar a que todo el
- * modulo espere a un await de nivel superior.
- */
-const DOMAINS = {};
-
-const GRUPOS_DE_DOMINIO = [];
-
-const CATALOGO_URL = "data/domains.json";
-
-
-/**
- * Las fichas de los casos de uso de IA, indexadas por su titulo.
- *
- * Los JSON de dominio guardan en ai.cases una cadena "titulo; titulo; titulo",
- * y el titulo es la clave del cruce: coincide exactamente con el del catalogo.
- * Que siga coincidiendo lo comprueba scripts/check_domains_sync.py en cada PR,
- * en las dos direcciones.
- *
- * Se carga una sola vez y se cruza al pintar. La alternativa era meter la ficha
- * dentro de cada subcapacidad al convertir los Excel, y serian 413 copias de
- * 100 fichas repartidas por los nueve archivos de datos.
- */
-const CASOS_DE_IA = new Map();
-
-const CASOS_DE_IA_URL = "data/casos-ia.json";
-
-
-/**
- * La copia local se guarda por escenario, no bajo una clave unica.
- *
- * Con una sola clave, abrir el escenario de un cliente y despues el de otro en
- * el mismo navegador dejaba cargados los datos del primero cuando la lectura
- * remota del segundo fallaba: applyStoredScenario() corre antes de leer
- * Firebase, y el catch de initializeSharedScenario() avisa de la falta de
- * conexion pero no limpia lo que ya se ha pintado. La pantalla acababa
- * ensenando los datos de un cliente bajo la URL de otro, y el aviso decia
- * "estas trabajando sobre la copia de este navegador" sin aclarar de quien era
- * esa copia.
- *
- * En modo local la clave es la misma de siempre, asi que nadie pierde su
- * trabajo al desplegar esto. En modo compartido la primera carga no encuentra
- * copia y baja de Firebase, que es la fuente de verdad de todos modos.
- */
-const STORAGE_KEY_BASE = "f3m-fpa-assessment-scenario";
-const STORAGE_KEY = scenarioId ? `${STORAGE_KEY_BASE}:${scenarioId}` : STORAGE_KEY_BASE;
-
-
-// Las palancas las define el motor; aqui solo se les pone el color de marca.
-const LEVERS = PALANCAS.map((palanca) => ({
-  ...palanca,
-  color: COLOR_DE_PALANCA[palanca.key],
-}));
-
-// Los estados y los limites de longitud de los campos editables los define el
-// contrato del escenario, que es el espejo de database.rules.json.
-const STATUS_OPTIONS = ESTADOS_VALIDOS;
-
-
-const state = {
-  activeDomainId: DEFAULT_DOMAIN_ID,
-  domains: {},
-  meta: null,
-  items: [],
-  targets: {},
-};
-
-
-let capabilityRadarCharts = {
-  procesos: null,
-  tecnologia: null,
-  organizacion: null,
-};
-
-
-const expandedHeatmapCapabilities = new Set(); // NUEVO: mantiene abiertas las capacidades desplegadas del heatmap entre renders
-
-// Que tarjetas tienen desplegado "Ver detalle". Cada repintado de la lista las
-// reconstruye desde la plantilla, con el detalle cerrado: quien abria los
-// niveles de madurez para decidir entre un 3 y un 4 se los encontraba cerrados
-// justo despues de puntuar.
-const tarjetasConDetalleAbierto = new Set();
+ // NUEVO: mantiene abiertas las capacidades desplegadas del heatmap entre renders
 
 
 let isApplyingRemoteScenario = false; // NUEVO: evita guardar de vuelta mientras estamos cargando datos remotos
@@ -251,9 +220,6 @@ let cancelarSuscripcionRemota = null;
 // Para retirar el chip de guardado cuando el estado ya no pide nada.
 let temporizadorDelChip = null;
 
-const NOMBRE_STORAGE_KEY = "f3m-nombre-editor";
-const MODO_PRESENTACION_KEY = "f3m-modo-presentacion";
-const TEMA_KEY = "f3m-tema";
 
 // Identidad de quien edita. Queda a null si la autenticación no está disponible:
 // la app debe seguir funcionando aunque Anonymous Auth no esté activado en la consola.
@@ -265,8 +231,6 @@ let vigilanciaDeIdentidad = null;
 let scoringCriteriaTrigger = null;
 let aiInitiativeTrigger = null;
 
-
-const els = {};
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -472,7 +436,6 @@ function marcarDominiosNoDisponibles(fallidos) {
 }
 
 
-
 function syncActiveDomainState() {
   if (!state.activeDomainId || !state.domains[state.activeDomainId]) {
     return;
@@ -482,7 +445,6 @@ function syncActiveDomainState() {
   state.domains[state.activeDomainId].meta = state.meta;
   state.domains[state.activeDomainId].targets = state.targets;
 }
-
 
 
 function setActiveDomain(domainId) {
@@ -512,7 +474,6 @@ function setActiveDomain(domainId) {
 
 
 }
-
 
 
 function resetDomainViewState() {
@@ -602,8 +563,9 @@ async function init() {
   cacheElements();
   bindGlobalEvents();
   // El tema y la densidad ya vienen puestos de tema.js, que corre antes del
-  // primer pintado. Aqui solo se ponen al dia los dos conmutadores y se engancha
-  // el seguimiento del sistema.
+  // primer pintado. Aqui solo se ponen al dia los dos conmutadores, se engancha
+  // el seguimiento del sistema y se le dice al modulo que repintar.
+  configurarPreferencias({ alCambiar: renderAll });
   restaurarModoPresentacion();
   actualizarBotonDeTema();
   seguirAlSistemaSiNoHayEleccion();
@@ -908,16 +870,6 @@ function bindGlobalEvents() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
 /**
  * Deja el escenario con exactamente lo que admiten las reglas de Firebase.
  *
@@ -928,7 +880,6 @@ function bindGlobalEvents() {
 function sanitizeScenarioForFirebase(payload) {
   return normalizarEscenarioParaFirebase(payload);
 }
-
 
 
 /**
@@ -1005,8 +956,6 @@ function getCapabilityTargets(capability, domainId = state.activeDomainId) {
 
   return objetivos;
 }
-
-
 
 
 /**
@@ -1200,50 +1149,6 @@ function setInitialLoading(isLoading) {
 }
 
 
-/**
- * Lo que queda detras de un modal abierto.
- *
- * Los avisos y el chip de guardado se quedan fuera a proposito: son regiones
- * live y tienen que poder anunciar un fallo de guardado aunque haya un modal
- * delante. Los tres modales son hijos directos de <body>, asi que ninguno cae
- * dentro de lo que se marca como inerte.
- */
-const REGIONES_DE_FONDO = [
-  ".app-header",
-  ".app-shell",
-  ".back-to-top-button",
-  ".skip-link",
-];
-
-
-/**
- * Deja el fondo inerte mientras hay un modal abierto.
- *
- * El foco ya estaba atrapado con atraparFoco(), pero eso solo frena al
- * tabulador. Con un lector de pantalla, el cursor virtual seguia recorriendo las
- * 152 subcapacidades de detras como si el modal no existiera, y desde ahi no hay
- * forma de saber que hay un dialogo esperando una confirmacion.
- *
- * atraparFoco() se mantiene: inert no esta en navegadores antiguos y ahi sigue
- * siendo lo unico que retiene el tabulador.
- */
-function updateModalOpenState() {
-  const hasOpenModal =
-    !els.scoringCriteriaModal?.hidden ||
-    !els.aiInitiativeModal?.hidden ||
-    !els.dialogModal?.hidden;
-
-  document.body.classList.toggle("modal-open", hasOpenModal);
-
-  REGIONES_DE_FONDO.forEach((selector) => {
-    const region = document.querySelector(selector);
-
-    if (region) {
-      region.inert = hasOpenModal;
-    }
-  });
-}
-
 function setupScoringCriteriaModal() {
   if (!els.scoringCriteriaModal || !els.assessmentList) {
     return;
@@ -1429,7 +1334,6 @@ function setupAiInitiativeModal() {
     }
   });
 }
-
 
 
 function setupDomainSwitcher() {
@@ -1712,7 +1616,6 @@ function closeAiInitiativeModal() {
 }
 
 
-
 /**
  * Cuantas subcapacidades tiene puntuadas cada dominio.
  *
@@ -1809,7 +1712,6 @@ function updateNavigationBadges() {
 
   els.roadmapTabBadge.classList.toggle("tab-badge-alert", highPriorityCount > 0);
 }
-
 
 
 function renderAll(opciones = {}) {
@@ -2186,7 +2088,7 @@ els.kpiGrid.innerHTML = [
   renderPriorityBars(metrics);
   renderLeverBars();
   renderSummaryTable();
-  renderCapabilityRadar(); // NUEVO: actualiza radar al recalcular dashboard
+  renderCapabilityRadar(buildSummaryRows()); // NUEVO: actualiza radar al recalcular dashboard
 }
 
 
@@ -2334,7 +2236,6 @@ function barRow(label, value, width, color) {
 }
 
 
-
 function renderSummaryTable() {
   const rows = agregarPorCapacidad(getScopedItems()).map(
     (capacidad) => `
@@ -2404,436 +2305,6 @@ function renderSummaryTable() {
     </tbody>
   `;
 }
-
-
-
-/**
- * Solo se avisa una vez por carga: renderCapabilityRadar() se llama en cada
- * repintado del dashboard, y el aviso taparia todo lo demas.
- */
-let avisoDeGraficosMostrado = false;
-
-
-/**
- * Si no hay Chart.js, se dice una sola vez por carga y se sigue.
- *
- * Antes esto era un return mudo dentro de renderCapabilityRadar(). Si la red del
- * cliente bloquea el CDN —normal en una red corporativa ajena— no habia radares,
- * no habia aviso, y el PDF que se entrega salia con tres recuadros en blanco.
- * Nadie se enteraba hasta tener el informe delante.
- *
- * Esta fuera de renderCapabilityRadar() porque ahora hay dos vistas que pintan
- * radares: entrar directamente por #overview con la libreria bloqueada tiene que
- * dar el mismo aviso.
- */
-function hayLibreriaDeGraficos() {
-  if (typeof Chart !== "undefined") {
-    return true;
-  }
-
-  if (!avisoDeGraficosMostrado) {
-    avisoDeGraficosMostrado = true;
-
-    showNotice(
-      "No se ha podido cargar la librería de gráficos: los radares no se pintan y el informe PDF "
-        + "saldrá sin ellos. El resto de la herramienta funciona con normalidad. Recarga la página "
-        + "para reintentarlo.",
-      "aviso",
-    );
-  }
-
-  return false;
-}
-
-
-/**
- * La paleta de los radares, por tema.
- *
- * Chart.js no lee CSS: sus colores van en la configuracion, asi que los tokens
- * del tema oscuro no le llegan. Y ahi no es un detalle: el azul de
- * Organizacion, #012169, sobre una tarjeta oscura es practicamente invisible.
- *
- * Los tres colores de palanca SON identidad y no cambian: lo que hay aqui son
- * las versiones aclaradas para dibujar sobre fondo oscuro, que siguen siendo
- * verde, naranja y azul y se siguen reconociendo. El informe PDF no pasa por
- * aqui —usa COLOR_DE_PALANCA directamente— porque sale claro siempre.
- */
-const PALETA_DE_RADAR = {
-  claro: {
-    procesos: COLOR_DE_PALANCA.procesos,
-    tecnologia: COLOR_DE_PALANCA.tecnologia,
-    organizacion: COLOR_DE_PALANCA.organizacion,
-    areaProcesos: "rgba(134, 188, 37, 0.24)",
-    areaTecnologia: "rgba(237, 139, 0, 0.22)",
-    areaOrganizacion: "rgba(1, 33, 105, 0.18)",
-    objetivo: "#4f5952",
-    leyenda: "#3a433d",
-    marcas: "#5c665e",
-    ejes: "#323a35",
-    rejilla: "#d9dfd4",
-    vertice: "#ffffff",
-  },
-  oscuro: {
-    procesos: "#a8dc4e",
-    tecnologia: "#f0a93a",
-    organizacion: "#7aa6e8",
-    areaProcesos: "rgba(168, 220, 78, 0.26)",
-    areaTecnologia: "rgba(240, 169, 58, 0.24)",
-    areaOrganizacion: "rgba(122, 166, 232, 0.22)",
-    objetivo: "#b3bdb6",
-    leyenda: "#cfd8d1",
-    marcas: "#a2aca5",
-    ejes: "#cfd8d1",
-    rejilla: "#39423c",
-    // El borde del vertice es del color de la TARJETA, para que el punto
-    // resalte sobre el area de color. En claro es blanco; en oscuro, la
-    // superficie oscura.
-    vertice: "#1a201c",
-  },
-};
-
-
-/** El tema que hay puesto, que tema.js resuelve antes del primer pintado. */
-function temaActual() {
-  return document.documentElement.dataset.tema === "oscuro" ? "oscuro" : "claro";
-}
-
-
-function paletaDeRadar() {
-  return PALETA_DE_RADAR[temaActual()];
-}
-
-
-function renderCapabilityRadar() {
-  if (!hayLibreriaDeGraficos()) {
-    return;
-  }
-
-  const radarData = buildCapabilityRadarData();
-
-  renderSingleCapabilityRadar({
-    key: "procesos",
-    canvas: els.capabilityRadarProcessesChart,
-    label: "Procesos",
-    values: radarData.procesos,
-    targetValues: radarData.objetivoProcesos,
-    color: paletaDeRadar().procesos,
-    backgroundColor: paletaDeRadar().areaProcesos,
-    radarData,
-  });
-
-  renderSingleCapabilityRadar({
-    key: "tecnologia",
-    canvas: els.capabilityRadarTechnologyChart,
-    label: "Tecnología",
-    values: radarData.tecnologia,
-    targetValues: radarData.objetivoTecnologia,
-    color: paletaDeRadar().tecnologia,
-    backgroundColor: paletaDeRadar().areaTecnologia,
-    radarData,
-  });
-
-  renderSingleCapabilityRadar({
-    key: "organizacion",
-    canvas: els.capabilityRadarOrganizationChart,
-    label: "Organización",
-    values: radarData.organizacion,
-    targetValues: radarData.objetivoOrganizacion,
-    color: paletaDeRadar().organizacion,
-    backgroundColor: paletaDeRadar().areaOrganizacion,
-    radarData,
-  });
-}
-
-
-
-function renderSingleCapabilityRadar({
-  key,
-  canvas,
-  label,
-  values,
-  targetValues,
-  color,
-  backgroundColor,
-  radarData,
-
-  // Donde se guarda la instancia de Chart. El Dashboard escribe en el registro
-  // de siempre —del que tira getCanvasImageDataUrl() para el PDF— y el Overview
-  // en el suyo: son seis canvas distintos y una sola caja de tres claves los
-  // pisaria, capturando ademas el radar equivocado en el informe.
-  registro = capabilityRadarCharts,
-}) {
-  if (!canvas) {
-    return;
-  }
-
-  // Estos dos colores se nombran porque ahora aparecen en dos sitios cada uno
-  // —la serie y su marca de leyenda, y `labels.color` y el `fontColor` de cada
-  // item— y tenerlos escritos dos veces era pedir que se descuadraran.
-  const paleta = paletaDeRadar();
-  const colorDelObjetivo = paleta.objetivo;
-  const colorDelTextoDeLeyenda = paleta.leyenda;
-
-  const chartData = {
-    labels: radarData.displayLabels,
-
-    datasets: [
-      {
-        label: `${label} actual`,
-        data: values,
-        fill: true,
-        backgroundColor,
-        borderColor: color,
-        borderWidth: 2.5,
-        pointBackgroundColor: color,
-        pointBorderColor: paleta.vertice,
-        pointBorderWidth: 2,
-        pointRadius: 3.5,
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: paleta.vertice,
-        pointHoverBorderColor: color,
-        order: 2,
-
-        // La marca que esta serie ensena en la leyenda. Va aqui, junto al
-        // estilo del trazo, para que no se puedan separar al editar una:
-        // generateLabels() la lee tal cual. No se usa `pointStyle` del dataset
-        // porque eso cambiaria tambien los vertices dibujados en el radar.
-        marcaDeLeyenda: {
-          pointStyle: "circle",
-          fillStyle: color,
-          lineWidth: 0,
-        },
-      },
-      {
-        label: `${label} objetivo`,
-        data: targetValues,
-        fill: false,
-        borderColor: colorDelObjetivo,
-        borderWidth: 2.25,
-        borderDash: [7, 5],
-        pointBackgroundColor: paleta.vertice,
-        pointBorderColor: colorDelObjetivo,
-        pointBorderWidth: 2,
-        pointRadius: 3,
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: colorDelObjetivo,
-        pointHoverBorderColor: paleta.vertice,
-        order: 1,
-
-        marcaDeLeyenda: {
-          pointStyle: "line",
-          strokeStyle: colorDelObjetivo,
-          lineWidth: 2,
-        },
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: false,
-
-    layout: {
-      padding: 4,
-    },
-
-    plugins: {
-      legend: {
-        display: true,
-        position: "bottom",
-
-        labels: {
-          usePointStyle: true,
-          boxWidth: 28,
-          boxHeight: 8,
-          padding: 16,
-          color: colorDelTextoDeLeyenda,
-
-          font: {
-            size: tamanoDeLetraDeGrafico(),
-            weight: "700",
-          },
-
-          // Antes esto era `pointStyle: "line"` para las dos series. Pero
-          // `labels.pointStyle` es global —pisa el del dataset— y la marca se
-          // traza con el color del BORDE del punto, que en la serie actual es
-          // blanco para que los vertices resalten sobre el area de color: la
-          // linea de la leyenda salia blanca sobre fondo blanco y no se veia.
-          // Quedaba el texto "Procesos actual" sin nada al lado y no habia
-          // forma de saber que ese era el nivel de la empresa hoy.
-          //
-          // Generandola a mano, cada serie declara su marca en
-          // `marcaDeLeyenda` y aqui solo se completan los campos que Chart.js
-          // necesita: el color del texto, el estado de visibilidad y el indice
-          // que usa el onClick por defecto para ocultar la serie.
-          generateLabels: (chart) =>
-            chart.data.datasets.map((dataset, index) => ({
-              text: dataset.label,
-              fontColor: colorDelTextoDeLeyenda,
-              hidden: !chart.isDatasetVisible(index),
-              datasetIndex: index,
-              ...dataset.marcaDeLeyenda,
-            })),
-        },
-      },
-
-      tooltip: {
-        callbacks: {
-          title: (items) => {
-            const index = items[0]?.dataIndex ?? 0;
-
-            return radarData.originalLabels[index] || "";
-          },
-
-          label: (context) => {
-            return `${context.dataset.label}: ${formatNumber(
-              context.parsed.r,
-            )}`;
-          },
-        },
-      },
-    },
-
-    scales: {
-      r: {
-        min: 0,
-        max: 5,
-
-        ticks: {
-          stepSize: 1,
-          backdropColor: "transparent",
-          color: paleta.marcas,
-
-          font: {
-            size: tamanoDeLetraDeGrafico(),
-            weight: "700",
-          },
-        },
-
-        pointLabels: {
-          color: paleta.ejes,
-          padding: 8,
-
-          font: {
-            size: tamanoDeLetraDeGrafico(),
-            weight: "800",
-          },
-        },
-
-        grid: {
-          color: paleta.rejilla,
-        },
-
-        angleLines: {
-          color: paleta.rejilla,
-        },
-      },
-    },
-  };
-
-  if (registro[key]) {
-    registro[key].data = chartData;
-    registro[key].options = chartOptions;
-    registro[key].update();
-    return;
-  }
-
-  registro[key] = new Chart(canvas, {
-    type: "radar",
-    data: chartData,
-    options: chartOptions,
-  });
-}
-
-
-
-
-function buildCapabilityRadarData() {
-  const rows = buildSummaryRows();
-
-  return {
-    originalLabels: rows.map(
-      (row) => row.Capacidad,
-    ),
-
-    displayLabels: rows.map(
-      (row) => getRadarShortLabel(row.Capacidad),
-    ),
-
-    procesos: rows.map(
-      (row) => toRadarNumber(row.Procesos),
-    ),
-
-    objetivoProcesos: rows.map(
-      (row) => toRadarNumber(row.ObjetivoProcesos),
-    ),
-
-    tecnologia: rows.map(
-      (row) => toRadarNumber(row.Tecnologia),
-    ),
-
-    objetivoTecnologia: rows.map(
-      (row) => toRadarNumber(row.ObjetivoTecnologia),
-    ),
-
-    organizacion: rows.map(
-      (row) => toRadarNumber(row.Organizacion),
-    ),
-
-    objetivoOrganizacion: rows.map(
-      (row) => toRadarNumber(row.ObjetivoOrganizacion),
-    ),
-  };
-}
-
-
-
-function toRadarNumber(value) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-}
-
-
-function getRadarShortLabel(label) {
-  const shortLabels = {
-    "Presupuestos y previsiones": ["Presupuestos", "y previsiones"],
-    "Informes de gestión del rendimiento": ["Informes", "gestión"],
-    "Evaluación business case": ["Business", "case"],
-    "Información y apoyo a la toma de decisiones": ["Apoyo", "decisiones"],
-    "Planificación largo plazo": ["Planificación", "largo plazo"],
-  };
-
-  return shortLabels[label] || wrapRadarLabel(label);
-}
-
-
-function wrapRadarLabel(label) {
-  const words = String(label).split(" ");
-  const lines = [];
-  let currentLine = "";
-
-  words.forEach((word) => {
-    const nextLine = currentLine ? `${currentLine} ${word}` : word;
-
-    if (nextLine.length > 18) {
-      if (currentLine) {
-        lines.push(currentLine);
-      }
-
-      currentLine = word;
-    } else {
-      currentLine = nextLine;
-    }
-  });
-
-  if (currentLine) {
-    lines.push(currentLine);
-  }
-
-  return lines;
-}
-
 
 
 /* ---------------------------------------------------------------- Overview --
@@ -3148,100 +2619,6 @@ function renderOverviewSummaryTable(filas) {
 }
 
 
-// Seis canvas, dos registros. getCanvasImageDataUrl() sigue leyendo el del
-// Dashboard, que es de donde salen los radares del informe PDF.
-const overviewRadarCharts = {
-  procesos: null,
-  tecnologia: null,
-  organizacion: null,
-};
-
-
-function renderOverviewRadar(filas) {
-  if (!hayLibreriaDeGraficos()) {
-    return;
-  }
-
-  const radarData = buildOverviewRadarData(filas);
-
-  renderSingleCapabilityRadar({
-    key: "procesos",
-    canvas: els.overviewRadarProcessesChart,
-    label: "Procesos",
-    values: radarData.procesos,
-    targetValues: radarData.objetivoProcesos,
-    color: paletaDeRadar().procesos,
-    backgroundColor: paletaDeRadar().areaProcesos,
-    radarData,
-    registro: overviewRadarCharts,
-  });
-
-  renderSingleCapabilityRadar({
-    key: "tecnologia",
-    canvas: els.overviewRadarTechnologyChart,
-    label: "Tecnología",
-    values: radarData.tecnologia,
-    targetValues: radarData.objetivoTecnologia,
-    color: paletaDeRadar().tecnologia,
-    backgroundColor: paletaDeRadar().areaTecnologia,
-    radarData,
-    registro: overviewRadarCharts,
-  });
-
-  renderSingleCapabilityRadar({
-    key: "organizacion",
-    canvas: els.overviewRadarOrganizationChart,
-    label: "Organización",
-    values: radarData.organizacion,
-    targetValues: radarData.objetivoOrganizacion,
-    color: paletaDeRadar().organizacion,
-    backgroundColor: paletaDeRadar().areaOrganizacion,
-    radarData,
-    registro: overviewRadarCharts,
-  });
-}
-
-
-/**
- * Los ejes del radar del Overview son los nueve dominios.
- *
- * Sin getRadarShortLabel(): sus abreviaturas son de capacidades de FP&A y aqui
- * no aplican. Las etiquetas del catalogo ya son cortas y solo hay que partirlas;
- * la mas larga, "Relación con Inversores", cabe en dos lineas.
- *
- * Ojo con toRadarNumber(null), que devuelve 0 y no null: un dominio sin puntuar
- * se dibuja en el centro en vez de dejar hueco. Es exactamente lo que hace hoy el
- * radar por capacidad —buildSummaryRows() pone "" y Number("") es 0— y se
- * replica a proposito para que los dos se comporten igual. Si algun dia se
- * quiere el hueco, hay que arreglar los dos a la vez.
- */
-function buildOverviewRadarData(filas) {
-  return {
-    originalLabels: filas.map((fila) => fila.label),
-
-    displayLabels: filas.map((fila) => wrapRadarLabel(fila.label)),
-
-    procesos: filas.map((fila) => toRadarNumber(fila.procesos)),
-
-    objetivoProcesos: filas.map(
-      (fila) => toRadarNumber(fila.objetivoProcesos),
-    ),
-
-    tecnologia: filas.map((fila) => toRadarNumber(fila.tecnologia)),
-
-    objetivoTecnologia: filas.map(
-      (fila) => toRadarNumber(fila.objetivoTecnologia),
-    ),
-
-    organizacion: filas.map((fila) => toRadarNumber(fila.organizacion)),
-
-    objetivoOrganizacion: filas.map(
-      (fila) => toRadarNumber(fila.objetivoOrganizacion),
-    ),
-  };
-}
-
-
 function toList(value, separator = "\n") {
   if (Array.isArray(value)) {
     return value.filter(Boolean);
@@ -3290,7 +2667,6 @@ function buildFilteredEmptyState() {
     </div>
   `;
 }
-
 
 
 function renderCapabilityTargets() {
@@ -3398,7 +2774,6 @@ function renderCapabilityTargets() {
   `;
 
 
-
   els.capabilityTargetsPanel
     .querySelectorAll(".capability-target-select")
     .forEach((select) => {
@@ -3503,7 +2878,6 @@ function capabilityTargetControl(
 }
 
 
-
 function handleCapabilityTargetChange(event) {
   const select = event.currentTarget;
   const capability = select.dataset.capability;
@@ -3544,7 +2918,6 @@ function handleCapabilityTargetChange(event) {
   renderAll();
   persistTargetsDelDominioActivo();
 }
-
 
 
 async function resetCapabilityTargets() {
@@ -3971,7 +3344,6 @@ function renderHeatmap() {
   updateHeatmapExpandAllButton(capabilityRows); // NUEVO: sincroniza texto Expandir/Colapsar todo
 
 }
-
 
 
 function handleHeatmapToggle(event) {
@@ -4423,160 +3795,6 @@ function avisarSiQuedaAlgoSinGuardar(event) {
 }
 
 
-/* ------------------------------------------------------------------ tema */
-
-/**
- * Deja el conmutador de tema diciendo lo que hay puesto.
- *
- * El tema ya esta aplicado: lo resuelve tema.js antes del primer pintado. Aqui
- * solo se pone al dia el boton, que app.js es quien conoce los elementos.
- */
-function actualizarBotonDeTema() {
-  const boton = els.themeButton;
-
-  if (!boton) {
-    return;
-  }
-
-  const oscuro = temaActual() === "oscuro";
-
-  boton.setAttribute("aria-pressed", String(oscuro));
-
-  // El title dice de donde viene el tema, que no es lo mismo que cual es: sin
-  // eleccion guardada lo pone el sistema y cambia solo si el sistema cambia.
-  boton.title = leerAlmacenamiento(TEMA_KEY)
-    ? "Tema elegido a mano. Vuelve a pulsarlo para cambiarlo."
-    : "Sigue la preferencia del sistema hasta que lo pulses";
-}
-
-
-/**
- * Aplica un tema y repinta.
- *
- * Repintar no es cosmetico: los radares son canvas y Chart.js no lee CSS, asi
- * que sus colores se fijan al construirlos. Sin esto, la interfaz cambiaria de
- * tema y los seis graficos se quedarian con la paleta anterior.
- */
-function aplicarTema(tema) {
-  document.documentElement.dataset.tema = tema === "oscuro" ? "oscuro" : "claro";
-
-  actualizarBotonDeTema();
-  renderAll();
-}
-
-
-function alternarTema() {
-  const siguiente = temaActual() === "oscuro" ? "claro" : "oscuro";
-
-  escribirAlmacenamiento(TEMA_KEY, siguiente);
-  aplicarTema(siguiente);
-}
-
-
-/**
- * Sigue al sistema mientras no haya una eleccion guardada.
- *
- * Quien no ha tocado el boton espera que la herramienta acompane a su sistema,
- * tambien si lo cambia con la pestana abierta. Quien si lo ha tocado espera lo
- * contrario: que se quede como lo dejo.
- */
-function seguirAlSistemaSiNoHayEleccion() {
-  if (!window.matchMedia) {
-    return;
-  }
-
-  const consulta = window.matchMedia("(prefers-color-scheme: dark)");
-
-  const alCambiar = (evento) => {
-    if (leerAlmacenamiento(TEMA_KEY)) {
-      return;
-    }
-
-    aplicarTema(evento.matches ? "oscuro" : "claro");
-  };
-
-  // addEventListener en MediaQueryList es lo moderno; addListener es lo que
-  // entienden Safari antiguos, y esta herramienta se abre en el portatil que
-  // haya en la sala.
-  if (consulta.addEventListener) {
-    consulta.addEventListener("change", alCambiar);
-  } else if (consulta.addListener) {
-    consulta.addListener(alCambiar);
-  }
-}
-
-
-/* ---------------------------------------------------------- presentacion */
-
-/** Si la herramienta esta en modo presentacion, para proyectarla en sala. */
-function enModoPresentacion() {
-  return document.documentElement.dataset.densidad === "presentacion";
-}
-
-
-/**
- * Tamano de letra de los radares.
- *
- * Chart.js no lee CSS: sus tipografias van en la configuracion, asi que el
- * modo presentacion no le llega por los tokens como al resto. Sin esto, los
- * nueve ejes del radar global se quedaban en 11 px mientras la tabla de al lado
- * crecia un 20%, que es peor que no agrandar nada.
- *
- * Sube a 13 y no a 15, que es lo que pedia la proporcion. El ancho del lienzo
- * lo fija la rejilla de tres columnas y NO crece con el modo, asi que a 15 px
- * los rotulos de un solo eje se salian: "Estrategicas" y "Auditoria Interna"
- * aparecian cortados por la mitad. Un rotulo recortado en un radar proyectado
- * es justo el fallo que este modo venia a evitar. La legibilidad la pone
- * sobre todo el lienzo, que si crece de 380 a 480 px.
- */
-function tamanoDeLetraDeGrafico() {
-  return enModoPresentacion() ? 13 : 11;
-}
-
-
-/**
- * Aplica el modo presentacion, sin repintar.
- *
- * Se llama tambien en el arranque, antes de que haya nada que repintar, de ahi
- * que la decision de llamar a renderAll() sea de quien alterna.
- */
-function aplicarModoPresentacion(activo) {
-  if (activo) {
-    document.documentElement.dataset.densidad = "presentacion";
-  } else {
-    delete document.documentElement.dataset.densidad;
-  }
-
-  els.presentationModeButton?.setAttribute("aria-pressed", String(Boolean(activo)));
-}
-
-
-function alternarModoPresentacion() {
-  const activo = !enModoPresentacion();
-
-  aplicarModoPresentacion(activo);
-  escribirAlmacenamiento(MODO_PRESENTACION_KEY, activo ? "1" : "0");
-
-  // Repintar es obligatorio, no cosmetico: los radares son canvas y su
-  // tipografia se fija al construirlos, asi que la tabla se agrandaria y los
-  // tres graficos de al lado se quedarian como estaban.
-  renderAll();
-}
-
-
-/**
- * Pone el conmutador de presentacion al dia.
- *
- * El atributo ya lo escribio tema.js antes del primer pintado; esto solo repite
- * la lectura para dejar el aria-pressed en su sitio. Se conserva la llamada a
- * aplicarModoPresentacion() y no se lee el atributo directamente para que el
- * estado siga saliendo de un unico sitio, la preferencia guardada.
- */
-function restaurarModoPresentacion() {
-  aplicarModoPresentacion(leerAlmacenamiento(MODO_PRESENTACION_KEY) === "1");
-}
-
-
 function cancelarGuardadoDiferido(itemId, campo) {
   const clave = `${itemId}:${campo}`;
 
@@ -4649,61 +3867,6 @@ function priorityBadge(priority) {
   return `<span class="priority-badge ${safePriority.toLowerCase()}">${escapeHtml(safePriority)}</span>`;
 }
 
-/**
- * El almacenamiento del navegador puede fallar y no es motivo para caerse.
- *
- * Lanza excepcion si la cuota esta llena, si el navegador tiene bloqueado el
- * almacenamiento por politica o en algunas ventanas privadas. Antes la
- * escritura iba sin proteger y por delante de la de Firebase: al superar la
- * cuota, el cambio no llegaba a ninguno de los dos sitios.
- */
-let avisoDeAlmacenamientoMostrado = false;
-
-function leerAlmacenamiento(clave) {
-  try {
-    return window.localStorage.getItem(clave);
-  } catch (error) {
-    console.warn("No se pudo leer del almacenamiento del navegador.", error);
-    return null;
-  }
-}
-
-
-function escribirAlmacenamiento(clave, valor) {
-  try {
-    window.localStorage.setItem(clave, valor);
-    return true;
-  } catch (error) {
-    console.warn("No se pudo escribir en el almacenamiento del navegador.", error);
-
-    if (!avisoDeAlmacenamientoMostrado) {
-      avisoDeAlmacenamientoMostrado = true;
-
-      showNotice(
-        "Este navegador no está guardando la copia local del escenario, probablemente por falta de " +
-          "espacio o por su configuración de privacidad. " +
-          (scenarioDatabaseRef
-            ? "Los cambios siguen enviándose al escenario compartido."
-            : "Exporta el escenario en JSON si no quieres perder el trabajo al cerrar."),
-        "aviso",
-      );
-    }
-
-    return false;
-  }
-}
-
-
-function borrarDeAlmacenamiento(clave) {
-  try {
-    window.localStorage.removeItem(clave);
-    return true;
-  } catch (error) {
-    console.warn("No se pudo borrar del almacenamiento del navegador.", error);
-    return false;
-  }
-}
-
 
 function getStoredScenario() {
   const stored = leerAlmacenamiento(STORAGE_KEY);
@@ -4765,7 +3928,6 @@ function readScenarioFromFirebase(timeoutMs = 8000) {
     timeoutMs,
   );
 }
-
 
 
 async function initializeSharedScenario() {
@@ -4966,7 +4128,6 @@ function avisarDeFalloDeLectura(error) {
 }
 
 
-
 function subscribeToSharedScenario() {
   if (!scenarioDatabaseRef) {
     return;
@@ -5141,7 +4302,6 @@ function aplicarEscenarioRemoto(remoteScenario) {
 }
 
 
-
 function updateSaveStatus(status, message, detalle = "") {
   if (!els.saveStatus) {
     return;
@@ -5257,7 +4417,6 @@ function hayIdentidadParaEscribir() {
 }
 
 
-
 /**
  * Una escritura completa, repartida en una ruta por dominio.
  *
@@ -5311,7 +4470,6 @@ function saveScenarioToFirebase(
     timeoutMs,
   );
 }
-
 
 
 /**
@@ -5516,7 +4674,6 @@ function persistScenario() {
 }
 
 
-
 function applyStoredScenario() {
   const stored = leerAlmacenamiento(STORAGE_KEY);
 
@@ -5534,15 +4691,6 @@ function applyStoredScenario() {
     console.warn("No se pudo aplicar el escenario local.", error);
   }
 }
-
-
-
-
-
-
-
-
-
 
 
 function getScenarioTargetsFromPayload(payload, domainId) {
@@ -5568,9 +4716,6 @@ function getScenarioTargetsFromPayload(payload, domainId) {
 
   return {};
 }
-
-
-
 
 
 /**
@@ -5788,8 +4933,6 @@ function applyScenarioPayload(payload, { seguirDominioDelEscenario = false } = {
 }
 
 
-
-
 function buildScenarioPayload() {
   syncActiveDomainState();
 
@@ -5845,7 +4988,6 @@ function buildScenarioPayload() {
     domains: domainsPayload,
   };
 }
-
 
 
 /**
@@ -6269,23 +5411,6 @@ function conLasVistasDelInformeVisibles(accion) {
 }
 
 
-/**
- * Obliga a los seis radares a medirse otra vez, ahora mismo.
- *
- * Chart.js es responsive por ResizeObserver, que es asincrono: quitar el modo
- * presentacion cambia la rejilla de una a tres columnas, pero el canvas conserva
- * su tamano anterior durante ese tick, y la captura del informe ocurre dentro
- * del mismo. Sin esto, exportar con el modo puesto metia en el PDF unos radares
- * de 734x480 en una diapositiva medida para 414x380.
- */
-function redimensionarRadares() {
-  [
-    ...Object.values(capabilityRadarCharts),
-    ...Object.values(overviewRadarCharts),
-  ].forEach((grafico) => grafico?.resize());
-}
-
-
 // Cuantas filas caben en el informe sin que deje de ser legible.
 const PDF_MAX_PRIORIDADES = 10;
 const PDF_MAX_ROADMAP = 15;
@@ -6566,55 +5691,6 @@ function getPdfActiveFiltersLabel() {
 }
 
 
-function getRadarImagesForPdf() {
-  return {
-    procesos: getCanvasImageDataUrl("procesos", els.capabilityRadarProcessesChart),
-    tecnologia: getCanvasImageDataUrl("tecnologia", els.capabilityRadarTechnologyChart),
-    organizacion: getCanvasImageDataUrl("organizacion", els.capabilityRadarOrganizationChart),
-  };
-}
-
-
-/**
- * Los radares de nueve ejes del Overview, para la parte global del informe.
- *
- * Son canvas distintos y registro distinto de los del Dashboard —seis canvas,
- * dos registros— y hasta ahora no llegaban al PDF.
- */
-function getOverviewRadarImagesForPdf() {
-  return {
-    procesos: getCanvasImageDataUrl("procesos", els.overviewRadarProcessesChart, overviewRadarCharts),
-    tecnologia: getCanvasImageDataUrl("tecnologia", els.overviewRadarTechnologyChart, overviewRadarCharts),
-    organizacion: getCanvasImageDataUrl("organizacion", els.overviewRadarOrganizationChart, overviewRadarCharts),
-  };
-}
-
-/**
- * La imagen de un radar para el informe, o cadena vacia si no hay radar.
- *
- * La cadena vacia importa: con ella, buildPdfRadarImageHtml() escribe "No se
- * pudo capturar el grafico" y el informe dice la verdad. Sin ella, un canvas
- * sin grafico devuelve un PNG en blanco perfectamente valido —no lanza— y el
- * PDF que se entrega al cliente sale con tres recuadros vacios.
- *
- * Se pregunta por la instancia de Chart y no por el tamano del canvas: es lo
- * unico que distingue "aqui no se ha pintado nada" de "se ha pintado un radar
- * sin datos", que son casos distintos.
- */
-function getCanvasImageDataUrl(palanca, canvas, registro = capabilityRadarCharts) {
-  if (!canvas || !registro[palanca]) {
-    return "";
-  }
-
-  try {
-    return canvas.toDataURL("image/png");
-  } catch (error) {
-    console.warn("No se pudo capturar el gráfico para el PDF.", error);
-    return "";
-  }
-}
-
-
 /**
  * Las filas de resumen del CSV, para el ambito visible.
  *
@@ -6624,10 +5700,6 @@ function getCanvasImageDataUrl(palanca, canvas, registro = capabilityRadarCharts
 function buildSummaryRows() {
   return filasDeResumen(agregarPorCapacidad(getScopedItems()));
 }
-
-
-
-
 
 
 function downloadFile(filename, content, type) {
@@ -6698,298 +5770,6 @@ async function resetScenario() {
 
   borrarDeAlmacenamiento(STORAGE_KEY);
   window.location.reload();
-}
-
-
-/**
- * Dialogo propio, en sustitucion de window.confirm y window.prompt.
- *
- * Los dialogos nativos ensenan el origen de la pagina ("127.0.0.1:8777 dice:"),
- * no se pueden disenar y desentonan delante de un cliente. Ademas no permiten
- * exigir una confirmacion proporcional al riesgo ni ofrecer una accion
- * alternativa como "exportar antes de borrar".
- *
- * Devuelve false si se cancela; true si se confirma; y el texto del campo
- * cuando se ha pedido uno.
- */
-let cerrarDialogoActual = null;
-
-function abrirDialogo({
-  eyebrow = "",
-  titulo,
-  parrafos = [],
-  tono = "neutro",
-  confirmar = "Continuar",
-  cancelar = "Cancelar",
-  campo = null,
-  confirmacionEscrita = null,
-  accionSecundaria = null,
-}) {
-  return new Promise((resolve) => {
-    const disparador = document.activeElement;
-
-    els.dialogEyebrow.textContent = eyebrow;
-    els.dialogEyebrow.hidden = !eyebrow;
-    els.dialogTitle.textContent = titulo;
-    els.dialogIcon.textContent = tono === "peligro" ? "!" : "?";
-
-    els.dialogMessage.innerHTML = parrafos
-      .map((texto) => `<p>${escapeHtml(texto)}</p>`)
-      .join("");
-
-    els.dialogModal.className = `modal-backdrop dialog-${tono}`;
-
-    // alertdialog solo cuando de verdad es una alerta. El marcado lo traia
-    // fijo, asi que "Poner mi nombre" —un campo de texto sin ninguna urgencia—
-    // se anunciaba con el mismo enfasis que "vas a borrar el trabajo de los
-    // nueve dominios", y ese enfasis deja de significar nada si vale para todo.
-    els.dialogModal.setAttribute(
-      "role",
-      tono === "peligro" ? "alertdialog" : "dialog",
-    );
-
-    els.dialogConfirm.textContent = confirmar;
-    els.dialogCancel.textContent = cancelar;
-
-    // Campo de texto: sirve tanto para pedir un dato como para exigir que se
-    // escriba una palabra antes de dejar confirmar.
-    const pideTexto = Boolean(campo) || Boolean(confirmacionEscrita);
-
-    els.dialogFieldWrap.hidden = !pideTexto;
-    els.dialogField.value = campo?.valor || "";
-    els.dialogField.maxLength = campo?.maxLength || 120;
-    els.dialogField.placeholder = campo?.placeholder || "";
-    els.dialogFieldLabel.textContent =
-      campo?.etiqueta ||
-      (confirmacionEscrita ? `Escribe ${confirmacionEscrita} para confirmar` : "");
-
-    els.dialogSecondary.hidden = !accionSecundaria;
-    els.dialogSecondary.textContent = accionSecundaria?.texto || "";
-
-    const validar = () => {
-      if (!confirmacionEscrita) {
-        return;
-      }
-
-      els.dialogConfirm.disabled =
-        els.dialogField.value.trim().toUpperCase() !==
-        confirmacionEscrita.toUpperCase();
-    };
-
-    els.dialogConfirm.disabled = Boolean(confirmacionEscrita);
-    validar();
-
-    const alConfirmar = () => terminar(campo ? els.dialogField.value : true);
-    const alCancelar = () => terminar(false);
-
-    const alPulsarTecla = (event) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        alCancelar();
-        return;
-      }
-
-      if (event.key === "Enter" && pideTexto && !els.dialogConfirm.disabled) {
-        event.preventDefault();
-        alConfirmar();
-        return;
-      }
-
-      if (event.key === "Tab") {
-        atraparFoco(event, els.dialogModal);
-      }
-    };
-
-    const alPulsarFondo = (event) => {
-      // Un clic fuera no puede cancelar algo destructivo por accidente.
-      if (event.target === els.dialogModal && tono !== "peligro") {
-        alCancelar();
-      }
-    };
-
-    const alPulsarSecundaria = () => accionSecundaria?.alHacerClic();
-
-    function terminar(resultado) {
-      els.dialogModal.hidden = true;
-      els.dialogConfirm.removeEventListener("click", alConfirmar);
-      els.dialogCancel.removeEventListener("click", alCancelar);
-      els.dialogSecondary.removeEventListener("click", alPulsarSecundaria);
-      els.dialogField.removeEventListener("input", validar);
-      els.dialogModal.removeEventListener("click", alPulsarFondo);
-      document.removeEventListener("keydown", alPulsarTecla, true);
-
-      cerrarDialogoActual = null;
-      updateModalOpenState();
-
-      if (disparador?.isConnected) {
-        disparador.focus();
-      }
-
-      resolve(resultado);
-    }
-
-    cerrarDialogoActual = alCancelar;
-
-    els.dialogConfirm.addEventListener("click", alConfirmar);
-    els.dialogCancel.addEventListener("click", alCancelar);
-    els.dialogSecondary.addEventListener("click", alPulsarSecundaria);
-    els.dialogField.addEventListener("input", validar);
-    els.dialogModal.addEventListener("click", alPulsarFondo);
-    document.addEventListener("keydown", alPulsarTecla, true);
-
-    els.dialogModal.hidden = false;
-    updateModalOpenState();
-
-    // El foco entra en el dialogo: al campo si lo hay, y si no a Cancelar, que
-    // es la opcion segura.
-    if (pideTexto) {
-      els.dialogField.focus();
-      els.dialogField.select();
-    } else {
-      els.dialogCancel.focus();
-    }
-  });
-}
-
-
-/** Mantiene el tabulador dentro del modal mientras esta abierto. */
-function atraparFoco(event, contenedor) {
-  const focusables = [...contenedor.querySelectorAll(
-    'button:not([disabled]):not([hidden]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
-  )].filter((el) => el.offsetParent !== null);
-
-  if (!focusables.length) {
-    return;
-  }
-
-  const primero = focusables[0];
-  const ultimo = focusables[focusables.length - 1];
-
-  if (event.shiftKey && document.activeElement === primero) {
-    event.preventDefault();
-    ultimo.focus();
-  } else if (!event.shiftKey && document.activeElement === ultimo) {
-    event.preventDefault();
-    primero.focus();
-  }
-}
-
-
-const ICONO_POR_TIPO = {
-  exito: "✓",
-  info: "i",
-  aviso: "!",
-  error: "!",
-};
-
-let temporizadorDeAviso = null;
-
-// Manejador del boton de accion del aviso, guardado para poder retirarlo.
-let accionDeAvisoActual = null;
-
-
-/**
- * Muestra un aviso donde se pueda leer y con el tono que le corresponde.
- *
- * Antes el aviso vivia dentro de <main>, a la altura 0 de una pagina de casi
- * 10.000 px: cualquier mensaje lanzado desde el Roadmap era invisible. Y usaba
- * el mismo amarillo de advertencia tanto para "Escenario importado" como para
- * "No se pudo aplicar el escenario remoto".
- */
-function showNotice(message, tipo = "info", persistente = null, accion = null) {
-  if (!els.loadNotice) {
-    return;
-  }
-
-  // Los errores y las advertencias no se van solos: quien esta en una sesion
-  // con cliente no puede perderselos por mirar a otro lado siete segundos.
-  const seQueda =
-    persistente === null ? tipo === "error" || tipo === "aviso" : persistente;
-
-  els.loadNoticeText.textContent = message;
-  els.loadNoticeIcon.textContent = ICONO_POR_TIPO[tipo] || ICONO_POR_TIPO.info;
-  els.loadNotice.className = `notice notice-${tipo}`;
-  els.loadNotice.hidden = false;
-
-  ponerAccionDeAviso(accion);
-
-  window.clearTimeout(temporizadorDeAviso);
-
-  if (seQueda) {
-    return;
-  }
-
-  temporizadorDeAviso = window.setTimeout(() => {
-    els.loadNotice.hidden = true;
-  }, 7000);
-}
-
-
-/**
- * Pone —o quita— el boton de accion del aviso.
- *
- * El manejador se guarda aparte para poder retirarlo: sin eso, cada aviso con
- * accion dejaba un listener encima del anterior y un clic disparaba todos los
- * que hubieran pasado por ahi.
- */
-function ponerAccionDeAviso(accion) {
-  const boton = els.loadNoticeAction;
-
-  if (!boton) {
-    return;
-  }
-
-  if (accionDeAvisoActual) {
-    boton.removeEventListener("click", accionDeAvisoActual);
-    accionDeAvisoActual = null;
-  }
-
-  if (!accion?.texto || typeof accion.alHacerClic !== "function") {
-    boton.hidden = true;
-    boton.textContent = "";
-    return;
-  }
-
-  accionDeAvisoActual = accion.alHacerClic;
-
-  boton.textContent = accion.texto;
-  boton.hidden = false;
-  boton.addEventListener("click", accionDeAvisoActual);
-}
-
-
-function ocultarAviso() {
-  window.clearTimeout(temporizadorDeAviso);
-  ponerAccionDeAviso(null);
-  els.loadNotice.hidden = true;
-}
-
-
-
-function getScenarioIdFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const rawScenarioId = params.get("scenario");
-
-  if (!rawScenarioId) {
-    return null;
-  }
-
-  const cleanScenarioId = rawScenarioId.trim();
-
-  // Permitimos letras, números, guiones y guiones bajos para evitar rutas raras en Firebase.
-  // El mínimo es 20 caracteres: el enlace es la única credencial del escenario, así que un id
-  // corto o inventado a mano sería adivinable y expondría el assessment completo.
-  const isValidScenarioId = /^[a-zA-Z0-9_-]{20,120}$/.test(cleanScenarioId);
-
-  if (!isValidScenarioId) {
-    console.warn(
-      "Scenario ID inválido (mínimo 20 caracteres, solo letras, números, '-' y '_'). Se usará modo local:",
-      cleanScenarioId,
-    );
-    return null;
-  }
-
-  return cleanScenarioId;
 }
 
 
