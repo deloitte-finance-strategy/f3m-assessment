@@ -35,7 +35,13 @@ navegador. Cualquier servidor estático equivalente sirve.
 |---|---|---|
 | `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 879 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Estado, DOM, Firebase, filtros, render de las cinco vistas | 7.346 |
+| `app.js` | Raíz de composición: `init()`, cableado, y lo que aún no se ha repartido | 5.977 |
+| `app/estado.js` | El estado compartido y las constantes que lo describen | 146 |
+| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 332 |
+| `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
+| `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 245 |
+| `app/graficos.js` | Los seis radares de Chart.js | 570 |
+| `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 184 |
 | `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.421 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 127 |
@@ -92,6 +98,28 @@ Dependencias de terceros, sin bundler:
 - **Firebase Realtime Database y Auth 12.15.0** importados desde `gstatic.com` (cabecera de
   `app.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
   ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
+
+### `app/` es el reparto de `app.js`, y está a medias
+
+`app.js` tenía 7.346 líneas y 205 funciones sin un solo marcador de sección. El reparto va por
+tandas, y **cada una se verifica antes de seguir**: consola en silencio, las pruebas, el informe y
+el A/B contra `main` sobre los nueve dominios. Hoy están fuera el estado, los avisos, el
+almacenamiento, las preferencias, los gráficos y las métricas.
+
+Dos reglas que han salido del propio reparto y conviene respetar:
+
+- **De `app/estado.js` solo salen objetos y colecciones, nunca valores sueltos.** En módulos ES se
+  puede *leer* lo que otro módulo exporta pero no se le puede asignar: `state.activeDomainId = "x"`
+  vale desde cualquier sitio, `vistaActiva = "roadmap"` no compila. Los valores sueltos que de
+  verdad cambian se quedan en el módulo que los gobierna y salen por una función de lectura.
+- **Lo que necesite repintar, que lo reciba inyectado.** `app/preferencias.js` no importa
+  `renderAll`: se lo pasan una vez al arrancar. Importarlo crearía un ciclo con el orquestador de
+  vistas, y un ciclo que hoy funciona por cómo se *hoistean* las funciones es una trampa para quien
+  lo toque mañana.
+
+**Lo que queda** —persistencia, escenario, las cinco vistas y el informe— es la parte donde el
+desenredo pesa más, porque todo cruza con el orquestador de repintado. Cada uno necesitará la misma
+decisión: inyectar el repintado o recibir los datos ya calculados, como se hizo con los radares.
 
 ### La versión va en cada import, y el CI lo comprueba
 
