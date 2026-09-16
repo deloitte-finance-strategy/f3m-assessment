@@ -221,17 +221,33 @@ export const casos = [
   // ----------------------------------------------------------- color de calor
   {
     grupo: "Color del heatmap",
-    nombre: "los cortes de color son los mismos que los de nivel de madurez",
+    nombre: "los cortes de color son los que dice el motor, no unos escritos aparte",
     ejecutar: (t) => {
-      // Si los dos se separan, una celda se pinta de un color y la columna
-      // "Nivel" de al lado dice otra cosa.
+      // Este caso comprobaba que el color cambiaba en 1,5 / 2,5 / 3,5 / 4,5,
+      // con los cortes escritos a mano en los dos lados. Seguia en verde si
+      // alguien movia uno en core/calculo.js: la celda se pintaria de un
+      // color y la columna "Nivel" de al lado diria otra cosa, que es justo
+      // lo que el caso decia estar cubriendo. Ahora se le preguntan al motor.
       const color = (valor) => estiloDeCalor(valor).match(/background:(#[0-9A-Fa-f]{6})/)[1];
 
-      t.igual(color(1.49) === color(1.51), false, "corte en 1,5");
-      t.igual(color(2.49) === color(2.51), false, "corte en 2,5");
-      t.igual(color(3.49) === color(3.51), false, "corte en 3,5");
-      t.igual(color(4.49) === color(4.51), false, "corte en 4,5");
-      t.igual(color(1) === color(1.49), true, "dentro del mismo tramo");
+      // En centesimas para no arrastrar error de coma flotante al sumar.
+      const cortes = [];
+      for (let centesimas = 101; centesimas <= 500; centesimas += 1) {
+        if (getMaturityLevel((centesimas - 1) / 100) !== getMaturityLevel(centesimas / 100)) {
+          cortes.push(centesimas);
+        }
+      }
+
+      t.igual(cortes.length, 4, "el motor reparte el 1-5 en cinco tramos");
+
+      cortes.forEach((centesimas) => {
+        const corte = centesimas / 100;
+        const justoAntes = (centesimas - 1) / 100;
+
+        t.igual(color(justoAntes) === color(corte), false, `corte en ${corte}`);
+      });
+
+      t.igual(color(1) === color((cortes[0] - 1) / 100), true, "dentro del mismo tramo");
     },
   },
   {
