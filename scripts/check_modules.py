@@ -23,8 +23,13 @@ Que comprueba
    sea un global del navegador. Esto es una heuristica —no hay un analizador de
    JavaScript de por medio— y por eso se limpia el codigo de cadenas, plantillas,
    expresiones regulares y comentarios antes de mirar, y solo se avisa de
-   nombres que ALGUN modulo del proyecto declara. Un nombre que no existe en
-   ninguna parte es casi siempre una palabra suelta de un texto en espanol.
+   nombres que ALGUN modulo del proyecto declara A NIVEL DE MODULO. Un nombre
+   que no existe en ninguna parte es casi siempre una palabra suelta de un
+   texto en espanol; uno que solo es local de otra funcion no se puede importar.
+
+   Aqui entran tanto las funciones como las variables de modulo. Las segundas
+   se colaban: se daba por declarado todo lo que apareciera dentro de un
+   `if ( ... ) {`, que tiene la misma forma que una lista de parametros.
 
 Codigo de salida 1 si algo no encaja.
 """
@@ -55,6 +60,12 @@ Symbol Proxy Reflect BigInt process
 # division: todas esperan una expresion detras.
 ANTES_DE_REGEX = set("""
 return typeof instanceof in of case do else yield await delete void new
+""".split())
+
+# Un `( ... ) {` detras de una de estas no es una lista de parametros, es una
+# condicion. Lo que aparezca dentro se usa, no se declara.
+CONTROL_DE_FLUJO = set("""
+if while for switch catch with
 """.split())
 
 PALABRAS = set("""
@@ -186,8 +197,21 @@ def declarados(codigo):
     # firma con un valor por defecto que llama a algo —renderLeverBars(items =
     # getScopedItems(), ...)— no casaba, sus parametros no se daban por
     # declarados, y el comprobador denunciaba un identificador que si existe.
-    for bloque in re.findall(r"\(((?:[^()]|\([^()]*\))*)\)\s*(?:=>|\{)", codigo):
-        nombres |= set(re.findall(r"[A-Za-z_$][\w$]*", bloque))
+    #
+    # Pero un `( ... ) {` no siempre es una firma: `if (...) {`, `while (...) {`
+    # y `switch (...) {` tienen la misma forma. Contarlos daba por DECLARADO
+    # todo lo que apareciera en una condicion, en cualquier modulo. Asi se colo
+    # `if (!guardadosPendientes.size && pendingScenarioWrites === 0)`: app.js
+    # leia una variable que se habia ido a app/persistencia.js, y el
+    # comprobador la daba por suya porque estaba dentro de un if. El navegador
+    # decia ReferenceError y el freno de cierre de pestana estaba muerto.
+    for coincidencia in re.finditer(r"\(((?:[^()]|\([^()]*\))*)\)\s*(?:=>|\{)", codigo):
+        anterior = re.search(r"([A-Za-z_$][\w$]*)\s*$", codigo[:coincidencia.start()])
+
+        if anterior and anterior.group(1) in CONTROL_DE_FLUJO:
+            continue
+
+        nombres |= set(re.findall(r"[A-Za-z_$][\w$]*", coincidencia.group(1)))
 
     for bloque in re.findall(r"(?:const|let|var)\s*[\{\[]([^\}\]]*)[\}\]]", codigo):
         nombres |= set(re.findall(r"[A-Za-z_$][\w$]*", bloque))
@@ -195,8 +219,43 @@ def declarados(codigo):
     for bloque in re.findall(r"catch\s*\(([^)]*)\)", codigo):
         nombres |= set(re.findall(r"[A-Za-z_$][\w$]*", bloque))
 
+    # Del encabezado de un for solo se declara lo que se enlaza. Cogerlo entero
+    # daba por declarado tambien aquello sobre lo que se itera: en
+    # `for (const item of items)`, `items` no se declara ahi.
     for bloque in re.findall(r"for\s*\(([^)]*)\)", codigo):
-        nombres |= set(re.findall(r"[A-Za-z_$][\w$]*", bloque))
+        for enlace in re.findall(
+            r"(?:const|let|var)\s*(\[[^\]]*\]|\{[^}]*\}|[A-Za-z_$][\w$]*)", bloque
+        ):
+            nombres |= set(re.findall(r"[A-Za-z_$][\w$]*", enlace))
+
+    return nombres
+
+
+def declarados_de_modulo(codigo):
+    """Solo lo declarado a nivel de modulo.
+
+    declarados() es deliberadamente ancha: mete parametros y variables de
+    dentro de una funcion, porque su trabajo es no denunciar nada que este a
+    mano. Para decir QUIEN declara un nombre hace falta lo contrario, porque
+    una variable local no se puede importar: atribuirle a un modulo algo que
+    solo vive dentro de una de sus funciones manda a quien lea el aviso a
+    buscar un import que no existiria nunca.
+    """
+    nombres = set()
+    profundidad = 0
+
+    for linea in codigo.splitlines():
+        if profundidad == 0:
+            encaje = re.match(
+                r"\s*(?:export\s+)?(?:async\s+)?"
+                r"(?:const|let|var|function\s*\*?|class)\s+([A-Za-z_$][\w$]*)",
+                linea,
+            )
+
+            if encaje:
+                nombres.add(encaje.group(1))
+
+        profundidad = max(0, profundidad + linea.count("{") - linea.count("}"))
 
     return nombres
 
@@ -271,9 +330,11 @@ def main():
         codigos[ruta] = sin_literales(textos[ruta])
 
     # Quien declara cada nombre, para no avisar de palabras que no son codigo.
+    # Solo cuentan las declaraciones de nivel de modulo: son las unicas que otro
+    # modulo podria importar, asi que son las unicas que explican el aviso.
     declarado_en = {}
     for ruta in rutas:
-        for nombre in declarados(codigos[ruta]):
+        for nombre in declarados_de_modulo(codigos[ruta]):
             declarado_en.setdefault(nombre, ruta)
 
     problemas = []
