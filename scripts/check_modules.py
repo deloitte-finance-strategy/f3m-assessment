@@ -181,7 +181,12 @@ def declarados(codigo):
     nombres |= set(re.findall(r"\bclass\s+([A-Za-z_$][\w$]*)", codigo))
 
     # Parametros y desestructuraciones, aceptados en bloque y sin precision.
-    for bloque in re.findall(r"\(([^()]*)\)\s*(?:=>|\{)", codigo):
+    #
+    # El patron admite un nivel de parentesis dentro de la lista. Sin eso, una
+    # firma con un valor por defecto que llama a algo —renderLeverBars(items =
+    # getScopedItems(), ...)— no casaba, sus parametros no se daban por
+    # declarados, y el comprobador denunciaba un identificador que si existe.
+    for bloque in re.findall(r"\(((?:[^()]|\([^()]*\))*)\)\s*(?:=>|\{)", codigo):
         nombres |= set(re.findall(r"[A-Za-z_$][\w$]*", bloque))
 
     for bloque in re.findall(r"(?:const|let|var)\s*[\{\[]([^\}\]]*)[\}\]]", codigo):
