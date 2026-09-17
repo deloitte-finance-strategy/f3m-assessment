@@ -42,7 +42,6 @@ import {
 } from "./escenario.js?v=11";
 
 
- // NUEVO: mantiene abiertas las capacidades desplegadas del heatmap entre renders
 
 
 let isApplyingRemoteScenario = false;
@@ -55,6 +54,20 @@ let pendingScenarioWrites = 0;
 
 
 let snapshotRemotoPendiente = null;
+
+
+// Para poder cancelar la suscripcion anterior antes de abrir otra. Sin esto,
+// cada reintento de conexion dejaba un listener mas escuchando, y cada snapshot
+// repintaba la aplicacion tantas veces como reintentos hubiera habido.
+//
+// Se perdio al repartir app.js y estuvo fuera hasta hoy. Sin ella,
+// subscribeToSharedScenario() reventaba con un ReferenceError en su primera
+// linea, asi que en un escenario compartido la suscripcion no llegaba a abrirse
+// NUNCA: se subia lo propio y no bajaba nada del resto del equipo.
+//
+// check_modules.py no lo vio porque solo avisa de nombres que ALGUN modulo
+// declara, y este no lo declaraba ninguno.
+let cancelarSuscripcionRemota = null;
 
 
 // getScenarioTimestamp / isScenarioNewer se han retirado: comparar marcas de tiempo
