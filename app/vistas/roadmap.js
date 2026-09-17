@@ -7,16 +7,16 @@
  * hayGuardadosPendientes() para frenar el cierre.
  */
 
-import { ordenarPorPrioridadYGap } from "../../core/calculo.js?v=11";
-import { LIMITES_DE_TEXTO, recortarAlLimite } from "../../core/escenario.js?v=11";
-import { escapeAttr, escapeHtml, formatNumber } from "../../core/presentacion.js?v=11";
-import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=11";
-import { STATUS_OPTIONS, els, state } from "../estado.js?v=11";
-import { getVisibleItems } from "../filtros.js?v=11";
-import { getUsuarioActual } from "../identidad.js?v=11";
-import { calculate } from "../metricas.js?v=11";
-import { persistItemChange } from "../persistencia.js?v=11";
-import { getAiDataForItem } from "../subcapacidad.js?v=11";
+import { ordenarPorPrioridadYGap } from "../../core/calculo.js?v=12";
+import { LIMITES_DE_TEXTO, recortarAlLimite } from "../../core/escenario.js?v=12";
+import { escapeAttr, escapeHtml, formatNumber } from "../../core/presentacion.js?v=12";
+import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=12";
+import { STATUS_OPTIONS, els, state } from "../estado.js?v=12";
+import { getVisibleItems } from "../filtros.js?v=12";
+import { getUsuarioActual } from "../identidad.js?v=12";
+import { calculate } from "../metricas.js?v=12";
+import { persistItemChange } from "../persistencia.js?v=12";
+import { getAiDataForItem } from "../subcapacidad.js?v=12";
 import { get } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
 
