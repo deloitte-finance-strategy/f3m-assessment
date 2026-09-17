@@ -31,6 +31,22 @@ Que comprueba
    se colaban: se daba por declarado todo lo que apareciera dentro de un
    `if ( ... ) {`, que tiene la misma forma que una lista de parametros.
 
+3. Que no se asigne a un nombre que no declara NADIE. Esto cierra el hueco que
+   deja la comprobacion anterior, y no es un hueco cualquiera: por el se colo un
+   ReferenceError hasta produccion.
+
+   Fue `cancelarSuscripcionRemota`, que se quedo fuera al sacar la persistencia
+   de app.js. Se usaba en cinco sitios de app/persistencia.js y no la declaraba
+   ya ningun modulo, asi que para la comprobacion 2 era una palabra suelta mas y
+   pasaba en verde. En el navegador, `subscribeToSharedScenario()` reventaba en
+   su primera linea y la suscripcion al escenario compartido no se abria nunca:
+   se subia lo propio y no bajaba nada del resto del equipo.
+
+   El criterio es la ASIGNACION y no el uso, y ahi esta lo que lo hace fiable.
+   Leer un nombre libre puede ser ruido; escribir en el es codigo siempre. Por
+   eso esta comprobacion si puede hablar de nombres que no existen en ninguna
+   parte, que es justo lo que la 2 tiene que callarse.
+
 Codigo de salida 1 si algo no encaja.
 """
 
@@ -308,6 +324,38 @@ def usados(codigo):
     return set(re.findall(r"\b[A-Za-z_$][\w$]*\b", sin))
 
 
+def asignados(codigo):
+    r"""Nombres a los que se ASIGNA algo siendo una referencia libre.
+
+    Es la firma de una declaracion perdida. La comprobacion 2 mira los USOS, y
+    tiene que callarse ante un nombre que no declara nadie porque no puede
+    distinguirlo del ruido. Una asignacion no tiene esa ambiguedad: escribir en
+    un nombre libre es codigo siempre, nunca una palabra que se ha colado.
+
+    Los cuatro detalles que hacen que esto no denuncie cosas sanas:
+
+    - `(?<![.\w$])` deja fuera `obj.prop = 1`, que asigna a una propiedad y no
+      a una variable.
+    - `=(?![=>])` distingue la asignacion de `===`, `==` y de la flecha de una
+      funcion: `fn = (a) => a` asigna, y `a => a` no.
+    - `!=`, `<=` y `>=` no casan solos, porque delante del `=` hay un caracter
+      que no es parte del nombre ni espacio.
+    - Los parametros con valor por defecto, `function f(a = 1)`, si casan, pero
+      `declarados()` ya los da por declarados y por eso no llegan al aviso.
+
+    El incremento va en su forma sufija, `a++`, que es la unica que usa el
+    proyecto. Un campo de clase (`class X { campo = 0 }`) si seria un falso
+    positivo, pero aqui no hay ni una sola clase; si algun dia la hay, este es
+    el sitio donde mirar.
+    """
+    patron = (
+        r"(?<![.\w$])([A-Za-z_$][\w$]*)\s*"
+        r"(?:=(?![=>])|[+\-*/%&|^]=|\+\+|--)"
+    )
+
+    return set(re.findall(patron, codigo))
+
+
 def archivos():
     for nombre in SUELTOS:
         ruta = RAIZ / nombre
@@ -371,6 +419,18 @@ def main():
                 donde = declarado_en[nombre].relative_to(RAIZ).as_posix()
                 problemas.append(
                     f"{relativa}: usa '{nombre}' sin importarlo (lo declara {donde})"
+                )
+
+        # --- 3. ninguna asignacion a un nombre que no declara nadie
+        #
+        # Lo que la 2 no puede decir. Alli un nombre que no declara ningun
+        # modulo se deja pasar a proposito, porque no hay con que separarlo del
+        # ruido; aqui lo separa la propia asignacion.
+        for nombre in sorted(asignados(codigos[ruta]) - locales - GLOBALES - PALABRAS):
+            if nombre not in declarado_en:
+                problemas.append(
+                    f"{relativa}: asigna '{nombre}', que no declara nadie "
+                    f"(declaracion perdida: en un modulo ES es un ReferenceError)"
                 )
 
     print(f"Modulos revisados: {len(rutas)}")
