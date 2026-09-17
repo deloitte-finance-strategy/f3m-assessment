@@ -11,16 +11,16 @@
  * getUsuarioActual(), que ademas deja claro que puede ser null.
  */
 
-import { NOMBRE_STORAGE_KEY, els } from "./estado.js?v=11";
+import { NOMBRE_STORAGE_KEY, els } from "./estado.js?v=12";
 import {
   borrarDeAlmacenamiento,
   escribirAlmacenamiento,
   leerAlmacenamiento,
-} from "./almacenamiento.js?v=11";
-import { abrirDialogo, showNotice } from "./avisos.js?v=11";
-import { conLimiteDeEspera, firebaseAuth, scenarioDatabaseRef } from "./firebase.js?v=11";
-import { marcarFalloDeSincronia } from "./indicador.js?v=11";
-import { repintarTodo } from "./repintado.js?v=11";
+} from "./almacenamiento.js?v=12";
+import { abrirDialogo, showNotice } from "./avisos.js?v=12";
+import { conLimiteDeEspera, firebaseAuth, scenarioDatabaseRef } from "./firebase.js?v=12";
+import { marcarFalloDeSincronia } from "./indicador.js?v=12";
+import { repintarTodo } from "./repintado.js?v=12";
 import { onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 

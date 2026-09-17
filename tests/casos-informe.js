@@ -13,9 +13,9 @@
  *   que escribe el usuario llega sin escapar.
  */
 
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=11";
-import { deTantas, paginar } from "../informe/secciones.js?v=11";
-import { resumenDeDesbordes } from "../informe/desbordes.js?v=11";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=12";
+import { deTantas, paginar } from "../informe/secciones.js?v=12";
+import { resumenDeDesbordes } from "../informe/desbordes.js?v=12";
 
 
 /** Una subcapacidad y sus metricas, lo minimo que el informe necesita. */

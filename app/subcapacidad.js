@@ -9,7 +9,7 @@
  * texto o como lista: toList() acepta las dos formas y devuelve siempre una.
  */
 
-import { CASOS_DE_IA } from "./estado.js?v=11";
+import { CASOS_DE_IA } from "./estado.js?v=12";
 
 
 

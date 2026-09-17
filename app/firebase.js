@@ -16,8 +16,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/fireba
 import { getDatabase, ref } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
-import { scenarioId } from "./estado.js?v=11";
-import { borrarDeAlmacenamiento } from "./almacenamiento.js?v=11";
+import { scenarioId } from "./estado.js?v=12";
+import { borrarDeAlmacenamiento } from "./almacenamiento.js?v=12";
 
 
 // Configuración de Firebase del proyecto fpa-assessment-mvp

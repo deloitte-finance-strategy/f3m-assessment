@@ -6,15 +6,15 @@
  * son valores simples.
  */
 
-import { casos as casosDeCalculo } from "./casos-calculo.js?v=11";
-import { casos as casosDeEscenario } from "./casos-escenario.js?v=11";
-import { casos as casosDeReglas } from "./casos-reglas.js?v=11";
-import { casos as casosDePresentacion } from "./casos-presentacion.js?v=11";
-import { casos as casosDeGraficos } from "./casos-graficos.js?v=11";
-import { casos as casosDeObjetivos } from "./casos-objetivos.js?v=11";
-import { casos as casosDeCoincidencias } from "./casos-coincidencias.js?v=11";
-import { casos as casosDeExportacion } from "./casos-exportacion.js?v=11";
-import { casos as casosDeInforme } from "./casos-informe.js?v=11";
+import { casos as casosDeCalculo } from "./casos-calculo.js?v=12";
+import { casos as casosDeEscenario } from "./casos-escenario.js?v=12";
+import { casos as casosDeReglas } from "./casos-reglas.js?v=12";
+import { casos as casosDePresentacion } from "./casos-presentacion.js?v=12";
+import { casos as casosDeGraficos } from "./casos-graficos.js?v=12";
+import { casos as casosDeObjetivos } from "./casos-objetivos.js?v=12";
+import { casos as casosDeCoincidencias } from "./casos-coincidencias.js?v=12";
+import { casos as casosDeExportacion } from "./casos-exportacion.js?v=12";
+import { casos as casosDeInforme } from "./casos-informe.js?v=12";
 
 
 /** Todos los casos, en el orden en que se quieren leer. */

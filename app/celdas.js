@@ -12,15 +12,15 @@
  * empiezan a decir cosas distintas con los mismos datos.
  */
 
-import { average } from "../core/calculo.js?v=11";
+import { average } from "../core/calculo.js?v=12";
 import {
   escapeAttr,
   escapeHtml,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=11";
-import { LEVERS, els, state } from "./estado.js?v=11";
-import { getScopedItems } from "./filtros.js?v=11";
+} from "../core/presentacion.js?v=12";
+import { LEVERS, els, state } from "./estado.js?v=12";
+import { getScopedItems } from "./filtros.js?v=12";
 
 
 export function buildFilteredEmptyState() {
