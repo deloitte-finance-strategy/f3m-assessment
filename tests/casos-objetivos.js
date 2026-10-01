@@ -9,7 +9,7 @@ import {
   createDefaultTargets,
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "../core/objetivos.js?v=12";
+} from "../core/objetivos.js?v=13";
 
 
 const ITEMS = [
@@ -172,6 +172,72 @@ export const casos = [
       t.igual(cumplimiento.procesos, 4);
       t.igual(cumplimiento.tecnologia, 4);
       t.igual(cumplimiento.organizacion, 4);
+    },
+  },
+
+  // ------------------------------------------------ capacidades renombradas
+  {
+    grupo: "Capacidades renombradas",
+    nombre: "un objetivo guardado con el nombre antiguo pasa al nuevo",
+    ejecutar: (t) => {
+      // Tesoreria: "Contabilidad y provision fiscal" pasa a llamarse "Control
+      // y tratamiento contable". Sin la traduccion, el objetivo ajustado en un
+      // taller volvia al 4 por defecto sin decir nada.
+      const tesoreria = [
+        { id: "tesoreria-1-1", capacidad: "Control y tratamiento contable" },
+        { id: "tesoreria-2-1", capacidad: "Inversiones" },
+      ];
+
+      const targets = normalizeDomainTargets(tesoreria, [
+        { capacidad: "Contabilidad y provisión fiscal", procesos: 2, tecnologia: 3, organizacion: 5 },
+      ]);
+
+      t.igual(targets["Control y tratamiento contable"].procesos, 2);
+      t.igual(targets["Control y tratamiento contable"].tecnologia, 3);
+      t.igual(targets["Control y tratamiento contable"].organizacion, 5);
+      t.igual(targets["Contabilidad y provisión fiscal"], undefined, "no reaparece el nombre viejo");
+    },
+  },
+  {
+    grupo: "Capacidades renombradas",
+    nombre: "donde el nombre antiguo sigue existiendo, no se traduce",
+    ejecutar: (t) => {
+      // Fiscal conserva "Contabilidad y provision fiscal": su objetivo es suyo.
+      const targets = normalizeDomainTargets(ITEMS, [
+        { capacidad: "Contabilidad y provisión fiscal", procesos: 1 },
+      ]);
+
+      t.igual(targets["Contabilidad y provisión fiscal"].procesos, 1);
+      t.igual(targets["Control y tratamiento contable"], undefined);
+    },
+  },
+  {
+    grupo: "Capacidades renombradas",
+    nombre: "si vienen los dos nombres, gana el vigente",
+    ejecutar: (t) => {
+      const tesoreria = [{ id: "tesoreria-1-1", capacidad: "Control y tratamiento contable" }];
+
+      const targets = normalizeDomainTargets(tesoreria, [
+        { capacidad: "Control y tratamiento contable", procesos: 3 },
+        { capacidad: "Contabilidad y provisión fiscal", procesos: 1 },
+      ]);
+
+      t.igual(targets["Control y tratamiento contable"].procesos, 3);
+    },
+  },
+  {
+    grupo: "Capacidades renombradas",
+    nombre: "hacia Firebase sale ya con el nombre nuevo",
+    ejecutar: (t) => {
+      const tesoreria = [{ id: "tesoreria-1-1", capacidad: "Control y tratamiento contable" }];
+
+      const lista = serializeTargetsForFirebase(tesoreria, [
+        { capacidad: "Contabilidad y provisión fiscal", procesos: 2 },
+      ]);
+
+      t.igual(lista.length, 1);
+      t.igual(lista[0].capacidad, "Control y tratamiento contable");
+      t.igual(lista[0].procesos, 2);
     },
   },
 ];

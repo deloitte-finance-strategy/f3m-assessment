@@ -19,7 +19,7 @@ import {
   normalizarEstado,
   recortarAlLimite,
   revisarEscenario,
-} from "../core/escenario.js?v=12";
+} from "../core/escenario.js?v=13";
 
 
 /** Serializador de objetivos de mentira: aqui solo importa que se le llame. */

@@ -8,13 +8,15 @@
  */
 
 import {
+  capacidadVigente,
   findMatchingScenarioItem,
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
   normalizeMatchKey,
+  subcapacidadVigente,
   toSavedItemsArray,
-} from "../core/coincidencias.js?v=12";
+} from "../core/coincidencias.js?v=13";
 
 
 const CARGADOS = [
@@ -199,4 +201,57 @@ export const casos = [
       t.igual(findMatchingScenarioItem(CARGADOS, { id: "inventado-9-9" }), undefined);
     },
   },
+
+  // ------------------------------------------------ capacidades renombradas
+  {
+    grupo: "Capacidades renombradas",
+    nombre: "una subcapacidad guardada sin id con los dos nombres antiguos se reconoce",
+    ejecutar: (t) => {
+      // En Tesoreria cambiaron a la vez la capacidad y su subcapacidad 1.1: un
+      // escenario de antes de los ids las trae las dos con el nombre viejo.
+      const tesoreria = [
+        { id: "tesoreria-1-1", capacidad: "Control y tratamiento contable", subcapacidad: "1.1 Gobierno del tratamiento contable de operaciones de tesorería" },
+        { id: "tesoreria-1-2", capacidad: "Control y tratamiento contable", subcapacidad: "1.2 Registro, conciliación y devengo de intereses y comisiones" },
+      ];
+
+      const encontrado = findMatchingScenarioItem(tesoreria, {
+        capacidad: "Contabilidad y provisión fiscal",
+        subcapacidad: "1.1 Gobierno contable-fiscal de operaciones de tesorería",
+      });
+
+      t.igual(encontrado?.id, "tesoreria-1-1", "los dos nombres antiguos");
+
+      const soloLaCapacidad = findMatchingScenarioItem(tesoreria, {
+        capacidad: "Contabilidad y provisión fiscal",
+        subcapacidad: "1.2 Registro, conciliación y devengo de intereses y comisiones",
+      });
+
+      t.igual(soloLaCapacidad?.id, "tesoreria-1-2", "solo la capacidad con el nombre antiguo");
+    },
+  },
+  {
+    grupo: "Capacidades renombradas",
+    nombre: "la subcapacidad antigua se traduce solo donde ya no existe",
+    ejecutar: (t) => {
+      const antigua = "1.1 Gobierno contable-fiscal de operaciones de tesorería";
+      const nueva = "1.1 Gobierno del tratamiento contable de operaciones de tesorería";
+
+      t.igual(subcapacidadVigente(antigua, [nueva]), nueva, "Tesoreria");
+      t.igual(subcapacidadVigente(antigua, [antigua, nueva]), antigua, "si sigue existiendo, es ella");
+      t.igual(subcapacidadVigente(antigua, ["1.1 Cálculo del impuesto"]), undefined, "en otro dominio no es nada");
+    },
+  },
+  {
+    grupo: "Capacidades renombradas",
+    nombre: "el nombre antiguo se queda en su sitio donde sigue existiendo",
+    ejecutar: (t) => {
+      const cargadas = ["Contabilidad y provisión fiscal", "Cumplimiento"];
+
+      t.igual(capacidadVigente("CONTABILIDAD Y PROVISION FISCAL", cargadas), "Contabilidad y provisión fiscal", "Fiscal");
+      t.igual(capacidadVigente("Contabilidad y provisión fiscal", ["Control y tratamiento contable"]), "Control y tratamiento contable", "Tesoreria");
+      t.igual(capacidadVigente("Contabilidad y provisión fiscal", ["Inversiones"]), undefined, "en otro dominio no es nada");
+      t.igual(capacidadVigente("", cargadas), undefined, "sin nombre");
+    },
+  },
 ];
+

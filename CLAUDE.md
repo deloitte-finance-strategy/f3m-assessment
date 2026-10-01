@@ -33,14 +33,14 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 879 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 899 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.401 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.452 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 159 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 332 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 253 |
-| `app/graficos.js` | Los seis radares de Chart.js | 570 |
+| `app/graficos.js` | Los seis radares de Chart.js, y a dónde lleva pulsar sus ejes | 674 |
 | `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 184 |
 | `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 427 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
@@ -61,8 +61,8 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 408 |
 | `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.421 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
-| `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 127 |
-| `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 166 |
+| `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
+| `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 509 |
 | `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
 | `core/presentacion.js` | Escapado, formato de números y colores de marca | 105 |
@@ -215,6 +215,14 @@ Consecuencia práctica: si algo depende de medir un elemento oculto, hay que hac
 Es lo que hace `conElDashboardVisible()` para capturar los radares del PDF — un canvas oculto no
 tiene tamaño y saldría en blanco.
 
+Los radares van **justo debajo de las cuatro tarjetas**, en el Overview y en el Dashboard: son lo
+primero que se enseña en un taller. Y **sus ejes se pulsan**: un dominio del Overview abre su
+Dashboard, y una capacidad del Dashboard abre el Heatmap con ella desplegada. A la capacidad no se
+la lleva filtrando el Assessment a propósito: un filtro puesto sin querer cambia después KPIs,
+roadmap, CSV y PDF. Chart.js no tiene eventos para las etiquetas del radar, así que
+`ejeBajoElPuntero()` en `app/graficos.js` mira la caja de cada una con `getPointLabelPosition()`. A
+dónde se va lo decide `setupNavegacionDeRadares()` en `app.js`, que se lo inyecta a los radares.
+
 Añadir una vista son cinco sitios: `VISTAS` y `cacheElements()` en `app.js`, un `<a>` en
 `<nav class="tabs">`, una `<section id>` en `index.html`, y su rama en `renderAll()`.
 
@@ -236,8 +244,13 @@ nota de ámbito lo dice en pantalla para que el descuadre con el Dashboard no se
 
 `getCapabilityTargets(capacidad, domainId)` y `calculate(item, domainId)` reciben el dominio, con el
 activo por defecto. Antes solo miraban el abierto en el conmutador, y eso daba gaps equivocados para
-los otros ocho: **"Contabilidad y provisión fiscal" existe en Fiscal y en Tesorería** y no tienen por
-qué compartir objetivo. La caché de objetivos va indexada por la pareja dominio + capacidad.
+los otros ocho: **un mismo nombre de capacidad puede existir en dos dominios** y no tienen por qué
+compartir objetivo. La caché de objetivos va indexada por la pareja dominio + capacidad.
+
+Hoy ningún nombre se repite —el caso real era "Contabilidad y provisión fiscal", en Fiscal y en
+Tesorería, hasta que la de Tesorería pasó a llamarse "Control y tratamiento contable"—, pero la
+resolución por dominio se queda: los datos salen de nueve Excel que mantienen personas distintas, y
+nada impide que dos vuelvan a coincidir. La cubren las pruebas de `core/`.
 
 Cuidado al pasar cualquiera de las dos a un `map()`: su segundo argumento es el dominio, y `map`
 pasa el índice. Por eso `agregarPorCapacidad()` las envuelve en lambdas, y el motor también
@@ -453,6 +466,33 @@ Un título que se renombre en un sitio y no en el otro no rompe nada visiblement
 con el título solo, sin etiquetas ni frase, y eso no se distingue de un caso sin clasificar. Por eso
 `check_domains_sync.py` cruza las dos listas en las dos direcciones y pone el CI en rojo.
 
+## Renombrar una capacidad o una subcapacidad
+
+El nombre de la capacidad **es la clave** de sus objetivos guardados (en Firebase, en la copia local
+y en los JSON exportados), y la red de las subcapacidades guardadas sin id. Cambiarlo solo en el
+Excel no rompe nada a la vista: los objetivos que el equipo hubiera ajustado vuelven al de por
+defecto, en silencio, y el gap cambia.
+
+Por eso un renombrado son tres pasos:
+
+1. El Excel del dominio, en **todas** las hojas donde aparece (Assessment, Resumen, Heatmap,
+   Roadmap, AI Overlay, Instrucciones y la caché del gráfico). Si se edita con `openpyxl`, ojo:
+   **descarta los gráficos al guardar**. El de Tesorería se cambió sustituyendo el texto dentro del
+   `.xlsx` (`xl/sharedStrings.xml` y `xl/charts/chart1.xml`), que no toca nada más.
+2. `python scripts/convert_domains.py`, y comprobar que el diff de `data/domains/` es solo ese nombre.
+3. Una entrada en `CAPACIDADES_RENOMBRADAS`, en `core/coincidencias.js`, con el nombre que tenía.
+   `capacidadVigente()` traduce el antiguo al nuevo **solo** si el antiguo ya no existe en el dominio
+   y el nuevo sí, así que no hace falta que la entrada sepa de qué dominio es para no equivocarse.
+
+**Una subcapacidad** se renombra igual, con su entrada en `SUBCAPACIDADES_RENOMBRADAS`. Ahí el nombre
+pesa menos: lo guardado se reconoce por el id, y el id sale del prefijo «1.1» del nombre
+(`make_id()` en `scripts/convert_domains.py`), así que **el prefijo no se toca**. La entrada es la
+red de los escenarios anteriores a los ids.
+
+Al sustituir textos dentro del `.xlsx`, ojo: Excel guarda cada cadena **una sola vez** en
+`xl/sharedStrings.xml`, y la comparten todas las celdas que dicen lo mismo. Antes de cambiar una hay
+que mirar qué celdas apuntan a ella, o el cambio se cuela en otra subcapacidad.
+
 ## Añadir un dominio nuevo
 
 **Un solo sitio**: una entrada en `data/domains.json`, con `id`, `label`, `title`, `group`, `source`
@@ -546,10 +586,13 @@ resto se comprueba a mano:
    a exportar: el aviso dice si alguna se recorta y cuál va más justa. Hacerlo también sobre
    **Controlling**, que con 24 subcapacidades es el dominio que aprieta.
 8. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
-   la fila de Fiscal. Tesorería tiene una capacidad con el mismo nombre y no debe moverse.
-9. Cambiar de dominio y confirmar que los datos se recargan.
-10. Recargar la página y confirmar que el escenario persiste.
-11. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
+   la fila de Fiscal.
+9. **Los radares se pulsan.** En el Overview, pulsar el nombre de un dominio abre su Dashboard. En el
+   Dashboard, pulsar el nombre de una capacidad abre el Heatmap con ella desplegada y a la vista,
+   **sin tocar los filtros**. El cursor cambia a mano solo encima de un nombre o de un vértice.
+10. Cambiar de dominio y confirmar que los datos se recargan.
+11. Recargar la página y confirmar que el escenario persiste.
+12. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
    uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
    guardado se pone **rojo**.
 
@@ -570,10 +613,12 @@ extracción del informe PDF no cambiaban ningún número.
 **Si el cambio toca los objetivos, puntuar no basta.** Los nueve JSON vienen sin `targets` y con
 `meta.targetMaturity` a 4, así que con los valores por defecto todos los caminos dan el mismo
 número y el A/B saldría idéntico aunque el cambio estuviera mal. Hay que **editar objetivos por
-capacidad en al menos dos dominios**, con valores distintos entre sí —Fiscal y Tesorería tienen una
-capacidad con el mismo nombre, "Contabilidad y provisión fiscal", y son el par que de verdad pone a
-prueba la resolución por dominio—, guardar una copia con **Escenario → Guardar una copia**, abrirla
-en la versión antigua y comparar entonces.
+capacidad en al menos dos dominios**, con valores distintos entre sí, guardar una copia con
+**Escenario → Guardar una copia**, abrirla en la versión antigua y comparar entonces.
+
+Ya no hay en los datos un par de dominios con una capacidad del mismo nombre —era Fiscal y Tesorería
+con "Contabilidad y provisión fiscal", hasta el cambio de nombre en Tesorería—, así que el A/B no
+pone a prueba la resolución por dominio. Eso queda en `tests/casos-calculo.js`.
 
 La forma cómoda de comparar es recorrer los nueve dominios en las dos versiones y quedarse con un
 hash del texto de las vistas, en lugar de mirar tabla por tabla: si los hashes coinciden, no se ha
