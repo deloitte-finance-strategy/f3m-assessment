@@ -14,6 +14,7 @@ import {
   getSavedScore,
   getScenarioItemsFromPayload,
   normalizeMatchKey,
+  subcapacidadVigente,
   toSavedItemsArray,
 } from "../core/coincidencias.js?v=13";
 
@@ -204,11 +205,13 @@ export const casos = [
   // ------------------------------------------------ capacidades renombradas
   {
     grupo: "Capacidades renombradas",
-    nombre: "una subcapacidad guardada sin id con el nombre antiguo se reconoce",
+    nombre: "una subcapacidad guardada sin id con los dos nombres antiguos se reconoce",
     ejecutar: (t) => {
+      // En Tesoreria cambiaron a la vez la capacidad y su subcapacidad 1.1: un
+      // escenario de antes de los ids las trae las dos con el nombre viejo.
       const tesoreria = [
-        { id: "tesoreria-1-1", capacidad: "Control y tratamiento contable", subcapacidad: "1.1 Gobierno contable-fiscal de operaciones de tesorería" },
-        { id: "tesoreria-2-1", capacidad: "Inversiones", subcapacidad: "2.1 Política de inversiones" },
+        { id: "tesoreria-1-1", capacidad: "Control y tratamiento contable", subcapacidad: "1.1 Gobierno del tratamiento contable de operaciones de tesorería" },
+        { id: "tesoreria-1-2", capacidad: "Control y tratamiento contable", subcapacidad: "1.2 Registro, conciliación y devengo de intereses y comisiones" },
       ];
 
       const encontrado = findMatchingScenarioItem(tesoreria, {
@@ -216,7 +219,26 @@ export const casos = [
         subcapacidad: "1.1 Gobierno contable-fiscal de operaciones de tesorería",
       });
 
-      t.igual(encontrado?.id, "tesoreria-1-1");
+      t.igual(encontrado?.id, "tesoreria-1-1", "los dos nombres antiguos");
+
+      const soloLaCapacidad = findMatchingScenarioItem(tesoreria, {
+        capacidad: "Contabilidad y provisión fiscal",
+        subcapacidad: "1.2 Registro, conciliación y devengo de intereses y comisiones",
+      });
+
+      t.igual(soloLaCapacidad?.id, "tesoreria-1-2", "solo la capacidad con el nombre antiguo");
+    },
+  },
+  {
+    grupo: "Capacidades renombradas",
+    nombre: "la subcapacidad antigua se traduce solo donde ya no existe",
+    ejecutar: (t) => {
+      const antigua = "1.1 Gobierno contable-fiscal de operaciones de tesorería";
+      const nueva = "1.1 Gobierno del tratamiento contable de operaciones de tesorería";
+
+      t.igual(subcapacidadVigente(antigua, [nueva]), nueva, "Tesoreria");
+      t.igual(subcapacidadVigente(antigua, [antigua, nueva]), antigua, "si sigue existiendo, es ella");
+      t.igual(subcapacidadVigente(antigua, ["1.1 Cálculo del impuesto"]), undefined, "en otro dominio no es nada");
     },
   },
   {

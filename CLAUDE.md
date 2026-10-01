@@ -62,7 +62,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.421 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
-| `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 231 |
+| `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 509 |
 | `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
 | `core/presentacion.js` | Escapado, formato de números y colores de marca | 105 |
@@ -466,7 +466,7 @@ Un título que se renombre en un sitio y no en el otro no rompe nada visiblement
 con el título solo, sin etiquetas ni frase, y eso no se distingue de un caso sin clasificar. Por eso
 `check_domains_sync.py` cruza las dos listas en las dos direcciones y pone el CI en rojo.
 
-## Renombrar una capacidad
+## Renombrar una capacidad o una subcapacidad
 
 El nombre de la capacidad **es la clave** de sus objetivos guardados (en Firebase, en la copia local
 y en los JSON exportados), y la red de las subcapacidades guardadas sin id. Cambiarlo solo en el
@@ -483,6 +483,15 @@ Por eso un renombrado son tres pasos:
 3. Una entrada en `CAPACIDADES_RENOMBRADAS`, en `core/coincidencias.js`, con el nombre que tenía.
    `capacidadVigente()` traduce el antiguo al nuevo **solo** si el antiguo ya no existe en el dominio
    y el nuevo sí, así que no hace falta que la entrada sepa de qué dominio es para no equivocarse.
+
+**Una subcapacidad** se renombra igual, con su entrada en `SUBCAPACIDADES_RENOMBRADAS`. Ahí el nombre
+pesa menos: lo guardado se reconoce por el id, y el id sale del prefijo «1.1» del nombre
+(`make_id()` en `scripts/convert_domains.py`), así que **el prefijo no se toca**. La entrada es la
+red de los escenarios anteriores a los ids.
+
+Al sustituir textos dentro del `.xlsx`, ojo: Excel guarda cada cadena **una sola vez** en
+`xl/sharedStrings.xml`, y la comparten todas las celdas que dicen lo mismo. Antes de cambiar una hay
+que mirar qué celdas apuntan a ella, o el cambio se cuela en otra subcapacidad.
 
 ## Añadir un dominio nuevo
 

@@ -52,31 +52,45 @@ export const CAPACIDADES_RENOMBRADAS = [
 
 
 /**
- * El nombre, de entre las capacidades cargadas, que corresponde a uno guardado.
- *
- * Devuelve el nombre tal como esta cargado, o undefined si no corresponde a
- * ninguna: ni por su nombre, ni por el nombre que tuvo.
+ * Lo mismo para las subcapacidades, con una diferencia: aqui el nombre solo es
+ * la red de las guardadas SIN id. Las que tienen id —todo lo guardado desde que
+ * existen— se reconocen por el, y el id sale del prefijo "1.1" del nombre en
+ * scripts/convert_domains.py: renombrar sin tocar ese prefijo no lo cambia.
  */
-export function capacidadVigente(nombreGuardado, capacidadesCargadas) {
+export const SUBCAPACIDADES_RENOMBRADAS = [
+  {
+    dominio: "tesoreria",
+    antes: "1.1 Gobierno contable-fiscal de operaciones de tesorería",
+    ahora: "1.1 Gobierno del tratamiento contable de operaciones de tesorería",
+  },
+];
+
+
+/**
+ * El nombre, de entre los cargados, que corresponde a uno guardado: por su
+ * nombre, o por el que tuvo segun `renombrados`. Devuelve el nombre tal como
+ * esta cargado, o undefined si no corresponde a ninguno.
+ */
+function nombreVigente(nombreGuardado, nombresCargados, renombrados) {
   const clave = normalizeMatchKey(nombreGuardado);
 
-  if (!clave || !Array.isArray(capacidadesCargadas)) {
+  if (!clave || !Array.isArray(nombresCargados)) {
     return undefined;
   }
 
-  const buscar = (claveBuscada) => capacidadesCargadas.find(
-    (capacidad) => normalizeMatchKey(capacidad) === claveBuscada,
+  const buscar = (claveBuscada) => nombresCargados.find(
+    (nombre) => normalizeMatchKey(nombre) === claveBuscada,
   );
 
-  const exacta = buscar(clave);
+  const exacto = buscar(clave);
 
-  if (exacta !== undefined) {
-    return exacta;
+  if (exacto !== undefined) {
+    return exacto;
   }
 
-  for (const renombrada of CAPACIDADES_RENOMBRADAS) {
-    if (normalizeMatchKey(renombrada.antes) === clave) {
-      const actual = buscar(normalizeMatchKey(renombrada.ahora));
+  for (const renombrado of renombrados) {
+    if (normalizeMatchKey(renombrado.antes) === clave) {
+      const actual = buscar(normalizeMatchKey(renombrado.ahora));
 
       if (actual !== undefined) {
         return actual;
@@ -85,6 +99,16 @@ export function capacidadVigente(nombreGuardado, capacidadesCargadas) {
   }
 
   return undefined;
+}
+
+
+export function capacidadVigente(nombreGuardado, capacidadesCargadas) {
+  return nombreVigente(nombreGuardado, capacidadesCargadas, CAPACIDADES_RENOMBRADAS);
+}
+
+
+export function subcapacidadVigente(nombreGuardado, subcapacidadesCargadas) {
+  return nombreVigente(nombreGuardado, subcapacidadesCargadas, SUBCAPACIDADES_RENOMBRADAS);
 }
 
 
@@ -218,14 +242,18 @@ export function findMatchingScenarioItem(items, savedItem) {
     return undefined;
   }
 
-  // La capacidad pudo guardarse con un nombre que ya no tiene: se traduce al
-  // vigente antes de comparar (ver CAPACIDADES_RENOMBRADAS).
+  // Las dos pudieron guardarse con un nombre que ya no tienen: se traducen al
+  // vigente antes de comparar (ver CAPACIDADES_RENOMBRADAS y su hermana).
   const capacidadActual = normalizeMatchKey(
     capacidadVigente(savedCapability, items.map((item) => item.capacidad)) ?? savedCapability,
   );
 
+  const subcapacidadActual = normalizeMatchKey(
+    subcapacidadVigente(savedSubcapability, items.map((item) => item.subcapacidad)) ?? savedSubcapability,
+  );
+
   return items.find((item) => (
     normalizeMatchKey(item.capacidad) === capacidadActual &&
-    normalizeMatchKey(item.subcapacidad) === savedSubcapability
+    normalizeMatchKey(item.subcapacidad) === subcapacidadActual
   ));
 }
