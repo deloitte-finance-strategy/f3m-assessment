@@ -10,27 +10,28 @@
  * decia "no se pudo cargar el JSON de datos" con los otros ocho perfectos.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=13";
-import { normalizarItemCargado } from "../core/escenario.js?v=13";
-import { normalizeDomainTargets } from "../core/objetivos.js?v=13";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=13";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=14";
+import { normalizarItemCargado } from "../core/escenario.js?v=14";
+import { normalizeDomainTargets } from "../core/objetivos.js?v=14";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=14";
 
 import {
   CASOS_DE_IA,
   CASOS_DE_IA_URL,
   CATALOGO_URL,
   DOMAINS,
+  ETIQUETAS_DE_CASOS,
   GRUPOS_DE_DOMINIO,
   LEVERS,
   els,
   expandedHeatmapCapabilities,
   state,
   syncActiveDomainState,
-} from "./estado.js?v=13";
+} from "./estado.js?v=14";
 
-import { comportamientoDeDesplazamiento } from "./preferencias.js?v=13";
-import { repintarTodo } from "./repintado.js?v=13";
-import { populateCapacityFilter } from "./filtros.js?v=13";
+import { comportamientoDeDesplazamiento } from "./preferencias.js?v=14";
+import { repintarTodo } from "./repintado.js?v=14";
+import { populateCapacityFilter } from "./filtros.js?v=14";
 
 
 /**
@@ -91,6 +92,22 @@ export async function cargarCatalogoDeCasosDeIa() {
     ]),
   );
 
+  // La lista entera de cada etiqueta, para los filtros y la leyenda de la
+  // pestana IA. Se vacian antes por si el catalogo se leyera dos veces.
+  ETIQUETAS_DE_CASOS.tiposDeIa.length = 0;
+  ETIQUETAS_DE_CASOS.tiposDeValor.length = 0;
+
+  [
+    [catalogo.tiposDeIa, ETIQUETAS_DE_CASOS.tiposDeIa],
+    [catalogo.tiposDeValor, ETIQUETAS_DE_CASOS.tiposDeValor],
+  ].forEach(([entradas, destino]) => {
+    (entradas || []).forEach((entrada) => {
+      if (entrada?.valor) {
+        destino.push({ valor: entrada.valor, definicion: entrada.definicion || "" });
+      }
+    });
+  });
+
   (catalogo.casos || []).forEach((caso) => {
     if (!caso.titulo) {
       return;
@@ -104,6 +121,9 @@ export async function cargarCatalogoDeCasosDeIa() {
       tipoValor: caso.tipoValor || "",
       definicionTipoIa: definiciones.get(caso.tipoIa) || "",
       definicionTipoValor: definiciones.get(caso.tipoValor) || "",
+      // Tal cual llegan: se comprueban contra la biblioteca al pintar, porque
+      // la biblioteca se carga aparte y puede no haber llegado.
+      fuentes: Array.isArray(caso.fuentes) ? caso.fuentes : [],
     });
   });
 }

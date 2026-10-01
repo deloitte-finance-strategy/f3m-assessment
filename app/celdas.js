@@ -10,17 +10,21 @@
  * estado vacio los usan cuatro de las cinco, y los KPIs y las barras, el Dashboard
  * y el Overview. Una copia por vista es como dos pantallas de la misma herramienta
  * empiezan a decir cosas distintas con los mismos datos.
+ *
+ * Las fichas de los casos de IA llegaron por lo mismo: vivian en el Assessment y
+ * las pedia prestadas el modal del Roadmap; con la pestana IA ya son tres sitios.
  */
 
-import { average } from "../core/calculo.js?v=13";
+import { average } from "../core/calculo.js?v=14";
 import {
   escapeAttr,
   escapeHtml,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=13";
-import { LEVERS, els, state } from "./estado.js?v=13";
-import { getScopedItems } from "./filtros.js?v=13";
+} from "../core/presentacion.js?v=14";
+import { pieDeFuente } from "./biblioteca.js?v=14";
+import { LEVERS, els, state } from "./estado.js?v=14";
+import { getScopedItems } from "./filtros.js?v=14";
 
 
 export function buildFilteredEmptyState() {
@@ -118,4 +122,101 @@ function barRow(label, value, width, color) {
       <span class="bar-value" aria-hidden="true">${escapeHtml(String(value))}</span>
     </div>
   `;
+}
+
+
+/**
+ * Las dos etiquetas de un caso no estrenan familia de color, y no es una
+ * limitacion: el sistema ya esta lleno. El verde, el naranja y el azul marino
+ * son las palancas; el rojo, el ambar y el verde son la prioridad; el teal es
+ * el nivel de madurez y el azul es el estado. Una sexta familia no significaria
+ * nada y le quitaria significado a las cinco que ya lo tienen.
+ *
+ * Se diferencian por peso dentro de la familia neutra. El tipo de valor lleva
+ * chip relleno porque es el eje que ordena la conversacion con el cliente
+ * —coste, riesgo, decision o P&L—, y el tipo de IA va con borde y fondo
+ * transparente porque es un calificativo tecnico.
+ *
+ * Y dos excepciones tonales, no cromaticas, que es lo que permite destacar sin
+ * romper nada:
+ *
+ * - "Agéntica" en oscuro de alto contraste, porque es lo que todo el mundo
+ *   pregunta ahora mismo y se busca con la vista.
+ * - "Automatización" en el tratamiento mas apagado del conjunto. Es la etiqueta
+ *   honesta de "esto no es IA de verdad" y no debe lucir como si lo fuera.
+ */
+const CLASE_DE_TIPO_DE_IA = {
+  Agéntica: "es-agentica",
+  Automatización: "es-automatizacion",
+};
+
+
+function aiCaseTag(valor, definicion, clases) {
+  if (!valor) {
+    return "";
+  }
+
+  const titulo = definicion ? ` title="${escapeAttr(definicion)}"` : "";
+
+  return `<span class="${clases}"${titulo}>${escapeHtml(valor)}</span>`;
+}
+
+
+/**
+ * Una ficha de caso: titulo, las dos etiquetas, la frase de que hace y, si se
+ * sabe, el documento del que sale, con el boton que lo abre.
+ *
+ * 'donde' solo lo trae la pestana IA. En la tarjeta y en el modal la ficha ya
+ * esta dentro de una subcapacidad; suelta en el catalogo, lo primero que se
+ * pregunta de un caso es en que parte del modelo aparece.
+ */
+function aiCaseCard(caso, donde = "") {
+  const etiquetas = [
+    aiCaseTag(caso.tipoValor, caso.definicionTipoValor, "ai-tag ai-tag-valor"),
+    aiCaseTag(
+      caso.tipoIa,
+      caso.definicionTipoIa,
+      `ai-tag ai-tag-ia ${CLASE_DE_TIPO_DE_IA[caso.tipoIa] || ""}`.trim(),
+    ),
+  ].join("");
+
+  return `
+    <li class="ai-case">
+      <p class="ai-case-title">${escapeHtml(caso.titulo)}</p>
+      ${etiquetas ? `<p class="ai-case-tags">${etiquetas}</p>` : ""}
+      ${
+        caso.descripcion
+          ? `<p class="ai-case-description">${escapeHtml(caso.descripcion)}</p>`
+          : ""
+      }
+      ${donde ? `<p class="ai-case-donde">${escapeHtml(donde)}</p>` : ""}
+      ${pieDeFuente(caso)}
+    </li>
+  `;
+}
+
+
+/**
+ * La lista de fichas, igual en la tarjeta, en el modal del roadmap y en la
+ * pestana IA. 'donde', si llega, es una funcion caso -> texto.
+ */
+export function aiCaseCards(casos, { donde } = {}) {
+  if (!casos?.length) {
+    return `<p class="small-note">Sin casos de uso de IA asociados informados.</p>`;
+  }
+
+  const fichas = casos.map((caso) => aiCaseCard(caso, donde ? donde(caso) : ""));
+
+  return `<ul class="ai-case-list">${fichas.join("")}</ul>`;
+}
+
+
+/** El contador que acompaña al titulo de la seccion. */
+export function pintarContadorDeCasos(elemento, casos) {
+  if (!elemento) {
+    return;
+  }
+
+  elemento.textContent = casos.length ? String(casos.length) : "";
+  elemento.hidden = !casos.length;
 }

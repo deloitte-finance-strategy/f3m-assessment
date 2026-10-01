@@ -8,8 +8,8 @@
  * palabra antes de borrar el trabajo de nueve dominios.
  */
 
-import { els } from "./estado.js?v=13";
-import { escapeHtml } from "../core/presentacion.js?v=13";
+import { els } from "./estado.js?v=14";
+import { escapeHtml } from "../core/presentacion.js?v=14";
 
 
 /**
@@ -17,7 +17,7 @@ import { escapeHtml } from "../core/presentacion.js?v=13";
  *
  * Los avisos y el chip de guardado se quedan fuera a proposito: son regiones
  * live y tienen que poder anunciar un fallo de guardado aunque haya un modal
- * delante. Los tres modales son hijos directos de <body>, asi que ninguno cae
+ * delante. Los cuatro modales son hijos directos de <body>, asi que ninguno cae
  * dentro de lo que se marca como inerte.
  */
 const REGIONES_DE_FONDO = [
@@ -26,6 +26,10 @@ const REGIONES_DE_FONDO = [
   ".back-to-top-button",
   ".skip-link",
 ];
+
+
+/** Los modales, por su clave en els. */
+const MODALES = ["scoringCriteriaModal", "aiInitiativeModal", "visorDocumento", "dialogModal"];
 
 
 /**
@@ -40,10 +44,11 @@ const REGIONES_DE_FONDO = [
  * siendo lo unico que retiene el tabulador.
  */
 export function updateModalOpenState() {
-  const hasOpenModal =
-    !els.scoringCriteriaModal?.hidden ||
-    !els.aiInitiativeModal?.hidden ||
-    !els.dialogModal?.hidden;
+  // Un modal que no esta en la pagina no cuenta como abierto. Con la forma
+  // anterior, !els.x?.hidden, un nodo ausente daba true: un index.html cacheado
+  // de antes del visor dejaba la herramienta entera inerte, sin poder pulsar
+  // nada y sin ningun modal a la vista.
+  const hasOpenModal = MODALES.some((id) => els[id] && !els[id].hidden);
 
   document.body.classList.toggle("modal-open", hasOpenModal);
 

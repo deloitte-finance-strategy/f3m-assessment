@@ -1,0 +1,33 @@
+{
+  "_comentario": "Fuente unica de la biblioteca de IA: los documentos de los que salen los casos de uso. La lee app.js (para la pestana IA y el visor de 'Mas informacion') y scripts/check_domains_sync.py (que comprueba que cada archivo existe y que cada fuente de data/casos-ia.json apunta a un documento de aqui y a una pagina que existe). 'archivo' es lo que se ve dentro de la herramienta y tiene que ser un PDF, porque es lo unico que el navegador sabe ensenar; 'original', si esta, es lo que se descarga. 'total' son las paginas o las diapositivas del documento, segun diga 'unidad'. Como anadir un documento: biblioteca/LEEME.md.",
+  "documentos": [
+    {
+      "id": "ai-dossier",
+      "titulo": "The AI Dossier",
+      "autor": "Deloitte AI Institute",
+      "fecha": "Octubre de 2025",
+      "idioma": "Inglés",
+      "formato": "PDF",
+      "unidad": "pagina",
+      "total": 190,
+      "archivo": "biblioteca/the-ai-dossier.pdf",
+      "nombreDeDescarga": "Full PDF Report - The AI Dossier - 80+ AI use cases.pdf",
+      "descripcion": "Más de ochenta casos de uso de alto impacto en seis industrias: consumo, energía e industria, servicios financieros, sector público, ciencias de la vida y sanidad, y tecnología, medios y telecomunicaciones. Esta edición incorpora los casos agénticos. Cada caso ocupa dos páginas: la primera explica cómo ayuda la IA y la segunda, cómo se gestiona el riesgo y qué beneficios trae."
+    },
+    {
+      "id": "financeai",
+      "titulo": "FinanceAI Use Case Overview",
+      "tituloCorto": "FinanceAI",
+      "autor": "Deloitte · FinanceAI",
+      "fecha": "Junio de 2024",
+      "idioma": "Inglés",
+      "formato": "PowerPoint",
+      "unidad": "diapositiva",
+      "total": 19,
+      "archivo": "biblioteca/financeai-use-cases-summary.pdf",
+      "original": "biblioteca/financeai-use-cases-summary.pptx",
+      "nombreDeDescarga": "FinanceAI - Use Cases Summary_C.pptx",
+      "descripcion": "Los casos de uso de IA para la función financiera: las tablas por proceso, con su tecnología de IA y las funciones a las que afectan, el mapa de la transformación de Finanzas de principio a fin y las seis pruebas de concepto prioritarias, cada una con su situación, su enfoque y sus beneficios."
+    }
+  ]
+}

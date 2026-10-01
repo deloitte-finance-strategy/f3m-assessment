@@ -33,39 +33,42 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 899 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.017 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.452 |
-| `app/estado.js` | El estado compartido y las constantes que lo describen | 159 |
-| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 332 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.498 |
+| `app/estado.js` | El estado compartido y las constantes que lo describen | 180 |
+| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 337 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 253 |
 | `app/graficos.js` | Los seis radares de Chart.js, y a dónde lleva pulsar sus ejes | 674 |
-| `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 184 |
-| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 427 |
+| `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 185 |
+| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 447 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
 | `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 87 |
 | `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 395 |
 | `app/firebase.js` | La conexión: configuración, referencia y límite de espera | 137 |
 | `app/identidad.js` | La sesión anónima y el nombre de quien edita | 234 |
 | `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 140 |
-| `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 753 |
+| `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 766 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
-| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas | 121 |
+| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 222 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe: datos, radares y tema | 487 |
+| `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 405 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 318 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 221 |
-| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 716 |
+| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 638 |
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 221 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 408 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.421 |
+| `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 601 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.882 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 509 |
 | `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
 | `core/presentacion.js` | Escapado, formato de números y colores de marca | 105 |
+| `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 410 |
 | `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 369 |
 | `informe/secciones.js` | Una función por diapositiva | 830 |
 | `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 302 |
@@ -75,7 +78,9 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
 | `data/domains/*.json` | Datos del assessment, un archivo por dominio | — |
-| `data/casos-ia.json` | **Fuente única de los 100 casos de uso de IA** y sus dos etiquetas | — |
+| `data/casos-ia.json` | **Fuente única de los 100 casos de uso de IA**, sus dos etiquetas y su fuente | — |
+| `data/biblioteca.json` | **Fuente única de la biblioteca de IA**: los documentos y sus páginas | — |
+| `biblioteca/` | Los documentos de la biblioteca. **Públicos**, como el repositorio. Ver su `LEEME.md` | — |
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
 | `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
 | `scripts/check_module_version.py` | Que todos los módulos se pidan con la misma `?v=`. **En CI** | — |
@@ -98,6 +103,7 @@ Flujo de arranque, en `init()` de `app.js`:
 cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScenarioModeNotice()
   → cargarCatalogoDeDominios()   // data/domains.json + pinta el conmutador
   → cargarCatalogoDeCasosDeIa()  // data/casos-ia.json; si falla, se sigue sin fichas
+    + cargarBiblioteca()         // a la vez, data/biblioteca.json; si falla, sin «Más información»
   → loadCoreDomains()            // Promise.allSettled de los 9 dominios
   → setActiveDomain("fpa")
   → applyStoredScenario()        // copia local de localStorage
@@ -123,8 +129,10 @@ tandas, y **cada una se verifica antes de seguir**: consola en silencio, las pru
 el A/B contra `main` sobre los nueve dominios. **El reparto está terminado**: fuera quedan los
 quince módulos de infraestructura —estado, avisos, almacenamiento, preferencias, gráficos,
 métricas, dominios, filtros, subcapacidad, escenario, Firebase, identidad, indicador,
-persistencia y repintado—, las cinco vistas en `app/vistas/`, `app/celdas.js` con lo que
-comparten, `app/modales.js` y `app/informe.js`. `app.js` pasó de 7.346 líneas a 1.401.
+persistencia y repintado—, las vistas en `app/vistas/`, `app/celdas.js` con lo que
+comparten, `app/modales.js` y `app/informe.js`. `app.js` pasó de 7.346 líneas a 1.401. Lo que ha
+llegado después ya nace fuera: la pestaña IA en `app/vistas/ia.js` y la biblioteca, con su visor, en
+`app/biblioteca.js`.
 
 Dos reglas que han salido del propio reparto y conviene respetar:
 
@@ -204,9 +212,9 @@ Los contrastes están comprobados **pareja a pareja en los dos temas**, sobre el
 componiendo el alfa. Al tocar un color hay que rehacer esa cuenta: en una celda del heatmap, un
 contraste mal puesto no es un problema estético, es un dato que no se lee.
 
-### Las cinco pestañas son vistas, no anclas
+### Las seis pestañas son vistas, no anclas
 
-`setupVistas()` muestra **solo la sección activa**; las otras cuatro están `hidden` y no se pintan.
+`setupVistas()` muestra **solo la sección activa**; las otras cinco están `hidden` y no se pintan.
 `renderAll()` solo repinta la vista visible. El enlace directo (`#roadmap`) se sigue respetando.
 
 La vista de arranque es **Overview**: `vistaDesdeLaUrl()` cae ahí cuando la URL no trae ancla.
@@ -239,6 +247,12 @@ sino "cómo está la función financiera"—, así que lee `state.domains` enter
 `getDominiosDelOverview()` y **no aplica los filtros**: son del dominio abierto (el desplegable de
 capacidad se rellena con las capacidades del activo), así que a nivel global no significan nada. Su
 nota de ámbito lo dice en pantalla para que el descuadre con el Dashboard no se lea como un fallo.
+
+**La pestaña IA tampoco usa ese ámbito**, por otro motivo: no habla de subcapacidades puntuadas sino
+del catálogo de casos, que es el mismo para los nueve dominios. Va antes del corte de `renderAll()`,
+como el Overview, y sus filtros —buscador, dominio, las dos etiquetas y documento— son suyos: no
+tocan ni leen los del Assessment. Como nada de lo que enseña depende de las puntuaciones, no se
+repinta con cada score; solo cuando cambian el catálogo, la biblioteca o los dominios cargados.
 
 ### Los objetivos se resuelven por dominio
 
@@ -466,6 +480,32 @@ Un título que se renombre en un sitio y no en el otro no rompe nada visiblement
 con el título solo, sin etiquetas ni frase, y eso no se distingue de un caso sin clasificar. Por eso
 `check_domains_sync.py` cruza las dos listas en las dos direcciones y pone el CI en rojo.
 
+### Y cada caso dice de dónde sale
+
+Cada caso de `data/casos-ia.json` lleva `fuentes`: el documento de la biblioteca, la página o
+diapositiva —la del visor, no la impresa— y el texto exacto con el que aparece allí, en inglés. La
+primera es la que abre **«Más información»**, en cualquier ficha: el detalle del Assessment, el
+modal de IA del Roadmap y la pestaña IA. Las demás salen en el visor como «También en».
+
+Cuatro casos no aparecen con esas palabras en los documentos y apuntan a la diapositiva de su área,
+con `"alcance": "area"` y una `nota`. El visor los marca como **referencia aproximada**: delante del
+cliente, el consultor tiene que saber si lo que se abre es el caso o su contexto.
+
+Los documentos y su número de páginas están en `data/biblioteca.json`, y los archivos en
+`biblioteca/`. Lo que se enseña dentro de la herramienta **tiene que ser un PDF**: es lo único que
+el navegador sabe abrir en una página concreta. Un PowerPoint lleva al lado su PDF exportado, y lo
+que se descarga es el original. Cómo se añade un documento: `biblioteca/LEEME.md`.
+
+El visor es el del propio navegador, en un iframe, y no una librería: pdf.js sería más de un
+megabyte vendorizado para enseñar algo que Chrome, Edge y Firefox ya enseñan. La CSP no cambia: el
+iframe hereda `default-src 'self'`. **No poner `frame-src 'none'`**: dejaría el visor en blanco.
+
+`core/biblioteca.js` descarta, sin corregir, cualquier fuente que no lleve a una página que existe,
+y `check_domains_sync.py` dice en el CI cuál se ha descartado: archivos que faltan, páginas fuera de
+rango, casos sin fuente o sin texto. Un documento que no cita ningún caso es solo un aviso: lo
+natural es subirlo antes de terminar de apuntar sus casos. Lo que no comprueba es que `total`
+coincida con el PDF ni que la página sea la buena: eso se mira abriéndola.
+
 ## Renombrar una capacidad o una subcapacidad
 
 El nombre de la capacidad **es la clave** de sus objetivos guardados (en Firebase, en la copia local
@@ -511,7 +551,8 @@ Los tres `group` válidos están en `groups`, dentro del mismo archivo: `Transac
 
 `check_domains_sync.py` detecta lo que suele fallar: un Excel que no existe, un campo que falta, un
 grupo inventado, un id repetido y un JSON huérfano que el catálogo no menciona. También cruza el
-catálogo de casos de IA con los títulos que usan las subcapacidades, en las dos direcciones.
+catálogo de casos de IA con los títulos que usan las subcapacidades, en las dos direcciones, y la
+biblioteca con las fuentes de cada caso.
 
 ## Convenciones
 
@@ -528,13 +569,14 @@ catálogo de casos de IA con los títulos que usan las subcapacidades, en las do
 python scripts/check_domains_sync.py
 ```
 
-Verifica el catálogo de dominios, el catálogo de casos de IA y que los 9 JSON coinciden con sus
-Excel. Código de salida `1` si algo falla.
+Verifica el catálogo de dominios, el catálogo de casos de IA, la biblioteca de IA con las fuentes
+de cada caso y que los 9 JSON coinciden con sus Excel. Código de salida `1` si algo falla.
 
 Se prueban en `tests/`, sin dependencias, todos los módulos que no necesitan navegador: las reglas
 de negocio, los objetivos, la coincidencia de subcapacidades, el contrato de escenario y su espejo
-con `database.rules.json`, el formato de presentación, la exportación a CSV y el informe —el deck
-que arma `informe/pdf.js`, las primitivas SVG y la lectura de las medidas de desborde.
+con `database.rules.json`, el formato de presentación, la exportación a CSV, la biblioteca de IA
+—que una fuente rota no llegue a la pantalla— y el informe —el deck que arma `informe/pdf.js`, las
+primitivas SVG y la lectura de las medidas de desborde.
 
 - **En el navegador**: con el servidor en marcha, abrir `http://localhost:8000/tests/`. Es la forma
   que funciona en cualquier equipo, sin instalar nada.
@@ -564,7 +606,7 @@ resto se comprueba a mano:
    independientes y se combinan: probar las cuatro combinaciones al menos en Overview y Heatmap,
    que son las que codifican datos en color y en tamaño. Sin elección guardada, cambiar el tema del
    sistema con la pestaña abierta tiene que arrastrar la herramienta.
-4. Recorrer las cinco vistas:
+4. Recorrer las seis vistas:
    - **Overview**: los 4 KPIs, el titular, las barras, la tabla por dominio y los 3 radares de 9
      ejes. Cambiar de dominio en el conmutador **no** debe cambiar ninguna cifra del Overview.
    - **Dashboard**: KPIs, titulares ejecutivos, barras de prioridad y palanca, y los 3 radares.
@@ -574,14 +616,19 @@ resto se comprueba a mano:
      suelto, sin etiquetas, es un cruce roto.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos.
+   - **IA**: los 4 KPIs, las dos tarjetas de la biblioteca y los 100 casos. «Ver sus N casos»
+     deja exactamente N fichas. «Más información» abre el documento en la página del caso, con su
+     texto en inglés encima para encontrarlo; probarlo también desde el detalle del Assessment y
+     desde el modal de IA del Roadmap, donde **Escape cierra solo el visor** y el foco vuelve al
+     modal. Cambiar de dominio no cambia nada en esta pestaña.
 5. Con un filtro puesto, comprobar que **KPIs, tabla, radares, heatmap, roadmap, CSV y PDF dan el
    mismo recuento** — y que el **Overview no cambia**, que es lo suyo.
 6. Ir y volver entre Overview y Dashboard: los radares de los dos siguen correctos (5 ejes de
    capacidad y 9 de dominio).
-7. **El informe.** Exportar desde **cada una de las cinco vistas**, incluido el Roadmap sin haber
-   pasado por Dashboard ni Overview: los **seis** radares tienen que salir pintados, los 3 de
-   dominio y los 3 de la parte global. En el diálogo, «Guardar como PDF» con **«Gráficos de fondo»
-   activado** —sin eso las portadas y el heatmap salen en blanco—, y comprobar que **ninguna
+7. **El informe.** Exportar desde **cada una de las seis vistas**, incluidos el Roadmap y la IA
+   sin haber pasado por Dashboard ni Overview: los **seis** radares tienen que salir pintados, los
+   3 de dominio y los 3 de la parte global. En el diálogo, «Guardar como PDF» con **«Gráficos de
+   fondo» activado** —sin eso las portadas y el heatmap salen en blanco—, y comprobar que **ninguna
    diapositiva desborda** a una segunda página. Para eso, abrir con `?comprobar=desbordes` y volver
    a exportar: el aviso dice si alguna se recorta y cuál va más justa. Hacerlo también sobre
    **Controlling**, que con 24 subcapacidades es el dominio que aprieta.
