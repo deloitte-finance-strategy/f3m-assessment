@@ -14,10 +14,10 @@
  * eso ataba el dibujo al estado.
  */
 
-import { formatNumber } from "../core/presentacion.js?v=12";
-import { els } from "./estado.js?v=12";
-import { showNotice } from "./avisos.js?v=12";
-import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=12";
+import { formatNumber } from "../core/presentacion.js?v=13";
+import { els } from "./estado.js?v=13";
+import { showNotice } from "./avisos.js?v=13";
+import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=13";
 
 
 
@@ -36,6 +36,25 @@ const overviewRadarCharts = {
   tecnologia: null,
   organizacion: null,
 };
+
+
+/**
+ * A donde lleva pulsar un eje. Llega inyectado desde app.js al arrancar, y no
+ * importado: abrir un dominio o una vista es cosa del orquestador, y este
+ * modulo importandolo cerraria un ciclo con el (ver app/repintado.js).
+ *
+ * Sin configurar, los radares se pintan igual y pulsar no hace nada.
+ */
+const navegacionDeRadares = {
+  abrirCapacidad: null,
+  abrirDominio: null,
+};
+
+
+export function configurarNavegacionDeRadares({ abrirCapacidad, abrirDominio } = {}) {
+  navegacionDeRadares.abrirCapacidad = abrirCapacidad || null;
+  navegacionDeRadares.abrirDominio = abrirDominio || null;
+}
 
 
 /**
@@ -86,6 +105,14 @@ export function renderCapabilityRadar(filas) {
 
   const radarData = buildCapabilityRadarData(filas);
 
+  const alElegirEje = (indice) => {
+    const capacidad = radarData.originalLabels[indice];
+
+    if (capacidad && navegacionDeRadares.abrirCapacidad) {
+      navegacionDeRadares.abrirCapacidad(capacidad);
+    }
+  };
+
   renderSingleCapabilityRadar({
     key: "procesos",
     canvas: els.capabilityRadarProcessesChart,
@@ -95,6 +122,7 @@ export function renderCapabilityRadar(filas) {
     color: paletaDeRadar().procesos,
     backgroundColor: paletaDeRadar().areaProcesos,
     radarData,
+    alElegirEje,
   });
 
   renderSingleCapabilityRadar({
@@ -106,6 +134,7 @@ export function renderCapabilityRadar(filas) {
     color: paletaDeRadar().tecnologia,
     backgroundColor: paletaDeRadar().areaTecnologia,
     radarData,
+    alElegirEje,
   });
 
   renderSingleCapabilityRadar({
@@ -117,6 +146,7 @@ export function renderCapabilityRadar(filas) {
     color: paletaDeRadar().organizacion,
     backgroundColor: paletaDeRadar().areaOrganizacion,
     radarData,
+    alElegirEje,
   });
 }
 
@@ -138,6 +168,9 @@ function renderSingleCapabilityRadar({
   // en el suyo: son seis canvas distintos y una sola caja de tres claves los
   // pisaria, capturando ademas el radar equivocado en el informe.
   registro = capabilityRadarCharts,
+
+  // Que hacer al pulsar el eje de indice i: abrir esa capacidad o ese dominio.
+  alElegirEje = null,
 }) {
   if (!canvas) {
     return;
@@ -212,6 +245,23 @@ function renderSingleCapabilityRadar({
 
     layout: {
       padding: 4,
+    },
+
+    // Se pulsa el NOMBRE del eje, que es donde se mira, y tambien sus vertices.
+    // Chart.js no tiene eventos para las etiquetas del radar, asi que se
+    // comprueba a mano si el puntero cae dentro de alguna.
+    onClick: (event, elementos, chart) => {
+      const indice = ejeBajoElPuntero(chart, event, elementos);
+
+      if (indice !== null && alElegirEje) {
+        alElegirEje(indice);
+      }
+    },
+
+    onHover: (event, elementos, chart) => {
+      const pulsable = Boolean(alElegirEje) && ejeBajoElPuntero(chart, event, elementos) !== null;
+
+      chart.canvas.style.cursor = pulsable ? "pointer" : "";
     },
 
     plugins: {
@@ -332,6 +382,14 @@ export function renderOverviewRadar(filas) {
 
   const radarData = buildOverviewRadarData(filas);
 
+  const alElegirEje = (indice) => {
+    const domainId = radarData.ids[indice];
+
+    if (domainId && navegacionDeRadares.abrirDominio) {
+      navegacionDeRadares.abrirDominio(domainId);
+    }
+  };
+
   renderSingleCapabilityRadar({
     key: "procesos",
     canvas: els.overviewRadarProcessesChart,
@@ -342,6 +400,7 @@ export function renderOverviewRadar(filas) {
     backgroundColor: paletaDeRadar().areaProcesos,
     radarData,
     registro: overviewRadarCharts,
+    alElegirEje,
   });
 
   renderSingleCapabilityRadar({
@@ -354,6 +413,7 @@ export function renderOverviewRadar(filas) {
     backgroundColor: paletaDeRadar().areaTecnologia,
     radarData,
     registro: overviewRadarCharts,
+    alElegirEje,
   });
 
   renderSingleCapabilityRadar({
@@ -366,6 +426,7 @@ export function renderOverviewRadar(filas) {
     backgroundColor: paletaDeRadar().areaOrganizacion,
     radarData,
     registro: overviewRadarCharts,
+    alElegirEje,
   });
 }
 
@@ -424,6 +485,8 @@ function buildCapabilityRadarData(rows) {
  */
 function buildOverviewRadarData(filas) {
   return {
+    ids: filas.map((fila) => fila.id),
+
     originalLabels: filas.map((fila) => fila.label),
 
     displayLabels: filas.map((fila) => wrapRadarLabel(fila.label)),
@@ -446,6 +509,47 @@ function buildOverviewRadarData(filas) {
       (fila) => toRadarNumber(fila.objetivoOrganizacion),
     ),
   };
+}
+
+
+
+
+/**
+ * El indice del eje bajo el puntero, o null si no hay ninguno.
+ *
+ * Primero un vertice, si Chart.js ya lo ha encontrado; si no, la caja de cada
+ * etiqueta. getPointLabelPosition() es API publica de la escala radial desde
+ * Chart.js 4, y aqui la version esta fijada en vendor/: no cambia por debajo.
+ * El margen es para el dedo en una pantalla tactil, que no apunta al pixel.
+ */
+function ejeBajoElPuntero(chart, event, elementos = []) {
+  if (elementos.length) {
+    return elementos[0].index;
+  }
+
+  const escala = chart.scales?.r;
+  const ejes = chart.data.labels?.length || 0;
+
+  if (!escala?.getPointLabelPosition || event?.x == null || event?.y == null) {
+    return null;
+  }
+
+  const margen = 6;
+
+  for (let indice = 0; indice < ejes; indice += 1) {
+    const caja = escala.getPointLabelPosition(indice);
+
+    if (
+      event.x >= caja.left - margen &&
+      event.x <= caja.right + margen &&
+      event.y >= caja.top - margen &&
+      event.y <= caja.bottom + margen
+    ) {
+      return indice;
+    }
+  }
+
+  return null;
 }
 
 
