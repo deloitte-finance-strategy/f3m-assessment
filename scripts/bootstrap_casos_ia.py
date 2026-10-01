@@ -15,6 +15,10 @@ El script se conserva por trazabilidad: dice de donde salio cada campo y como
 se leyo. Necesita el Excel de origen, que no esta versionado.
 
     python scripts/bootstrap_casos_ia.py [ruta-del-excel]
+
+No volver a ejecutarlo sobre el JSON actual: lo escribe de cero, y se llevaria
+por delante todo lo que se ha anadido despues en el repositorio, como las
+'fuentes' de cada caso, que son las que abre "Mas informacion".
 """
 
 import json

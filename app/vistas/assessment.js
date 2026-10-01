@@ -16,11 +16,16 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=12";
-import { createDefaultTargets } from "../../core/objetivos.js?v=12";
-import { escapeAttr, escapeHtml, formatNumber } from "../../core/presentacion.js?v=12";
-import { abrirDialogo, showNotice } from "../avisos.js?v=12";
-import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=12";
+} from "../../core/calculo.js?v=13";
+import { createDefaultTargets } from "../../core/objetivos.js?v=13";
+import { escapeAttr, escapeHtml, formatNumber } from "../../core/presentacion.js?v=13";
+import { abrirDialogo, showNotice } from "../avisos.js?v=13";
+import {
+  aiCaseCards,
+  buildFilteredEmptyState,
+  pintarContadorDeCasos,
+  priorityBadge,
+} from "../celdas.js?v=13";
 import {
   DOMAINS,
   LEVERS,
@@ -28,100 +33,17 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=12";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=12";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=12";
-import { persistItemChange, persistTargetsDelDominioActivo } from "../persistencia.js?v=12";
-import { repintarTodo } from "../repintado.js?v=12";
+} from "../estado.js?v=13";
+import { describirObjetivos, getVisibleItems } from "../filtros.js?v=13";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=13";
+import { persistItemChange, persistTargetsDelDominioActivo } from "../persistencia.js?v=13";
+import { repintarTodo } from "../repintado.js?v=13";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=12";
-
-
-/**
- * Las dos etiquetas de un caso no estrenan familia de color, y no es una
- * limitacion: el sistema ya esta lleno. El verde, el naranja y el azul marino
- * son las palancas; el rojo, el ambar y el verde son la prioridad; el teal es
- * el nivel de madurez y el azul es el estado. Una sexta familia no significaria
- * nada y le quitaria significado a las cinco que ya lo tienen.
- *
- * Se diferencian por peso dentro de la familia neutra. El tipo de valor lleva
- * chip relleno porque es el eje que ordena la conversacion con el cliente
- * —coste, riesgo, decision o P&L—, y el tipo de IA va con borde y fondo
- * transparente porque es un calificativo tecnico.
- *
- * Y dos excepciones tonales, no cromaticas, que es lo que permite destacar sin
- * romper nada:
- *
- * - "Agéntica" en oscuro de alto contraste, porque es lo que todo el mundo
- *   pregunta ahora mismo y se busca con la vista.
- * - "Automatización" en el tratamiento mas apagado del conjunto. Es la etiqueta
- *   honesta de "esto no es IA de verdad" y no debe lucir como si lo fuera.
- */
-const CLASE_DE_TIPO_DE_IA = {
-  Agéntica: "es-agentica",
-  Automatización: "es-automatizacion",
-};
-
-
-function aiCaseTag(valor, definicion, clases) {
-  if (!valor) {
-    return "";
-  }
-
-  const titulo = definicion ? ` title="${escapeAttr(definicion)}"` : "";
-
-  return `<span class="${clases}"${titulo}>${escapeHtml(valor)}</span>`;
-}
-
-
-/** Una ficha de caso: titulo, las dos etiquetas y la frase de que hace. */
-function aiCaseCard(caso) {
-  const etiquetas = [
-    aiCaseTag(caso.tipoValor, caso.definicionTipoValor, "ai-tag ai-tag-valor"),
-    aiCaseTag(
-      caso.tipoIa,
-      caso.definicionTipoIa,
-      `ai-tag ai-tag-ia ${CLASE_DE_TIPO_DE_IA[caso.tipoIa] || ""}`.trim(),
-    ),
-  ].join("");
-
-  return `
-    <li class="ai-case">
-      <p class="ai-case-title">${escapeHtml(caso.titulo)}</p>
-      ${etiquetas ? `<p class="ai-case-tags">${etiquetas}</p>` : ""}
-      ${
-        caso.descripcion
-          ? `<p class="ai-case-description">${escapeHtml(caso.descripcion)}</p>`
-          : ""
-      }
-    </li>
-  `;
-}
-
-
-/** La lista de fichas, igual en el modal del roadmap y en la tarjeta. */
-export function aiCaseCards(casos) {
-  if (!casos?.length) {
-    return `<p class="small-note">Sin casos de uso de IA asociados informados.</p>`;
-  }
-
-  return `<ul class="ai-case-list">${casos.map(aiCaseCard).join("")}</ul>`;
-}
-
-
-/** El contador que acompaña al titulo de la seccion. */
-export function pintarContadorDeCasos(elemento, casos) {
-  if (!elemento) {
-    return;
-  }
-
-  elemento.textContent = casos.length ? String(casos.length) : "";
-  elemento.hidden = !casos.length;
-}
+} from "../subcapacidad.js?v=13";
 
 
 export function renderCapabilityTargets() {

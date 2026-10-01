@@ -28,6 +28,12 @@
         linea ni un manejador onclick, asi que no hace falta, y es justo la
         directiva que cierra la inyeccion de codigo. No anadirlo por comodidad.
 
+      - El visor de «Más información» abre los PDF de biblioteca/ en un iframe.
+        Lo permite default-src 'self', del que frame-src hereda: no hace falta
+        anadir nada, pero tampoco se puede poner frame-src 'none' sin dejar el
+        visor en blanco. object-src 'none' no le afecta —comprobado en Chromium—:
+        el iframe no es un <object>.
+
       - Falta frame-ancestors, que es lo que protegeria del clickjacking. No es
         un olvido: en <meta> se ignora Y el navegador imprime una advertencia en
         consola en cada carga, lo que romperia el "la consola arranca en
@@ -63,7 +69,7 @@
     -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23012169'/%3E%3Crect x='7' y='19' width='5' height='7' rx='1.5' fill='%2386BC25'/%3E%3Crect x='13.5' y='14' width='5' height='12' rx='1.5' fill='%2386BC25'/%3E%3Crect x='20' y='8' width='5' height='18' rx='1.5' fill='%2386BC25'/%3E%3C/svg%3E">
 
-    <link rel="stylesheet" href="styles.css?v=12">
+    <link rel="stylesheet" href="styles.css?v=13">
 
     <!--
       Resuelve el tema y la densidad antes del primer pintado. Va aqui, sincrono
@@ -73,7 +79,7 @@
       En linea no puede ir: la CSP no admite scripts sin archivo, que es
       justamente la directiva que cierra la inyeccion de codigo.
     -->
-    <script src="tema.js?v=12"></script>
+    <script src="tema.js?v=13"></script>
   </head>
   <body>
     <!--
@@ -250,6 +256,7 @@
           Roadmap
           <span class="tab-badge tab-badge-alert" id="roadmapTabBadge">0 Alta</span>
         </a>
+        <a href="#ia">IA</a>
       </nav>
 
       <!--
@@ -525,6 +532,79 @@
         <div class="active-filters active-filters-block" data-active-filters hidden></div>
         <div class="table-wrap panel">
           <table class="data-table roadmap-table" id="roadmapTable"></table>
+        </div>
+      </section>
+
+      <!--
+        La pestana IA: los casos de uso de IA y la biblioteca de los documentos
+        de los que salen. Como el Overview, no depende del dominio abierto ni de
+        los filtros del Assessment, y su nota de ambito lo dice; los filtros del
+        catalogo son suyos.
+      -->
+      <section id="ia" class="section-block">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Inteligencia artificial</p>
+            <h2>Casos de uso y biblioteca de documentos</h2>
+          </div>
+          <p class="small-note" id="iaSourceNote"></p>
+        </div>
+
+        <div class="kpi-grid" id="iaKpiGrid"></div>
+
+        <div class="panel ia-panel">
+          <div class="panel-heading">
+            <h3>Biblioteca de documentos</h3>
+            <span class="small-note">Los documentos de los que salen los casos. Se abren aquí mismo, o en una pestaña nueva.</span>
+          </div>
+          <div class="biblioteca-grid" id="iaBiblioteca"></div>
+        </div>
+
+        <div class="panel ia-panel ia-catalogo">
+          <div class="panel-heading">
+            <div>
+              <h3 id="iaCatalogoTitulo" tabindex="-1">Catálogo de casos de uso</h3>
+              <p class="small-note ia-recuento" id="iaCatalogoRecuento" aria-live="polite"></p>
+            </div>
+          </div>
+
+          <div class="filters ia-filtros">
+            <label class="search-label">
+              <span>Buscar</span>
+              <input
+                id="iaBuscar"
+                type="search"
+                placeholder="Caso, descripción o texto del documento"
+              >
+            </label>
+
+            <label>
+              <span>Dominio</span>
+              <select id="iaFiltroDominio"></select>
+            </label>
+
+            <label>
+              <span>Tipo de valor</span>
+              <select id="iaFiltroValor"></select>
+            </label>
+
+            <label>
+              <span>Tipo de IA</span>
+              <select id="iaFiltroTipoIa"></select>
+            </label>
+
+            <label>
+              <span>Documento</span>
+              <select id="iaFiltroDocumento"></select>
+            </label>
+          </div>
+
+          <details class="ia-leyenda">
+            <summary>Qué significa cada etiqueta</summary>
+            <div class="ia-leyenda-cuerpo" id="iaLeyenda"></div>
+          </details>
+
+          <div class="ia-catalogo-lista" id="iaCatalogo"></div>
         </div>
       </section>
     </main>
@@ -837,6 +917,44 @@
 </div>
 
 
+<!--
+  El visor de la biblioteca: lo abre «Más información» en cualquier ficha de
+  caso, y "Abrir aqui" en la pestana IA. Va despues del modal de la iniciativa
+  de IA porque se abre encima de el: con el mismo z-index, gana el que va
+  despues en el documento.
+
+  El documento lo pinta el visor de PDF del navegador en un iframe; lo crea
+  app/biblioteca.js cada vez que se abre, en la pagina de la fuente.
+-->
+<div class="modal-backdrop" id="visorDocumento" role="dialog" aria-modal="true" aria-labelledby="visorTitulo" hidden>
+  <div class="criteria-modal visor-modal" role="document">
+    <div class="criteria-modal-header visor-cabecera">
+      <div>
+        <p class="eyebrow" id="visorAntetitulo">Fuente del caso de uso</p>
+        <h2 id="visorTitulo">Documento</h2>
+        <p class="small-note visor-datos" id="visorDatos"></p>
+      </div>
+      <button class="modal-close-button" id="visorCerrar" type="button" aria-label="Cerrar el documento">
+        ×
+      </button>
+    </div>
+
+    <div class="visor-contexto" id="visorContexto" hidden></div>
+
+    <div class="visor-marco" id="visorMarco"></div>
+
+    <div class="visor-acciones">
+      <a class="biblioteca-enlace" id="visorAbrir" href="biblioteca/" target="_blank" rel="noopener">
+        Abrir en una pestaña nueva
+      </a>
+      <a class="biblioteca-enlace" id="visorDescargar" href="biblioteca/" download>
+        Descargar
+      </a>
+    </div>
+  </div>
+</div>
+
+
 
     <!--
       Chart.js va en el repositorio, no en un CDN. Muchas redes corporativas
@@ -879,7 +997,7 @@
       NUMERO AQUI Y EN TODOS LOS IMPORTS. Lo comprueba el CI:
       python scripts/check_module_version.py
     -->
-    <script type="module" src="app.js?v=12"></script>
+    <script type="module" src="app.js?v=13"></script>
   </body>
 </html>
 

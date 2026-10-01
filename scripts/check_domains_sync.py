@@ -15,7 +15,11 @@ Cuatro comprobaciones, en este orden:
    usan las subcapacidades, en las dos direcciones, y cada caso trae sus dos
    etiquetas con un valor de los declarados.
 
-4. Cada JSON generado coincide con su Excel: se regenera el payload en memoria
+4. La biblioteca de IA (data/biblioteca.json) apunta a archivos que existen, y
+   cada caso dice de que documento sale y en que pagina, con una pagina que el
+   documento tiene.
+
+5. Cada JSON generado coincide con su Excel: se regenera el payload en memoria
    y se compara con el archivo commiteado. No escribe nada.
 
 Devuelve codigo de salida 1 si algo falla, para poder usarse en CI o antes de
@@ -25,6 +29,7 @@ un commit.
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -39,6 +44,14 @@ DIRECTORIO_DE_DATOS = ROOT / "data" / "domains"
 CATALOGO_DE_CASOS = ROOT / "data" / "casos-ia.json"
 
 CAMPOS_DE_CASO = ("id", "titulo", "descripcion", "tipoIa", "tipoValor")
+
+BIBLIOTECA = ROOT / "data" / "biblioteca.json"
+
+UNIDADES_DE_DOCUMENTO = ("pagina", "diapositiva")
+
+ID_DE_DOCUMENTO = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+RUTA_DE_BIBLIOTECA = re.compile(r"^biblioteca/[A-Za-z0-9._-]+$")
 
 
 def check_catalogo():
@@ -262,6 +275,175 @@ def check_casos_ia():
     return problemas, resumen
 
 
+def check_documento(documento, vistos):
+    """Los problemas de un documento de data/biblioteca.json.
+
+    Las mismas reglas que normalizarDocumento() en core/biblioteca.js: alli se
+    descarta en silencio lo que no se puede ensenar, para que la pantalla no se
+    rompa; aqui se dice, para que no se descarte sin que nadie se entere.
+    """
+    ident = documento.get("id") or "(sin id)"
+    problemas = []
+
+    if not ID_DE_DOCUMENTO.match(str(documento.get("id", ""))):
+        problemas.append(f"{ident}: el id tiene que ir en minusculas, cifras y guiones")
+    elif ident in vistos:
+        problemas.append(f"{ident}: el id esta repetido")
+
+    if not clean(documento.get("titulo")):
+        problemas.append(f"{ident}: le falta el titulo")
+
+    if documento.get("unidad") not in UNIDADES_DE_DOCUMENTO:
+        problemas.append(
+            f"{ident}: la unidad tiene que ser {' o '.join(UNIDADES_DE_DOCUMENTO)}"
+        )
+
+    total = documento.get("total")
+
+    if not isinstance(total, int) or isinstance(total, bool) or total < 1:
+        problemas.append(f"{ident}: 'total' tiene que ser el numero de paginas o diapositivas")
+
+    for campo, obligatorio in (("archivo", True), ("original", False)):
+        ruta = documento.get(campo)
+
+        if not ruta:
+            if obligatorio:
+                problemas.append(f"{ident}: le falta '{campo}'")
+            continue
+
+        if not RUTA_DE_BIBLIOTECA.match(ruta) or ".." in ruta:
+            problemas.append(f"{ident}: '{campo}' tiene que ser un archivo dentro de biblioteca/")
+        elif not (ROOT / ruta).exists():
+            problemas.append(f"{ident}: no existe {ruta}")
+
+    if documento.get("archivo") and not str(documento["archivo"]).lower().endswith(".pdf"):
+        problemas.append(
+            f"{ident}: 'archivo' tiene que ser un PDF, que es lo que sabe ensenar el "
+            "navegador; el original va en 'original'"
+        )
+
+    return problemas
+
+
+def check_fuentes(caso, documentos, con_problemas=frozenset()):
+    """Los problemas de las fuentes de un caso, contra los documentos validos.
+
+    Una fuente que apunta a un documento que ya tiene sus propios problemas no
+    se repite aqui: el fallo es del documento, y ya se ha dicho una vez.
+    """
+    titulo = clean(caso.get("titulo")) or "(sin titulo)"
+    fuentes = caso.get("fuentes")
+
+    if not fuentes:
+        return [
+            f'"{titulo}": no dice de que documento sale; sin fuente, la ficha se pinta '
+            "sin «Más información»"
+        ]
+
+    if not isinstance(fuentes, list):
+        return [f'"{titulo}": \'fuentes\' tiene que ser una lista']
+
+    problemas = []
+
+    for numero, fuente in enumerate(fuentes, start=1):
+        donde = f'"{titulo}", fuente {numero}'
+        ident = (fuente or {}).get("documento")
+        documento = documentos.get(ident)
+
+        if ident in con_problemas:
+            continue
+
+        if not documento:
+            problemas.append(f"{donde}: el documento no esta en data/biblioteca.json")
+            continue
+
+        total = documento["total"]
+        pagina = fuente.get("pagina")
+        hasta = fuente.get("hasta", pagina)
+
+        if not isinstance(pagina, int) or isinstance(pagina, bool) or not 1 <= pagina <= total:
+            problemas.append(f"{donde}: la pagina tiene que estar entre 1 y {total}")
+        elif not isinstance(hasta, int) or isinstance(hasta, bool) or not pagina <= hasta <= total:
+            problemas.append(f"{donde}: 'hasta' tiene que estar entre {pagina} y {total}")
+
+        if not clean(fuente.get("texto")):
+            problemas.append(
+                f"{donde}: falta 'texto', como se llama el caso en el documento; sin el, "
+                "encontrarlo en la pagina es leerla entera"
+            )
+
+        alcance = fuente.get("alcance", "caso")
+
+        if alcance not in ("caso", "area"):
+            problemas.append(f"{donde}: 'alcance' tiene que ser caso o area")
+        elif alcance == "area" and not clean(fuente.get("nota")):
+            problemas.append(f"{donde}: una referencia de area tiene que explicar por que en 'nota'")
+
+    return problemas
+
+
+def check_biblioteca():
+    """Devuelve (problemas, avisos, resumen) de la biblioteca de IA.
+
+    El fallo que se vigila es el silencioso: un archivo renombrado, una pagina
+    que el documento no tiene o un caso nuevo sin fuente no rompen nada a la
+    vista. La ficha se pinta igual, solo que sin «Más información», o con uno
+    que abre la pagina equivocada delante del cliente.
+
+    Un documento que ningun caso cita es un aviso y no un fallo. La biblioteca
+    empieza por los dos documentos principales y va a crecer, y lo natural es
+    subir un documento antes de terminar de apuntar sus casos; la pestana IA ya
+    lo ensena asi, sin el boton de ver sus casos.
+    """
+    if not BIBLIOTECA.exists():
+        return [f"falta {BIBLIOTECA.relative_to(ROOT).as_posix()}"], [], ""
+
+    try:
+        biblioteca = json.loads(BIBLIOTECA.read_text(encoding="utf-8"))
+        casos = json.loads(CATALOGO_DE_CASOS.read_text(encoding="utf-8")).get("casos", [])
+    except (json.JSONDecodeError, OSError) as error:
+        return [f"no se puede leer la biblioteca o el catalogo de casos: {error}"], [], ""
+
+    problemas = []
+    documentos = {}
+    con_problemas = set()
+
+    for documento in biblioteca.get("documentos", []):
+        propios = check_documento(documento, documentos)
+        problemas.extend(propios)
+
+        if not propios:
+            documentos[documento["id"]] = documento
+        elif documento.get("id") not in documentos:
+            con_problemas.add(documento.get("id"))
+
+    if not documentos and not con_problemas:
+        problemas.append("data/biblioteca.json no declara ningun documento")
+
+    for caso in casos:
+        problemas.extend(check_fuentes(caso, documentos, con_problemas))
+
+    usados = {
+        fuente.get("documento")
+        for caso in casos
+        for fuente in (caso.get("fuentes") or [])
+        if isinstance(fuente, dict)
+    }
+
+    avisos = [
+        f"{ident}: ningun caso lo cita todavia; si sus casos ya estan en el catalogo, "
+        "falta apuntarlos en sus 'fuentes'"
+        for ident in sorted(set(documentos) - usados)
+    ]
+
+    resumen = (
+        f"{len(documentos)} documentos, "
+        f"{sum(1 for caso in casos if caso.get('fuentes'))} de {len(casos)} casos con su fuente"
+    )
+
+    return problemas, avisos, resumen
+
+
 def check_domain(config):
     """Devuelve (estado, detalle) para un dominio."""
     destino = config["output"]
@@ -344,6 +526,20 @@ def main():
         print(f"  OK    {resumen_de_casos}")
 
     print()
+    print("Biblioteca de IA (data/biblioteca.json <-> fuentes de cada caso)")
+
+    problemas_de_biblioteca, avisos_de_biblioteca, resumen_de_biblioteca = check_biblioteca()
+
+    for problema in problemas_de_biblioteca:
+        print(f"  ERROR {problema}")
+
+    for aviso in avisos_de_biblioteca:
+        print(f"  AVISO {aviso}")
+
+    if not problemas_de_biblioteca:
+        print(f"  OK    {resumen_de_biblioteca}")
+
+    print()
 
     fallos = 0
 
@@ -376,13 +572,25 @@ def main():
             "el cruce es por texto exacto."
         )
 
+    if problemas_de_biblioteca:
+        print(
+            f"{len(problemas_de_biblioteca)} problema(s) en la biblioteca de IA. "
+            "Como se anade un documento o una fuente: biblioteca/LEEME.md."
+        )
+
     if fallos:
         print(
             f"{fallos} dominio(s) desincronizado(s). "
             "Ejecuta 'python scripts/convert_domains.py' para regenerarlos."
         )
 
-    if problemas_de_catalogo or problemas_de_overlay or problemas_de_casos or fallos:
+    if (
+        problemas_de_catalogo
+        or problemas_de_overlay
+        or problemas_de_casos
+        or problemas_de_biblioteca
+        or fallos
+    ):
         return 1
 
     print(f"Los {len(FILES)} dominios coinciden con sus Excel.")

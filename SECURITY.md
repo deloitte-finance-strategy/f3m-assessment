@@ -96,6 +96,10 @@ Aun así, **hacer el repositorio privado es la medida pendiente más recomendabl
 servir GitHub Pages desde un repositorio privado requiere GitHub Enterprise Cloud. Si la
 organización no lo tiene, **hacerlo privado tumba el sitio**. Confirmarlo antes.
 
+**Los documentos de la biblioteca de IA también son públicos.** Los de `biblioteca/` se sirven con
+la web, y cualquiera con la dirección los descarga. Antes de añadir uno, comprobar que se puede
+compartir fuera de Deloitte.
+
 **El repositorio no puede garantizar qué reglas están desplegadas.** `database.rules.json` es lo que
 *debería* estar publicado. Que lo esté se comprueba en la consola de Firebase, y no hay forma de
 automatizarlo desde aquí. **Si las reglas activas fueran las permisivas, todo lo de la sección

@@ -33,6 +33,10 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
   del dominio abierto en el conmutador.
 - Ver heatmap por subcapacidad y palanca.
 - Revisar roadmap ordenado por prioridad y gap.
+- Consultar en la pestaña **IA** los 100 casos de uso de inteligencia artificial del modelo, con
+  buscador y filtros por dominio, etiqueta y documento, y la **biblioteca** de los documentos de los
+  que salen. **«Más información»**, en cualquier ficha de caso, abre su documento de origen dentro
+  de la herramienta, en la página o diapositiva donde aparece.
 - Guardar una copia del trabajo en un archivo y volver a abrirla más adelante, desde el menú
   **Escenario** de la cabecera.
 - Exportar resumen y roadmap en CSV.
@@ -108,6 +112,12 @@ apariciones al pintar, en vez de repetirlas dentro de cada subcapacidad.
 `check_domains_sync.py` cruza las dos listas en cada ejecución, en las dos direcciones. El cruce es
 por texto exacto, así que un título que se renombra en un sitio y no en el otro pone el CI en rojo
 en vez de dejar una ficha sin etiquetas en pantalla.
+
+Cada caso dice también **de dónde sale**: su campo `fuentes` apunta a un documento de
+`data/biblioteca.json` y a su página o diapositiva, y eso es lo que abre «Más información». Los
+documentos están en `biblioteca/`, que es pública como el resto del repositorio. Su `LEEME.md`
+explica cómo añadir uno y cómo apuntar un caso a su fuente, y el mismo `check_domains_sync.py`
+comprueba que cada referencia lleve a una página que existe.
 
 El documento de trabajo del equipo se genera desde ahí, y no al revés:
 

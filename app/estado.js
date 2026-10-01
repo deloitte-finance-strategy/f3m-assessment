@@ -13,15 +13,16 @@
  * una funcion de lectura.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=12";
-import { ESTADOS_VALIDOS } from "../core/escenario.js?v=12";
-import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=12";
+import { PALANCAS } from "../core/calculo.js?v=13";
+import { ESTADOS_VALIDOS } from "../core/escenario.js?v=13";
+import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=13";
 
 
 export const DEFAULT_DOMAIN_ID = "fpa";
 
 export const CATALOGO_URL = "data/domains.json";
 export const CASOS_DE_IA_URL = "data/casos-ia.json";
+export const BIBLIOTECA_URL = "data/biblioteca.json";
 
 
 /**
@@ -45,6 +46,26 @@ export const GRUPOS_DE_DOMINIO = [];
  * 100 fichas repartidas por los nueve archivos de datos.
  */
 export const CASOS_DE_IA = new Map();
+
+
+/**
+ * Las dos etiquetas de los casos, con su definicion y en el orden del catalogo.
+ *
+ * Las fichas ya llevan la definicion de las suyas, pero la pestana IA necesita
+ * la lista entera —para los filtros y para la leyenda— y en el orden en que la
+ * declara el catalogo, no en el de aparicion.
+ */
+export const ETIQUETAS_DE_CASOS = { tiposDeIa: [], tiposDeValor: [] };
+
+
+/**
+ * Los documentos de la biblioteca de IA, por id. Se llenan al arrancar desde
+ * data/biblioteca.json, ya revisados por core/biblioteca.js.
+ *
+ * Sin ellos la herramienta funciona igual: las fichas de los casos se pintan
+ * sin el «Más información», que es justo lo que no se podria abrir.
+ */
+export const BIBLIOTECA = new Map();
 
 
 // Las palancas las define el motor; aqui solo se les pone el color de marca.

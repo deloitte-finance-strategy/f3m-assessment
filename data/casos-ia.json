@@ -1,5 +1,5 @@
 {
-  "_comentario": "Fuente unica de los casos de uso de IA: que hace cada uno y sus dos etiquetas. Lo lee app.js (para las fichas del modal de IA y de la tarjeta de assessment), scripts/check_domains_sync.py (que cruza estos titulos con los de ai.cases de data/domains/*.json, en las dos direcciones) y scripts/generar_excel_casos_ia.py (que regenera el documento del equipo). El cruce con las subcapacidades se hace por 'titulo', que coincide exactamente con cada entrada de ai.cases. Los campos 'poc' y 'origen' no los usa la aplicacion: estan para que el Excel del equipo se pueda regenerar sin perder nada.",
+  "_comentario": "Fuente unica de los casos de uso de IA: que hace cada uno, sus dos etiquetas y donde esta en los documentos de la biblioteca. Lo lee app.js (para las fichas del modal de IA, de la tarjeta de assessment y de la pestana IA), scripts/check_domains_sync.py (que cruza estos titulos con los de ai.cases de data/domains/*.json, en las dos direcciones, y comprueba cada fuente contra data/biblioteca.json) y scripts/generar_excel_casos_ia.py (que regenera el documento del equipo). El cruce con las subcapacidades se hace por 'titulo', que coincide exactamente con cada entrada de ai.cases. 'fuentes' es lo que abre 'Mas informacion': el documento de data/biblioteca.json, la pagina o diapositiva, 'hasta' cuando el caso ocupa mas de una, 'texto' tal y como aparece en el documento para encontrarlo en la pagina, una 'nota' opcional, y 'alcance': 'area' cuando el caso no aparece con esas palabras y la referencia es a su area. La primera fuente es la que se abre; las demas se ofrecen dentro del visor. Los campos 'poc' y 'origen' no los usa la aplicacion: estan para que el Excel del equipo se pueda regenerar sin perder nada.",
   "tiposDeIa": [
     {
       "valor": "Analítica",
@@ -52,7 +52,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Automated closing checklists"
+      "origen": "FinanceAI — Automated closing checklists",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 9,
+          "texto": "Automated closing checklists to ensure all accounting policies are followed"
+        }
+      ]
     },
     {
       "id": "IA-002",
@@ -61,7 +68,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Capture variations and exceptions in P2P/O2C enabling touchless close"
+      "origen": "FinanceAI — Capture variations and exceptions in P2P/O2C enabling touchless close",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "Capture all variations and exceptions in P2P and O2C, enabling a touchless financial close"
+        }
+      ]
     },
     {
       "id": "IA-003",
@@ -70,7 +84,15 @@
       "tipoIa": "Analítica",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — AI-enabled process mining"
+      "origen": "FinanceAI — AI-enabled process mining",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "AI-enabled process mining",
+          "nota": "Aparece como tecnología de IA del cierre sin intervención sobre P2P y O2C."
+        }
+      ]
     },
     {
       "id": "IA-004",
@@ -79,7 +101,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "FinanceAI — Identify missing monthly accruals based on historic trends"
+      "origen": "FinanceAI — Identify missing monthly accruals based on historic trends",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 9,
+          "texto": "Identify missing monthly accruals based on historic trends"
+        }
+      ]
     },
     {
       "id": "IA-005",
@@ -88,7 +117,19 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Journal Entry Automation & Close Value prediction"
+      "origen": "FinanceAI — Journal Entry Automation & Close Value prediction",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 18,
+          "texto": "Proof of Concept | Journal Entry Automation"
+        },
+        {
+          "documento": "financeai",
+          "pagina": 13,
+          "texto": "Journal Entry Automation"
+        }
+      ]
     },
     {
       "id": "IA-006",
@@ -97,7 +138,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "FinanceAI — Identify unusual entries recorded during the close period"
+      "origen": "FinanceAI — Identify unusual entries recorded during the close period",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 9,
+          "texto": "Identify unusual entries recorded during the close period for further review"
+        }
+      ]
     },
     {
       "id": "IA-007",
@@ -106,7 +154,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "FinanceAI — Monitor potentially suspect or fraudulent journal entries in real time"
+      "origen": "FinanceAI — Monitor potentially suspect or fraudulent journal entries in real time",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "Monitor potentially suspect or fraudulent journal entries in real time"
+        }
+      ]
     },
     {
       "id": "IA-008",
@@ -115,7 +170,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "FinanceAI — Identify expense classification errors"
+      "origen": "FinanceAI — Identify expense classification errors",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 9,
+          "texto": "Identify expense classification errors through clustering and classification models trained on historical data"
+        }
+      ]
     },
     {
       "id": "IA-009",
@@ -124,7 +186,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "FinanceAI — Proactive detection of fraudulent activities"
+      "origen": "FinanceAI — Proactive detection of fraudulent activities",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Proactive detection of fraudulent activities"
+        }
+      ]
     },
     {
       "id": "IA-010",
@@ -133,7 +202,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Reconcile account balances at transaction level to invoices, purchase orders and bank statements"
+      "origen": "FinanceAI — Reconcile account balances at transaction level to invoices, purchase orders and bank statements",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 9,
+          "texto": "Reconcile account balances at the transaction level to underlying documents like invoices, purchase orders, and bank statements"
+        }
+      ]
     },
     {
       "id": "IA-015",
@@ -142,7 +218,14 @@
       "tipoIa": "Automatización",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Consolidate accounting records under different standards and currencies"
+      "origen": "FinanceAI — Consolidate accounting records under different standards and currencies",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 9,
+          "texto": "Consolidate accounting records recorded under different standards and currencies"
+        }
+      ]
     },
     {
       "id": "IA-016",
@@ -151,7 +234,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Habilitador transversal",
       "poc": false,
-      "origen": "FinanceAI — Identify inconsistencies in master data records"
+      "origen": "FinanceAI — Identify inconsistencies in master data records",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 9,
+          "texto": "Identify inconsistencies in master data records"
+        }
+      ]
     },
     {
       "id": "IA-017",
@@ -160,7 +250,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Habilitador transversal",
       "poc": false,
-      "origen": "FinanceAI — Guided adaptable workflows for master data record changes"
+      "origen": "FinanceAI — Guided adaptable workflows for master data record changes",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 9,
+          "texto": "Guided, adaptable workflows for master data record changes"
+        }
+      ]
     },
     {
       "id": "IA-018",
@@ -169,7 +266,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Habilitador transversal",
       "poc": false,
-      "origen": "FinanceAI — Generate metadata documentation"
+      "origen": "FinanceAI — Generate metadata documentation",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 9,
+          "texto": "Generate metadata documentation for account balance descriptions and other master data objects"
+        }
+      ]
     },
     {
       "id": "IA-019",
@@ -178,7 +282,14 @@
       "tipoIa": "Automatización",
       "tipoValor": "Habilitador transversal",
       "poc": false,
-      "origen": "FinanceAI — Automate financial data across diverse sources"
+      "origen": "FinanceAI — Automate financial data across diverse sources",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Automate financial data across diverse sources"
+        }
+      ]
     },
     {
       "id": "IA-025",
@@ -187,7 +298,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Automated financial statement preparation"
+      "origen": "FinanceAI — Automated financial statement preparation",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Automated financial statement preparation"
+        }
+      ]
     },
     {
       "id": "IA-026",
@@ -196,7 +314,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Consolidate written financial reports into one compliant report"
+      "origen": "FinanceAI — Consolidate written financial reports into one compliant report",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 9,
+          "texto": "Consolidate written financial reports in various formats into one compliant and uniformly formatted report"
+        }
+      ]
     },
     {
       "id": "IA-027",
@@ -205,7 +330,19 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Generate draft regulatory filings"
+      "origen": "FinanceAI — Generate draft regulatory filings",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 11,
+          "texto": "Generate Regulatory Filings"
+        },
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "Generate draft regulatory filings"
+        }
+      ]
     },
     {
       "id": "IA-028",
@@ -214,7 +351,19 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Draft sections of 10Q / 10K generation"
+      "origen": "FinanceAI — Draft sections of 10Q / 10K generation",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Draft sections of 10Q / 10K generation"
+        },
+        {
+          "documento": "financeai",
+          "pagina": 19,
+          "texto": "Proof of Concept | Investor Relations Analyst Augmentation"
+        }
+      ]
     },
     {
       "id": "IA-029",
@@ -223,7 +372,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Narrative MD&A draft generation"
+      "origen": "FinanceAI — Narrative MD&A draft generation",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Narrative MD&A draft generation"
+        }
+      ]
     },
     {
       "id": "IA-030",
@@ -232,7 +388,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "FinanceAI — Financial rules and regulations interpretations"
+      "origen": "FinanceAI — Financial rules and regulations interpretations",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Financial rules and regulations interpretations"
+        }
+      ]
     },
     {
       "id": "IA-031",
@@ -241,7 +404,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "FinanceAI — Monitor emerging regulations and evaluate current state compliance"
+      "origen": "FinanceAI — Monitor emerging regulations and evaluate current state compliance",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "Monitor emerging regulations and evaluate current state compliance"
+        }
+      ]
     },
     {
       "id": "IA-032",
@@ -250,7 +420,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "Dossier — Global policy tracking (p. 123, Government & Public Services)"
+      "origen": "Dossier — Global policy tracking (p. 123, Government & Public Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 123,
+          "hasta": 124,
+          "texto": "Global policy tracking"
+        }
+      ]
     },
     {
       "id": "IA-033",
@@ -259,7 +437,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "Dossier — Summarizing legislative documents (p. 121, Government & Public Services)"
+      "origen": "Dossier — Summarizing legislative documents (p. 121, Government & Public Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 121,
+          "hasta": 122,
+          "texto": "Summarizing legislative documents"
+        }
+      ]
     },
     {
       "id": "IA-034",
@@ -268,7 +454,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "Dossier — Automated regulatory compliance (p. 151, Life Sciences & Health Care)"
+      "origen": "Dossier — Automated regulatory compliance (p. 151, Life Sciences & Health Care)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 151,
+          "hasta": 152,
+          "texto": "Revealing the rules"
+        }
+      ]
     },
     {
       "id": "IA-040",
@@ -277,7 +471,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Analítica y decisión",
       "poc": true,
-      "origen": "FinanceAI — Generate account variance analysis and intelligent explanations"
+      "origen": "FinanceAI — Generate account variance analysis and intelligent explanations",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "Generate account variance analysis and intelligent explanations"
+        }
+      ]
     },
     {
       "id": "IA-041",
@@ -286,7 +487,19 @@
       "tipoIa": "Generativa",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "FinanceAI — Mgmt Reporting Actuals Plan Variance + Commentary"
+      "origen": "FinanceAI — Mgmt Reporting Actuals Plan Variance + Commentary",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 15,
+          "texto": "Proof of Concept | Mgmt Reporting – Actuals, Plan, Variance + Commentary production"
+        },
+        {
+          "documento": "financeai",
+          "pagina": 13,
+          "texto": "Mgmt Reporting – Actuals, Plan, Variance + Commentary"
+        }
+      ]
     },
     {
       "id": "IA-042",
@@ -295,7 +508,19 @@
       "tipoIa": "Generativa",
       "tipoValor": "Habilitador transversal",
       "poc": true,
-      "origen": "FinanceAI — FinanceAI Insights Platform / Digital Analyst"
+      "origen": "FinanceAI — FinanceAI Insights Platform / Digital Analyst",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 14,
+          "texto": "Proof of Concept | FinanceAI Insights Platform"
+        },
+        {
+          "documento": "financeai",
+          "pagina": 13,
+          "texto": "FinanceAI | Insights Platform"
+        }
+      ]
     },
     {
       "id": "IA-043",
@@ -304,7 +529,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Analítica y decisión",
       "poc": true,
-      "origen": "FinanceAI — Identify past data patterns to predict and improve future financial performance"
+      "origen": "FinanceAI — Identify past data patterns to predict and improve future financial performance",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 4,
+          "texto": "Identify past data patterns to predict and improve future financial performance"
+        }
+      ]
     },
     {
       "id": "IA-044",
@@ -313,7 +545,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "FinanceAI — Generate executive level overview of company financial health"
+      "origen": "FinanceAI — Generate executive level overview of company financial health",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 4,
+          "texto": "Generate executive level overview of company financial health"
+        }
+      ]
     },
     {
       "id": "IA-045",
@@ -322,7 +561,27 @@
       "tipoIa": "Generativa",
       "tipoValor": "Habilitador transversal",
       "poc": false,
-      "origen": "Dossier — Enterprise-wide data search and access (p. 79, FS) / Data access for all (p. 23, Consumer) / Insights for all (p. 109, GPS)"
+      "origen": "Dossier — Enterprise-wide data search and access (p. 79, FS) / Data access for all (p. 23, Consumer) / Insights for all (p. 109, GPS)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 79,
+          "hasta": 80,
+          "texto": "Business intelligence at your fingertips"
+        },
+        {
+          "documento": "ai-dossier",
+          "pagina": 23,
+          "hasta": 24,
+          "texto": "Data access for all"
+        },
+        {
+          "documento": "ai-dossier",
+          "pagina": 109,
+          "hasta": 110,
+          "texto": "Insights for all"
+        }
+      ]
     },
     {
       "id": "IA-046",
@@ -331,7 +590,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "Dossier — Smarter intelligence (p. 103, Government & Public Services)"
+      "origen": "Dossier — Smarter intelligence (p. 103, Government & Public Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 103,
+          "hasta": 104,
+          "texto": "Smarter intelligence"
+        }
+      ]
     },
     {
       "id": "IA-047",
@@ -340,7 +607,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Analítica y decisión",
       "poc": true,
-      "origen": "FinanceAI — Project-level recommendations"
+      "origen": "FinanceAI — Project-level recommendations",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Project-level recommendations"
+        }
+      ]
     },
     {
       "id": "IA-048",
@@ -349,7 +623,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Proactive defect resolution recommendations"
+      "origen": "FinanceAI — Proactive defect resolution recommendations",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Proactive defect resolution recommendations"
+        }
+      ]
     },
     {
       "id": "IA-049",
@@ -358,7 +639,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Habilitador transversal",
       "poc": false,
-      "origen": "Dossier — AI-powered archive access and extraction (p. 187, Technology, Media & Telecommunications)"
+      "origen": "Dossier — AI-powered archive access and extraction (p. 187, Technology, Media & Telecommunications)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 187,
+          "hasta": 188,
+          "texto": "AI-powered archive access and extraction"
+        }
+      ]
     },
     {
       "id": "IA-050",
@@ -367,7 +656,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Develop guided workflows for creating budgets"
+      "origen": "FinanceAI — Develop guided workflows for creating budgets",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 4,
+          "texto": "Develop guided workflows for creating budgets that can consider financial metrics and user input"
+        }
+      ]
     },
     {
       "id": "IA-051",
@@ -376,7 +672,19 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Analítica y decisión",
       "poc": true,
-      "origen": "FinanceAI — On demand forecasting and scenario modeling"
+      "origen": "FinanceAI — On demand forecasting and scenario modeling",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 17,
+          "texto": "Proof of Concept | Forecasting & Scenario Modeling – Automated / On Demand"
+        },
+        {
+          "documento": "financeai",
+          "pagina": 13,
+          "texto": "Forecasting & Scenario Modeling – Automated / On Demand"
+        }
+      ]
     },
     {
       "id": "IA-052",
@@ -385,7 +693,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — AI-supported budget allocation (p. 167, Technology, Media & Telecommunications)"
+      "origen": "Dossier — AI-supported budget allocation (p. 167, Technology, Media & Telecommunications)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 167,
+          "hasta": 168,
+          "texto": "AI-supported budget allocation"
+        }
+      ]
     },
     {
       "id": "IA-053",
@@ -394,7 +710,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "FinanceAI — Summarize and score project proposals across the organization"
+      "origen": "FinanceAI — Summarize and score project proposals across the organization",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 4,
+          "texto": "Summarize and score project proposals across the organization to facilitate executive review"
+        }
+      ]
     },
     {
       "id": "IA-054",
@@ -403,7 +726,15 @@
       "tipoIa": "Analítica",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "Dossier — Integrated business planning (p. 35, Consumer)"
+      "origen": "Dossier — Integrated business planning (p. 35, Consumer)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 35,
+          "hasta": 36,
+          "texto": "Integrated business planning"
+        }
+      ]
     },
     {
       "id": "IA-060",
@@ -412,7 +743,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Analítica y decisión",
       "poc": true,
-      "origen": "FinanceAI — Predictive cash flow forecasting tool"
+      "origen": "FinanceAI — Predictive cash flow forecasting tool",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Predictive cash flow forecasting tool"
+        }
+      ]
     },
     {
       "id": "IA-061",
@@ -421,7 +759,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "FinanceAI — Enhance cash flow analysis, minimizing liquidity risks, improving forecasting accuracy, and maximizing returns on cash holdings"
+      "origen": "FinanceAI — Enhance cash flow analysis, minimizing liquidity risks, improving forecasting accuracy, and maximizing returns on cash holdings",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 4,
+          "texto": "Enhance cash flow analysis, minimizing liquidity risks, improving forecasting accuracy, and maximizing returns on cash holdings"
+        }
+      ]
     },
     {
       "id": "IA-062",
@@ -430,7 +775,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — Intraday liquidity optimization (p. 75, Financial Services)"
+      "origen": "Dossier — Intraday liquidity optimization (p. 75, Financial Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 75,
+          "hasta": 76,
+          "texto": "Intraday liquidity optimization"
+        }
+      ]
     },
     {
       "id": "IA-063",
@@ -439,7 +792,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "FinanceAI — Optimize foreign exchange operations by evaluating foreign exchange data and identifying patterns and trends to reduce financial risks"
+      "origen": "FinanceAI — Optimize foreign exchange operations by evaluating foreign exchange data and identifying patterns and trends to reduce financial risks",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 4,
+          "texto": "Optimize foreign exchange operations by evaluating foreign exchange data by identifying patterns and trends to reduce financial risks"
+        }
+      ]
     },
     {
       "id": "IA-064",
@@ -448,7 +808,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — AI agents for algorithmic trading and market simulation (p. 71, Financial Services)"
+      "origen": "Dossier — AI agents for algorithmic trading and market simulation (p. 71, Financial Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 71,
+          "hasta": 72,
+          "texto": "AI agents for algorithmic trading and market simulation"
+        }
+      ]
     },
     {
       "id": "IA-065",
@@ -457,7 +825,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "Dossier — AI agents for credit underwriting (p. 73, Financial Services)"
+      "origen": "Dossier — AI agents for credit underwriting (p. 73, Financial Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 73,
+          "hasta": 74,
+          "texto": "AI agents for credit underwriting"
+        }
+      ]
     },
     {
       "id": "IA-066",
@@ -466,7 +842,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Analítica y decisión",
       "poc": true,
-      "origen": "FinanceAI — Predictive company valuation analyzing financial data"
+      "origen": "FinanceAI — Predictive company valuation analyzing financial data",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Predictive company valuation analyzing financial data"
+        }
+      ]
     },
     {
       "id": "IA-067",
@@ -475,7 +858,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "FinanceAI — Generate investing strategies from consolidated market conditions, internal financial performance, and firm objectives"
+      "origen": "FinanceAI — Generate investing strategies from consolidated market conditions, internal financial performance, and firm objectives",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 4,
+          "texto": "Generate investing strategies from consolidated market conditions, internal financial performance, and firm objectives"
+        }
+      ]
     },
     {
       "id": "IA-070",
@@ -484,7 +874,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Accurate tax report generation"
+      "origen": "FinanceAI — Accurate tax report generation",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Accurate tax report generation"
+        }
+      ]
     },
     {
       "id": "IA-071",
@@ -493,7 +890,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Automate tax filing processes, analyze financial data, and generate accurate tax reports"
+      "origen": "FinanceAI — Automate tax filing processes, analyze financial data, and generate accurate tax reports",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 4,
+          "texto": "Automate tax filing processes, analyze financial data, and generate accurate tax reports"
+        }
+      ]
     },
     {
       "id": "IA-072",
@@ -502,7 +906,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "FinanceAI — Evaluate tax laws and regulations and provide recommendations for tax planning, compliance, and risk management"
+      "origen": "FinanceAI — Evaluate tax laws and regulations and provide recommendations for tax planning, compliance, and risk management",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 4,
+          "texto": "Evaluate tax laws and regulations and provide recommendations for tax planning, compliance, and risk management"
+        }
+      ]
     },
     {
       "id": "IA-073",
@@ -511,7 +922,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "FinanceAI — Predictive tax planning, compliance, and risk management"
+      "origen": "FinanceAI — Predictive tax planning, compliance, and risk management",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Predictive tax planning, compliance, and risk management"
+        }
+      ]
     },
     {
       "id": "IA-080",
@@ -520,7 +938,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": true,
-      "origen": "FinanceAI — Automated invoice error detection & correction"
+      "origen": "FinanceAI — Automated invoice error detection & correction",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "Automated invoice error detection & correction"
+        }
+      ]
     },
     {
       "id": "IA-081",
@@ -529,7 +954,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "FinanceAI — Generate customized invoices for nonstandard customer orders"
+      "origen": "FinanceAI — Generate customized invoices for nonstandard customer orders",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "Generate customized invoices for nonstandard customer orders"
+        }
+      ]
     },
     {
       "id": "IA-082",
@@ -538,7 +970,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Valor de negocio",
       "poc": true,
-      "origen": "FinanceAI — Facilitate payment collection to identify collections gaps and automate outreach"
+      "origen": "FinanceAI — Facilitate payment collection to identify collections gaps and automate outreach",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "Facilitate payment collection to identify collections gaps and automate outreach and processing"
+        }
+      ]
     },
     {
       "id": "IA-083",
@@ -547,7 +986,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "FinanceAI — Recommend optimal payment terms to improve DSO"
+      "origen": "FinanceAI — Recommend optimal payment terms to improve DSO",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Recommend optimal payment terms to improve DSO"
+        }
+      ]
     },
     {
       "id": "IA-084",
@@ -556,7 +1002,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Valor de negocio",
       "poc": true,
-      "origen": "FinanceAI — Recommend most optimal payment timing"
+      "origen": "FinanceAI — Recommend most optimal payment timing",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Recommend most optimal payment timing"
+        }
+      ]
     },
     {
       "id": "IA-085",
@@ -565,7 +1018,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "FinanceAI — Predicts late payments or defaults"
+      "origen": "FinanceAI — Predicts late payments or defaults",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 2,
+          "texto": "Predicts late payments or defaults"
+        }
+      ]
     },
     {
       "id": "IA-086",
@@ -574,7 +1034,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": true,
-      "origen": "FinanceAI — Read customer contracts and identify performance obligations"
+      "origen": "FinanceAI — Read customer contracts and identify performance obligations",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 2,
+          "texto": "Read customer contracts and identify performance obligations for revenue recognition"
+        }
+      ]
     },
     {
       "id": "IA-087",
@@ -583,7 +1050,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "FinanceAI — Using data from contract management system, forecast monthly expense for all third-party contracts"
+      "origen": "FinanceAI — Using data from contract management system, forecast monthly expense for all third-party contracts",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "Using data from contract management system, forecast monthly expense for all third-party contracts"
+        }
+      ]
     },
     {
       "id": "IA-088",
@@ -592,7 +1066,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "Dossier — Drafting contracts and SoWs (p. 117, Government & Public Services)"
+      "origen": "Dossier — Drafting contracts and SoWs (p. 117, Government & Public Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 117,
+          "hasta": 118,
+          "texto": "Drafting contracts and SoWs"
+        }
+      ]
     },
     {
       "id": "IA-089",
@@ -601,7 +1083,16 @@
       "tipoIa": "Analítica",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "Dossier — Supplier assessment, dentro de Resilient logistics and planning (p. 61, Energy, Resources & Industrials)"
+      "origen": "Dossier — Supplier assessment, dentro de Resilient logistics and planning (p. 61, Energy, Resources & Industrials)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 61,
+          "hasta": 62,
+          "texto": "Resilient logistics and planning",
+          "nota": "La evaluación de proveedores es una de las piezas del caso «Resilient logistics and planning»."
+        }
+      ]
     },
     {
       "id": "IA-090",
@@ -610,7 +1101,15 @@
       "tipoIa": "Analítica",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "Dossier — Resilient logistics and planning (p. 61, Energy, Resources & Industrials)"
+      "origen": "Dossier — Resilient logistics and planning (p. 61, Energy, Resources & Industrials)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 61,
+          "hasta": 62,
+          "texto": "Resilient logistics and planning"
+        }
+      ]
     },
     {
       "id": "IA-091",
@@ -619,7 +1118,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — Denial appeal letters (p. 139, Life Sciences & Health Care)"
+      "origen": "Dossier — Denial appeal letters (p. 139, Life Sciences & Health Care)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 139,
+          "hasta": 140,
+          "texto": "A co-writer for appeals"
+        }
+      ]
     },
     {
       "id": "IA-096",
@@ -628,7 +1135,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — AI-driven predictive maintenance (p. 41, Energy, Resources & Industrials)"
+      "origen": "Dossier — AI-driven predictive maintenance (p. 41, Energy, Resources & Industrials)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 41,
+          "hasta": 42,
+          "texto": "AI-driven predictive maintenance"
+        }
+      ]
     },
     {
       "id": "IA-100",
@@ -637,7 +1152,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "FinanceAI — Identify & proactively correct revenue leakage"
+      "origen": "FinanceAI — Identify & proactively correct revenue leakage",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 2,
+          "texto": "Identify & proactively correct revenue leakage"
+        }
+      ]
     },
     {
       "id": "IA-101",
@@ -646,7 +1168,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Valor de negocio",
       "poc": true,
-      "origen": "FinanceAI — Recommend demand planning, product costing, and pricing setting"
+      "origen": "FinanceAI — Recommend demand planning, product costing, and pricing setting",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Recommend demand planning, product costing, and pricing setting"
+        }
+      ]
     },
     {
       "id": "IA-102",
@@ -655,7 +1184,14 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "FinanceAI — Examine market trends, supplier behavior, and other factors to determine optimal prices"
+      "origen": "FinanceAI — Examine market trends, supplier behavior, and other factors to determine optimal prices",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 3,
+          "texto": "Examine market trends, supplier behavior, and other relevant factors to determine optimal prices, make pricing adjustments, and maximize profitability"
+        }
+      ]
     },
     {
       "id": "IA-103",
@@ -664,7 +1200,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — Dynamic pricing and inventory optimization (p. 7, Consumer)"
+      "origen": "Dossier — Dynamic pricing and inventory optimization (p. 7, Consumer)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 7,
+          "hasta": 8,
+          "texto": "Dynamic pricing and inventory optimization"
+        }
+      ]
     },
     {
       "id": "IA-104",
@@ -673,7 +1217,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — Planning for promotions (p. 21, Consumer)"
+      "origen": "Dossier — Planning for promotions (p. 21, Consumer)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 21,
+          "hasta": 22,
+          "texto": "Planning for promotions"
+        }
+      ]
     },
     {
       "id": "IA-105",
@@ -682,7 +1234,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — Intelligent commercial operations (p. 47, Energy, Resources & Industrials)"
+      "origen": "Dossier — Intelligent commercial operations (p. 47, Energy, Resources & Industrials)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 47,
+          "hasta": 48,
+          "texto": "Intelligent commercial operations"
+        }
+      ]
     },
     {
       "id": "IA-106",
@@ -691,7 +1251,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "Dossier — AI-powered RFP and knowledge assistant (p. 181, Technology, Media & Telecommunications)"
+      "origen": "Dossier — AI-powered RFP and knowledge assistant (p. 181, Technology, Media & Telecommunications)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 181,
+          "hasta": 182,
+          "texto": "AI-powered RFP and knowledge assistant"
+        }
+      ]
     },
     {
       "id": "IA-107",
@@ -700,7 +1268,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — Hyper-personalized sales and marketing assistant (p. 87, Financial Services)"
+      "origen": "Dossier — Hyper-personalized sales and marketing assistant (p. 87, Financial Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 87,
+          "hasta": 88,
+          "texto": "Customized marketing for the individual"
+        }
+      ]
     },
     {
       "id": "IA-108",
@@ -709,7 +1285,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — AI agents for customer success (p. 159, Technology, Media & Telecommunications)"
+      "origen": "Dossier — AI agents for customer success (p. 159, Technology, Media & Telecommunications)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 159,
+          "hasta": 160,
+          "texto": "AI agents for customer success"
+        }
+      ]
     },
     {
       "id": "IA-110",
@@ -718,7 +1302,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — Dynamic inventory management (p. 135, Life Sciences & Health Care)"
+      "origen": "Dossier — Dynamic inventory management (p. 135, Life Sciences & Health Care)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 135,
+          "hasta": 136,
+          "texto": "Dynamic inventory management"
+        }
+      ]
     },
     {
       "id": "IA-111",
@@ -727,7 +1319,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — Autonomous supply chain operations (p. 13, Consumer)"
+      "origen": "Dossier — Autonomous supply chain operations (p. 13, Consumer)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 13,
+          "hasta": 14,
+          "texto": "Autonomous supply chain operations"
+        }
+      ]
     },
     {
       "id": "IA-112",
@@ -736,7 +1336,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — AI-orchestrated product design (p. 9, Consumer)"
+      "origen": "Dossier — AI-orchestrated product design (p. 9, Consumer)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 9,
+          "hasta": 10,
+          "texto": "AI-orchestrated product design"
+        }
+      ]
     },
     {
       "id": "IA-113",
@@ -745,7 +1353,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — Smarter clinical trials (p. 133, Life Sciences & Health Care)"
+      "origen": "Dossier — Smarter clinical trials (p. 133, Life Sciences & Health Care)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 133,
+          "hasta": 134,
+          "texto": "Smarter clinical trials"
+        }
+      ]
     },
     {
       "id": "IA-114",
@@ -754,7 +1370,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier — End-to-end autonomous drug discovery and development (p. 137, Life Sciences & Health Care)"
+      "origen": "Dossier — End-to-end autonomous drug discovery and development (p. 137, Life Sciences & Health Care)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 137,
+          "hasta": 138,
+          "texto": "End-to-end autonomous drug discovery and development"
+        }
+      ]
     },
     {
       "id": "IA-120",
@@ -763,7 +1387,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "FinanceAI — Predictive compliance monitoring"
+      "origen": "FinanceAI — Predictive compliance monitoring",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Predictive compliance monitoring"
+        }
+      ]
     },
     {
       "id": "IA-121",
@@ -772,7 +1403,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "Dossier — AI-powered risk management and regulatory compliance (p. 67, Financial Services)"
+      "origen": "Dossier — AI-powered risk management and regulatory compliance (p. 67, Financial Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 67,
+          "hasta": 68,
+          "texto": "AI-powered risk management and regulatory compliance"
+        }
+      ]
     },
     {
       "id": "IA-122",
@@ -781,7 +1420,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "Dossier — AI-supported regulatory examinations and inspections (p. 97, Government & Public Services)"
+      "origen": "Dossier — AI-supported regulatory examinations and inspections (p. 97, Government & Public Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 97,
+          "hasta": 98,
+          "texto": "AI-supported regulatory examinations and inspections"
+        }
+      ]
     },
     {
       "id": "IA-123",
@@ -790,7 +1437,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Habilitador transversal",
       "poc": false,
-      "origen": "Dossier — Synthetic data generation (p. 81, Financial Services)"
+      "origen": "Dossier — Synthetic data generation (p. 81, Financial Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 81,
+          "hasta": 82,
+          "texto": "Fixing the missing data issue"
+        }
+      ]
     },
     {
       "id": "IA-124",
@@ -799,7 +1454,15 @@
       "tipoIa": "Analítica",
       "tipoValor": "Habilitador transversal",
       "poc": false,
-      "origen": "Dossier — AI-driven vulnerability management (p. 93, Financial Services)"
+      "origen": "Dossier — AI-driven vulnerability management (p. 93, Financial Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 93,
+          "hasta": 94,
+          "texto": "Focused cyber"
+        }
+      ]
     },
     {
       "id": "IA-127",
@@ -808,7 +1471,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "Dossier — Research-based report generation / KYC (p. 83, Financial Services)"
+      "origen": "Dossier — Research-based report generation / KYC (p. 83, Financial Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 83,
+          "hasta": 84,
+          "texto": "Getting to know your customer"
+        }
+      ]
     },
     {
       "id": "IA-130",
@@ -817,7 +1488,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "FinanceAI — Recommend, summarize, and detect risk from M&A cleanroom data"
+      "origen": "FinanceAI — Recommend, summarize, and detect risk from M&A cleanroom data",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Recommend, summarize, and detect risk from M&A cleanroom data"
+        }
+      ]
     },
     {
       "id": "IA-131",
@@ -826,7 +1504,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Habilitador transversal",
       "poc": false,
-      "origen": "Dossier — Code assistant for digital transformation (p. 77, Financial Services)"
+      "origen": "Dossier — Code assistant for digital transformation (p. 77, Financial Services)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 77,
+          "hasta": 78,
+          "texto": "Transformation with speed and confidence"
+        }
+      ]
     },
     {
       "id": "IA-132",
@@ -835,7 +1521,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Habilitador transversal",
       "poc": false,
-      "origen": "Dossier — AI agents for software engineering (p. 161, Technology, Media & Telecommunications)"
+      "origen": "Dossier — AI agents for software engineering (p. 161, Technology, Media & Telecommunications)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 161,
+          "hasta": 162,
+          "texto": "AI agents for software engineering"
+        }
+      ]
     },
     {
       "id": "IA-133",
@@ -844,7 +1538,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "Dossier — Next-level market intelligence (p. 33, Consumer)"
+      "origen": "Dossier — Next-level market intelligence (p. 33, Consumer)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 33,
+          "hasta": 34,
+          "texto": "Next-level market intelligence"
+        }
+      ]
     },
     {
       "id": "IA-134",
@@ -853,7 +1555,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "Dossier — Marketing content assistant (p. 19, Consumer)"
+      "origen": "Dossier — Marketing content assistant (p. 19, Consumer)",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 19,
+          "hasta": 20,
+          "texto": "Marketing content assistant"
+        }
+      ]
     },
     {
       "id": "IA-135",
@@ -862,7 +1572,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": true,
-      "origen": "Slide FinanceAI «What AI Use Cases exist for Finance?», Investor Relations"
+      "origen": "Slide FinanceAI «What AI Use Cases exist for Finance?», Investor Relations",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 19,
+          "texto": "Proof of Concept | Investor Relations Analyst Augmentation"
+        }
+      ]
     },
     {
       "id": "IA-136",
@@ -871,7 +1588,16 @@
       "tipoIa": "Generativa",
       "tipoValor": "Analítica y decisión",
       "poc": true,
-      "origen": "Slide FinanceAI, Strategic Finance"
+      "origen": "Slide FinanceAI, Strategic Finance",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Strategic Finance",
+          "alcance": "area",
+          "nota": "El caso no aparece con estas palabras en el documento: la diapositiva recoge su área, Strategic Finance."
+        }
+      ]
     },
     {
       "id": "IA-137",
@@ -880,7 +1606,16 @@
       "tipoIa": "Analítica",
       "tipoValor": "Control y cumplimiento",
       "poc": true,
-      "origen": "Slide FinanceAI, Source-to-Pay"
+      "origen": "Slide FinanceAI, Source-to-Pay",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Source-to-Pay",
+          "alcance": "area",
+          "nota": "El caso no aparece con estas palabras en el documento: la diapositiva recoge su área, Source-to-Pay."
+        }
+      ]
     },
     {
       "id": "IA-138",
@@ -889,7 +1624,16 @@
       "tipoIa": "Analítica",
       "tipoValor": "Analítica y decisión",
       "poc": true,
-      "origen": "Slide FinanceAI, Source-to-Pay"
+      "origen": "Slide FinanceAI, Source-to-Pay",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Source-to-Pay",
+          "alcance": "area",
+          "nota": "El caso no aparece con estas palabras en el documento: la diapositiva recoge su área, Source-to-Pay."
+        }
+      ]
     },
     {
       "id": "IA-139",
@@ -898,7 +1642,14 @@
       "tipoIa": "Analítica",
       "tipoValor": "Analítica y decisión",
       "poc": false,
-      "origen": "Catálogo maestro F3M_AI_Mapping_Consolidado_v1, fila 39, encaje Alto"
+      "origen": "Catálogo maestro F3M_AI_Mapping_Consolidado_v1, fila 39, encaje Alto",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Enable predictive challenger models to test various scenarios"
+        }
+      ]
     },
     {
       "id": "IA-140",
@@ -907,7 +1658,15 @@
       "tipoIa": "Agéntica",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "Catálogo maestro, fila 82; dossier p. 85, Financial Services"
+      "origen": "Catálogo maestro, fila 82; dossier p. 85, Financial Services",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 85,
+          "hasta": 86,
+          "texto": "Enhanced AI support for customers"
+        }
+      ]
     },
     {
       "id": "IA-141",
@@ -916,7 +1675,16 @@
       "tipoIa": "Generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "Slide FinanceAI, Tax"
+      "origen": "Slide FinanceAI, Tax",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Tax",
+          "alcance": "area",
+          "nota": "El caso no aparece con estas palabras en el documento: la diapositiva recoge su área, Tax."
+        }
+      ]
     },
     {
       "id": "IA-142",
@@ -925,7 +1693,14 @@
       "tipoIa": "Generativa",
       "tipoValor": "Eficiencia operativa",
       "poc": false,
-      "origen": "Slide FinanceAI, Internal Audit"
+      "origen": "Slide FinanceAI, Internal Audit",
+      "fuentes": [
+        {
+          "documento": "financeai",
+          "pagina": 5,
+          "texto": "Draft audit report generation"
+        }
+      ]
     },
     {
       "id": "IA-143",
@@ -934,7 +1709,15 @@
       "tipoIa": "Generativa",
       "tipoValor": "Control y cumplimiento",
       "poc": false,
-      "origen": "Dossier p. 183, Technology, Media & Telecommunications"
+      "origen": "Dossier p. 183, Technology, Media & Telecommunications",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 183,
+          "hasta": 184,
+          "texto": "Automated test case generation"
+        }
+      ]
     },
     {
       "id": "IA-144",
@@ -943,7 +1726,15 @@
       "tipoIa": "Analítica + generativa",
       "tipoValor": "Valor de negocio",
       "poc": false,
-      "origen": "Dossier p. 101, Government & Public Services"
+      "origen": "Dossier p. 101, Government & Public Services",
+      "fuentes": [
+        {
+          "documento": "ai-dossier",
+          "pagina": 101,
+          "hasta": 102,
+          "texto": "AI-enhanced benefits eligibility"
+        }
+      ]
     }
   ]
 }

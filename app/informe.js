@@ -12,23 +12,23 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=12";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=12";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=12";
-import { showNotice } from "./avisos.js?v=12";
-import { getActiveDomainConfig } from "./dominios.js?v=12";
-import { DOMAINS, els, state } from "./estado.js?v=12";
-import { getVisibleItems } from "./filtros.js?v=12";
-import { getScenarioShortLabel } from "./firebase.js?v=12";
+} from "../core/calculo.js?v=13";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=13";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=13";
+import { showNotice } from "./avisos.js?v=13";
+import { getActiveDomainConfig } from "./dominios.js?v=13";
+import { DOMAINS, els, state } from "./estado.js?v=13";
+import { getVisibleItems } from "./filtros.js?v=13";
+import { getScenarioShortLabel } from "./firebase.js?v=13";
 import {
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
-} from "./graficos.js?v=12";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=12";
-import { getAiDataForItem } from "./subcapacidad.js?v=12";
-import { renderDashboard } from "./vistas/dashboard.js?v=12";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=12";
+} from "./graficos.js?v=13";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=13";
+import { getAiDataForItem } from "./subcapacidad.js?v=13";
+import { renderDashboard } from "./vistas/dashboard.js?v=13";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=13";
 import { get } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
 
