@@ -15,9 +15,9 @@ import {
   DEFAULT_TARGET_MATURITY,
   normalizeTargetValue,
   unique,
-} from "./calculo.js?v=13";
+} from "./calculo.js?v=14";
 
-import { normalizeMatchKey } from "./coincidencias.js?v=13";
+import { capacidadVigente, normalizeMatchKey } from "./coincidencias.js?v=14";
 
 
 /** Una entrada por capacidad, las tres palancas al objetivo por defecto. */
@@ -76,16 +76,26 @@ export function normalizeDomainTargets(
         };
       });
 
-  savedTargetsArray.forEach((savedTarget) => {
+  const capacidades = Object.keys(targets);
+
+  // Los que vienen con el nombre que la capacidad tuvo van primero, para que
+  // si el escenario trae los dos —el antiguo y el vigente— gane el vigente, que
+  // es el que se escribio despues.
+  const porSuNombre = (savedTarget) => capacidades.some(
+    (capability) => normalizeMatchKey(capability) === normalizeMatchKey(savedTarget?.capacidad),
+  );
+
+  [
+    ...savedTargetsArray.filter((savedTarget) => !porSuNombre(savedTarget)),
+    ...savedTargetsArray.filter(porSuNombre),
+  ].forEach((savedTarget) => {
     const savedCapability = savedTarget?.capacidad;
 
     if (!savedCapability) {
       return;
     }
 
-    const matchingCapability = Object.keys(targets).find(
-      (capability) => normalizeMatchKey(capability) === normalizeMatchKey(savedCapability),
-    );
+    const matchingCapability = capacidadVigente(savedCapability, capacidades);
 
     if (!matchingCapability) {
       return;

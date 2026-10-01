@@ -382,8 +382,8 @@ export function agregarPorCapacidad(items, metricasDe, objetivosDe) {
  * promediadas daria otro numero que el del PDF.
  *
  * metricasDe(item, domainId) y objetivosDe(capacidad, domainId) reciben el
- * dominio porque el mismo nombre de capacidad existe en dos dominios distintos
- * —"Contabilidad y provision fiscal", en Fiscal y en Tesoreria— y no tienen por
+ * dominio porque el mismo nombre de capacidad puede existir en dos dominios
+ * —"Contabilidad y provision fiscal" estuvo en Fiscal y en Tesoreria— y no tienen por
  * que compartir objetivo.
  */
 export function agregarPorDominio(dominios, metricasDe, objetivosDe) {

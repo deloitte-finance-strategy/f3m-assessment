@@ -6,9 +6,9 @@
  * via getDominiosDelOverview() y no getScopedItems().
  */
 
-import { rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=13";
-import { escapeHtml, formatNumber } from "../../core/presentacion.js?v=13";
-import { kpiCard, priorityBadge, renderLeverBars, renderPriorityBars } from "../celdas.js?v=13";
+import { rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=14";
+import { escapeHtml, formatNumber } from "../../core/presentacion.js?v=14";
+import { kpiCard, priorityBadge, renderLeverBars, renderPriorityBars } from "../celdas.js?v=14";
 import {
   DOMAINS,
   GRUPOS_DE_DOMINIO,
@@ -16,9 +16,9 @@ import {
   els,
   state,
   syncActiveDomainState,
-} from "../estado.js?v=13";
-import { renderOverviewRadar } from "../graficos.js?v=13";
-import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=13";
+} from "../estado.js?v=14";
+import { renderOverviewRadar } from "../graficos.js?v=14";
+import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=14";
 
 
 /**

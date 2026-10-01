@@ -69,7 +69,7 @@
     -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23012169'/%3E%3Crect x='7' y='19' width='5' height='7' rx='1.5' fill='%2386BC25'/%3E%3Crect x='13.5' y='14' width='5' height='12' rx='1.5' fill='%2386BC25'/%3E%3Crect x='20' y='8' width='5' height='18' rx='1.5' fill='%2386BC25'/%3E%3C/svg%3E">
 
-    <link rel="stylesheet" href="styles.css?v=13">
+    <link rel="stylesheet" href="styles.css?v=14">
 
     <!--
       Resuelve el tema y la densidad antes del primer pintado. Va aqui, sincrono
@@ -79,7 +79,7 @@
       En linea no puede ir: la CSP no admite scripts sin archivo, que es
       justamente la directiva que cierra la inyeccion de codigo.
     -->
-    <script src="tema.js?v=13"></script>
+    <script src="tema.js?v=14"></script>
   </head>
   <body>
     <!--
@@ -277,36 +277,17 @@
 
         <p class="dashboard-headline" id="overviewHeadline" hidden></p>
 
-        <div class="split-grid">
-          <div class="panel">
-            <div class="panel-heading">
-              <h3>Prioridad por subcapacidad</h3>
-              <span class="small-note">Todos los dominios cargados, sin filtros</span>
-            </div>
-            <div class="priority-bars" id="overviewPriorityBars"></div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-heading">
-              <h3>Promedio por palanca</h3>
-              <span class="small-note">Solo scores informados</span>
-            </div>
-            <div class="lever-bars" id="overviewLeverBars"></div>
-          </div>
-        </div>
-
-        <div class="table-wrap panel">
-          <div class="panel-heading">
-            <h3>Resumen por dominio</h3>
-            <span class="small-note">Cada dominio contra sus propios objetivos por capacidad y palanca</span>
-          </div>
-          <table class="data-table" id="overviewSummaryTable"></table>
-        </div>
+        <!--
+          Los radares van justo debajo de las cuatro tarjetas, y no al final:
+          son lo primero que se ensena en un taller y quedaban a tres pantallas
+          de scroll, detras de las barras y de la tabla. Sus ejes se pueden
+          pulsar para entrar en ese dominio (ver app/graficos.js).
+        -->
 
         <div class="summary-radar-block">
           <div class="panel-heading radar-heading">
             <h3>Radar por dominio</h3>
-            <span class="small-note">Comparativa entre madurez actual y objetivo, dominio a dominio</span>
+            <span class="small-note">Comparativa entre madurez actual y objetivo, dominio a dominio. Pulsa un dominio para abrir su Dashboard</span>
           </div>
 
           <div class="radar-grid radar-grid-overview">
@@ -341,6 +322,32 @@
             </article>
           </div>
         </div>
+
+        <div class="split-grid">
+          <div class="panel">
+            <div class="panel-heading">
+              <h3>Prioridad por subcapacidad</h3>
+              <span class="small-note">Todos los dominios cargados, sin filtros</span>
+            </div>
+            <div class="priority-bars" id="overviewPriorityBars"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading">
+              <h3>Promedio por palanca</h3>
+              <span class="small-note">Solo scores informados</span>
+            </div>
+            <div class="lever-bars" id="overviewLeverBars"></div>
+          </div>
+        </div>
+
+        <div class="table-wrap panel">
+          <div class="panel-heading">
+            <h3>Resumen por dominio</h3>
+            <span class="small-note">Cada dominio contra sus propios objetivos por capacidad y palanca</span>
+          </div>
+          <table class="data-table" id="overviewSummaryTable"></table>
+        </div>
       </section>
 
       <section id="dashboard" class="section-block">
@@ -365,36 +372,17 @@
 
         <p class="dashboard-headline" id="dashboardHeadline" hidden></p>
 
-        <div class="split-grid">
-          <div class="panel">
-            <div class="panel-heading">
-              <h3>Prioridad por subcapacidad</h3>
-              <span class="small-note">Basado en los objetivos configurados por capacidad</span>
-            </div>
-            <div class="priority-bars" id="priorityBars"></div>
-          </div>
+        <!--
+          Los radares van justo debajo de las cuatro tarjetas, y no al final:
+          son lo primero que se ensena en un taller y quedaban a tres pantallas
+          de scroll, detras de las barras y de la tabla. Sus ejes se pueden
+          pulsar para entrar en ese capacidad (ver app/graficos.js).
+        -->
 
-          <div class="panel">
-            <div class="panel-heading">
-              <h3>Promedio por palanca</h3>
-              <span class="small-note">Solo scores informados</span>
-            </div>
-            <div class="lever-bars" id="leverBars"></div>
-          </div>
-        </div>
-
-        <div class="table-wrap panel">
-          <div class="panel-heading">
-            <h3>Resumen por capacidad</h3>
-          <span class="small-note">Promedios calculados desde las subcapacidades visibles en el modelo</span>
-          </div>
-            <table class="data-table" id="summaryTable"></table>
-          </div>
-
-                <div class="summary-radar-block">
+        <div class="summary-radar-block">
           <div class="panel-heading radar-heading">
             <h3>Radar por capacidad</h3>
-            <span class="small-note">Comparativa entre madurez actual y objetivo definido por capacidad</span>
+            <span class="small-note">Comparativa entre madurez actual y objetivo definido por capacidad. Pulsa una capacidad para verla en el Heatmap</span>
           </div>
 
           <div class="radar-grid">
@@ -429,6 +417,32 @@
             </article>
           </div>
         </div>
+
+        <div class="split-grid">
+          <div class="panel">
+            <div class="panel-heading">
+              <h3>Prioridad por subcapacidad</h3>
+              <span class="small-note">Basado en los objetivos configurados por capacidad</span>
+            </div>
+            <div class="priority-bars" id="priorityBars"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading">
+              <h3>Promedio por palanca</h3>
+              <span class="small-note">Solo scores informados</span>
+            </div>
+            <div class="lever-bars" id="leverBars"></div>
+          </div>
+        </div>
+
+        <div class="table-wrap panel">
+          <div class="panel-heading">
+            <h3>Resumen por capacidad</h3>
+          <span class="small-note">Promedios calculados desde las subcapacidades visibles en el modelo</span>
+          </div>
+            <table class="data-table" id="summaryTable"></table>
+          </div>
       </section>
 
 
@@ -997,7 +1011,7 @@
       NUMERO AQUI Y EN TODOS LOS IMPORTS. Lo comprueba el CI:
       python scripts/check_module_version.py
     -->
-    <script type="module" src="app.js?v=13"></script>
+    <script type="module" src="app.js?v=14"></script>
   </body>
 </html>
 

@@ -24,10 +24,10 @@ import {
   normalizarBiblioteca,
   ubicacionDeFuente,
   urlDeDocumento,
-} from "../core/biblioteca.js?v=13";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=13";
-import { atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=13";
-import { BIBLIOTECA, BIBLIOTECA_URL, CASOS_DE_IA, els } from "./estado.js?v=13";
+} from "../core/biblioteca.js?v=14";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=14";
+import { atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=14";
+import { BIBLIOTECA, BIBLIOTECA_URL, CASOS_DE_IA, els } from "./estado.js?v=14";
 
 
 /**
