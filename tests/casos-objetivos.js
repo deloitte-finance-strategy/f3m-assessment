@@ -9,7 +9,7 @@ import {
   createDefaultTargets,
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "../core/objetivos.js?v=14";
+} from "../core/objetivos.js?v=15";
 
 
 const ITEMS = [

@@ -3100,8 +3100,18 @@ border-color: var(--line-tenue);
    en una caja de 780px de alto el texto del PDF no se lee proyectado.
    ================================================== */
 
+/* Las filas van por nombre y no por posicion. Al abrir un documento entero
+   —«Abrir aquí»— el contexto del caso va oculto, y un hijo con display: none
+   no ocupa fila: por posicion, el marco caia en la fila automatica, que para
+   un iframe son 150px, y la flexible se la quedaban los enlaces de abajo. Con
+   nombre, la fila del contexto se queda vacia y mide cero. */
 .criteria-modal.visor-modal {
   display: grid;
+  grid-template-areas:
+    "cabecera"
+    "contexto"
+    "marco"
+    "acciones";
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   width: min(1180px, 100%);
   height: min(92vh, 1100px);
@@ -3109,11 +3119,16 @@ border-color: var(--line-tenue);
   overflow: hidden;
 }
 
+.visor-cabecera {
+  grid-area: cabecera;
+}
+
 .visor-datos {
   margin-top: 4px;
 }
 
 .visor-contexto {
+  grid-area: contexto;
   display: grid;
   gap: 6px;
   max-height: 32vh;
@@ -3199,6 +3214,7 @@ border-color: var(--line-tenue);
 }
 
 .visor-marco {
+  grid-area: marco;
   min-height: 0;
   background: var(--surface-muted);
 }
@@ -3227,6 +3243,7 @@ border-color: var(--line-tenue);
 }
 
 .visor-acciones {
+  grid-area: acciones;
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;

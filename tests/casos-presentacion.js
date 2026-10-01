@@ -9,7 +9,7 @@
  * el navegador, o node tests/ejecutar.mjs desde la linea de comandos.
  */
 
-import { escapeAttr, escapeHtml, formatNumber } from "../core/presentacion.js?v=14";
+import { escapeAttr, escapeHtml, formatNumber } from "../core/presentacion.js?v=15";
 
 
 export const casos = [

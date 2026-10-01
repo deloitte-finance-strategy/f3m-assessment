@@ -61,7 +61,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 221 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 408 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 601 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.882 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.899 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
