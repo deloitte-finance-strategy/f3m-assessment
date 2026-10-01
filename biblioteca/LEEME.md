@@ -27,17 +27,19 @@ Un navegador no sabe enseñar un `.pptx`, y un PDF sí, y además en una página
 (`the-ai-dossier.pdf#page=123`). Así que dentro de la herramienta se ve el PDF, con una página por
 diapositiva, y lo que se descarga es el original, que es lo que el consultor querrá reutilizar.
 
-**El PDF de ahora está exportado con LibreOffice**, no con PowerPoint, porque se generó en un
-equipo sin Office. Se ve bien salvo en un detalle: **la tabla de la diapositiva 4 se corta por
-abajo**. Conviene sustituirlo por la exportación del propio PowerPoint:
+**El PDF se exporta desde el propio PowerPoint**, no con otra herramienta. El primero se sacó con
+LibreOffice y cortaba por abajo la tabla de la diapositiva 4: delante del cliente, una fuente
+cortada parece un fallo de la herramienta. Si el PowerPoint cambia, el PDF se vuelve a sacar así:
 
 1. Abrir `financeai-use-cases-summary.pptx` en PowerPoint.
 2. **Archivo → Exportar → Crear documento PDF/XPS**. En **Opciones**: intervalo **Todas**,
    publicar **Diapositivas** (no Documentos ni Páginas de notas) y, si alguna vez las hay,
    **Incluir diapositivas ocultas**: sin ellas, las páginas dejan de coincidir con las
    diapositivas.
-3. Guardarlo con el mismo nombre, `financeai-use-cases-summary.pdf`, encima del actual.
-4. Comprobar que tiene **19 páginas**, una por diapositiva y en el mismo orden.
+3. Guardarlo con el mismo nombre, `financeai-use-cases-summary.pdf`, encima del actual, y subir
+   también el `.pptx` nuevo, que es lo que se descarga.
+4. Comprobar que tiene **19 páginas**, una por diapositiva y en el mismo orden. Si cambian el
+   número o el orden, hay que actualizar `total` y repasar las diapositivas de sus casos.
 
 Con el mismo nombre y las mismas páginas no hay que tocar nada más: ni el JSON ni el código.
 
