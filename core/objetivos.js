@@ -15,9 +15,9 @@ import {
   DEFAULT_TARGET_MATURITY,
   normalizeTargetValue,
   unique,
-} from "./calculo.js?v=14";
+} from "./calculo.js?v=15";
 
-import { capacidadVigente, normalizeMatchKey } from "./coincidencias.js?v=14";
+import { capacidadVigente, normalizeMatchKey } from "./coincidencias.js?v=15";
 
 
 /** Una entrada por capacidad, las tres palancas al objetivo por defecto. */

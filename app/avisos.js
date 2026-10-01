@@ -8,8 +8,8 @@
  * palabra antes de borrar el trabajo de nueve dominios.
  */
 
-import { els } from "./estado.js?v=14";
-import { escapeHtml } from "../core/presentacion.js?v=14";
+import { els } from "./estado.js?v=15";
+import { escapeHtml } from "../core/presentacion.js?v=15";
 
 
 /**
