@@ -8,13 +8,14 @@
  */
 
 import {
+  capacidadVigente,
   findMatchingScenarioItem,
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
   normalizeMatchKey,
   toSavedItemsArray,
-} from "../core/coincidencias.js?v=12";
+} from "../core/coincidencias.js?v=13";
 
 
 const CARGADOS = [
@@ -199,4 +200,36 @@ export const casos = [
       t.igual(findMatchingScenarioItem(CARGADOS, { id: "inventado-9-9" }), undefined);
     },
   },
+
+  // ------------------------------------------------ capacidades renombradas
+  {
+    grupo: "Capacidades renombradas",
+    nombre: "una subcapacidad guardada sin id con el nombre antiguo se reconoce",
+    ejecutar: (t) => {
+      const tesoreria = [
+        { id: "tesoreria-1-1", capacidad: "Control y tratamiento contable", subcapacidad: "1.1 Gobierno contable-fiscal de operaciones de tesorería" },
+        { id: "tesoreria-2-1", capacidad: "Inversiones", subcapacidad: "2.1 Política de inversiones" },
+      ];
+
+      const encontrado = findMatchingScenarioItem(tesoreria, {
+        capacidad: "Contabilidad y provisión fiscal",
+        subcapacidad: "1.1 Gobierno contable-fiscal de operaciones de tesorería",
+      });
+
+      t.igual(encontrado?.id, "tesoreria-1-1");
+    },
+  },
+  {
+    grupo: "Capacidades renombradas",
+    nombre: "el nombre antiguo se queda en su sitio donde sigue existiendo",
+    ejecutar: (t) => {
+      const cargadas = ["Contabilidad y provisión fiscal", "Cumplimiento"];
+
+      t.igual(capacidadVigente("CONTABILIDAD Y PROVISION FISCAL", cargadas), "Contabilidad y provisión fiscal", "Fiscal");
+      t.igual(capacidadVigente("Contabilidad y provisión fiscal", ["Control y tratamiento contable"]), "Control y tratamiento contable", "Tesoreria");
+      t.igual(capacidadVigente("Contabilidad y provisión fiscal", ["Inversiones"]), undefined, "en otro dominio no es nada");
+      t.igual(capacidadVigente("", cargadas), undefined, "sin nombre");
+    },
+  },
 ];
+

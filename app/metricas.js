@@ -18,9 +18,9 @@ import {
   agregarPorDominio as agregarPorDominioCore,
   calcularMetricas,
   normalizeTargetValue,
-} from "../core/calculo.js?v=12";
+} from "../core/calculo.js?v=13";
 
-import { DOMAINS, state } from "./estado.js?v=12";
+import { DOMAINS, state } from "./estado.js?v=13";
 
 
 /**
@@ -35,8 +35,9 @@ import { DOMAINS, state } from "./estado.js?v=12";
  * El dominio es un parametro y no state.activeDomainId porque el Overview
  * agrega los nueve a la vez: con el dominio activo de por medio, los gaps de
  * los otros ocho salian calculados contra objetivos que no eran los suyos. Y la
- * clave de la cache lo lleva por lo mismo: "Contabilidad y provision fiscal"
- * existe en Fiscal y en Tesoreria, y no tienen por que compartir objetivo.
+ * clave de la cache lo lleva por lo mismo: un nombre de capacidad puede
+ * repetirse entre dominios —"Contabilidad y provision fiscal" estuvo en Fiscal y
+ * en Tesoreria—, y no tienen por que compartir objetivo.
  *
  * Nadie muta el objeto devuelto: las escrituras van a state.domains[..].targets,
  * que es el origen, no el resultado.
