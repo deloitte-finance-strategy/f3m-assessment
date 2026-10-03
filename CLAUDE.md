@@ -37,30 +37,30 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
 | `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.498 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 180 |
-| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 337 |
+| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 341 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 253 |
-| `app/graficos.js` | Los seis radares de Chart.js, y a dónde lleva pulsar sus ejes | 674 |
+| `app/graficos.js` | Los seis radares de Chart.js, y a dónde lleva pulsar sus ejes | 686 |
 | `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 185 |
-| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 447 |
+| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 450 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
-| `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 87 |
+| `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 88 |
 | `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 395 |
 | `app/firebase.js` | La conexión: configuración, referencia y límite de espera | 137 |
 | `app/identidad.js` | La sesión anónima y el nombre de quien edita | 234 |
 | `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 140 |
 | `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 766 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
-| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 222 |
+| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 231 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe: datos, radares y tema | 487 |
-| `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 405 |
+| `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 417 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 318 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 221 |
 | `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 638 |
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 221 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 408 |
-| `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 601 |
+| `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 607 |
 | `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.899 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
@@ -68,7 +68,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 509 |
 | `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
 | `core/presentacion.js` | Escapado, formato de números y colores de marca | 105 |
-| `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 410 |
+| `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 411 |
 | `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 369 |
 | `informe/secciones.js` | Una función por diapositiva | 830 |
 | `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 302 |

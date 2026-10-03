@@ -8,8 +8,8 @@
  * palabra antes de borrar el trabajo de nueve dominios.
  */
 
-import { els } from "./estado.js?v=15";
-import { escapeHtml } from "../core/presentacion.js?v=15";
+import { els } from "./estado.js?v=16";
+import { escapeHtml } from "../core/presentacion.js?v=16";
 
 
 /**
@@ -28,8 +28,16 @@ const REGIONES_DE_FONDO = [
 ];
 
 
-/** Los modales, por su clave en els. */
-const MODALES = ["scoringCriteriaModal", "aiInitiativeModal", "visorDocumento", "dialogModal"];
+/**
+ * Un modal abierto: todos llevan .modal-backdrop y se abren quitandoles hidden.
+ *
+ * Por la clase y no por una lista de ids: con lista, cada modal nuevo habia que
+ * apuntarlo aqui ademas de en index.html, y un id de la lista que no estuviera
+ * en la pagina —un index.html cacheado de antes del visor— contaba como abierto
+ * y dejaba la herramienta entera inerte. Lo que no esta en la pagina no casa con
+ * el selector. El visor lo usa tambien para saber que modales deja debajo.
+ */
+export const SELECTOR_DE_MODAL_ABIERTO = ".modal-backdrop:not([hidden])";
 
 
 /**
@@ -44,11 +52,7 @@ const MODALES = ["scoringCriteriaModal", "aiInitiativeModal", "visorDocumento", 
  * siendo lo unico que retiene el tabulador.
  */
 export function updateModalOpenState() {
-  // Un modal que no esta en la pagina no cuenta como abierto. Con la forma
-  // anterior, !els.x?.hidden, un nodo ausente daba true: un index.html cacheado
-  // de antes del visor dejaba la herramienta entera inerte, sin poder pulsar
-  // nada y sin ningun modal a la vista.
-  const hasOpenModal = MODALES.some((id) => els[id] && !els[id].hidden);
+  const hasOpenModal = document.querySelector(SELECTOR_DE_MODAL_ABIERTO) !== null;
 
   document.body.classList.toggle("modal-open", hasOpenModal);
 

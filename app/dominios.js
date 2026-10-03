@@ -10,10 +10,10 @@
  * decia "no se pudo cargar el JSON de datos" con los otros ocho perfectos.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=15";
-import { normalizarItemCargado } from "../core/escenario.js?v=15";
-import { normalizeDomainTargets } from "../core/objetivos.js?v=15";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=15";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=16";
+import { normalizarItemCargado } from "../core/escenario.js?v=16";
+import { normalizeDomainTargets } from "../core/objetivos.js?v=16";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=16";
 
 import {
   CASOS_DE_IA,
@@ -27,11 +27,11 @@ import {
   expandedHeatmapCapabilities,
   state,
   syncActiveDomainState,
-} from "./estado.js?v=15";
+} from "./estado.js?v=16";
 
-import { comportamientoDeDesplazamiento } from "./preferencias.js?v=15";
-import { repintarTodo } from "./repintado.js?v=15";
-import { populateCapacityFilter } from "./filtros.js?v=15";
+import { comportamientoDeDesplazamiento } from "./preferencias.js?v=16";
+import { repintarTodo } from "./repintado.js?v=16";
+import { populateCapacityFilter } from "./filtros.js?v=16";
 
 
 /**
@@ -93,9 +93,12 @@ export async function cargarCatalogoDeCasosDeIa() {
   );
 
   // La lista entera de cada etiqueta, para los filtros y la leyenda de la
-  // pestana IA. Se vacian antes por si el catalogo se leyera dos veces.
+  // pestana IA. Se vacian antes por si el catalogo se leyera dos veces, y las
+  // fichas con ellas: un caso que ya no esta en el catalogo no puede seguir
+  // pintandose con la etiqueta que tenia.
   ETIQUETAS_DE_CASOS.tiposDeIa.length = 0;
   ETIQUETAS_DE_CASOS.tiposDeValor.length = 0;
+  CASOS_DE_IA.clear();
 
   [
     [catalogo.tiposDeIa, ETIQUETAS_DE_CASOS.tiposDeIa],

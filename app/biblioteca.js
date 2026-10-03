@@ -24,10 +24,15 @@ import {
   normalizarBiblioteca,
   ubicacionDeFuente,
   urlDeDocumento,
-} from "../core/biblioteca.js?v=15";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=15";
-import { atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=15";
-import { BIBLIOTECA, BIBLIOTECA_URL, CASOS_DE_IA, els } from "./estado.js?v=15";
+} from "../core/biblioteca.js?v=16";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=16";
+import {
+  SELECTOR_DE_MODAL_ABIERTO,
+  atraparFoco,
+  showNotice,
+  updateModalOpenState,
+} from "./avisos.js?v=16";
+import { BIBLIOTECA, BIBLIOTECA_URL, CASOS_DE_IA, els } from "./estado.js?v=16";
 
 
 /**
@@ -155,7 +160,14 @@ export function setupVisorDeDocumentos() {
     const otraFuente = event.target.closest("[data-fuente-del-visor]");
 
     if (otraFuente) {
-      mostrarFuente(Number(otraFuente.dataset.fuenteDelVisor));
+      const indice = Number(otraFuente.dataset.fuenteDelVisor);
+
+      mostrarFuente(indice);
+
+      // El contexto se pinta de nuevo entero, y el boton pulsado con el: sin
+      // esto el foco caia al <body> y, con teclado, habia que volver a buscar
+      // dentro del visor desde el principio.
+      els.visorContexto?.querySelector(`[data-fuente-del-visor="${indice}"]`)?.focus();
     }
   });
 
@@ -228,7 +240,7 @@ function abrirVisor(disparador) {
   if (els.visorDocumento.hidden) {
     disparadorDelVisor = disparador;
 
-    modalesDebajo = [...document.querySelectorAll(".modal-backdrop:not([hidden])")].filter(
+    modalesDebajo = [...document.querySelectorAll(SELECTOR_DE_MODAL_ABIERTO)].filter(
       (modal) => modal !== els.visorDocumento,
     );
 

@@ -14,10 +14,10 @@
  * eso ataba el dibujo al estado.
  */
 
-import { formatNumber } from "../core/presentacion.js?v=15";
-import { els } from "./estado.js?v=15";
-import { showNotice } from "./avisos.js?v=15";
-import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=15";
+import { formatNumber } from "../core/presentacion.js?v=16";
+import { els } from "./estado.js?v=16";
+import { showNotice } from "./avisos.js?v=16";
+import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=16";
 
 
 
@@ -521,13 +521,25 @@ function buildOverviewRadarData(filas) {
  * etiqueta. getPointLabelPosition() es API publica de la escala radial desde
  * Chart.js 4, y aqui la version esta fijada en vendor/: no cambia por debajo.
  * El margen es para el dedo en una pantalla tactil, que no apunta al pixel.
+ *
+ * Un vertice en el centro no cuenta: no es de ningun eje. Ahi caen a la vez
+ * todos los que valen 0 —en un taller recien empezado, todos—, Chart.js los
+ * devuelve juntos y el primero es el del eje 0, asi que pulsar el centro abria
+ * el primer dominio, o la primera capacidad, sin que nadie lo hubiera pedido.
  */
 function ejeBajoElPuntero(chart, event, elementos = []) {
-  if (elementos.length) {
-    return elementos[0].index;
+  const escala = chart.scales?.r;
+
+  const vertice = elementos.find(({ element }) => (
+    !element ||
+    !escala ||
+    Math.hypot(element.x - escala.xCenter, element.y - escala.yCenter) > 1
+  ));
+
+  if (vertice) {
+    return vertice.index;
   }
 
-  const escala = chart.scales?.r;
   const ejes = chart.data.labels?.length || 0;
 
   if (!escala?.getPointLabelPosition || event?.x == null || event?.y == null) {

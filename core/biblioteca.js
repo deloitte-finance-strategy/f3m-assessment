@@ -15,6 +15,8 @@
  * que algo se ha roto.
  */
 
+import { normalizeMatchKey } from "./coincidencias.js?v=16";
+
 
 /**
  * Como se nombra la unidad de cada documento.
@@ -245,14 +247,13 @@ function mayuscula(cadena) {
  * Buscar "prevision" tiene que encontrar "Previsión": en una sesion se teclea
  * deprisa y sin tildes, y un buscador que no encuentra lo que esta en pantalla
  * parece roto.
+ *
+ * Es la clave con la que se reconoce el trabajo guardado, normalizeMatchKey(),
+ * con los espacios de dentro juntos: dos formas de quitar tildes acaban
+ * quitando cosas distintas.
  */
 export function normalizarTextoDeBusqueda(valor) {
-  return String(valor ?? "")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+  return normalizeMatchKey(String(valor ?? "")).replace(/\s+/g, " ");
 }
 
 
