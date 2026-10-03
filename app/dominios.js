@@ -170,6 +170,21 @@ export function renderDomainSwitcher() {
       `;
     })
     .join("");
+
+  // El ancho de cada grupo, en proporcion a lo que ocupan sus botones. Cada
+  // boton cuenta su nombre mas ocho caracteres por el relleno y el contador de
+  // avance. El porque, en styles.css.
+  contenedor.style.setProperty(
+    "--columnas-de-dominio",
+    grupos
+      .map((grupo) => {
+        const ancho = dominios
+          .filter((dominio) => dominio.group === grupo)
+          .reduce((total, dominio) => total + String(dominio.label).length + 8, 0);
+        return `minmax(min-content, ${Math.max(ancho, 1)}fr)`;
+      })
+      .join(" "),
+  );
 }
 
 
