@@ -19,13 +19,19 @@ import {
   contarPorCampo,
   filtrarCasos,
   resumenDeFuentes,
-} from "../../core/biblioteca.js?v=15";
-import { escapeAttr, escapeHtml } from "../../core/presentacion.js?v=15";
-import { fuentesDelCaso } from "../biblioteca.js?v=15";
-import { aiCaseCards, kpiCard } from "../celdas.js?v=15";
-import { BIBLIOTECA, CASOS_DE_IA, ETIQUETAS_DE_CASOS, els } from "../estado.js?v=15";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=15";
-import { getDominiosDelOverview } from "./overview.js?v=15";
+  titulosDeCasos,
+} from "../../core/biblioteca.js?v=16";
+import { escapeAttr, escapeHtml } from "../../core/presentacion.js?v=16";
+import { fuentesDelCaso } from "../biblioteca.js?v=16";
+import {
+  CLASES_DE_TIPO_DE_VALOR,
+  aiCaseCards,
+  clasesDeTipoDeIa,
+  kpiCard,
+} from "../celdas.js?v=16";
+import { BIBLIOTECA, CASOS_DE_IA, ETIQUETAS_DE_CASOS, els } from "../estado.js?v=16";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=16";
+import { getDominiosDelOverview } from "./overview.js?v=16";
 
 
 const FILTROS_VACIOS = { texto: "", dominio: "", tipoValor: "", tipoIa: "", documento: "" };
@@ -123,9 +129,12 @@ function pintarResumen() {
     0,
   );
 
+  // Con titulosDeCasos(), la misma lectura de ai.cases que da las apariciones:
+  // un ai.cases con solo separadores no puede contar como subcapacidad con casos
+  // y a la vez no aportar ninguna aparicion.
   const subcapacidadesConCasos = dominios.reduce(
     (suma, dominio) =>
-      suma + dominio.items.filter((item) => String(item?.ai?.cases || "").trim()).length,
+      suma + dominio.items.filter((item) => titulosDeCasos(item?.ai?.cases).length).length,
     0,
   );
 
@@ -276,9 +285,13 @@ function tarjetaDeDocumento(documento) {
                 class="biblioteca-boton"
                 type="button"
                 data-ver-casos-de="${escapeAttr(documento.id)}"
-                aria-label="${escapeAttr(`Ver los ${casos} casos que salen de ${documento.titulo}`)}"
+                aria-label="${escapeAttr(
+                  casos === 1
+                    ? `Ver el caso que sale de ${documento.titulo}`
+                    : `Ver los ${casos} casos que salen de ${documento.titulo}`,
+                )}"
               >
-                Ver sus ${casos} ${casos === 1 ? "caso" : "casos"}
+                Ver sus ${plural(casos, "caso")}
               </button>
             `
             : ""
@@ -337,15 +350,8 @@ function pintarLeyenda() {
   `;
 
   els.iaLeyenda.innerHTML = [
-    bloque("Tipo de valor", ETIQUETAS_DE_CASOS.tiposDeValor, () => "ai-tag ai-tag-valor"),
-    bloque("Tipo de IA", ETIQUETAS_DE_CASOS.tiposDeIa, (valor) =>
-      [
-        "ai-tag ai-tag-ia",
-        { Agéntica: "es-agentica", Automatización: "es-automatizacion" }[valor] || "",
-      ]
-        .join(" ")
-        .trim(),
-    ),
+    bloque("Tipo de valor", ETIQUETAS_DE_CASOS.tiposDeValor, () => CLASES_DE_TIPO_DE_VALOR),
+    bloque("Tipo de IA", ETIQUETAS_DE_CASOS.tiposDeIa, clasesDeTipoDeIa),
   ].join("");
 }
 

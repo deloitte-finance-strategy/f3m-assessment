@@ -1,6 +1,6 @@
 """Verifica el catalogo de dominios y que los JSON coinciden con los Excel.
 
-Cuatro comprobaciones, en este orden:
+Cinco comprobaciones, en este orden:
 
 1. El catalogo (data/domains.json) esta completo y es coherente: cada dominio
    tiene los campos que la aplicacion espera, su Excel de origen existe, su
@@ -311,7 +311,7 @@ def check_documento(documento, vistos):
                 problemas.append(f"{ident}: le falta '{campo}'")
             continue
 
-        if not RUTA_DE_BIBLIOTECA.match(ruta) or ".." in ruta:
+        if not isinstance(ruta, str) or not RUTA_DE_BIBLIOTECA.match(ruta) or ".." in ruta:
             problemas.append(f"{ident}: '{campo}' tiene que ser un archivo dentro de biblioteca/")
         elif not (ROOT / ruta).exists():
             problemas.append(f"{ident}: no existe {ruta}")
@@ -347,7 +347,18 @@ def check_fuentes(caso, documentos, con_problemas=frozenset()):
 
     for numero, fuente in enumerate(fuentes, start=1):
         donde = f'"{titulo}", fuente {numero}'
-        ident = (fuente or {}).get("documento")
+
+        # Una fuente mal escrita —un id suelto en vez del objeto, o el id dentro
+        # de una lista— se dice como las demas. Sin esto el script se caia con
+        # una traza en vez de decir cual era.
+        if not isinstance(fuente, dict) or not isinstance(fuente.get("documento"), str):
+            problemas.append(
+                f"{donde}: tiene que ser un objeto con 'documento', el id de un documento "
+                "de data/biblioteca.json, y su 'pagina'"
+            )
+            continue
+
+        ident = fuente["documento"]
         documento = documentos.get(ident)
 
         if ident in con_problemas:
@@ -408,14 +419,24 @@ def check_biblioteca():
     documentos = {}
     con_problemas = set()
 
-    for documento in biblioteca.get("documentos", []):
+    # Lo que no es un objeto se dice y se salta, en vez de tumbar el script con
+    # una traza que no dice que entrada es.
+    declarados = biblioteca.get("documentos", []) if isinstance(biblioteca, dict) else []
+    casos = [caso for caso in casos if isinstance(caso, dict)]
+
+    for documento in declarados:
+        if not isinstance(documento, dict):
+            problemas.append("data/biblioteca.json: cada documento tiene que ser un objeto")
+            continue
+
         propios = check_documento(documento, documentos)
         problemas.extend(propios)
+        ident = documento.get("id")
 
         if not propios:
-            documentos[documento["id"]] = documento
-        elif documento.get("id") not in documentos:
-            con_problemas.add(documento.get("id"))
+            documentos[ident] = documento
+        elif isinstance(ident, str) and ident not in documentos:
+            con_problemas.add(ident)
 
     if not documentos and not con_problemas:
         problemas.append("data/biblioteca.json no declara ningun documento")
@@ -424,10 +445,10 @@ def check_biblioteca():
         problemas.extend(check_fuentes(caso, documentos, con_problemas))
 
     usados = {
-        fuente.get("documento")
+        fuente["documento"]
         for caso in casos
         for fuente in (caso.get("fuentes") or [])
-        if isinstance(fuente, dict)
+        if isinstance(fuente, dict) and isinstance(fuente.get("documento"), str)
     }
 
     avisos = [

@@ -15,16 +15,16 @@
  * las pedia prestadas el modal del Roadmap; con la pestana IA ya son tres sitios.
  */
 
-import { average } from "../core/calculo.js?v=15";
+import { average } from "../core/calculo.js?v=16";
 import {
   escapeAttr,
   escapeHtml,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=15";
-import { pieDeFuente } from "./biblioteca.js?v=15";
-import { LEVERS, els, state } from "./estado.js?v=15";
-import { getScopedItems } from "./filtros.js?v=15";
+} from "../core/presentacion.js?v=16";
+import { pieDeFuente } from "./biblioteca.js?v=16";
+import { LEVERS, els, state } from "./estado.js?v=16";
+import { getScopedItems } from "./filtros.js?v=16";
 
 
 export function buildFilteredEmptyState() {
@@ -151,6 +151,19 @@ const CLASE_DE_TIPO_DE_IA = {
 };
 
 
+/**
+ * Las clases del chip de cada etiqueta. Las usan la ficha y la leyenda de la
+ * pestana IA, que tienen que pintar el mismo chip: si cada una llevara su copia,
+ * una etiqueta nueva podria salir destacada en las fichas y apagada en la
+ * leyenda que la explica.
+ */
+export const CLASES_DE_TIPO_DE_VALOR = "ai-tag ai-tag-valor";
+
+export function clasesDeTipoDeIa(valor) {
+  return `ai-tag ai-tag-ia ${CLASE_DE_TIPO_DE_IA[valor] || ""}`.trim();
+}
+
+
 function aiCaseTag(valor, definicion, clases) {
   if (!valor) {
     return "";
@@ -172,12 +185,8 @@ function aiCaseTag(valor, definicion, clases) {
  */
 function aiCaseCard(caso, donde = "") {
   const etiquetas = [
-    aiCaseTag(caso.tipoValor, caso.definicionTipoValor, "ai-tag ai-tag-valor"),
-    aiCaseTag(
-      caso.tipoIa,
-      caso.definicionTipoIa,
-      `ai-tag ai-tag-ia ${CLASE_DE_TIPO_DE_IA[caso.tipoIa] || ""}`.trim(),
-    ),
+    aiCaseTag(caso.tipoValor, caso.definicionTipoValor, CLASES_DE_TIPO_DE_VALOR),
+    aiCaseTag(caso.tipoIa, caso.definicionTipoIa, clasesDeTipoDeIa(caso.tipoIa)),
   ].join("");
 
   return `

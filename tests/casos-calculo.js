@@ -26,7 +26,7 @@ import {
   round2,
   toScore,
   unique,
-} from "../core/calculo.js?v=15";
+} from "../core/calculo.js?v=16";
 
 
 // --- utilidades de los casos ------------------------------------------------
@@ -422,9 +422,11 @@ export const casos = [
     grupo: "Agregacion por dominio",
     nombre: "dos dominios con la misma capacidad usan cada uno SU objetivo",
     ejecutar: (t) => {
-      // El caso real: "Contabilidad y provision fiscal" existe en Fiscal y en
-      // Tesoreria. Con los objetivos indexados solo por nombre de capacidad,
-      // los dos salian calculados contra el objetivo del dominio abierto.
+      // El caso real: "Contabilidad y provision fiscal" estuvo en Fiscal y en
+      // Tesoreria, hasta que la de Tesoreria paso a llamarse "Control y
+      // tratamiento contable". Con los objetivos indexados solo por nombre de
+      // capacidad, los dos salian calculados contra el objetivo del dominio
+      // abierto, y nada impide que dos nombres vuelvan a coincidir.
       const capacidad = "Contabilidad y provision fiscal";
 
       const [fiscal, tesoreria] = agregarDominios(

@@ -9,7 +9,8 @@
  * texto o como lista: toList() acepta las dos formas y devuelve siempre una.
  */
 
-import { CASOS_DE_IA } from "./estado.js?v=15";
+import { titulosDeCasos } from "../core/biblioteca.js?v=16";
+import { CASOS_DE_IA } from "./estado.js?v=16";
 
 
 
@@ -55,13 +56,13 @@ export function getItemEvidenceText(item) {
  * relleno: una ficha sin etiquetas dice la verdad —ese caso no esta
  * clasificado— y un "sin clasificar" inventado no. Que eso no ocurra es trabajo
  * de scripts/check_domains_sync.py, que cruza las dos listas en cada PR.
+ *
+ * Los titulos salen de titulosDeCasos(), la misma lectura con la que la pestana
+ * IA cuenta las apariciones: las fichas de una subcapacidad y ese recuento no
+ * pueden partir ai.cases de dos formas distintas.
  */
 function fichasDeCasosDeIa(cases) {
-  return String(cases || "")
-    .split(";")
-    .map((titulo) => titulo.trim())
-    .filter(Boolean)
-    .map((titulo) => CASOS_DE_IA.get(titulo) || { titulo });
+  return titulosDeCasos(cases).map((titulo) => CASOS_DE_IA.get(titulo) || { titulo });
 }
 
 
