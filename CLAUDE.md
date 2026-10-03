@@ -84,6 +84,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
 | `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
 | `scripts/check_module_version.py` | Que todos los módulos se pidan con la misma `?v=`. **En CI** | — |
+| `scripts/check_modules.py` | Que cada import encuentre su export y no quede un nombre sin declarar en `app/`. **En CI** | — |
 | `vendor/` | Chart.js, servido desde aquí y no desde un CDN. **Se versiona** | — |
 | `SECURITY.md` | Modelo de amenazas, qué protege y qué no, y los procedimientos | — |
 
@@ -119,20 +120,18 @@ Dependencias de terceros, sin bundler:
   sin pintar y el PDF entregable con tres huecos. `vendor/LEEME.md` explica el porqué y cómo se
   actualiza.
 - **Firebase Realtime Database y Auth 12.15.0** importados desde `gstatic.com` (cabecera de
-  `app.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
+  `app/firebase.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
   ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
 
 ### `app/` es el reparto de `app.js`
 
-`app.js` tenía 7.346 líneas y 205 funciones sin un solo marcador de sección. El reparto va por
-tandas, y **cada una se verifica antes de seguir**: consola en silencio, las pruebas, el informe y
-el A/B contra `main` sobre los nueve dominios. **El reparto está terminado**: fuera quedan los
-quince módulos de infraestructura —estado, avisos, almacenamiento, preferencias, gráficos,
-métricas, dominios, filtros, subcapacidad, escenario, Firebase, identidad, indicador,
-persistencia y repintado—, las vistas en `app/vistas/`, `app/celdas.js` con lo que
-comparten, `app/modales.js` y `app/informe.js`. `app.js` pasó de 7.346 líneas a 1.401. Lo que ha
-llegado después ya nace fuera: la pestaña IA en `app/vistas/ia.js` y la biblioteca, con su visor, en
-`app/biblioteca.js`.
+`app.js` es la raíz de composición; todo lo demás vive en `app/`: los quince módulos de
+infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, métricas, dominios,
+filtros, subcapacidad, escenario, Firebase, identidad, indicador, persistencia y repintado—, las
+vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`
+y `app/biblioteca.js`. Lo nuevo nace ya en `app/`, no en `app.js`. Mover código entre módulos se
+verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
+`main` sobre los nueve dominios.
 
 Dos reglas que han salido del propio reparto y conviene respetar:
 
@@ -201,7 +200,7 @@ vivo. Con elección guardada manda ella, en los dos sentidos.
 - **El verde de marca y los tres colores de palanca.** Son identidad. Un verde de Procesos distinto
   en oscuro dejaría de significar "Procesos".
 - **Los radares.** Chart.js no lee CSS: sus colores van en la configuración. Por eso existe
-  `PALETA_DE_RADAR` en `app.js`, con las versiones aclaradas para dibujar sobre fondo oscuro — el
+  `PALETA_DE_RADAR` en `app/preferencias.js`, con las versiones aclaradas para dibujar sobre fondo oscuro — el
   azul de Organización, `#012169`, sobre una tarjeta oscura es invisible.
 - **El informe PDF.** Sale claro siempre, con el tema que sea. Se imprime, y un deck oscuro gasta
   tinta y se proyecta peor. `conLasVistasDelInformeVisibles()` fuerza el tema claro mientras dura la
@@ -220,8 +219,8 @@ contraste mal puesto no es un problema estético, es un dato que no se lee.
 La vista de arranque es **Overview**: `vistaDesdeLaUrl()` cae ahí cuando la URL no trae ancla.
 
 Consecuencia práctica: si algo depende de medir un elemento oculto, hay que hacerlo visible primero.
-Es lo que hace `conElDashboardVisible()` para capturar los radares del PDF — un canvas oculto no
-tiene tamaño y saldría en blanco.
+Es lo que hace `conLasVistasDelInformeVisibles()`, en `app/informe.js`, para capturar los radares
+del PDF — un canvas oculto no tiene tamaño y saldría en blanco.
 
 Los radares van **justo debajo de las cuatro tarjetas**, en el Overview y en el Dashboard: son lo
 primero que se enseña en un taller. Y **sus ejes se pulsan**: un dominio del Overview abre su
@@ -329,7 +328,7 @@ La fuente de verdad es `core/calculo.js`, y está cubierta por las pruebas. El R
 `core/presentacion.js`: Procesos `#86BC25` · Tecnología `#ED8B00` · Organización `#012169`.
 
 **Objetivo de madurez**: configurable **por capacidad y por palanca**, vía `getCapabilityTargets()`
-en `app.js`. `DEFAULT_TARGET_MATURITY = 4` es solo el valor por defecto cuando una capacidad no
+en `app/metricas.js`. `DEFAULT_TARGET_MATURITY = 4` es solo el valor por defecto cuando una capacidad no
 tiene objetivo propio, no una constante fija del modelo.
 
 **Cálculo** (`calcularMetricas()` en `core/calculo.js`):
@@ -373,7 +372,7 @@ las mismas reglas de promedio. Dos cosas propias:
 
 ### Cachés de cálculo
 
-`calculate()` en `app.js` envuelve a `calcularMetricas()` con una caché por ítem, y
+`calculate()` en `app/metricas.js` envuelve a `calcularMetricas()` con una caché por ítem, y
 `getCapabilityTargets()` devuelve la misma referencia mientras los objetivos no cambien.
 
 **Ninguna se invalida a mano**: los valores se recalculan siempre y la caché solo decide si
@@ -427,7 +426,7 @@ aviso en vez de corregirse en silencio.
 **`SECURITY.md` es el documento completo**: qué protege la herramienta, qué no, qué datos guarda y
 dónde, y los procedimientos. Lo que sigue es lo que hay que tener presente al tocar este código.
 
-La configuración de Firebase está en claro en la cabecera de `app.js` (`apiKey`, `databaseURL`,
+La configuración de Firebase está en claro en la cabecera de `app/firebase.js` (`apiKey`, `databaseURL`,
 `projectId`…). En una web app de Firebase esto es **público por diseño** y no constituye un secreto
 filtrado: la autorización la dan las reglas, no el secreto de la clave.
 
@@ -596,8 +595,9 @@ nuevo, caché vacía— antes de dar por buena la prueba.
 
 ### Comprobación manual en el navegador
 
-El CI (`.github/workflows/verificacion.yml`) ejecuta esas dos cosas en cada PR. No hay linter, y el
-resto se comprueba a mano:
+El CI (`.github/workflows/verificacion.yml`) ejecuta en cada PR esas dos cosas y además
+`check_module_version.py` y `check_modules.py`, que caza los imports rotos de `app/` que las
+pruebas no ven porque no cargan el navegador. No hay linter, y el resto se comprueba a mano:
 
 1. `python -m http.server 8000` → `http://localhost:8000/`.
 2. Consola del navegador **en silencio**. Un arranque correcto no imprime nada: lo que aparezca
