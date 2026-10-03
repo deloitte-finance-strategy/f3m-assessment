@@ -3991,7 +3991,7 @@ height: 100% !important;
   position: relative;
   z-index: 1;
   margin: 16px 0 10px;
-  padding: 14px;
+  padding: 12px 14px;
   scroll-margin-top: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -4004,11 +4004,20 @@ height: 100% !important;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+}
+
+/* Rotulo y titulo en la misma linea: apilados se llevaban una linea entera de
+   la primera pantalla, y el titulo ya dice de sobra que esto son los dominios. */
+.domain-switcher-header > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
 }
 
 .domain-switcher-header .eyebrow {
-  margin-bottom: 3px;
+  margin-bottom: 0;
 }
 
 .domain-switcher-header h2 {
@@ -4033,7 +4042,12 @@ height: 100% !important;
 
 .domain-groups {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Cada grupo, ancho segun lo que ocupan sus botones: renderDomainSwitcher()
+     lo escribe en --columnas-de-dominio. A tercios iguales, al grupo de dos
+     dominios le sobraba sitio y el de cuatro bajaba a una tercera fila, y esa
+     fila es la que empujaba los datos fuera de la primera pantalla. El minimo
+     es min-content para que el rotulo del grupo no se corte nunca. */
+  grid-template-columns: var(--columnas-de-dominio, repeat(3, minmax(0, 1fr)));
   gap: 9px;
 }
 
@@ -4043,9 +4057,9 @@ height: 100% !important;
   align-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 6px;
   min-width: 0;
-  padding: 11px 12px;
+  padding: 9px 12px;
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   background: var(--surface-muted);
@@ -4054,7 +4068,7 @@ height: 100% !important;
 
 .domain-group > span {
   width: 100%;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
   overflow: hidden;
   color: var(--graphite);
   font-size: var(--fs-2xs);
@@ -4068,9 +4082,9 @@ height: 100% !important;
 
 
 .domain-button {
-  min-height: 34px;
+  min-height: 32px;
   max-width: 100%;
-  padding: 0 13px;
+  padding: 0 11px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);

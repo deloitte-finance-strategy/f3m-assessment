@@ -10,10 +10,10 @@
  * decia "no se pudo cargar el JSON de datos" con los otros ocho perfectos.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=16";
-import { normalizarItemCargado } from "../core/escenario.js?v=16";
-import { normalizeDomainTargets } from "../core/objetivos.js?v=16";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=16";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=17";
+import { normalizarItemCargado } from "../core/escenario.js?v=17";
+import { normalizeDomainTargets } from "../core/objetivos.js?v=17";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=17";
 
 import {
   CASOS_DE_IA,
@@ -27,11 +27,11 @@ import {
   expandedHeatmapCapabilities,
   state,
   syncActiveDomainState,
-} from "./estado.js?v=16";
+} from "./estado.js?v=17";
 
-import { comportamientoDeDesplazamiento } from "./preferencias.js?v=16";
-import { repintarTodo } from "./repintado.js?v=16";
-import { populateCapacityFilter } from "./filtros.js?v=16";
+import { comportamientoDeDesplazamiento } from "./preferencias.js?v=17";
+import { repintarTodo } from "./repintado.js?v=17";
+import { populateCapacityFilter } from "./filtros.js?v=17";
 
 
 /**
@@ -170,6 +170,21 @@ export function renderDomainSwitcher() {
       `;
     })
     .join("");
+
+  // El ancho de cada grupo, en proporcion a lo que ocupan sus botones. Cada
+  // boton cuenta su nombre mas ocho caracteres por el relleno y el contador de
+  // avance. El porque, en styles.css.
+  contenedor.style.setProperty(
+    "--columnas-de-dominio",
+    grupos
+      .map((grupo) => {
+        const ancho = dominios
+          .filter((dominio) => dominio.group === grupo)
+          .reduce((total, dominio) => total + String(dominio.label).length + 8, 0);
+        return `minmax(min-content, ${Math.max(ancho, 1)}fr)`;
+      })
+      .join(" "),
+  );
 }
 
 

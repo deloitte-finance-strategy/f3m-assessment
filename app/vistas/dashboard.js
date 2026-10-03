@@ -6,20 +6,20 @@
  * las dos vistas lo dicen en pantalla.
  */
 
-import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=16";
-import { filasDeResumen } from "../../core/exportacion.js?v=16";
-import { escapeHtml, formatNumber } from "../../core/presentacion.js?v=16";
+import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=17";
+import { filasDeResumen } from "../../core/exportacion.js?v=17";
+import { escapeHtml, formatNumber } from "../../core/presentacion.js?v=17";
 import {
   buildFilteredEmptyState,
   kpiCard,
   priorityBadge,
   renderLeverBars,
   renderPriorityBars,
-} from "../celdas.js?v=16";
-import { els, state } from "../estado.js?v=16";
-import { getScopedItems } from "../filtros.js?v=16";
-import { renderCapabilityRadar } from "../graficos.js?v=16";
-import { agregarPorCapacidad, calculate } from "../metricas.js?v=16";
+} from "../celdas.js?v=17";
+import { els, state } from "../estado.js?v=17";
+import { getScopedItems } from "../filtros.js?v=17";
+import { renderCapabilityRadar } from "../graficos.js?v=17";
+import { agregarPorCapacidad, calculate } from "../metricas.js?v=17";
 
 
 export function renderDashboard() {
