@@ -12,23 +12,24 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=18";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=18";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=18";
-import { showNotice } from "./avisos.js?v=18";
-import { getActiveDomainConfig } from "./dominios.js?v=18";
-import { DOMAINS, els, state } from "./estado.js?v=18";
-import { getVisibleItems } from "./filtros.js?v=18";
-import { getScenarioShortLabel } from "./firebase.js?v=18";
+} from "../core/calculo.js?v=19";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=19";
+import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=19";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=19";
+import { showNotice } from "./avisos.js?v=19";
+import { getActiveDomainConfig } from "./dominios.js?v=19";
+import { DOMAINS, els, state } from "./estado.js?v=19";
+import { getVisibleItems } from "./filtros.js?v=19";
+import { getScenarioShortLabel } from "./firebase.js?v=19";
 import {
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
-} from "./graficos.js?v=18";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=18";
-import { getAiDataForItem } from "./subcapacidad.js?v=18";
-import { renderDashboard } from "./vistas/dashboard.js?v=18";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=18";
+} from "./graficos.js?v=19";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=19";
+import { getAiDataForItem } from "./subcapacidad.js?v=19";
+import { renderDashboard } from "./vistas/dashboard.js?v=19";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=19";
 import { get } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
 
@@ -233,12 +234,14 @@ function buildEnhancedPdfReportData() {
 
   const commentItems = visibleItems.filter((item) => item.comentario?.trim());
   const activeDomain = getActiveDomainConfig();
+  const ahora = new Date();
 
   return {
     domainId: activeDomain.id,
     domainLabel: activeDomain.label,
     domainTitle: activeDomain.title,
-    generatedAt: new Date().toLocaleString("es-ES"),
+    generatedAt: fechaLegible(ahora),
+    fechaDeArchivo: fechaParaArchivo(ahora),
     // Nunca el identificador completo: este informe se envía al cliente.
     scenarioLabel: getScenarioShortLabel(),
     sourceFile: state.meta?.sourceFile || "-",
@@ -283,7 +286,7 @@ function construirTitularesDelDominio(items, metrics) {
   const evaluadas = metrics.filter((entrada) => !entrada.metrics.isPending);
 
   if (!evaluadas.length) {
-    return { aviso: "Todavia no hay ninguna subcapacidad puntuada en este dominio." };
+    return { aviso: "Todavía no hay ninguna subcapacidad puntuada en este dominio." };
   }
 
   const brechas = rankingDeBrechas(metrics, (entrada) => entrada.item.capacidad);
@@ -350,7 +353,7 @@ function construirBloqueGlobalParaInforme() {
           palancaMasDebil: palancas[0] || null,
           pendientes: entradas.length - evaluadas.length,
         }
-      : { aviso: "Todavia no hay ninguna subcapacidad puntuada en ningun dominio." },
+      : { aviso: "Todavía no hay ninguna subcapacidad puntuada en ningún dominio." },
 
     radarImages: getOverviewRadarImagesForPdf(),
   };

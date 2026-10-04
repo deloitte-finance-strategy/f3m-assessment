@@ -12,30 +12,30 @@ import {
   DEFAULT_TARGET_MATURITY,
   normalizeTargetValue,
   toScore,
-} from "../core/calculo.js?v=18";
+} from "../core/calculo.js?v=19";
 
 import {
   normalizarAutoria,
   normalizarEscenarioParaFirebase,
   normalizarEstado,
   recortarAlLimite,
-} from "../core/escenario.js?v=18";
+} from "../core/escenario.js?v=19";
 
 import {
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "../core/objetivos.js?v=18";
+} from "../core/objetivos.js?v=19";
 
 import {
   findMatchingScenarioItem,
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
-} from "../core/coincidencias.js?v=18";
+} from "../core/coincidencias.js?v=19";
 
-import { LEVERS, STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=18";
-import { leerAlmacenamiento } from "./almacenamiento.js?v=18";
-import { setActiveDomain } from "./dominios.js?v=18";
+import { LEVERS, STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=19";
+import { leerAlmacenamiento } from "./almacenamiento.js?v=19";
+import { setActiveDomain } from "./dominios.js?v=19";
 
 
 

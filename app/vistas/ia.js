@@ -20,18 +20,18 @@ import {
   filtrarCasos,
   resumenDeFuentes,
   titulosDeCasos,
-} from "../../core/biblioteca.js?v=18";
-import { escapeAttr, escapeHtml } from "../../core/presentacion.js?v=18";
-import { fuentesDelCaso } from "../biblioteca.js?v=18";
+} from "../../core/biblioteca.js?v=19";
+import { escapeAttr, escapeHtml } from "../../core/presentacion.js?v=19";
+import { fuentesDelCaso } from "../biblioteca.js?v=19";
 import {
   CLASES_DE_TIPO_DE_VALOR,
   aiCaseCards,
   clasesDeTipoDeIa,
   kpiCard,
-} from "../celdas.js?v=18";
-import { BIBLIOTECA, CASOS_DE_IA, ETIQUETAS_DE_CASOS, els } from "../estado.js?v=18";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=18";
-import { getDominiosDelOverview } from "./overview.js?v=18";
+} from "../celdas.js?v=19";
+import { BIBLIOTECA, CASOS_DE_IA, ETIQUETAS_DE_CASOS, els } from "../estado.js?v=19";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=19";
+import { getDominiosDelOverview } from "./overview.js?v=19";
 
 
 const FILTROS_VACIOS = { texto: "", dominio: "", tipoValor: "", tipoIa: "", documento: "" };

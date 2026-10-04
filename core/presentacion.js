@@ -126,3 +126,36 @@ export function formatMedia(value) {
 
   return FORMATO_DE_MEDIA.format(value);
 }
+
+
+/**
+ * La fecha del informe, para leerla: "4 de octubre de 2026, 11:26".
+ *
+ * Era toLocaleString(), que da "4/10/2026, 11:26:44": en un deck que se
+ * entrega, los segundos sobran y el 4/10 se lee distinto a cada lado del
+ * Atlantico.
+ */
+const FORMATO_DE_FECHA = new Intl.DateTimeFormat("es-ES", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+export function fechaLegible(fecha) {
+  return FORMATO_DE_FECHA.format(fecha);
+}
+
+
+/**
+ * La misma fecha para el nombre de un archivo: "2026-10-04".
+ *
+ * Asi ordenan bien en una carpeta y dos informes de dias distintos no se pisan.
+ * Con la fecha local, no la UTC: el informe de las 00:30 es de hoy, no de ayer.
+ */
+export function fechaParaArchivo(fecha) {
+  const dosCifras = (numero) => String(numero).padStart(2, "0");
+
+  return `${fecha.getFullYear()}-${dosCifras(fecha.getMonth() + 1)}-${dosCifras(fecha.getDate())}`;
+}

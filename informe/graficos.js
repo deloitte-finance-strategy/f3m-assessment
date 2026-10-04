@@ -22,8 +22,8 @@
  * para lo que es geometria de verdad.
  */
 
-import { escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=18";
-import { PALETA, colorDeCalor } from "./estilos.js?v=18";
+import { escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=19";
+import { PALETA, colorDeCalor } from "./estilos.js?v=19";
 
 
 /** Coordenada legible: 2 decimales bastan y evitan cadenas de 17 cifras. */
@@ -109,6 +109,9 @@ function descripcionDeBullet(valor, objetivo, maximo) {
  * Se usa para las tres palancas. El arco se dibuja con stroke-dasharray sobre
  * una circunferencia girada -90 grados, que es la unica forma de hacer un arco
  * sin calcular un path con arcos elipticos.
+ *
+ * La cifra va algo por encima del centro: centrada, la coma de "3,33" bajaba
+ * hasta el "OBJ 4" de debajo y lo tapaba.
  */
 export function svgDonut({ valor, objetivo, maximo = 5, color = PALETA.marca, titulo = "" }) {
   const radio = 38;
@@ -130,8 +133,8 @@ export function svgDonut({ valor, objetivo, maximo = 5, color = PALETA.marca, ti
       <circle cx="50" cy="50" r="${radio}" fill="none" stroke="${PALETA.pista}" stroke-width="${grosor}"></circle>
       ${arco}
       ${marcaDeObjetivoEnAnillo(objetivo, maximo, radio, grosor)}
-      <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
-            font-size="26" font-weight="700" fill="${PALETA.tinta}">${escapeHtml(formatMedia(valor))}</text>
+      <text x="50" y="45" text-anchor="middle" dominant-baseline="central"
+            font-size="25" font-weight="700" fill="${PALETA.tinta}">${escapeHtml(formatMedia(valor))}</text>
       <text x="50" y="68" text-anchor="middle" font-size="9" font-weight="700"
             letter-spacing="0.6" fill="${PALETA.tintaTenue}">OBJ ${escapeHtml(formatNumber(objetivo))}</text>
     </svg>
@@ -211,6 +214,8 @@ function marcaDeScore(score, posicion, pista) {
 }
 
 
+// La linea acaba justo debajo de la pista, como la del score. Bajaba 2,4 mas y
+// tachaba el nombre del nivel que hay debajo, que con objetivo 4 es "Optimizado".
 function marcaDeObjetivoEnEscala(objetivo, posicion, pista) {
   if (!Number.isFinite(objetivo)) {
     return "";
@@ -219,7 +224,7 @@ function marcaDeObjetivoEnEscala(objetivo, posicion, pista) {
   const x = posicion(objetivo);
 
   return `
-    <line x1="${x}" y1="${pista.y - 2.4}" x2="${x}" y2="${pista.y + pista.alto + 2.4}"
+    <line x1="${x}" y1="${pista.y - 2.4}" x2="${x}" y2="${pista.y + pista.alto + 0.6}"
           stroke="${PALETA.tinta}" stroke-width="1.4" stroke-dasharray="1.5 1.1"></line>
     <text x="${x}" y="26" text-anchor="${anclaSegunBorde(x)}" font-size="4.4"
           font-weight="800" letter-spacing="0.3" fill="${PALETA.tintaSuave}">OBJETIVO ${escapeHtml(formatNumber(objetivo))}</text>

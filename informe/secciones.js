@@ -12,7 +12,7 @@
  * quien conoce el deck entero. Cada seccion solo sabe pintar su cuerpo.
  */
 
-import { average } from "../core/calculo.js?v=18";
+import { average } from "../core/calculo.js?v=19";
 
 import {
   COLOR_DE_PALANCA,
@@ -21,9 +21,9 @@ import {
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=18";
+} from "../core/presentacion.js?v=19";
 
-import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=18";
+import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=19";
 
 
 /**
@@ -85,7 +85,7 @@ export function portada(data) {
     <p class="portada-antetitulo">Finance Strategy · F3M Assessment</p>
     <h1>Informe preliminar de madurez<b>${escapeHtml(data.domainLabel)}</b></h1>
     <p class="portada-bajada">
-      Lectura de la funcion financiera, diagnostico del dominio, brechas frente a
+      Lectura de la función financiera, diagnóstico del dominio, brechas frente a
       objetivo, oportunidades de inteligencia artificial y roadmap de iniciativas.
     </p>
 
@@ -94,12 +94,20 @@ export function portada(data) {
       <div><span>Origen de los datos</span><strong>${escapeHtml(data.scenarioLabel)}</strong></div>
       <div><span>Filtros aplicados</span><strong>${escapeHtml(data.filters)}</strong></div>
       <div><span>Objetivo base</span><strong>${escapeHtml(String(data.targetMaturity))}</strong></div>
-      <div><span>Fecha de generacion</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
+      <div><span>Fecha de generación</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
     </div>
   `;
 }
 
 
+/**
+ * El indice, una linea por seccion y no por diapositiva.
+ *
+ * Una seccion que paginar() reparte en varias diapositivas llega como varias
+ * entradas seguidas con el mismo titulo. Listadas tal cual, el indice decia
+ * "Roadmap e iniciativas" tres veces, con tres numeros, y parecian tres
+ * apartados distintos. Juntas son una linea con su rango: "16–18".
+ */
 export function indice(plan) {
   const partes = [];
 
@@ -112,18 +120,25 @@ export function indice(plan) {
         partes.push({ parte: seccion.parte, filas: [] });
       }
 
-      partes[partes.length - 1].filas.push(seccion);
+      const filas = partes[partes.length - 1].filas;
+      const anterior = filas[filas.length - 1];
+
+      if (anterior && anterior.titulo === seccion.titulo && anterior.hasta === seccion.numero - 1) {
+        anterior.hasta = seccion.numero;
+      } else {
+        filas.push({ titulo: seccion.titulo, desde: seccion.numero, hasta: seccion.numero });
+      }
     });
 
   const bloques = partes
     .map((bloque) => `
       <p class="indice-parte">${escapeHtml(bloque.parte)}</p>
       ${bloque.filas
-        .map((seccion) => `
+        .map((fila) => `
           <div class="indice-fila">
-            <span>${escapeHtml(seccion.titulo)}</span>
+            <span>${escapeHtml(fila.titulo)}</span>
             <i></i>
-            <b>${seccion.numero}</b>
+            <b>${fila.desde === fila.hasta ? fila.desde : `${fila.desde}–${fila.hasta}`}</b>
           </div>
         `)
         .join("")}
@@ -149,21 +164,21 @@ export function cierre(data) {
       + (data.global.dominios < data.global.dominiosTotales
         ? `, de los ${data.global.dominiosTotales} del modelo.`
         : ", los nueve del modelo.")
-    : "Este informe no incluye la parte global: no habia dominios cargados al exportarlo.";
+    : "Este informe no incluye la parte global: no había dominios cargados al exportarlo.";
 
   return `
     <p class="separador-numero">Alcance de este informe</p>
-    <h2>Como leer estas cifras</h2>
+    <h2>Cómo leer estas cifras</h2>
     <p>
       ${escapeHtml(alcanceGlobal)}
       La parte de dominio recorre ${data.visibleItems.length} subcapacidades de
-      ${escapeHtml(data.domainLabel)}, de las que ${data.scored.length} estan puntuadas.
+      ${escapeHtml(data.domainLabel)}, de las que ${data.scored.length} están puntuadas.
     </p>
     <div class="portada-datos">
       <div><span>Filtros aplicados</span><strong>${escapeHtml(data.filters)}</strong></div>
       <div><span>Origen de los datos</span><strong>${escapeHtml(data.scenarioLabel)}</strong></div>
       <div><span>Archivo de origen</span><strong>${escapeHtml(data.sourceFile)}</strong></div>
-      <div><span>Fecha de generacion</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
+      <div><span>Fecha de generación</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
     </div>
   `;
 }
@@ -207,14 +222,14 @@ function titularHtml(titulares, sujeto) {
 
   if (titulares.mayorBrecha) {
     frases.push(
-      `La mayor brecha de ${escapeHtml(sujeto)} esta en <b>${escapeHtml(titulares.mayorBrecha.grupo)}</b>`
+      `La mayor brecha de ${escapeHtml(sujeto)} está en <b>${escapeHtml(titulares.mayorBrecha.grupo)}</b>`
         + `, con ${escapeHtml(formatMedia(titulares.mayorBrecha.gap))} puntos frente al objetivo.`,
     );
   }
 
   if (titulares.palancaMasDebil) {
     frases.push(
-      `La palanca mas debil es <b>${escapeHtml(titulares.palancaMasDebil.label)}</b>`
+      `La palanca más débil es <b>${escapeHtml(titulares.palancaMasDebil.label)}</b>`
         + `, en ${escapeHtml(formatMedia(titulares.palancaMasDebil.media))} sobre 5.`,
     );
   }
@@ -222,7 +237,7 @@ function titularHtml(titulares, sujeto) {
   if (titulares.pendientes) {
     frases.push(`Quedan <b>${titulares.pendientes}</b> subcapacidades por evaluar.`);
   } else {
-    frases.push("Todas las subcapacidades estan evaluadas.");
+    frases.push("Todas las subcapacidades están evaluadas.");
   }
 
   return `<p class="titular">${frases.join(" ")}</p>`;
@@ -232,7 +247,7 @@ function titularHtml(titulares, sujeto) {
 function escalaHtml({ score, objetivo, nota }) {
   return `
     <div class="panel escala">
-      <h3>Posicion en la escala de madurez F3M</h3>
+      <h3>Posición en la escala de madurez F3M</h3>
       ${svgEscalaDeMadurez({ score, objetivo })}
       ${nota ? `<p class="nota" style="margin-top:3mm;">${escapeHtml(nota)}</p>` : ""}
     </div>
@@ -259,8 +274,8 @@ function radaresHtml(radarImages, { sufijo }) {
     <div class="rejilla-3">
       ${[
         ["Procesos", radarImages?.procesos, COLOR_DE_PALANCA.procesos],
-        ["Tecnologia", radarImages?.tecnologia, COLOR_DE_PALANCA.tecnologia],
-        ["Organizacion", radarImages?.organizacion, COLOR_DE_PALANCA.organizacion],
+        ["Tecnología", radarImages?.tecnologia, COLOR_DE_PALANCA.tecnologia],
+        ["Organización", radarImages?.organizacion, COLOR_DE_PALANCA.organizacion],
       ]
         .map(([titulo, imagen, color]) => `
           <article class="panel panel-claro">
@@ -268,7 +283,7 @@ function radaresHtml(radarImages, { sufijo }) {
             ${
               imagen
                 ? `<img class="radar" src="${escapeAttr(imagen)}" alt="Radar de ${escapeAttr(titulo)} ${escapeAttr(sufijo)}">`
-                : `<p class="nota">No se pudo capturar el grafico de ${escapeHtml(titulo)}.</p>`
+                : `<p class="nota">No se pudo capturar el gráfico de ${escapeHtml(titulo)}.</p>`
             }
           </article>
         `)
@@ -315,9 +330,9 @@ export function panoramaGlobal(data) {
       ${escalaHtml({
         score: global.scoreGlobal,
         objetivo: global.objetivoMedio,
-        nota: "El marcador es el score global; la linea discontinua, el objetivo medio configurado.",
+        nota: "El marcador es el score global; la línea discontinua, el objetivo medio configurado.",
       })}
-      ${titularHtml(global.titulares, "la funcion financiera")}
+      ${titularHtml(global.titulares, "la función financiera")}
     </div>
 
     ${notaDeAlcanceGlobal(global)}
@@ -401,7 +416,7 @@ export function rankingDeDominios(data) {
     </table>
     <p class="nota" style="margin-top:4mm;">
       Ordenados por brecha descendente. La barra es la madurez media del dominio y la marca vertical, su objetivo medio.
-      ${data.global.filas.some((fila) => fila.id === data.domainId) ? "El dominio de este informe va senalado." : ""}
+      ${data.global.filas.some((fila) => fila.id === data.domainId) ? "El dominio de este informe va señalado." : ""}
     </p>
   `;
 }
@@ -411,7 +426,7 @@ export function radarGlobal(data) {
   return `
     ${radaresHtml(data.global.radarImages, { sufijo: "por dominio" })}
     <p class="nota" style="margin-top:4mm;">
-      Nueve ejes, uno por dominio. La linea continua es la madurez actual y la discontinua, el objetivo configurado.
+      Nueve ejes, uno por dominio. La línea continua es la madurez actual y la discontinua, el objetivo configurado.
       Un dominio sin puntuar no se dibuja: su eje queda vacío.
     </p>
   `;
@@ -455,7 +470,7 @@ export function resumenDelDominio(data) {
       ${escalaHtml({
         score: data.scoreGlobal,
         objetivo: data.objetivoMedio,
-        nota: `Madurez media de ${escapeHtml(data.domainLabel)} frente a su objetivo medio.`,
+        nota: `Madurez media de ${data.domainLabel} frente a su objetivo medio.`,
       })}
       ${titularHtml(data.titulares, `${data.domainLabel}`)}
     </div>
@@ -467,8 +482,8 @@ export function resumenDelDominio(data) {
 export function perfilPorPalanca(data) {
   const palancas = [
     ["Procesos", "procesos", COLOR_DE_PALANCA.procesos],
-    ["Tecnologia", "tecnologia", COLOR_DE_PALANCA.tecnologia],
-    ["Organizacion", "organizacion", COLOR_DE_PALANCA.organizacion],
+    ["Tecnología", "tecnologia", COLOR_DE_PALANCA.tecnologia],
+    ["Organización", "organizacion", COLOR_DE_PALANCA.organizacion],
   ];
 
   const anillos = palancas
@@ -524,7 +539,7 @@ export function radarPorCapacidad(data) {
   return `
     ${radaresHtml(data.radarImages, { sufijo: "por capacidad" })}
     <p class="nota" style="margin-top:4mm;">
-      Un eje por capacidad de ${escapeHtml(data.domainLabel)}. La linea continua es la madurez actual y la discontinua, el objetivo.
+      Un eje por capacidad de ${escapeHtml(data.domainLabel)}. La línea continua es la madurez actual y la discontinua, el objetivo.
     </p>
   `;
 }
@@ -602,8 +617,8 @@ export function heatmap(entradas) {
         <tr>
           <th style="width:36%;">Subcapacidad</th>
           <th class="col-dato" style="width:9%;">Procesos</th>
-          <th class="col-dato" style="width:9%;">Tecnologia</th>
-          <th class="col-dato" style="width:9%;">Organizacion</th>
+          <th class="col-dato" style="width:9%;">Tecnología</th>
+          <th class="col-dato" style="width:9%;">Organización</th>
           <th class="col-dato" style="width:9%;">Score medio</th>
           <th class="col-dato" style="width:8%;">Gap</th>
           <th class="col-dato" style="width:14%;">Prioridad</th>
@@ -743,7 +758,7 @@ export function panoramaDeIa(ia, data) {
     </div>
 
     <div class="panel panel-claro" style="margin-top:6mm;">
-      <h3>Que significa cada tipo de valor</h3>
+      <h3>Qué significa cada tipo de valor</h3>
       <div class="leyenda">
         ${ia.porTipoDeValor
           .map((grupo) => `
