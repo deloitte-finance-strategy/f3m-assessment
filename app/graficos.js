@@ -14,7 +14,7 @@
  * eso ataba el dibujo al estado.
  */
 
-import { formatNumber } from "../core/presentacion.js?v=18";
+import { formatMedia } from "../core/presentacion.js?v=18";
 import { els } from "./estado.js?v=18";
 import { showNotice } from "./avisos.js?v=18";
 import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=18";
@@ -197,7 +197,7 @@ function renderSingleCapabilityRadar({
         pointBackgroundColor: color,
         pointBorderColor: paleta.vertice,
         pointBorderWidth: 2,
-        pointRadius: 3.5,
+        pointRadius: (contexto) => (esVerticeAislado(contexto) ? 5.5 : 3.5),
         pointHoverRadius: 6,
         pointHoverBackgroundColor: paleta.vertice,
         pointHoverBorderColor: color,
@@ -313,7 +313,7 @@ function renderSingleCapabilityRadar({
           },
 
           label: (context) => {
-            return `${context.dataset.label}: ${formatNumber(
+            return `${context.dataset.label}: ${formatMedia(
               context.parsed.r,
             )}`;
           },
@@ -477,11 +477,9 @@ function buildCapabilityRadarData(rows) {
  * no aplican. Las etiquetas del catalogo ya son cortas y solo hay que partirlas;
  * la mas larga, "Relación con Inversores", cabe en dos lineas.
  *
- * Ojo con toRadarNumber(null), que devuelve 0 y no null: un dominio sin puntuar
- * se dibuja en el centro en vez de dejar hueco. Es exactamente lo que hace hoy el
- * radar por capacidad —buildSummaryRows() pone "" y Number("") es 0— y se
- * replica a proposito para que los dos se comporten igual. Si algun dia se
- * quiere el hueco, hay que arreglar los dos a la vez.
+ * Un dominio sin puntuar deja hueco: toRadarNumber() devuelve null para null y
+ * para "", que es lo que pone buildSummaryRows() en el radar por capacidad. Los
+ * dos radares se comportan igual, y conviene que sigan asi.
  */
 function buildOverviewRadarData(filas) {
   return {
@@ -567,7 +565,41 @@ function ejeBajoElPuntero(chart, event, elementos = []) {
 
 
 
+/**
+ * Un vertice sin vecinos puntuados a ningun lado.
+ *
+ * Sin puntuar no se dibuja (ver toRadarNumber), asi que un dominio puntuado
+ * entre dos que no lo estan se queda sin lineas que lo unan a nada: solo su
+ * punto. A 3,5 px se pierde en la rejilla, y es el caso normal al empezar un
+ * taller. Un poco mas grande, se ve.
+ */
+function esVerticeAislado({ dataIndex, dataset }) {
+  const datos = dataset?.data || [];
+  const total = datos.length;
+
+  if (total < 2 || datos[dataIndex] === null || datos[dataIndex] === undefined) {
+    return false;
+  }
+
+  const anterior = datos[(dataIndex - 1 + total) % total];
+  const siguiente = datos[(dataIndex + 1) % total];
+
+  return (anterior === null || anterior === undefined)
+    && (siguiente === null || siguiente === undefined);
+}
+
+
+/**
+ * Sin puntuar es un hueco en el radar, no un cero.
+ *
+ * Number(null) y Number("") dan 0, y un 0 se dibuja en el centro: delante de un
+ * cliente, un dominio o una capacidad que todavia no se ha evaluado se leia como
+ * evaluada con la peor nota. Con null, Chart.js no dibuja ese vertice ni las
+ * lineas que llegan a el. Es lo mismo que hacen el heatmap y las tablas, que
+ * ensenan un guion.
+ */
 function toRadarNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 }
