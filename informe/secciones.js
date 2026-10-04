@@ -12,17 +12,18 @@
  * quien conoce el deck entero. Cada seccion solo sabe pintar su cuerpo.
  */
 
-import { average } from "../core/calculo.js?v=17";
+import { average } from "../core/calculo.js?v=18";
 
 import {
   COLOR_DE_PALANCA,
   escapeAttr,
   escapeHtml,
+  formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=17";
+} from "../core/presentacion.js?v=18";
 
-import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=17";
+import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=18";
 
 
 /**
@@ -207,14 +208,14 @@ function titularHtml(titulares, sujeto) {
   if (titulares.mayorBrecha) {
     frases.push(
       `La mayor brecha de ${escapeHtml(sujeto)} esta en <b>${escapeHtml(titulares.mayorBrecha.grupo)}</b>`
-        + `, con ${escapeHtml(formatNumber(titulares.mayorBrecha.gap))} puntos frente al objetivo.`,
+        + `, con ${escapeHtml(formatMedia(titulares.mayorBrecha.gap))} puntos frente al objetivo.`,
     );
   }
 
   if (titulares.palancaMasDebil) {
     frases.push(
       `La palanca mas debil es <b>${escapeHtml(titulares.palancaMasDebil.label)}</b>`
-        + `, en ${escapeHtml(formatNumber(titulares.palancaMasDebil.media))} sobre 5.`,
+        + `, en ${escapeHtml(formatMedia(titulares.palancaMasDebil.media))} sobre 5.`,
     );
   }
 
@@ -287,12 +288,12 @@ export function panoramaGlobal(data) {
     ${rejillaDeKpis([
       {
         etiqueta: "Score global F3M",
-        valor: formatNumber(global.scoreGlobal),
+        valor: formatMedia(global.scoreGlobal),
         nota: "Promedio de las subcapacidades puntuadas de todos los dominios",
       },
       {
         etiqueta: "Gap medio vs objetivo",
-        valor: formatNumber(global.gapMedio),
+        valor: formatMedia(global.gapMedio),
         nota: "Contra los objetivos definidos por capacidad y palanca",
       },
       {
@@ -371,9 +372,9 @@ export function rankingDeDominios(data) {
               etiqueta: `${fila.label}: ${formatNumber(fila.scoreMedio)} de 5, objetivo ${formatNumber(fila.targetMedio)}`,
             })}
           </td>
-          <td class="num">${escapeHtml(formatNumber(fila.scoreMedio))}</td>
-          <td class="num">${escapeHtml(formatNumber(fila.targetMedio))}</td>
-          <td class="num">${escapeHtml(formatNumber(fila.gap))}</td>
+          <td class="num">${escapeHtml(formatMedia(fila.scoreMedio))}</td>
+          <td class="num">${escapeHtml(formatMedia(fila.targetMedio))}</td>
+          <td class="num">${escapeHtml(formatMedia(fila.gap))}</td>
           <td>${marcaDePrioridad(fila.prioridad)}</td>
           <td class="num">${fila.evaluadas}/${fila.total}</td>
         </tr>
@@ -425,14 +426,14 @@ export function resumenDelDominio(data) {
     ${rejillaDeKpis([
       {
         etiqueta: "Score del dominio",
-        valor: formatNumber(data.scoreGlobal),
+        valor: formatMedia(data.scoreGlobal),
         nota: data.scored.length
           ? "Promedio de las subcapacidades puntuadas"
           : "Pendiente de scoring",
       },
       {
         etiqueta: "Gap medio vs objetivo",
-        valor: formatNumber(data.gapMedio),
+        valor: formatMedia(data.gapMedio),
         nota: "Contra los objetivos definidos por capacidad y palanca",
       },
       {
@@ -489,7 +490,7 @@ export function perfilPorPalanca(data) {
           <p class="radar-titulo"><em style="background:${color}"></em>${escapeHtml(titulo)}</p>
           ${svgDonut({ valor: media, objetivo, color, titulo })}
           <p class="nota" style="margin-top:3mm; text-align:center;">
-            Brecha de ${escapeHtml(formatNumber(gap))} puntos
+            Brecha de ${escapeHtml(formatMedia(gap))} puntos
           </p>
         </article>
       `;
@@ -541,12 +542,12 @@ export function resumenPorCapacidad(filas) {
             etiqueta: `${fila.capacidad}: ${formatNumber(fila.scoreMedio)} de 5, objetivo ${formatNumber(fila.targetMedio)}`,
           })}
         </td>
-        <td class="num">${escapeHtml(formatNumber(fila.procesos))}</td>
-        <td class="num">${escapeHtml(formatNumber(fila.tecnologia))}</td>
-        <td class="num">${escapeHtml(formatNumber(fila.organizacion))}</td>
-        <td class="num">${escapeHtml(formatNumber(fila.scoreMedio))}</td>
-        <td class="num">${escapeHtml(formatNumber(fila.targetMedio))}</td>
-        <td class="num">${escapeHtml(formatNumber(fila.gap))}</td>
+        <td class="num">${escapeHtml(formatMedia(fila.procesos))}</td>
+        <td class="num">${escapeHtml(formatMedia(fila.tecnologia))}</td>
+        <td class="num">${escapeHtml(formatMedia(fila.organizacion))}</td>
+        <td class="num">${escapeHtml(formatMedia(fila.scoreMedio))}</td>
+        <td class="num">${escapeHtml(formatMedia(fila.targetMedio))}</td>
+        <td class="num">${escapeHtml(formatMedia(fila.gap))}</td>
         <td>${marcaDePrioridad(fila.prioridad)}</td>
         <td class="num">${escapeHtml(fila.avance)}</td>
       </tr>
@@ -588,8 +589,8 @@ export function heatmap(entradas) {
         <td class="celda-calor" style="${estiloDeCalor(item.scores.procesos)}">${escapeHtml(formatNumber(item.scores.procesos))}</td>
         <td class="celda-calor" style="${estiloDeCalor(item.scores.tecnologia)}">${escapeHtml(formatNumber(item.scores.tecnologia))}</td>
         <td class="celda-calor" style="${estiloDeCalor(item.scores.organizacion)}">${escapeHtml(formatNumber(item.scores.organizacion))}</td>
-        <td class="celda-calor" style="${estiloDeCalor(metrics.scoreMedio)}">${escapeHtml(formatNumber(metrics.scoreMedio))}</td>
-        <td class="celda-fin">${escapeHtml(formatNumber(metrics.gap))}</td>
+        <td class="celda-calor" style="${estiloDeCalor(metrics.scoreMedio)}">${escapeHtml(formatMedia(metrics.scoreMedio))}</td>
+        <td class="celda-fin">${escapeHtml(formatMedia(metrics.gap))}</td>
         <td class="celda-fin">${marcaDePrioridad(metrics.prioridad)}</td>
       </tr>
     `)
@@ -634,7 +635,7 @@ export function brechas(entradas, desde) {
             etiqueta: `${item.subcapacidad}: ${formatNumber(metrics.scoreMedio)} de 5, objetivo ${formatNumber(metrics.targetMedio)}`,
           })}
           <p class="nota" style="margin-top:1.4mm;">
-            Gap ${escapeHtml(formatNumber(metrics.gap))} · ${escapeHtml(metrics.prioridad)} · ${escapeHtml(metrics.oleada)}
+            Gap ${escapeHtml(formatMedia(metrics.gap))} · ${escapeHtml(metrics.prioridad)} · ${escapeHtml(metrics.oleada)}
           </p>
         </div>
       </article>

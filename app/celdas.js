@@ -15,16 +15,16 @@
  * las pedia prestadas el modal del Roadmap; con la pestana IA ya son tres sitios.
  */
 
-import { average } from "../core/calculo.js?v=17";
+import { average } from "../core/calculo.js?v=18";
 import {
   escapeAttr,
   escapeHtml,
-  formatNumber,
+  formatMedia,
   priorityColor,
-} from "../core/presentacion.js?v=17";
-import { pieDeFuente } from "./biblioteca.js?v=17";
-import { LEVERS, els, state } from "./estado.js?v=17";
-import { getScopedItems } from "./filtros.js?v=17";
+} from "../core/presentacion.js?v=18";
+import { pieDeFuente } from "./biblioteca.js?v=18";
+import { LEVERS, els, state } from "./estado.js?v=18";
+import { getScopedItems } from "./filtros.js?v=18";
 
 
 export function buildFilteredEmptyState() {
@@ -101,7 +101,7 @@ export function renderLeverBars(items = getScopedItems(), destino = els.leverBar
 
     return barRow(
       lever.label,
-      formatNumber(avg),
+      formatMedia(avg),
       width,
       lever.color,
     );

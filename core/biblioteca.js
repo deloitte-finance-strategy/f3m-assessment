@@ -15,7 +15,7 @@
  * que algo se ha roto.
  */
 
-import { normalizeMatchKey } from "./coincidencias.js?v=17";
+import { normalizeMatchKey } from "./coincidencias.js?v=18";
 
 
 /**

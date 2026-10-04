@@ -16,16 +16,16 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=17";
-import { createDefaultTargets } from "../../core/objetivos.js?v=17";
-import { escapeAttr, escapeHtml, formatNumber } from "../../core/presentacion.js?v=17";
-import { abrirDialogo, showNotice } from "../avisos.js?v=17";
+} from "../../core/calculo.js?v=18";
+import { createDefaultTargets } from "../../core/objetivos.js?v=18";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=18";
+import { abrirDialogo, showNotice } from "../avisos.js?v=18";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=17";
+} from "../celdas.js?v=18";
 import {
   DOMAINS,
   LEVERS,
@@ -33,17 +33,17 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=17";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=17";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=17";
-import { persistItemChange, persistTargetsDelDominioActivo } from "../persistencia.js?v=17";
-import { repintarTodo } from "../repintado.js?v=17";
+} from "../estado.js?v=18";
+import { describirObjetivos, getVisibleItems } from "../filtros.js?v=18";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=18";
+import { persistItemChange, persistTargetsDelDominioActivo } from "../persistencia.js?v=18";
+import { repintarTodo } from "../repintado.js?v=18";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=17";
+} from "../subcapacidad.js?v=18";
 
 
 export function renderCapabilityTargets() {
@@ -532,18 +532,18 @@ function scoreResult(metrics) {
       </div>
 
       <div class="score-summary-main">
-        <strong>${formatNumber(metrics.scoreMedio)}</strong>
+        <strong>${formatMedia(metrics.scoreMedio)}</strong>
         <span>Score medio</span>
       </div>
 
       <div class="score-summary-target">
         Objetivo medio:
-        <strong>${formatNumber(metrics.targetMedio)}</strong>
+        <strong>${formatMedia(metrics.targetMedio)}</strong>
       </div>
 
       <div class="score-summary-details">
         <span>
-          <strong>${formatNumber(metrics.gap)}</strong>
+          <strong>${formatMedia(metrics.gap)}</strong>
           Gap
         </span>
 

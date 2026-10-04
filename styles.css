@@ -1655,11 +1655,17 @@ display: none;
 }
 
 
+/*
+  El nivel no se parte: "3 - Estandarizado" salia en dos lineas, con el "3 -"
+  arriba, y se leia como dos datos. Si no cabe junto al gap, baja entero a la
+  linea de abajo.
+*/
 .score-summary-details {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px 8px;
   margin-top: 8px;
 }
 
@@ -1708,6 +1714,7 @@ display: none;
   font-size: var(--fs-3xs);
   line-height: 1.2;
   text-align: center;
+  white-space: nowrap;
 }
 
 
@@ -2313,22 +2320,17 @@ border-color: var(--line-tenue);
     partian a mitad de palabra —"PRIORIDA/D", "OLEA/DA", "RESPONSAB/LE"— y
     obligaban a que TODAS midieran dos lineas de alto.
 
-    Con anchos propios para las columnas cortas y una anchura minima que las
-    respete, no se parte nada. Por debajo de ~1360 px la tabla se desplaza en
-    horizontal dentro de su contenedor, que es lo que ese contenedor ya hacia.
+    Con anchos propios para cada columna y una anchura minima que los respete,
+    no se parte nada. Los anchos, y por que son esos, van mas abajo.
   */
   table-layout: fixed;
 }
 
 /*
   .table-wrap .data-table fija 980px y gana en especificidad, asi que la anchura
-  minima del roadmap tiene que declararse con el mismo peso. Con 980 las once
-  columnas se quedaban sin sitio: la de Gap en 48 px, de los que 24 son relleno,
-  y "2,67" no cabe en 24 px.
+  minima del roadmap se declara con el mismo peso, mas abajo, junto a los anchos
+  de las columnas de los que sale.
 */
-.table-wrap .roadmap-table {
-  min-width: 1300px;
-}
 
 /* Una cabecera es una etiqueta: se parte entre palabras o no se parte. */
 .roadmap-table thead th {
@@ -2394,91 +2396,132 @@ border-color: var(--line-tenue);
 
 
 
+/*
+  Los anchos van en pixeles y no en porcentajes. Con porcentajes, la columna de
+  Capacidad se quedaba en unos 125 px y partia las palabras por la mitad
+  ("Presupuest" / "os"), el Estado se leia "No inic" y el Responsable,
+  "Responsabl". Con table-layout: fixed, el min-width de una celda no cuenta, asi
+  que no habia forma de pedir un minimo.
+
+  Cada ancho es el que necesita la palabra mas larga de esa columna en los nueve
+  dominios, medida en el navegador, con un poco de holgura: "Transformación" en
+  Capacidad, "posicionamiento" en Subcapacidad, "No iniciado" en Estado. La
+  Iniciativa no lleva ancho: se queda con lo que sobra, y es la unica columna
+  que de verdad tiene texto que leer.
+
+  Suman 1.366 px, lo que deja una pantalla de 1.440 sin desplazamiento. En
+  Presentacion la letra crece y los anchos con ella, asi que la tabla se
+  desplaza en horizontal: quedan a la vista Capacidad, Subcapacidad, Gap,
+  Prioridad e Iniciativa, que es lo que se ensena, y los campos de edicion a la
+  derecha. Es mejor que partir palabras delante del cliente.
+*/
+.roadmap-table {
+  --rm-capacidad: 156px;
+  --rm-subcapacidad: 160px;
+  --rm-gap: 64px;
+  --rm-prioridad: 102px;
+  --rm-iniciativa-min: 220px;
+  --rm-ia: 60px;
+  --rm-oleada: 82px;
+  --rm-responsable: 136px;
+  --rm-estado: 150px;
+  --rm-comentarios: 136px;
+  --rm-ultimo: 104px;
+}
+
+:root[data-densidad="presentacion"] .roadmap-table {
+  --rm-capacidad: 188px;
+  --rm-subcapacidad: 180px;
+  --rm-gap: 74px;
+  --rm-prioridad: 122px;
+  --rm-iniciativa-min: 280px;
+  --rm-ia: 62px;
+  --rm-oleada: 98px;
+  --rm-responsable: 162px;
+  --rm-estado: 174px;
+  --rm-comentarios: 150px;
+  --rm-ultimo: 108px;
+}
+
+/*
+  La tabla nunca es mas estrecha que la suma de sus columnas: por debajo, se
+  desplaza en horizontal dentro de su contenedor, que es lo que ya hacia.
+*/
+.table-wrap .roadmap-table {
+  min-width: calc(
+    var(--rm-capacidad) + var(--rm-subcapacidad) + var(--rm-gap) +
+    var(--rm-prioridad) + var(--rm-iniciativa-min) + var(--rm-ia) +
+    var(--rm-oleada) + var(--rm-responsable) + var(--rm-estado) +
+    var(--rm-comentarios) + var(--rm-ultimo)
+  );
+}
+
 /* Capacidad */
 .roadmap-table th:nth-child(1),
 .roadmap-table td:nth-child(1) {
-  width: 9%;
-  min-width: 0;
+  width: var(--rm-capacidad);
 }
 
 /* Subcapacidad */
 .roadmap-table th:nth-child(2),
 .roadmap-table td:nth-child(2) {
-  width: 12%;
-  min-width: 0;
+  width: var(--rm-subcapacidad);
 }
 
 /* Gap */
 .roadmap-table th:nth-child(3),
 .roadmap-table td:nth-child(3) {
-  width: 5%;
-  min-width: 72px;
+  width: var(--rm-gap);
   text-align: center;
 }
 
 /* Prioridad */
 .roadmap-table th:nth-child(4),
 .roadmap-table td:nth-child(4) {
-  width: 8%;
-  min-width: 104px;
+  width: var(--rm-prioridad);
   text-align: center;
 }
 
-/* Iniciativa sugerida */
-.roadmap-table th:nth-child(5),
-.roadmap-table td:nth-child(5) {
-  width: 20%;
-  min-width: 0;
-}
+/* Iniciativa sugerida: sin ancho, se queda con el resto */
 
 /* IA */
 .roadmap-table th:nth-child(6),
 .roadmap-table td:nth-child(6) {
-  width: 5%;
-  min-width: 62px;
+  width: var(--rm-ia);
   text-align: center;
 }
 
 /* Oleada */
 .roadmap-table th:nth-child(7),
 .roadmap-table td:nth-child(7) {
-  width: 6%;
-  min-width: 78px;
+  width: var(--rm-oleada);
   text-align: center;
 }
 
-/* Owner: el ancho que necesita un nombre y un apellido sin recortarse. */
+/* Responsable: el ancho que necesita un nombre y un apellido sin recortarse. */
 .roadmap-table th:nth-child(8),
 .roadmap-table td:nth-child(8) {
-  width: 9%;
-  min-width: 120px;
+  width: var(--rm-responsable);
 }
 
 /* Estado: antes el desplegable se leia "No ini" y "En cur". */
 .roadmap-table th:nth-child(9),
 .roadmap-table td:nth-child(9) {
-  width: 9%;
-  min-width: 118px;
+  width: var(--rm-estado);
 }
 
 /* Comentarios */
 .roadmap-table th:nth-child(10),
 .roadmap-table td:nth-child(10) {
-  width: 11%;
-  min-width: 0;
+  width: var(--rm-comentarios);
 }
 
-/* Ultimo cambio. Faltaba: las diez anteriores sumaban el 100% y esta se
-   quedaba a cero, con el encabezado partido letra a letra. */
+/* Ultimo cambio */
 .roadmap-table th:nth-child(11),
 .roadmap-table td:nth-child(11) {
-  width: 6%;
-  min-width: 104px;
+  width: var(--rm-ultimo);
 }
 
-
-
-/* Oleada compacta */
 .roadmap-wave-cell {
   text-align: center;
 }
@@ -2507,11 +2550,12 @@ border-color: var(--line-tenue);
   padding: 0 8px;
 }
 
-/* Estado */
+/* Estado. Sin relleno a la derecha: la flecha del desplegable ya reserva su
+   sitio, y los 24 px que llevaba se sumaban a ella y recortaban "No iniciado". */
 .roadmap-status {
   width: 100%;
   min-width: 0;
-  padding: 0 24px 0 6px;
+  padding: 0 4px 0 6px;
   font-size: var(--fs-xs);
   white-space: nowrap;
 }
