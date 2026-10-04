@@ -6,20 +6,20 @@
  * las dos vistas lo dicen en pantalla.
  */
 
-import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=17";
-import { filasDeResumen } from "../../core/exportacion.js?v=17";
-import { escapeHtml, formatNumber } from "../../core/presentacion.js?v=17";
+import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=18";
+import { filasDeResumen } from "../../core/exportacion.js?v=18";
+import { escapeHtml, formatMedia } from "../../core/presentacion.js?v=18";
 import {
   buildFilteredEmptyState,
   kpiCard,
   priorityBadge,
   renderLeverBars,
   renderPriorityBars,
-} from "../celdas.js?v=17";
-import { els, state } from "../estado.js?v=17";
-import { getScopedItems } from "../filtros.js?v=17";
-import { renderCapabilityRadar } from "../graficos.js?v=17";
-import { agregarPorCapacidad, calculate } from "../metricas.js?v=17";
+} from "../celdas.js?v=18";
+import { els, state } from "../estado.js?v=18";
+import { getScopedItems } from "../filtros.js?v=18";
+import { renderCapabilityRadar } from "../graficos.js?v=18";
+import { agregarPorCapacidad, calculate } from "../metricas.js?v=18";
 
 
 export function renderDashboard() {
@@ -32,7 +32,7 @@ export function renderDashboard() {
 els.kpiGrid.innerHTML = [
   kpiCard(
     "Score global dominio",
-    formatNumber(scoreGlobal),
+    formatMedia(scoreGlobal),
     scored.length
       ? "Promedio de subcapacidades puntuadas"
       : "Pendiente de scoring",
@@ -40,7 +40,7 @@ els.kpiGrid.innerHTML = [
   ),
   kpiCard(
     "Gap medio vs objetivo",
-    formatNumber(gapMedio),
+    formatMedia(gapMedio),
     "Calculado con los objetivos definidos por capacidad y palanca",
     "gap",
   ),
@@ -113,7 +113,7 @@ function renderTitularesEjecutivos(items, metrics) {
 
   if (porCapacidad.length) {
     titulares.push(
-      `Mayor brecha: ${porCapacidad[0].grupo} (gap ${formatNumber(porCapacidad[0].gap)})`,
+      `Mayor brecha: ${porCapacidad[0].grupo} (gap ${formatMedia(porCapacidad[0].gap)})`,
     );
   }
 
@@ -121,7 +121,7 @@ function renderTitularesEjecutivos(items, metrics) {
 
   if (porPalanca.length) {
     titulares.push(
-      `Palanca más débil: ${porPalanca[0].label} (${formatNumber(porPalanca[0].media)})`,
+      `Palanca más débil: ${porPalanca[0].label} (${formatMedia(porPalanca[0].media)})`,
     );
   }
 
@@ -146,27 +146,27 @@ function renderSummaryTable() {
         <td>${escapeHtml(capacidad.capacidad)}</td>
 
         <td class="number">
-          ${formatNumber(capacidad.procesos)}
+          ${formatMedia(capacidad.procesos)}
         </td>
 
         <td class="number">
-          ${formatNumber(capacidad.tecnologia)}
+          ${formatMedia(capacidad.tecnologia)}
         </td>
 
         <td class="number">
-          ${formatNumber(capacidad.organizacion)}
+          ${formatMedia(capacidad.organizacion)}
         </td>
 
         <td class="number">
-          ${formatNumber(capacidad.scoreMedio)}
+          ${formatMedia(capacidad.scoreMedio)}
         </td>
 
         <td class="number">
-          ${formatNumber(capacidad.targetMedio)}
+          ${formatMedia(capacidad.targetMedio)}
         </td>
 
         <td class="number">
-          ${formatNumber(capacidad.gap)}
+          ${formatMedia(capacidad.gap)}
         </td>
 
         <td>

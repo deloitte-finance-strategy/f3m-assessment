@@ -6,9 +6,9 @@
  * via getDominiosDelOverview() y no getScopedItems().
  */
 
-import { rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=17";
-import { escapeHtml, formatNumber } from "../../core/presentacion.js?v=17";
-import { kpiCard, priorityBadge, renderLeverBars, renderPriorityBars } from "../celdas.js?v=17";
+import { rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=18";
+import { escapeHtml, formatMedia } from "../../core/presentacion.js?v=18";
+import { kpiCard, priorityBadge, renderLeverBars, renderPriorityBars } from "../celdas.js?v=18";
 import {
   DOMAINS,
   GRUPOS_DE_DOMINIO,
@@ -16,9 +16,9 @@ import {
   els,
   state,
   syncActiveDomainState,
-} from "../estado.js?v=17";
-import { renderOverviewRadar } from "../graficos.js?v=17";
-import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=17";
+} from "../estado.js?v=18";
+import { renderOverviewRadar } from "../graficos.js?v=18";
+import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=18";
 
 
 /**
@@ -138,7 +138,7 @@ export function renderOverview() {
   els.overviewKpiGrid.innerHTML = [
     kpiCard(
       "Score global F3M",
-      formatNumber(resumenDelOverview.scoreGlobal),
+      formatMedia(resumenDelOverview.scoreGlobal),
       evaluadas.length
         // Se dice "subcapacidades" y no "dominios" a proposito: si no, alguien
         // promedia a mano las nueve cifras de la tabla y no le cuadra.
@@ -148,7 +148,7 @@ export function renderOverview() {
     ),
     kpiCard(
       "Gap medio vs objetivo",
-      formatNumber(resumenDelOverview.gapMedio),
+      formatMedia(resumenDelOverview.gapMedio),
       "Cada dominio contra sus propios objetivos por capacidad y palanca",
       "gap",
     ),
@@ -217,7 +217,7 @@ function renderOverviewHeadline(filas, entradas) {
 
   if (porGap.length) {
     titulares.push(
-      `Dominio con mayor brecha: ${porGap[0].label} (gap ${formatNumber(porGap[0].gap)})`,
+      `Dominio con mayor brecha: ${porGap[0].label} (gap ${formatMedia(porGap[0].gap)})`,
     );
   }
 
@@ -225,7 +225,7 @@ function renderOverviewHeadline(filas, entradas) {
 
   if (porPalanca.length) {
     titulares.push(
-      `Palanca más débil: ${porPalanca[0].label} (${formatNumber(porPalanca[0].media)})`,
+      `Palanca más débil: ${porPalanca[0].label} (${formatMedia(porPalanca[0].media)})`,
     );
   }
 
@@ -257,27 +257,27 @@ function renderOverviewSummaryTable(filas) {
         </td>
 
         <td class="number">
-          ${formatNumber(fila.procesos)}
+          ${formatMedia(fila.procesos)}
         </td>
 
         <td class="number">
-          ${formatNumber(fila.tecnologia)}
+          ${formatMedia(fila.tecnologia)}
         </td>
 
         <td class="number">
-          ${formatNumber(fila.organizacion)}
+          ${formatMedia(fila.organizacion)}
         </td>
 
         <td class="number">
-          ${formatNumber(fila.scoreMedio)}
+          ${formatMedia(fila.scoreMedio)}
         </td>
 
         <td class="number">
-          ${formatNumber(fila.targetMedio)}
+          ${formatMedia(fila.targetMedio)}
         </td>
 
         <td class="number">
-          ${formatNumber(fila.gap)}
+          ${formatMedia(fila.gap)}
         </td>
 
         <td>

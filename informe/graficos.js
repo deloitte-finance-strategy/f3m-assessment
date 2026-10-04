@@ -22,8 +22,8 @@
  * para lo que es geometria de verdad.
  */
 
-import { escapeHtml, formatNumber } from "../core/presentacion.js?v=17";
-import { PALETA, colorDeCalor } from "./estilos.js?v=17";
+import { escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=18";
+import { PALETA, colorDeCalor } from "./estilos.js?v=18";
 
 
 /** Coordenada legible: 2 decimales bastan y evitan cadenas de 17 cifras. */
@@ -131,7 +131,7 @@ export function svgDonut({ valor, objetivo, maximo = 5, color = PALETA.marca, ti
       ${arco}
       ${marcaDeObjetivoEnAnillo(objetivo, maximo, radio, grosor)}
       <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
-            font-size="26" font-weight="700" fill="${PALETA.tinta}">${escapeHtml(formatNumber(valor))}</text>
+            font-size="26" font-weight="700" fill="${PALETA.tinta}">${escapeHtml(formatMedia(valor))}</text>
       <text x="50" y="68" text-anchor="middle" font-size="9" font-weight="700"
             letter-spacing="0.6" fill="${PALETA.tintaTenue}">OBJ ${escapeHtml(formatNumber(objetivo))}</text>
     </svg>
@@ -206,7 +206,7 @@ function marcaDeScore(score, posicion, pista) {
   return `
     <line x1="${x}" y1="${pista.y - 3}" x2="${x}" y2="${pista.y + pista.alto + 0.6}" stroke="${PALETA.tinta}" stroke-width="1.9"></line>
     <text x="${x}" y="${pista.y - 4.4}" text-anchor="${anclaSegunBorde(x)}" font-size="7.5" font-weight="700"
-          fill="${PALETA.tinta}">${escapeHtml(formatNumber(score))}</text>
+          fill="${PALETA.tinta}">${escapeHtml(formatMedia(score))}</text>
   `;
 }
 

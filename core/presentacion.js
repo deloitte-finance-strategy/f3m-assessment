@@ -103,3 +103,26 @@ export function formatNumber(value) {
 
   return FORMATO_DE_NUMERO.format(value);
 }
+
+
+/**
+ * Una media, siempre con dos decimales: "3,00", "2,50", "2,94".
+ *
+ * Con formatNumber() una columna de medias decia "3", "2,5" y "2,94" una debajo
+ * de otra. Son el mismo tipo de dato con la misma precision, y escritos asi
+ * parecen tres cosas distintas y no se alinean. En una tabla proyectada se nota.
+ *
+ * Solo para medias: scores, objetivos medios y gaps, tambien en KPIs y
+ * titulares. Un score suelto de una palanca es un entero de 1 a 5 y sigue con
+ * formatNumber(): "3,00" sugeriria una precision que no tiene.
+ */
+const FORMATO_DE_MEDIA = new Intl.NumberFormat("es-ES", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+export function formatMedia(value) {
+  if (!Number.isFinite(value)) return "-";
+
+  return FORMATO_DE_MEDIA.format(value);
+}

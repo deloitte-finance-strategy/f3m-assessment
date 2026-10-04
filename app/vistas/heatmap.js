@@ -11,13 +11,13 @@
  * existe para impedir.
  */
 
-import { getMaturityLevelNumber, priorityFromGap } from "../../core/calculo.js?v=17";
-import { escapeAttr, escapeHtml, formatNumber } from "../../core/presentacion.js?v=17";
+import { getMaturityLevelNumber, priorityFromGap } from "../../core/calculo.js?v=18";
+import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../../core/presentacion.js?v=18";
 
-import { LEVERS, els, expandedHeatmapCapabilities } from "../estado.js?v=17";
-import { agregarPorCapacidad } from "../metricas.js?v=17";
-import { getScopedItems } from "../filtros.js?v=17";
-import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=17";
+import { LEVERS, els, expandedHeatmapCapabilities } from "../estado.js?v=18";
+import { agregarPorCapacidad } from "../metricas.js?v=18";
+import { getScopedItems } from "../filtros.js?v=18";
+import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=18";
 
 export function renderHeatmap() {
   const capabilityRows = agregarPorCapacidad(getScopedItems());
@@ -34,9 +34,9 @@ export function renderHeatmap() {
             <tr class="heatmap-detail-row ${isExpanded ? "" : "is-hidden"}" data-capability-detail="${escapeAttr(entry.capacidad)}">
               <td class="heatmap-detail-capability">${escapeHtml(item.capacidad)}</td>
               <td>${escapeHtml(item.subcapacidad)}</td>
-              ${LEVERS.map((lever) => heatScoreCell(item.scores[lever.key])).join("")}
+              ${LEVERS.map((lever) => heatScoreCell(item.scores[lever.key], formatNumber)).join("")}
               ${heatScoreCell(metrics.scoreMedio)}
-              <td class="heat-cell ${gapClass(metrics.gap)}">${formatNumber(metrics.gap)}</td>
+              <td class="heat-cell ${gapClass(metrics.gap)}">${formatMedia(metrics.gap)}</td>
               <td>${priorityBadge(metrics.prioridad)}</td>
             </tr>
           `;
@@ -62,7 +62,7 @@ export function renderHeatmap() {
           ${heatScoreCell(entry.tecnologia)}
           ${heatScoreCell(entry.organizacion)}
           ${heatScoreCell(entry.scoreMedio)}
-          <td class="heat-cell ${gapClass(entry.gap)}">${formatNumber(entry.gap)}</td>
+          <td class="heat-cell ${gapClass(entry.gap)}">${formatMedia(entry.gap)}</td>
           <td>${priorityBadge(entry.prioridad)}</td>
         </tr>
         ${detailRows}
@@ -184,8 +184,11 @@ function updateHeatmapExpandAllButton(capabilityRows) {
  * esta evaluada y con la peor nota posible, cuando lo que pasa es que todavia
  * no se ha evaluado. La tabla resumen del Dashboard, con los mismos datos,
  * enseña un guion. Dos vistas de la misma herramienta decian cosas distintas.
+ *
+ * Por defecto escribe una media, con dos decimales. El score suelto de una
+ * palanca, en las filas de subcapacidad, es un entero y llega con formatNumber.
  */
-function heatScoreCell(value) {
+function heatScoreCell(value, formatear = formatMedia) {
   const sinValor = value === null || value === undefined || value === "";
   const number = sinValor ? NaN : Number(value);
 
@@ -196,7 +199,7 @@ function heatScoreCell(value) {
   // El nivel sale de getMaturityLevelNumber(), que es donde vive el redondeo
   // acotado del modelo. Aqui estaba reimplementado en linea, asi que eran dos
   // definiciones de "que nivel es un 3,5" a dos lineas de distancia.
-  return `<td class="heat-cell heat-${getMaturityLevelNumber(number)}">${formatNumber(number)}</td>`;
+  return `<td class="heat-cell heat-${getMaturityLevelNumber(number)}">${formatear(number)}</td>`;
 }
 
 

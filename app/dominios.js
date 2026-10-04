@@ -10,10 +10,10 @@
  * decia "no se pudo cargar el JSON de datos" con los otros ocho perfectos.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=17";
-import { normalizarItemCargado } from "../core/escenario.js?v=17";
-import { normalizeDomainTargets } from "../core/objetivos.js?v=17";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=17";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=18";
+import { normalizarItemCargado } from "../core/escenario.js?v=18";
+import { normalizeDomainTargets } from "../core/objetivos.js?v=18";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=18";
 
 import {
   CASOS_DE_IA,
@@ -27,11 +27,11 @@ import {
   expandedHeatmapCapabilities,
   state,
   syncActiveDomainState,
-} from "./estado.js?v=17";
+} from "./estado.js?v=18";
 
-import { comportamientoDeDesplazamiento } from "./preferencias.js?v=17";
-import { repintarTodo } from "./repintado.js?v=17";
-import { populateCapacityFilter } from "./filtros.js?v=17";
+import { comportamientoDeDesplazamiento } from "./preferencias.js?v=18";
+import { repintarTodo } from "./repintado.js?v=18";
+import { populateCapacityFilter } from "./filtros.js?v=18";
 
 
 /**

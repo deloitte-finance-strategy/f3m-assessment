@@ -9,7 +9,7 @@
  * el navegador, o node tests/ejecutar.mjs desde la linea de comandos.
  */
 
-import { escapeAttr, escapeHtml, formatNumber } from "../core/presentacion.js?v=17";
+import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=18";
 
 
 export const casos = [
@@ -41,6 +41,19 @@ export const casos = [
       t.igual(formatNumber(3.1), "3,1", "un solo decimal significativo");
       t.igual(formatNumber(4.0), "4", "sin parte decimal");
       t.igual(formatNumber(2.2), "2,2", "media de palanca tipica");
+    },
+  },
+  {
+    grupo: "Numeros en espanol",
+    nombre: "una media lleva siempre dos decimales, para que una columna se alinee",
+    ejecutar: (t) => {
+      t.igual(formatMedia(3), "3,00", "entera");
+      t.igual(formatMedia(2.5), "2,50", "un decimal");
+      t.igual(formatMedia(2.94), "2,94", "dos decimales");
+      t.igual(formatMedia(1.666666), "1,67", "se redondea igual que formatNumber");
+      t.igual(formatMedia(0), "0,00", "cero es un valor, no un vacio");
+      t.igual(formatMedia(null), "-", "sin puntuar sigue siendo un guion");
+      t.igual(formatMedia(NaN), "-", "NaN tambien");
     },
   },
   {
