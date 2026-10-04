@@ -13,9 +13,9 @@
  *   que escribe el usuario llega sin escapar.
  */
 
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=18";
-import { deTantas, paginar } from "../informe/secciones.js?v=18";
-import { resumenDeDesbordes } from "../informe/desbordes.js?v=18";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=19";
+import { deTantas, paginar } from "../informe/secciones.js?v=19";
+import { resumenDeDesbordes } from "../informe/desbordes.js?v=19";
 
 
 /** Una subcapacidad y sus metricas, lo minimo que el informe necesita. */
@@ -236,6 +236,47 @@ export const casos = [
       t.igual(html.includes("1.15 Una subcapacidad"), true, "la ultima fila esta en el documento");
     },
   },
+  {
+    grupo: "El deck",
+    nombre: "el indice lista una seccion repartida una sola vez, con su rango",
+    ejecutar: (t) => {
+      const muchas = Array.from({ length: 15 }, (_, i) => entrada(i + 1));
+
+      const html = buildEnhancedPdfReportHtml(
+        datos({ metrics: muchas, scored: muchas, roadmapItems: muchas, roadmapTotal: 15 }),
+      );
+
+      const indice = html.slice(html.indexOf('<div class="indice">'), html.indexOf("</section>", html.indexOf('<div class="indice">')));
+      const lineas = indice.match(/<span>Roadmap e iniciativas<\/span>/g) || [];
+
+      t.igual(lineas.length, 1, "una sola linea para el roadmap");
+      t.igual(/<span>Roadmap e iniciativas<\/span>\s*<i><\/i>\s*<b>\d+–\d+<\/b>/.test(indice), true, "con el rango de sus diapositivas");
+    },
+  },
+
+  {
+    grupo: "El deck",
+    nombre: "sin comentarios no hay diapositiva de comentarios, y con ellos si",
+    ejecutar: (t) => {
+      const sin = buildEnhancedPdfReportHtml(datos());
+      const con = buildEnhancedPdfReportHtml(
+        datos({ commentItems: [{ capacidad: "Cumplimiento", subcapacidad: "1.1 Una subcapacidad", comentario: "Revisar el calendario" }] }),
+      );
+
+      t.igual(sin.includes("Comentarios y hallazgos"), false, "ni la diapositiva ni su linea del indice");
+      t.igual(con.includes("Comentarios y hallazgos"), true);
+      t.igual(cuentaDeDiapositivas(con), cuentaDeDiapositivas(sin) + 1, "una diapositiva mas, no otra cosa");
+    },
+  },
+  {
+    grupo: "El deck",
+    nombre: "el titulo, que es el nombre del PDF al guardarlo, lleva la fecha",
+    ejecutar: (t) => {
+      const html = buildEnhancedPdfReportHtml(datos({ domainLabel: "FP&A", fechaDeArchivo: "2026-10-04" }));
+
+      t.igual(html.includes("<title>Informe F3M - FP&amp;A - 2026-10-04</title>"), true);
+    },
+  },
 
   // ------------------------------------------------------------- escapado
   {
@@ -272,6 +313,18 @@ export const casos = [
       );
 
       t.igual(html.includes("<script>x</script>"), false);
+    },
+  },
+  {
+    grupo: "Escapado del informe",
+    nombre: "se escapa una vez y no dos: FP&A no sale como FP&amp;A",
+    ejecutar: (t) => {
+      // La nota de la escala de madurez se escapaba al armarla y otra vez al
+      // pintarla, y el PDF de FP&A decia literalmente "FP&amp;A".
+      const html = buildEnhancedPdfReportHtml(datos({ domainLabel: "FP&A", domainTitle: "FP&A" }));
+
+      t.igual(html.includes("&amp;amp;"), false, "ningun escapado doble");
+      t.igual(html.includes("Madurez media de FP&amp;A frente"), true, "la nota de la escala, escapada una vez");
     },
   },
 

@@ -21,9 +21,9 @@
  * reescalar, que es lo mas cerca de una ppt sin generar una ppt.
  */
 
-import { escapeHtml } from "../core/presentacion.js?v=18";
+import { escapeHtml } from "../core/presentacion.js?v=19";
 
-import { getEnhancedPdfReportStyles } from "./estilos.js?v=18";
+import { getEnhancedPdfReportStyles } from "./estilos.js?v=19";
 
 import {
   POR_DIAPOSITIVA,
@@ -46,12 +46,12 @@ import {
   resumenPorCapacidad,
   roadmap,
   separador,
-} from "./secciones.js?v=18";
+} from "./secciones.js?v=19";
 
 
-const PARTE_GLOBAL = "La funcion financiera";
+const PARTE_GLOBAL = "La función financiera";
 const PARTE_DOMINIO = "El dominio";
-const PARTE_ACCION = "Hacia donde";
+const PARTE_ACCION = "Hacia dónde";
 
 
 export function buildEnhancedPdfReportHtml(data) {
@@ -69,7 +69,7 @@ export function buildEnhancedPdfReportHtml(data) {
     <html lang="es">
       <head>
         <meta charset="utf-8">
-        <title>Informe ${escapeHtml(data.domainLabel)} · F3M Assessment</title>
+        <title>${escapeHtml(tituloDelDocumento(data))}</title>
         <style>${getEnhancedPdfReportStyles()}</style>
       </head>
       <body>${diapositivas}</body>
@@ -135,7 +135,7 @@ function parteGlobal(data) {
           numero: "Parte 1",
           titulo: PARTE_GLOBAL,
           texto:
-            "Como esta la funcion financiera en su conjunto, dominio a dominio, antes de entrar "
+            "Cómo está la función financiera en su conjunto, dominio a dominio, antes de entrar "
             + "al detalle. Esta parte no depende de los filtros de la herramienta.",
         }),
     },
@@ -143,7 +143,7 @@ function parteGlobal(data) {
       parte: PARTE_GLOBAL,
       titulo: "Panorama F3M",
       entradilla:
-        "Madurez media de la funcion financiera frente al objetivo configurado, y lo que hay que mirar primero.",
+        "Madurez media de la función financiera frente al objetivo configurado, y lo que hay que mirar primero.",
       cuerpo: () => panoramaGlobal(data),
     },
     {
@@ -175,7 +175,7 @@ function parteDelDominio(data) {
           numero: "Parte 2",
           titulo: data.domainTitle || data.domainLabel,
           texto:
-            "Diagnostico del dominio: capacidades, subcapacidades y brechas frente al objetivo, "
+            "Diagnóstico del dominio: capacidades, subcapacidades y brechas frente al objetivo, "
             + "con los filtros que estaban activos al generar el informe.",
         }),
     },
@@ -189,7 +189,7 @@ function parteDelDominio(data) {
       parte: PARTE_DOMINIO,
       titulo: "Perfil por palanca",
       entradilla:
-        "Madurez media de Procesos, Tecnologia y Organizacion frente a su objetivo, y reparto por prioridad.",
+        "Madurez media de Procesos, Tecnología y Organización frente a su objetivo, y reparto por prioridad.",
       cuerpo: () => perfilPorPalanca(data),
     },
     {
@@ -292,14 +292,20 @@ function parteDeAccion(data) {
         subtitulo: deTantas(indiceDeTanda, tandas.length),
         entradilla:
           indiceDeTanda === 0
-            ? "Cada ficha lleva sus dos etiquetas: que tipo de IA es y que tipo de valor mueve."
+            ? "Cada ficha lleva sus dos etiquetas: qué tipo de IA es y qué tipo de valor mueve."
             : "",
         cuerpo: () => fichasDeIa(tanda),
       });
     });
   }
 
+  // Sin comentarios no hay diapositiva: una pagina que solo dice "no hay
+  // comentarios" en un deck que se entrega parece un apartado sin terminar.
   paginar(data.commentItems, POR_DIAPOSITIVA.comentarios).forEach((tanda, indiceDeTanda, tandas) => {
+    if (!tanda.length) {
+      return;
+    }
+
     secciones.push({
       parte: PARTE_ACCION,
       titulo: "Comentarios y hallazgos",
@@ -310,6 +316,18 @@ function parteDeAccion(data) {
   });
 
   return secciones;
+}
+
+
+/**
+ * El titulo de la ventana del informe, que es tambien el nombre que propone
+ * "Guardar como PDF". Con la fecha, dos informes del mismo dominio no se pisan
+ * en la carpeta de descargas y se ordenan solos.
+ */
+function tituloDelDocumento(data) {
+  return data.fechaDeArchivo
+    ? `Informe F3M - ${data.domainLabel} - ${data.fechaDeArchivo}`
+    : `Informe ${data.domainLabel} · F3M Assessment`;
 }
 
 

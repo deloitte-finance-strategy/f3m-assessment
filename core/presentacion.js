@@ -126,3 +126,41 @@ export function formatMedia(value) {
 
   return FORMATO_DE_MEDIA.format(value);
 }
+
+
+const MESES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+const dosCifras = (numero) => String(numero).padStart(2, "0");
+
+
+/**
+ * La fecha del informe, para leerla: "4 de octubre de 2026, 11:26".
+ *
+ * Era toLocaleString(), que da "4/10/2026, 11:26:44": en un deck que se
+ * entrega, los segundos sobran y el 4/10 se lee distinto a cada lado del
+ * Atlantico.
+ *
+ * Se compone a mano y no con Intl.DateTimeFormat a proposito: con las mismas
+ * opciones, una version de Node da "4 de octubre de 2026, 11:26" y otra
+ * "4 de octubre de 2026 a las 11:26". Cada navegador trae su version, asi que
+ * el informe diria la fecha de una forma u otra segun el portatil de la sala.
+ */
+export function fechaLegible(fecha) {
+  const dia = `${fecha.getDate()} de ${MESES[fecha.getMonth()]} de ${fecha.getFullYear()}`;
+
+  return `${dia}, ${dosCifras(fecha.getHours())}:${dosCifras(fecha.getMinutes())}`;
+}
+
+
+/**
+ * La misma fecha para el nombre de un archivo: "2026-10-04".
+ *
+ * Asi ordenan bien en una carpeta y dos informes de dias distintos no se pisan.
+ * Con la fecha local, no la UTC: el informe de las 00:30 es de hoy, no de ayer.
+ */
+export function fechaParaArchivo(fecha) {
+  return `${fecha.getFullYear()}-${dosCifras(fecha.getMonth() + 1)}-${dosCifras(fecha.getDate())}`;
+}

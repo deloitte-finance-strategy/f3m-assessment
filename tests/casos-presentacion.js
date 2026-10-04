@@ -9,7 +9,7 @@
  * el navegador, o node tests/ejecutar.mjs desde la linea de comandos.
  */
 
-import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=18";
+import { escapeAttr, escapeHtml, fechaLegible, fechaParaArchivo, formatMedia, formatNumber } from "../core/presentacion.js?v=19";
 
 
 export const casos = [
@@ -75,6 +75,25 @@ export const casos = [
       t.igual(formatNumber(NaN), "-", "resultado no numerico");
       t.igual(formatNumber(Infinity), "-", "division por cero");
       t.igual(formatNumber("3.17"), "-", "un texto no es un numero");
+    },
+  },
+
+  // ---------------------------------------------------------------- fechas
+  {
+    grupo: "Fechas del informe",
+    nombre: "se leen con el mes en letra y sin segundos",
+    ejecutar: (t) => {
+      t.igual(fechaLegible(new Date(2026, 9, 4, 9, 5, 44)), "4 de octubre de 2026, 09:05");
+      t.igual(fechaLegible(new Date(2026, 0, 31, 23, 0)), "31 de enero de 2026, 23:00", "enero es el mes 0");
+      t.igual(fechaLegible(new Date(2026, 11, 1, 0, 7)), "1 de diciembre de 2026, 00:07", "y diciembre el 11");
+    },
+  },
+  {
+    grupo: "Fechas del informe",
+    nombre: "en el nombre de archivo van al reves, con ceros, y en hora local",
+    ejecutar: (t) => {
+      t.igual(fechaParaArchivo(new Date(2026, 0, 5, 0, 30)), "2026-01-05", "la medianoche y media sigue siendo ese dia");
+      t.igual(fechaParaArchivo(new Date(2026, 11, 31, 23, 59)), "2026-12-31");
     },
   },
 

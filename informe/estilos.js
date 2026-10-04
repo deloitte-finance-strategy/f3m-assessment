@@ -10,7 +10,7 @@
  * todavia, asi que escribe los suyos literales y tienen que ser los mismos.
  */
 
-import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=18";
+import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=19";
 
 
 /**
@@ -391,6 +391,7 @@ function estilosDePortada() {
     .indice-fila b {
       font-variant-numeric: tabular-nums;
       font-weight: 700;
+      white-space: nowrap;
       color: ${PALETA.tintaSuave};
     }
   `;
