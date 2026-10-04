@@ -412,7 +412,7 @@ export function radarGlobal(data) {
     ${radaresHtml(data.global.radarImages, { sufijo: "por dominio" })}
     <p class="nota" style="margin-top:4mm;">
       Nueve ejes, uno por dominio. La linea continua es la madurez actual y la discontinua, el objetivo configurado.
-      Un dominio sin puntuar se dibuja en el centro.
+      Un dominio sin puntuar no se dibuja: su eje queda vacío.
     </p>
   `;
 }
