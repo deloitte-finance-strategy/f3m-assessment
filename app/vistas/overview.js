@@ -6,9 +6,9 @@
  * via getDominiosDelOverview() y no getScopedItems().
  */
 
-import { rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=19";
-import { escapeHtml, formatMedia } from "../../core/presentacion.js?v=19";
-import { kpiCard, priorityBadge, renderLeverBars, renderPriorityBars } from "../celdas.js?v=19";
+import { rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=20";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=20";
+import { celdaDeAvance, kpiCard, priorityBadge, renderLeverBars, renderPriorityBars } from "../celdas.js?v=20";
 import {
   DOMAINS,
   GRUPOS_DE_DOMINIO,
@@ -16,9 +16,9 @@ import {
   els,
   state,
   syncActiveDomainState,
-} from "../estado.js?v=19";
-import { renderOverviewRadar } from "../graficos.js?v=19";
-import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=19";
+} from "../estado.js?v=20";
+import { renderOverviewRadar } from "../graficos.js?v=20";
+import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=20";
 
 
 /**
@@ -249,8 +249,10 @@ function renderOverviewHeadline(filas, entradas) {
 function renderOverviewSummaryTable(filas) {
   const rows = filas.map(
     (fila) => `
-      <tr class="${fila.evaluadas === 0 ? "is-pending" : ""}">
-        <td>${escapeHtml(fila.label)}</td>
+      <tr class="${fila.evaluadas === 0 ? "is-pending" : ""}" data-abrir-dominio="${escapeAttr(fila.id)}">
+        <td>
+          <button class="fila-dominio" type="button" title="Abrir el Dashboard de ${escapeAttr(fila.label)}">${escapeHtml(fila.label)}</button>
+        </td>
 
         <td class="number">
           ${fila.capacidades}
@@ -285,7 +287,7 @@ function renderOverviewSummaryTable(filas) {
         </td>
 
         <td class="number">
-          ${fila.evaluadas}/${fila.total}
+          ${celdaDeAvance(fila.evaluadas, fila.total)}
         </td>
       </tr>
     `,

@@ -9,7 +9,7 @@
  * el navegador, o node tests/ejecutar.mjs desde la linea de comandos.
  */
 
-import { escapeAttr, escapeHtml, fechaLegible, fechaParaArchivo, formatMedia, formatNumber } from "../core/presentacion.js?v=19";
+import { escapeAttr, escapeHtml, fechaLegible, fechaParaArchivo, formatMedia, formatNumber } from "../core/presentacion.js?v=20";
 
 
 export const casos = [

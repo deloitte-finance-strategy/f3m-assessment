@@ -15,16 +15,16 @@
  * las pedia prestadas el modal del Roadmap; con la pestana IA ya son tres sitios.
  */
 
-import { average } from "../core/calculo.js?v=19";
+import { average } from "../core/calculo.js?v=20";
 import {
   escapeAttr,
   escapeHtml,
   formatMedia,
   priorityColor,
-} from "../core/presentacion.js?v=19";
-import { pieDeFuente } from "./biblioteca.js?v=19";
-import { LEVERS, els, state } from "./estado.js?v=19";
-import { getScopedItems } from "./filtros.js?v=19";
+} from "../core/presentacion.js?v=20";
+import { pieDeFuente } from "./biblioteca.js?v=20";
+import { LEVERS, els, state } from "./estado.js?v=20";
+import { getScopedItems } from "./filtros.js?v=20";
 
 
 export function buildFilteredEmptyState() {
@@ -121,6 +121,28 @@ function barRow(label, value, width, color) {
       <span class="bar-track" aria-hidden="true"><span class="bar-fill" style="width:${width}%;background:${color}"></span></span>
       <span class="bar-value" aria-hidden="true">${escapeHtml(String(value))}</span>
     </div>
+  `;
+}
+
+
+/**
+ * La columna «Avance» de las dos tablas resumen: la cifra y una barra al lado.
+ *
+ * La cifra sola obligaba a leer nueve «7/24» y hacer la cuenta para saber que
+ * dominio esta terminado; la barra lo dice de un vistazo, que es lo que se
+ * pregunta en un taller. La cifra se queda porque la barra no dice cuantas
+ * faltan. Terminado no estrena color, solo pone la cifra en negrita: la barra
+ * llena ya lo dice, y un color de "completo" seria uno mas que aprender.
+ */
+export function celdaDeAvance(evaluadas, total) {
+  const porcentaje = total ? Math.round((evaluadas / total) * 100) : 0;
+  const completo = total > 0 && evaluadas >= total;
+
+  return `
+    <span class="avance${completo ? " avance-completo" : ""}">
+      <span class="avance-pista" aria-hidden="true"><span class="avance-relleno" style="width:${porcentaje}%"></span></span>
+      <span class="avance-cifra">${evaluadas}/${total}</span>
+    </span>
   `;
 }
 

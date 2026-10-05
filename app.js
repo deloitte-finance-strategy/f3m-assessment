@@ -20,14 +20,14 @@ import {
   resumenGlobal,
   toScore,
   unique,
-} from "./core/calculo.js?v=19";
+} from "./core/calculo.js?v=20";
 
 // Objetivos de madurez por capacidad y palanca: la mitad de todo gap.
 import {
   createDefaultTargets,
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "./core/objetivos.js?v=19";
+} from "./core/objetivos.js?v=20";
 
 // Reconocer el trabajo guardado. Si esto falla, una puntuacion no aparece y no
 // se rompe nada visiblemente, que es la peor forma de fallar.
@@ -36,14 +36,14 @@ import {
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
-} from "./core/coincidencias.js?v=19";
+} from "./core/coincidencias.js?v=20";
 
 // El CSV que se abre en Excel y se le envia al cliente.
 import {
   filasDeResumen,
   filasDeRoadmap,
   toCsv,
-} from "./core/exportacion.js?v=19";
+} from "./core/exportacion.js?v=20";
 
 // El contrato de un escenario: que campos admite Firebase y con que limites.
 // Espejo de database.rules.json, para no enviar nunca algo que sera rechazado.
@@ -56,7 +56,7 @@ import {
   normalizarItemCargado,
   recortarAlLimite,
   revisarEscenario,
-} from "./core/escenario.js?v=19";
+} from "./core/escenario.js?v=20";
 
 // Escapado, formato y colores de marca. Los comparten la aplicacion y el
 // informe PDF, que desde que vive aparte ya no puede leerlos de aqui.
@@ -64,16 +64,17 @@ import {
   COLOR_DE_PALANCA,
   escapeAttr,
   escapeHtml,
+  fechaParaArchivo,
   formatNumber,
   priorityColor,
-} from "./core/presentacion.js?v=19";
+} from "./core/presentacion.js?v=20";
 
 // El informe PDF: entra el objeto de datos, sale el documento imprimible.
-import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=19";
+import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=20";
 
 // La red que impide que una diapositiva recorte contenido en silencio. Se
 // dispara con ?comprobar=desbordes; ver informe/desbordes.js.
-import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=19";
+import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=20";
 
 // El estado compartido y las constantes que lo describen.
 import {
@@ -96,7 +97,7 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "./app/estado.js?v=19";
+} from "./app/estado.js?v=20";
 
 // El banner de avisos y el dialogo de confirmacion.
 import {
@@ -105,14 +106,14 @@ import {
   ocultarAviso,
   showNotice,
   updateModalOpenState,
-} from "./app/avisos.js?v=19";
+} from "./app/avisos.js?v=20";
 
 // El almacenamiento del navegador, que puede fallar y no es motivo para caerse.
 import {
   borrarDeAlmacenamiento,
   escribirAlmacenamiento,
   leerAlmacenamiento,
-} from "./app/almacenamiento.js?v=19";
+} from "./app/almacenamiento.js?v=20";
 
 // Las dos preferencias de vista: el tema y la densidad.
 import {
@@ -126,7 +127,7 @@ import {
   seguirAlSistemaSiNoHayEleccion,
   tamanoDeLetraDeGrafico,
   temaActual,
-} from "./app/preferencias.js?v=19";
+} from "./app/preferencias.js?v=20";
 
 // Los seis radares de Chart.js: tres por capacidad y tres por dominio.
 import {
@@ -137,7 +138,7 @@ import {
   redimensionarRadares,
   renderCapabilityRadar,
   renderOverviewRadar,
-} from "./app/graficos.js?v=19";
+} from "./app/graficos.js?v=20";
 
 // El motor atado al estado: objetivos por dominio y metricas con cache.
 import {
@@ -145,11 +146,11 @@ import {
   agregarPorDominio,
   calculate,
   getCapabilityTargets,
-} from "./app/metricas.js?v=19";
+} from "./app/metricas.js?v=20";
 
 // El cortacircuitos: quien necesite repintar lo pide por aqui, no al
 // orquestador de vistas, para no cerrar un ciclo con el.
-import { configurarRepintado } from "./app/repintado.js?v=19";
+import { configurarRepintado } from "./app/repintado.js?v=20";
 
 // La conexion con Firebase.
 import {
@@ -159,7 +160,7 @@ import {
   getScenarioShareUrl,
   getScenarioShortLabel,
   scenarioDatabaseRef,
-} from "./app/firebase.js?v=19";
+} from "./app/firebase.js?v=20";
 
 // El chip de guardado, que es la unica senal permanente de si el trabajo esta
 // a salvo. Va aparte de la persistencia para que la identidad pueda marcarlo
@@ -170,7 +171,7 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./app/indicador.js?v=19";
+} from "./app/indicador.js?v=20";
 
 // Quien edita: la sesion anonima y el nombre que se elige.
 import {
@@ -180,7 +181,7 @@ import {
   inicializarIdentidad,
   marcaDeAutoria,
   pedirNombreEditor,
-} from "./app/identidad.js?v=19";
+} from "./app/identidad.js?v=20";
 
 // Un escenario como dato: leerlo, volcarlo y volver a armarlo.
 import {
@@ -189,7 +190,7 @@ import {
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./app/escenario.js?v=19";
+} from "./app/escenario.js?v=20";
 
 // Los nueve dominios: catalogo, carga y conmutador.
 import {
@@ -202,7 +203,7 @@ import {
   renderDomainSwitcher,
   setActiveDomain,
   switchDomain,
-} from "./app/dominios.js?v=19";
+} from "./app/dominios.js?v=20";
 
 // Los tres filtros y el ambito de datos que sale de ellos.
 import {
@@ -216,7 +217,7 @@ import {
   populateCapacityFilter,
   removeActiveFilter,
   updateActiveFiltersUi,
-} from "./app/filtros.js?v=19";
+} from "./app/filtros.js?v=20";
 
 // Leer los campos de una subcapacidad, que llegan del Excel en dos formas.
 import {
@@ -225,7 +226,7 @@ import {
   getItemObjective,
   getItemQuestions,
   toList,
-} from "./app/subcapacidad.js?v=19";
+} from "./app/subcapacidad.js?v=20";
 
 // Guardar y recibir: el escenario compartido, las escrituras granulares por
 // ruta y la suscripcion remota.
@@ -235,37 +236,37 @@ import {
   persistItemChange,
   persistScenario,
   persistTargetsDelDominioActivo,
-} from "./app/persistencia.js?v=19";
+} from "./app/persistencia.js?v=20";
 
 // Los fragmentos de HTML que comparten varias vistas.
-import { buildFilteredEmptyState, priorityBadge } from "./app/celdas.js?v=19";
+import { buildFilteredEmptyState, priorityBadge } from "./app/celdas.js?v=20";
 
 // El Heatmap, primera vista que sale de aqui.
-import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=19";
+import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=20";
 
 // El Overview: los nueve dominios a la vez, sin aplicar los filtros.
-import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=19";
+import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=20";
 
 // El Dashboard: el dominio abierto, con sus KPIs y su tabla resumen.
-import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=19";
+import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=20";
 
 // El Assessment: puntuar cada subcapacidad en las tres palancas.
-import { renderAssessments, renderCapabilityTargets } from "./app/vistas/assessment.js?v=19";
+import { renderAssessments, renderCapabilityTargets } from "./app/vistas/assessment.js?v=20";
 
 // El Roadmap: las iniciativas priorizadas y sus campos editables.
-import { hayGuardadosPendientes, renderRoadmap } from "./app/vistas/roadmap.js?v=19";
+import { hayGuardadosPendientes, renderRoadmap } from "./app/vistas/roadmap.js?v=20";
 
 // Los dos modales: criterios de puntuacion y ficha de caso de IA.
-import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=19";
+import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=20";
 
 // La pestana IA: el catalogo de casos y la biblioteca de documentos.
-import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=19";
+import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=20";
 
 // La biblioteca de IA y el visor que abre «Más información».
-import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=19";
+import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=20";
 
 // Lo que la aplicacion le pasa al informe: datos, radares y tema claro.
-import { exportPdfReport } from "./app/informe.js?v=19";
+import { exportPdfReport } from "./app/informe.js?v=20";
 
 
 document.addEventListener("DOMContentLoaded", init);
@@ -618,6 +619,7 @@ function bindGlobalEvents() {
   setupVistaIa();
   setupDomainSwitcher();
   setupNavegacionDeRadares();
+  setupFilasDelOverview();
   setupBackToTopButton();
 }
 
@@ -768,15 +770,7 @@ function setupDomainSwitcher() {
  */
 function setupNavegacionDeRadares() {
   configurarNavegacionDeRadares({
-    abrirDominio: async (domainId) => {
-      try {
-        await switchDomain(domainId);
-        mostrarVista("dashboard");
-      } catch (error) {
-        showNotice(`No se ha podido abrir el dominio ${DOMAINS[domainId]?.label || domainId}. Recarga la página e inténtalo de nuevo.`, "error");
-        console.error(error);
-      }
-    },
+    abrirDominio: abrirDominioEnSuDashboard,
 
     abrirCapacidad: (capacidad) => {
       expandedHeatmapCapabilities.add(capacidad);
@@ -798,6 +792,40 @@ function setupNavegacionDeRadares() {
       });
       boton.focus({ preventScroll: true });
     },
+  });
+}
+
+
+async function abrirDominioEnSuDashboard(domainId) {
+  try {
+    await switchDomain(domainId);
+    mostrarVista("dashboard");
+  } catch (error) {
+    showNotice(`No se ha podido abrir el dominio ${DOMAINS[domainId]?.label || domainId}. Recarga la página e inténtalo de nuevo.`, "error");
+    console.error(error);
+  }
+}
+
+
+/**
+ * La tabla «Resumen por dominio» del Overview lleva al mismo sitio que el eje
+ * del radar: pulsar una fila abre el Dashboard de ese dominio. Era lo primero
+ * que se intentaba en un taller, y no pasaba nada.
+ *
+ * Se escucha en la tabla y no en cada fila porque la tabla se repinta entera.
+ * La fila entera se puede pulsar con raton; con teclado, el nombre del dominio
+ * es un boton, que es lo que recibe el foco y lo que anuncia un lector.
+ */
+function setupFilasDelOverview() {
+  els.overviewSummaryTable?.addEventListener("click", (event) => {
+    const fila = event.target.closest("tr[data-abrir-dominio]");
+
+    // Quien esta seleccionando una cifra para copiarla no quiere irse.
+    if (!fila || String(window.getSelection?.() || "")) {
+      return;
+    }
+
+    abrirDominioEnSuDashboard(fila.dataset.abrirDominio);
   });
 }
 
@@ -1246,15 +1274,18 @@ async function importScenario(event) {
   }
 }
 
-function toSafeFileName(value) {
-  return String(value || "domain")
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+/**
+ * El nombre del CSV, con el mismo patron que el PDF: «Datos F3M - FP&A -
+ * 2026-10-05.csv». Antes era siempre «f3m_fpa_assessment_export.csv», y la
+ * segunda exportacion del dia pisaba a la primera o salia como «(1)».
+ *
+ * Solo se quitan los caracteres que Windows no admite en un nombre de archivo:
+ * el «&» de FP&A si vale, y es como se llama el dominio.
+ */
+function nombreDelCsv(dominio, fecha) {
+  const nombre = String(dominio || "Dominio").replace(/[<>:"/\\|?*]+/g, " ").trim();
+
+  return `Datos F3M - ${nombre} - ${fechaParaArchivo(fecha)}.csv`;
 }
 
 
@@ -1273,10 +1304,9 @@ function exportCsv() {
   );
 
   const activeDomain = getActiveDomainConfig();
-  const domainFileName = toSafeFileName(activeDomain.id || activeDomain.label);
 
   downloadFile(
-    `f3m_${domainFileName}_assessment_export.csv`,
+    nombreDelCsv(activeDomain.label || activeDomain.id, new Date()),
     toCsv([...buildSummaryRows(), ...roadmapRows]),
     "text/csv;charset=utf-8",
   );

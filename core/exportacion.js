@@ -6,7 +6,7 @@
  * necesita ni DOM ni estado: solo recibe filas y devuelve texto.
  */
 
-import { getMaturityLevel } from "./calculo.js?v=19";
+import { getMaturityLevel } from "./calculo.js?v=20";
 
 
 // Excel con configuración regional española espera punto y coma, no coma: con

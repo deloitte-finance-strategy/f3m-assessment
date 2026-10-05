@@ -6,20 +6,21 @@
  * las dos vistas lo dicen en pantalla.
  */
 
-import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=19";
-import { filasDeResumen } from "../../core/exportacion.js?v=19";
-import { escapeHtml, formatMedia } from "../../core/presentacion.js?v=19";
+import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=20";
+import { filasDeResumen } from "../../core/exportacion.js?v=20";
+import { escapeHtml, formatMedia } from "../../core/presentacion.js?v=20";
 import {
   buildFilteredEmptyState,
+  celdaDeAvance,
   kpiCard,
   priorityBadge,
   renderLeverBars,
   renderPriorityBars,
-} from "../celdas.js?v=19";
-import { els, state } from "../estado.js?v=19";
-import { getScopedItems } from "../filtros.js?v=19";
-import { renderCapabilityRadar } from "../graficos.js?v=19";
-import { agregarPorCapacidad, calculate } from "../metricas.js?v=19";
+} from "../celdas.js?v=20";
+import { els, state } from "../estado.js?v=20";
+import { getScopedItems } from "../filtros.js?v=20";
+import { renderCapabilityRadar } from "../graficos.js?v=20";
+import { agregarPorCapacidad, calculate } from "../metricas.js?v=20";
 
 
 export function renderDashboard() {
@@ -174,7 +175,7 @@ function renderSummaryTable() {
         </td>
 
         <td class="number">
-          ${capacidad.evaluadas}/${capacidad.total}
+          ${celdaDeAvance(capacidad.evaluadas, capacidad.total)}
         </td>
       </tr>
     `,

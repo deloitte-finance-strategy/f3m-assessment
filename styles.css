@@ -2025,6 +2025,69 @@ border-radius: var(--r-pill);
   white-space: nowrap;
 }
 
+/*
+  Avance: la cifra con una barra al lado. La barra va delante para que las
+  nueve queden alineadas por la izquierda y se comparen como en un grafico; la
+  cifra, con ancho fijo, no las empuja segun tenga uno o dos digitos.
+*/
+.avance {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.avance-pista {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--r-pill);
+  background: var(--line-tenue);
+}
+
+.avance-relleno {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--green);
+}
+
+.avance-cifra {
+  min-width: 3.6em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.avance-completo .avance-cifra {
+  color: var(--ink-2);
+  font-weight: var(--fw-bold);
+}
+
+/*
+  Las filas del Overview abren su Dashboard. El nombre es un boton para que
+  llegue el teclado, pero se lee como el texto de la celda que era: en una
+  tabla de datos, nueve botones con borde serian ruido.
+*/
+#overviewSummaryTable tbody tr[data-abrir-dominio] {
+  cursor: pointer;
+}
+
+.fila-dominio {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-weight: inherit;
+  text-align: left;
+}
+
+#overviewSummaryTable tbody tr:hover .fila-dominio,
+.fila-dominio:focus-visible {
+  color: var(--green-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 
 #sourceNote,
 #overviewSourceNote {
@@ -2409,27 +2472,34 @@ border-color: var(--line-tenue);
   Iniciativa no lleva ancho: se queda con lo que sobra, y es la unica columna
   que de verdad tiene texto que leer.
 
-  Suman 1.366 px, lo que deja una pantalla de 1.440 sin desplazamiento. En
+  Suman 1.310 px, lo que deja sin desplazamiento un portatil de 1.366, que es
+  la pantalla mas comun en las salas: con 1.370, la ultima columna salia
+  cortada justo ahi. Lo que faltaba sale del relleno de las celdas, 10 px por
+  lado en vez de 12, y de la holgura de las cabeceras cortas (Gap, Oleada,
+  Prioridad). Responsable y Comentarios no se tocan por dentro: por debajo de
+  su ancho, el texto de ayuda de los campos se recorta o se parte. En
   Presentacion la letra crece y los anchos con ella, asi que la tabla se
   desplaza en horizontal: quedan a la vista Capacidad, Subcapacidad, Gap,
   Prioridad e Iniciativa, que es lo que se ensena, y los campos de edicion a la
   derecha. Es mejor que partir palabras delante del cliente.
 */
 .roadmap-table {
-  --rm-capacidad: 156px;
-  --rm-subcapacidad: 160px;
-  --rm-gap: 64px;
-  --rm-prioridad: 102px;
+  --celda-x: 10px;
+  --rm-capacidad: 152px;
+  --rm-subcapacidad: 156px;
+  --rm-gap: 52px;
+  --rm-prioridad: 96px;
   --rm-iniciativa-min: 220px;
-  --rm-ia: 60px;
-  --rm-oleada: 82px;
-  --rm-responsable: 136px;
-  --rm-estado: 150px;
-  --rm-comentarios: 136px;
-  --rm-ultimo: 104px;
+  --rm-ia: 56px;
+  --rm-oleada: 74px;
+  --rm-responsable: 130px;
+  --rm-estado: 146px;
+  --rm-comentarios: 132px;
+  --rm-ultimo: 96px;
 }
 
 :root[data-densidad="presentacion"] .roadmap-table {
+  --celda-x: 16px;
   --rm-capacidad: 188px;
   --rm-subcapacidad: 180px;
   --rm-gap: 74px;
@@ -4884,11 +4954,13 @@ height: 100% !important;
   }
 
   /* Las barras son la longitud, no el color: sin fondo no quedaba nada. */
-  .bar-track {
+  .bar-track,
+  .avance-pista {
     border: 1px solid CanvasText;
   }
 
-  .bar-fill {
+  .bar-fill,
+  .avance-relleno {
     forced-color-adjust: none;
     background: Highlight !important;
   }
