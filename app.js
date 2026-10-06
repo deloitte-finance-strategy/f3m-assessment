@@ -20,14 +20,14 @@ import {
   resumenGlobal,
   toScore,
   unique,
-} from "./core/calculo.js?v=20";
+} from "./core/calculo.js?v=21";
 
 // Objetivos de madurez por capacidad y palanca: la mitad de todo gap.
 import {
   createDefaultTargets,
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "./core/objetivos.js?v=20";
+} from "./core/objetivos.js?v=21";
 
 // Reconocer el trabajo guardado. Si esto falla, una puntuacion no aparece y no
 // se rompe nada visiblemente, que es la peor forma de fallar.
@@ -36,14 +36,14 @@ import {
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
-} from "./core/coincidencias.js?v=20";
+} from "./core/coincidencias.js?v=21";
 
 // El CSV que se abre en Excel y se le envia al cliente.
 import {
   filasDeResumen,
   filasDeRoadmap,
   toCsv,
-} from "./core/exportacion.js?v=20";
+} from "./core/exportacion.js?v=21";
 
 // El contrato de un escenario: que campos admite Firebase y con que limites.
 // Espejo de database.rules.json, para no enviar nunca algo que sera rechazado.
@@ -56,7 +56,7 @@ import {
   normalizarItemCargado,
   recortarAlLimite,
   revisarEscenario,
-} from "./core/escenario.js?v=20";
+} from "./core/escenario.js?v=21";
 
 // Escapado, formato y colores de marca. Los comparten la aplicacion y el
 // informe PDF, que desde que vive aparte ya no puede leerlos de aqui.
@@ -67,14 +67,14 @@ import {
   fechaParaArchivo,
   formatNumber,
   priorityColor,
-} from "./core/presentacion.js?v=20";
+} from "./core/presentacion.js?v=21";
 
 // El informe PDF: entra el objeto de datos, sale el documento imprimible.
-import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=20";
+import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=21";
 
 // La red que impide que una diapositiva recorte contenido en silencio. Se
 // dispara con ?comprobar=desbordes; ver informe/desbordes.js.
-import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=20";
+import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=21";
 
 // El estado compartido y las constantes que lo describen.
 import {
@@ -92,12 +92,11 @@ import {
   STORAGE_KEY_BASE,
   TEMA_KEY,
   els,
-  expandedHeatmapCapabilities,
   scenarioId,
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "./app/estado.js?v=20";
+} from "./app/estado.js?v=21";
 
 // El banner de avisos y el dialogo de confirmacion.
 import {
@@ -106,14 +105,14 @@ import {
   ocultarAviso,
   showNotice,
   updateModalOpenState,
-} from "./app/avisos.js?v=20";
+} from "./app/avisos.js?v=21";
 
 // El almacenamiento del navegador, que puede fallar y no es motivo para caerse.
 import {
   borrarDeAlmacenamiento,
   escribirAlmacenamiento,
   leerAlmacenamiento,
-} from "./app/almacenamiento.js?v=20";
+} from "./app/almacenamiento.js?v=21";
 
 // Las dos preferencias de vista: el tema y la densidad.
 import {
@@ -127,7 +126,7 @@ import {
   seguirAlSistemaSiNoHayEleccion,
   tamanoDeLetraDeGrafico,
   temaActual,
-} from "./app/preferencias.js?v=20";
+} from "./app/preferencias.js?v=21";
 
 // Los seis radares de Chart.js: tres por capacidad y tres por dominio.
 import {
@@ -138,7 +137,7 @@ import {
   redimensionarRadares,
   renderCapabilityRadar,
   renderOverviewRadar,
-} from "./app/graficos.js?v=20";
+} from "./app/graficos.js?v=21";
 
 // El motor atado al estado: objetivos por dominio y metricas con cache.
 import {
@@ -146,11 +145,11 @@ import {
   agregarPorDominio,
   calculate,
   getCapabilityTargets,
-} from "./app/metricas.js?v=20";
+} from "./app/metricas.js?v=21";
 
 // El cortacircuitos: quien necesite repintar lo pide por aqui, no al
 // orquestador de vistas, para no cerrar un ciclo con el.
-import { configurarRepintado } from "./app/repintado.js?v=20";
+import { configurarRepintado } from "./app/repintado.js?v=21";
 
 // La conexion con Firebase.
 import {
@@ -160,7 +159,7 @@ import {
   getScenarioShareUrl,
   getScenarioShortLabel,
   scenarioDatabaseRef,
-} from "./app/firebase.js?v=20";
+} from "./app/firebase.js?v=21";
 
 // El chip de guardado, que es la unica senal permanente de si el trabajo esta
 // a salvo. Va aparte de la persistencia para que la identidad pueda marcarlo
@@ -171,7 +170,7 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./app/indicador.js?v=20";
+} from "./app/indicador.js?v=21";
 
 // Quien edita: la sesion anonima y el nombre que se elige.
 import {
@@ -181,7 +180,7 @@ import {
   inicializarIdentidad,
   marcaDeAutoria,
   pedirNombreEditor,
-} from "./app/identidad.js?v=20";
+} from "./app/identidad.js?v=21";
 
 // Un escenario como dato: leerlo, volcarlo y volver a armarlo.
 import {
@@ -190,7 +189,7 @@ import {
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./app/escenario.js?v=20";
+} from "./app/escenario.js?v=21";
 
 // Los nueve dominios: catalogo, carga y conmutador.
 import {
@@ -203,7 +202,7 @@ import {
   renderDomainSwitcher,
   setActiveDomain,
   switchDomain,
-} from "./app/dominios.js?v=20";
+} from "./app/dominios.js?v=21";
 
 // Los tres filtros y el ambito de datos que sale de ellos.
 import {
@@ -217,7 +216,7 @@ import {
   populateCapacityFilter,
   removeActiveFilter,
   updateActiveFiltersUi,
-} from "./app/filtros.js?v=20";
+} from "./app/filtros.js?v=21";
 
 // Leer los campos de una subcapacidad, que llegan del Excel en dos formas.
 import {
@@ -226,7 +225,7 @@ import {
   getItemObjective,
   getItemQuestions,
   toList,
-} from "./app/subcapacidad.js?v=20";
+} from "./app/subcapacidad.js?v=21";
 
 // Guardar y recibir: el escenario compartido, las escrituras granulares por
 // ruta y la suscripcion remota.
@@ -236,37 +235,37 @@ import {
   persistItemChange,
   persistScenario,
   persistTargetsDelDominioActivo,
-} from "./app/persistencia.js?v=20";
+} from "./app/persistencia.js?v=21";
 
 // Los fragmentos de HTML que comparten varias vistas.
-import { buildFilteredEmptyState, priorityBadge } from "./app/celdas.js?v=20";
+import { buildFilteredEmptyState, priorityBadge } from "./app/celdas.js?v=21";
 
 // El Heatmap, primera vista que sale de aqui.
-import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=20";
+import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=21";
 
 // El Overview: los nueve dominios a la vez, sin aplicar los filtros.
-import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=20";
+import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=21";
 
 // El Dashboard: el dominio abierto, con sus KPIs y su tabla resumen.
-import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=20";
+import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=21";
 
 // El Assessment: puntuar cada subcapacidad en las tres palancas.
-import { renderAssessments, renderCapabilityTargets } from "./app/vistas/assessment.js?v=20";
+import { renderAssessments, renderCapabilityTargets } from "./app/vistas/assessment.js?v=21";
 
 // El Roadmap: las iniciativas priorizadas y sus campos editables.
-import { hayGuardadosPendientes, renderRoadmap } from "./app/vistas/roadmap.js?v=20";
+import { hayGuardadosPendientes, renderRoadmap, setupCajaDelRoadmap } from "./app/vistas/roadmap.js?v=21";
 
 // Los dos modales: criterios de puntuacion y ficha de caso de IA.
-import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=20";
+import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=21";
 
 // La pestana IA: el catalogo de casos y la biblioteca de documentos.
-import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=20";
+import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=21";
 
 // La biblioteca de IA y el visor que abre «Más información».
-import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=20";
+import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=21";
 
 // Lo que la aplicacion le pasa al informe: datos, radares y tema claro.
-import { exportPdfReport } from "./app/informe.js?v=20";
+import { exportPdfReport } from "./app/informe.js?v=21";
 
 
 document.addEventListener("DOMContentLoaded", init);
@@ -620,6 +619,9 @@ function bindGlobalEvents() {
   setupDomainSwitcher();
   setupNavegacionDeRadares();
   setupFilasDelOverview();
+  setupFilasDelDashboard();
+  setupAltoDePestanas();
+  setupCajaDelRoadmap();
   setupBackToTopButton();
 }
 
@@ -696,6 +698,10 @@ function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
     }
   });
 
+  // El nombre del dominio en la barra de pestanas sobra en las dos vistas que
+  // no dependen de el; el CSS lo esconde leyendo esto.
+  document.querySelector(".tabs")?.setAttribute("data-vista", id);
+
   document.querySelectorAll(".tabs a").forEach((enlace) => {
     const esActiva = enlace.getAttribute("href") === `#${id}`;
 
@@ -760,10 +766,13 @@ function setupDomainSwitcher() {
  *
  * En el Overview cada eje es un dominio, y se abre su Dashboard: la misma
  * lectura, un nivel mas abajo. En el Dashboard cada eje es una capacidad, y se
- * abre el Heatmap con ella desplegada y a la vista. Se eligio el Heatmap y no
- * filtrar el Assessment porque no toca los filtros: un filtro de capacidad
- * puesto sin querer cambia luego KPIs, roadmap, CSV y PDF, y en un taller nadie
- * se acuerda de quitarlo.
+ * abre el Assessment en sus subcapacidades, que es donde se puntua. Antes se
+ * abria el Heatmap, pero en un taller lo que se quiere al ver una capacidad
+ * floja es ponerse a puntuarla.
+ *
+ * Se lleva hasta sus tarjetas y no se filtra el Assessment, y eso es a
+ * proposito: un filtro de capacidad puesto sin querer cambia luego KPIs,
+ * roadmap, CSV y PDF, y en un taller nadie se acuerda de quitarlo.
  *
  * Vive aqui porque cambiar de vista y de dominio es cosa del orquestador; los
  * radares lo reciben inyectado.
@@ -771,27 +780,43 @@ function setupDomainSwitcher() {
 function setupNavegacionDeRadares() {
   configurarNavegacionDeRadares({
     abrirDominio: abrirDominioEnSuDashboard,
+    abrirCapacidad: abrirCapacidadEnElAssessment,
+  });
+}
 
-    abrirCapacidad: (capacidad) => {
-      expandedHeatmapCapabilities.add(capacidad);
-      mostrarVista("heatmap");
 
-      const boton = els.heatmapTable?.querySelector(
-        `[data-capability-toggle="${CSS.escape(capacidad)}"]`,
-      );
+/**
+ * Las tarjetas de una capacidad van seguidas, asi que basta con llegar a la
+ * primera. Se resaltan todas un momento para que se vea donde empieza y donde
+ * acaba, y el foco va a su primer score: con teclado se puntua sin buscarla.
+ */
+function abrirCapacidadEnElAssessment(capacidad) {
+  mostrarVista("assessment");
 
-      if (!boton) {
-        return;
-      }
+  const tarjetas = [...els.assessmentList.querySelectorAll(".assessment-card")].filter(
+    (tarjeta) => tarjeta.dataset.capacidad === capacidad,
+  );
 
-      // El foco en el boton de la fila deja claro a donde se ha llegado, y
-      // con teclado se puede volver a plegar sin buscarla.
-      boton.closest("tr")?.scrollIntoView({
-        behavior: comportamientoDeDesplazamiento(),
-        block: "center",
-      });
-      boton.focus({ preventScroll: true });
-    },
+  if (!tarjetas.length) {
+    return;
+  }
+
+  tarjetas[0].scrollIntoView({
+    behavior: comportamientoDeDesplazamiento(),
+    block: "start",
+  });
+  tarjetas[0].querySelector(".score-select")?.focus({ preventScroll: true });
+
+  tarjetas.forEach((tarjeta) => {
+    tarjeta.classList.remove("tarjeta-de-llegada");
+    // Forzar el reflujo reinicia la animacion si se llega dos veces seguidas.
+    void tarjeta.offsetWidth;
+    tarjeta.classList.add("tarjeta-de-llegada");
+    tarjeta.addEventListener(
+      "animationend",
+      () => tarjeta.classList.remove("tarjeta-de-llegada"),
+      { once: true },
+    );
   });
 }
 
@@ -827,6 +852,46 @@ function setupFilasDelOverview() {
 
     abrirDominioEnSuDashboard(fila.dataset.abrirDominio);
   });
+}
+
+
+/**
+ * La tabla «Resumen por capacidad» del Dashboard lleva al mismo sitio que el
+ * eje del radar: las subcapacidades de esa capacidad en el Assessment. Es la
+ * pareja de la tabla del Overview, y se resuelve igual.
+ */
+function setupFilasDelDashboard() {
+  els.summaryTable?.addEventListener("click", (event) => {
+    const fila = event.target.closest("tr[data-abrir-capacidad]");
+
+    if (!fila || String(window.getSelection?.() || "")) {
+      return;
+    }
+
+    abrirCapacidadEnElAssessment(fila.dataset.abrirCapacidad);
+  });
+}
+
+
+/**
+ * Lo que se queda fijo debajo de las pestanas —el encabezado del Roadmap, una
+ * tarjeta a la que se llega desde un radar— necesita saber cuanto miden. No es
+ * un numero fijo: cambia con la densidad, con la letra y si las pestanas pasan
+ * a dos lineas en una ventana estrecha.
+ */
+function setupAltoDePestanas() {
+  const pestanas = document.querySelector(".tabs");
+
+  if (!pestanas || typeof ResizeObserver === "undefined") {
+    return;
+  }
+
+  new ResizeObserver(() => {
+    document.documentElement.style.setProperty(
+      "--alto-pestanas",
+      `${pestanas.offsetHeight}px`,
+    );
+  }).observe(pestanas);
 }
 
 

@@ -7,16 +7,16 @@
  * hayGuardadosPendientes() para frenar el cierre.
  */
 
-import { ordenarPorPrioridadYGap } from "../../core/calculo.js?v=20";
-import { LIMITES_DE_TEXTO, recortarAlLimite } from "../../core/escenario.js?v=20";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=20";
-import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=20";
-import { STATUS_OPTIONS, els, state } from "../estado.js?v=20";
-import { getVisibleItems } from "../filtros.js?v=20";
-import { getUsuarioActual } from "../identidad.js?v=20";
-import { calculate } from "../metricas.js?v=20";
-import { persistItemChange } from "../persistencia.js?v=20";
-import { getAiDataForItem } from "../subcapacidad.js?v=20";
+import { ordenarPorPrioridadYGap } from "../../core/calculo.js?v=21";
+import { LIMITES_DE_TEXTO, recortarAlLimite } from "../../core/escenario.js?v=21";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=21";
+import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=21";
+import { STATUS_OPTIONS, els, state } from "../estado.js?v=21";
+import { getVisibleItems } from "../filtros.js?v=21";
+import { getUsuarioActual } from "../identidad.js?v=21";
+import { calculate } from "../metricas.js?v=21";
+import { persistItemChange } from "../persistencia.js?v=21";
+import { getAiDataForItem } from "../subcapacidad.js?v=21";
 import { get } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
 
@@ -145,6 +145,74 @@ els.roadmapTable.querySelectorAll(".roadmap-comment").forEach((textarea) => {
 });
 
   restaurarEdicionDeRoadmap(edicionEnCurso);
+  pintarRecuentoDeIniciativas(roadmapItems.length);
+}
+
+
+/**
+ * Cuantas iniciativas hay, encima de la tabla. Sin la cifra no habia forma de
+ * saber si la lista acababa en la pantalla o seguia: con filtros, ademas, es
+ * la confirmacion de que el Roadmap dice lo mismo que el KPI.
+ */
+function pintarRecuentoDeIniciativas(total) {
+  const nota = document.getElementById("roadmapNote");
+
+  if (!nota) {
+    return;
+  }
+
+  const recuento = total === 1 ? "1 iniciativa" : `${total} iniciativas`;
+
+  nota.innerHTML = `<strong>${recuento}</strong> · Ordenadas por prioridad y gap. Respetan los filtros del Assessment.`;
+}
+
+
+/**
+ * El Roadmap crece con la pagina cuando cabe a lo ancho, y se queda en su caja
+ * cuando no.
+ *
+ * La caja tiene alto propio y se desplaza por dentro, que es lo que permite
+ * fijar el encabezado y la primera columna cuando la tabla desborda en
+ * horizontal. Pero con 20 iniciativas, a 1366 px se veian cuatro, la cuarta
+ * cortada a media frase, y nada decia que hubiera mas: lo natural era bajar la
+ * pagina y la pagina no tenia nada mas que ensenar.
+ *
+ * Cuando la tabla cabe, la caja se suelta y el encabezado se fija debajo de las
+ * pestanas. Cuando no cabe —Presentacion en un portatil, o una ventana
+ * estrecha— se queda como estaba: un desplazamiento horizontal con la barra al
+ * fondo de tres mil pixeles de tabla no lo encuentra nadie.
+ *
+ * Se compara con la anchura minima de la tabla y no con la que tiene, porque
+ * esa depende del modo en que este la caja, y la decision no puede depender de
+ * si misma. No hay forma de preguntarselo al CSS.
+ */
+export function setupCajaDelRoadmap() {
+  const tabla = els.roadmapTable;
+  const caja = tabla?.closest(".table-wrap");
+
+  if (!caja || typeof ResizeObserver === "undefined") {
+    return;
+  }
+
+  const ajustar = () => {
+    const anchoMinimo = Number.parseFloat(getComputedStyle(tabla).minWidth) || 0;
+    // Sin contar la barra vertical, que solo existe en uno de los dos modos:
+    // con ella, una tabla justa en el limite cambiaba de modo segun empezara.
+    const anchoDisponible = caja.offsetWidth - caja.clientLeft * 2;
+
+    // Oculta, la caja mide cero: se decide cuando se ensene.
+    if (!anchoDisponible) {
+      return;
+    }
+
+    caja.classList.toggle("roadmap-en-pagina", anchoMinimo <= anchoDisponible);
+  };
+
+  // Observar la tabla cubre la densidad: su anchura minima cambia con ella.
+  const observador = new ResizeObserver(ajustar);
+
+  observador.observe(caja);
+  observador.observe(tabla);
 }
 
 

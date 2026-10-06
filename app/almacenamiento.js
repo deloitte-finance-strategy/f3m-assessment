@@ -11,8 +11,8 @@
  * ignorar.
  */
 
-import { scenarioId } from "./estado.js?v=20";
-import { showNotice } from "./avisos.js?v=20";
+import { scenarioId } from "./estado.js?v=21";
+import { showNotice } from "./avisos.js?v=21";
 
 
 /**

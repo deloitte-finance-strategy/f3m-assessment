@@ -6,9 +6,9 @@
  * las dos vistas lo dicen en pantalla.
  */
 
-import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=20";
-import { filasDeResumen } from "../../core/exportacion.js?v=20";
-import { escapeHtml, formatMedia } from "../../core/presentacion.js?v=20";
+import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=21";
+import { filasDeResumen } from "../../core/exportacion.js?v=21";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=21";
 import {
   buildFilteredEmptyState,
   celdaDeAvance,
@@ -16,11 +16,11 @@ import {
   priorityBadge,
   renderLeverBars,
   renderPriorityBars,
-} from "../celdas.js?v=20";
-import { els, state } from "../estado.js?v=20";
-import { getScopedItems } from "../filtros.js?v=20";
-import { renderCapabilityRadar } from "../graficos.js?v=20";
-import { agregarPorCapacidad, calculate } from "../metricas.js?v=20";
+} from "../celdas.js?v=21";
+import { els, state } from "../estado.js?v=21";
+import { getScopedItems } from "../filtros.js?v=21";
+import { renderCapabilityRadar } from "../graficos.js?v=21";
+import { agregarPorCapacidad, calculate } from "../metricas.js?v=21";
 
 
 export function renderDashboard() {
@@ -143,8 +143,10 @@ function renderTitularesEjecutivos(items, metrics) {
 function renderSummaryTable() {
   const rows = agregarPorCapacidad(getScopedItems()).map(
     (capacidad) => `
-      <tr class="${capacidad.evaluadas === 0 ? "is-pending" : ""}">
-        <td>${escapeHtml(capacidad.capacidad)}</td>
+      <tr class="${capacidad.evaluadas === 0 ? "is-pending" : ""}" data-abrir-capacidad="${escapeAttr(capacidad.capacidad)}">
+        <td>
+          <button class="fila-enlace" type="button" title="Puntuar ${escapeAttr(capacidad.capacidad)} en el Assessment">${escapeHtml(capacidad.capacidad)}</button>
+        </td>
 
         <td class="number">
           ${formatMedia(capacidad.procesos)}

@@ -10,10 +10,10 @@
  * decia "no se pudo cargar el JSON de datos" con los otros ocho perfectos.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=20";
-import { normalizarItemCargado } from "../core/escenario.js?v=20";
-import { normalizeDomainTargets } from "../core/objetivos.js?v=20";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=20";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=21";
+import { normalizarItemCargado } from "../core/escenario.js?v=21";
+import { normalizeDomainTargets } from "../core/objetivos.js?v=21";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=21";
 
 import {
   CASOS_DE_IA,
@@ -27,11 +27,11 @@ import {
   expandedHeatmapCapabilities,
   state,
   syncActiveDomainState,
-} from "./estado.js?v=20";
+} from "./estado.js?v=21";
 
-import { comportamientoDeDesplazamiento } from "./preferencias.js?v=20";
-import { repintarTodo } from "./repintado.js?v=20";
-import { populateCapacityFilter } from "./filtros.js?v=20";
+import { comportamientoDeDesplazamiento } from "./preferencias.js?v=21";
+import { repintarTodo } from "./repintado.js?v=21";
+import { populateCapacityFilter } from "./filtros.js?v=21";
 
 
 /**
@@ -386,6 +386,15 @@ function updateActiveDomainUi() {
 
   if (label && domain) {
     label.textContent = domain.label;
+  }
+
+  // Al bajar por las tarjetas, el conmutador se queda arriba y la barra de
+  // pestanas es lo unico que sigue a la vista: ahi se dice en que dominio se
+  // esta puntuando.
+  const enLasPestanas = document.getElementById("tabsDominio");
+
+  if (enLasPestanas && domain) {
+    enLasPestanas.textContent = domain.label;
   }
 
   if (els.dashboardDomainTitle && domain) {

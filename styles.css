@@ -807,6 +807,30 @@ transform: translateY(-1px);
   -webkit-backdrop-filter: blur(12px);
 }
 
+/*
+  En que dominio se esta, a la derecha de las pestanas. Al bajar por las 24
+  tarjetas de Controlling el conmutador queda atras, y esta barra es lo unico
+  que sigue a la vista. Discreto a proposito: es un recordatorio, no un control.
+  En el Overview y en la IA no se ensena, porque no dependen del dominio.
+*/
+.tabs-dominio {
+  margin-left: auto;
+  padding-left: 12px;
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+  white-space: nowrap;
+}
+
+.tabs-dominio strong {
+  color: var(--ink-2);
+  font-weight: var(--fw-bold);
+}
+
+.tabs[data-vista="overview"] .tabs-dominio,
+.tabs[data-vista="ia"] .tabs-dominio {
+  display: none;
+}
+
 
 .tabs a {
   display: inline-flex;
@@ -1478,11 +1502,40 @@ display: none;
 
 .assessment-card {
   padding: var(--tarjeta-p);
+  /* Quien llega desde un radar o una tabla cae aqui: sin este margen, la
+     barra de pestanas fija tapaba el principio de la tarjeta. */
+  scroll-margin-top: calc(var(--alto-pestanas, 60px) + 12px);
+}
+
+/*
+  Al llegar desde el Dashboard, las tarjetas de esa capacidad se marcan un
+  momento: el salto deja la primera arriba, pero no dice donde acaba la
+  capacidad. Un contorno y no un fondo, para no confundirse con un color de
+  prioridad.
+*/
+.assessment-card.tarjeta-de-llegada {
+  animation: tarjeta-de-llegada 2.4s ease-out;
+}
+
+@keyframes tarjeta-de-llegada {
+  0%,
+  45% {
+    box-shadow: 0 0 0 3px var(--green);
+  }
+
+  100% {
+    box-shadow: 0 0 0 3px transparent;
+  }
 }
 
 .card-main {
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) minmax(280px, 400px) minmax(180px, 220px);
+  /*
+    La columna de scores llega a 440 px y no a 400: con 400, cada desplegable
+    media 128 px y «Sin puntuar», que necesita unos 136 con la flecha, se leia
+    «Sin puntuai».
+  */
+  grid-template-columns: minmax(300px, 1fr) minmax(280px, 440px) minmax(180px, 220px);
   gap: 18px;
   align-items: center;
 }
@@ -1947,6 +2000,22 @@ background: rgba(134, 188, 37, 0.75);
 border-radius: var(--r-pill);
 }
 
+/*
+  El Roadmap se suelta de su caja cuando cabe a lo ancho, y crece con la
+  pagina: con la caja, a 1366 px se veian cuatro de veinte iniciativas y nada
+  decia que hubiera mas. Lo decide setupCajaDelRoadmap(), en
+  app/vistas/roadmap.js, que explica por que no puede hacerlo el CSS. El
+  encabezado se sigue quedando arriba, ahora debajo de las pestanas.
+*/
+.table-wrap.roadmap-en-pagina {
+  max-height: none;
+  overflow: visible;
+}
+
+.roadmap-en-pagina .roadmap-table thead th {
+  top: var(--alto-pestanas, 60px);
+}
+
 
 
 #summaryTable,
@@ -2065,15 +2134,17 @@ border-radius: var(--r-pill);
 }
 
 /*
-  Las filas del Overview abren su Dashboard. El nombre es un boton para que
+  Las filas del Overview abren su Dashboard, y las del Dashboard las
+  subcapacidades de su capacidad en el Assessment. El nombre es un boton para que
   llegue el teclado, pero se lee como el texto de la celda que era: en una
   tabla de datos, nueve botones con borde serian ruido.
 */
-#overviewSummaryTable tbody tr[data-abrir-dominio] {
+#overviewSummaryTable tbody tr[data-abrir-dominio],
+#summaryTable tbody tr[data-abrir-capacidad] {
   cursor: pointer;
 }
 
-.fila-dominio {
+.fila-enlace {
   padding: 0;
   background: none;
   color: inherit;
@@ -2081,8 +2152,9 @@ border-radius: var(--r-pill);
   text-align: left;
 }
 
-#overviewSummaryTable tbody tr:hover .fila-dominio,
-.fila-dominio:focus-visible {
+#overviewSummaryTable tbody tr:hover .fila-enlace,
+#summaryTable tbody tr:hover .fila-enlace,
+.fila-enlace:focus-visible {
   color: var(--green-dark);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -2472,9 +2544,12 @@ border-color: var(--line-tenue);
   Iniciativa no lleva ancho: se queda con lo que sobra, y es la unica columna
   que de verdad tiene texto que leer.
 
-  Suman 1.310 px, lo que deja sin desplazamiento un portatil de 1.366, que es
+  Suman 1.286 px, lo que deja sin desplazamiento un portatil de 1.366, que es
   la pantalla mas comun en las salas: con 1.370, la ultima columna salia
-  cortada justo ahi. Lo que faltaba sale del relleno de las celdas, 10 px por
+  cortada justo ahi. Y con 1.310 tambien, en Windows: su barra de
+  desplazamiento ocupa 17 px de la ventana, y la medida se habia hecho en un
+  navegador sin ella. Los 24 px que faltaban salen del minimo de la Iniciativa,
+  la unica columna que puede ceder sin partir una palabra. Lo que faltaba sale del relleno de las celdas, 10 px por
   lado en vez de 12, y de la holgura de las cabeceras cortas (Gap, Oleada,
   Prioridad). Responsable y Comentarios no se tocan por dentro: por debajo de
   su ancho, el texto de ayuda de los campos se recorta o se parte. En
@@ -2489,7 +2564,7 @@ border-color: var(--line-tenue);
   --rm-subcapacidad: 156px;
   --rm-gap: 52px;
   --rm-prioridad: 96px;
-  --rm-iniciativa-min: 220px;
+  --rm-iniciativa-min: 196px;
   --rm-ia: 56px;
   --rm-oleada: 74px;
   --rm-responsable: 130px;

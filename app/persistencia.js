@@ -14,17 +14,17 @@
  * rama intacta en vez de desaparecer para todo el equipo.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=20";
-import { serializeTargetsForFirebase } from "../core/objetivos.js?v=20";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=21";
+import { serializeTargetsForFirebase } from "../core/objetivos.js?v=21";
 import { get, onValue, update } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
-import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=20";
-import { escribirAlmacenamiento } from "./almacenamiento.js?v=20";
-import { ocultarAviso, showNotice } from "./avisos.js?v=20";
-import { conLimiteDeEspera, scenarioDatabaseRef } from "./firebase.js?v=20";
-import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=20";
-import { repintarTodo } from "./repintado.js?v=20";
-import { populateCapacityFilter } from "./filtros.js?v=20";
+import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=21";
+import { escribirAlmacenamiento } from "./almacenamiento.js?v=21";
+import { ocultarAviso, showNotice } from "./avisos.js?v=21";
+import { conLimiteDeEspera, scenarioDatabaseRef } from "./firebase.js?v=21";
+import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=21";
+import { repintarTodo } from "./repintado.js?v=21";
+import { populateCapacityFilter } from "./filtros.js?v=21";
 
 import {
   hayCanalDeVuelta,
@@ -32,14 +32,14 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./indicador.js?v=20";
+} from "./indicador.js?v=21";
 
 import {
   applyScenarioPayload,
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./escenario.js?v=20";
+} from "./escenario.js?v=21";
 
 
 
