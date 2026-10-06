@@ -69,7 +69,7 @@
     -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23012169'/%3E%3Crect x='7' y='19' width='5' height='7' rx='1.5' fill='%2386BC25'/%3E%3Crect x='13.5' y='14' width='5' height='12' rx='1.5' fill='%2386BC25'/%3E%3Crect x='20' y='8' width='5' height='18' rx='1.5' fill='%2386BC25'/%3E%3C/svg%3E">
 
-    <link rel="stylesheet" href="styles.css?v=20">
+    <link rel="stylesheet" href="styles.css?v=21">
 
     <!--
       Resuelve el tema y la densidad antes del primer pintado. Va aqui, sincrono
@@ -79,7 +79,7 @@
       En linea no puede ir: la CSP no admite scripts sin archivo, que es
       justamente la directiva que cierra la inyeccion de codigo.
     -->
-    <script src="tema.js?v=20"></script>
+    <script src="tema.js?v=21"></script>
   </head>
   <body>
     <!--
@@ -257,6 +257,7 @@
           <span class="tab-badge tab-badge-alert" id="roadmapTabBadge">0 Alta</span>
         </a>
         <a href="#ia">IA</a>
+        <span class="tabs-dominio" aria-hidden="true">Dominio <strong id="tabsDominio"></strong></span>
       </nav>
 
       <!--
@@ -376,13 +377,13 @@
           Los radares van justo debajo de las cuatro tarjetas, y no al final:
           son lo primero que se ensena en un taller y quedaban a tres pantallas
           de scroll, detras de las barras y de la tabla. Sus ejes se pueden
-          pulsar para abrir esa capacidad en el Heatmap (ver app/graficos.js).
+          pulsar para puntuar esa capacidad en el Assessment (ver app/graficos.js).
         -->
 
         <div class="summary-radar-block">
           <div class="panel-heading radar-heading">
             <h3>Radar por capacidad</h3>
-            <span class="small-note">Comparativa entre madurez actual y objetivo definido por capacidad. Pulsa una capacidad para verla en el Heatmap</span>
+            <span class="small-note">Comparativa entre madurez actual y objetivo definido por capacidad. Pulsa una capacidad para puntuarla en el Assessment</span>
           </div>
 
           <div class="radar-grid">
@@ -540,7 +541,7 @@
             <p class="eyebrow">Roadmap</p>
             <h2>Iniciativas sugeridas</h2>
           </div>
-          <p class="small-note">Ordenado por prioridad y gap. Respeta los filtros del Assessment.</p>
+          <p class="small-note" id="roadmapNote">Ordenadas por prioridad y gap. Respetan los filtros del Assessment.</p>
         </div>
 
         <div class="active-filters active-filters-block" data-active-filters hidden></div>
@@ -1011,7 +1012,7 @@
       NUMERO AQUI Y EN TODOS LOS IMPORTS. Lo comprueba el CI:
       python scripts/check_module_version.py
     -->
-    <script type="module" src="app.js?v=20"></script>
+    <script type="module" src="app.js?v=21"></script>
   </body>
 </html>
 

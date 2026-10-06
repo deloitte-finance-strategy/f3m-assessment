@@ -11,13 +11,13 @@
  * existe para impedir.
  */
 
-import { getMaturityLevelNumber, priorityFromGap } from "../../core/calculo.js?v=20";
-import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../../core/presentacion.js?v=20";
+import { getMaturityLevelNumber, priorityFromGap } from "../../core/calculo.js?v=21";
+import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../../core/presentacion.js?v=21";
 
-import { LEVERS, els, expandedHeatmapCapabilities } from "../estado.js?v=20";
-import { agregarPorCapacidad } from "../metricas.js?v=20";
-import { getScopedItems } from "../filtros.js?v=20";
-import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=20";
+import { LEVERS, els, expandedHeatmapCapabilities } from "../estado.js?v=21";
+import { agregarPorCapacidad } from "../metricas.js?v=21";
+import { getScopedItems } from "../filtros.js?v=21";
+import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=21";
 
 export function renderHeatmap() {
   const capabilityRows = agregarPorCapacidad(getScopedItems());

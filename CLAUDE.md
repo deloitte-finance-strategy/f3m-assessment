@@ -224,9 +224,10 @@ del PDF — un canvas oculto no tiene tamaño y saldría en blanco.
 
 Los radares van **justo debajo de las cuatro tarjetas**, en el Overview y en el Dashboard: son lo
 primero que se enseña en un taller. Y **sus ejes se pulsan**: un dominio del Overview abre su
-Dashboard, y una capacidad del Dashboard abre el Heatmap con ella desplegada. A la capacidad no se
-la lleva filtrando el Assessment a propósito: un filtro puesto sin querer cambia después KPIs,
-roadmap, CSV y PDF. Chart.js no tiene eventos para las etiquetas del radar, así que
+Dashboard, y una capacidad del Dashboard abre el Assessment en sus tarjetas, que se resaltan un
+momento. Las filas de las dos tablas resumen llevan al mismo sitio que su eje. A la capacidad se la
+lleva desplazando y no filtrando el Assessment, a propósito: un filtro puesto sin querer cambia
+después KPIs, roadmap, CSV y PDF. Chart.js no tiene eventos para las etiquetas del radar, así que
 `ejeBajoElPuntero()` en `app/graficos.js` mira la caja de cada una con `getPointLabelPosition()`. A
 dónde se va lo decide `setupNavegacionDeRadares()` en `app.js`, que se lo inyecta a los radares.
 
@@ -615,7 +616,11 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      de casos de IA trae de 2 a 4 fichas, cada una con sus dos etiquetas y su frase: un título
      suelto, sin etiquetas, es un cruce roto.
    - **Heatmap**: desplegar y plegar capacidades.
-   - **Roadmap**: comprobar que respeta los filtros activos.
+   - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
+     Cuando cabe a lo ancho, la tabla crece con la página y su encabezado se queda bajo las
+     pestañas; cuando no cabe —Presentación, o menos de 1366 px— vuelve a su caja con desplazamiento
+     propio. Lo decide `setupCajaDelRoadmap()`. Al tocar los anchos de sus columnas, medir con la
+     barra de desplazamiento visible, como en Windows: un Chromium sin ella da 17 px de más.
    - **IA**: los 4 KPIs, las dos tarjetas de la biblioteca y los 100 casos. «Ver sus N casos»
      deja exactamente N fichas. «Más información» abre el documento en la página del caso, con su
      texto en inglés encima para encontrarlo; probarlo también desde el detalle del Assessment y
@@ -635,8 +640,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 8. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
    la fila de Fiscal.
 9. **Los radares se pulsan.** En el Overview, pulsar el nombre de un dominio abre su Dashboard. En el
-   Dashboard, pulsar el nombre de una capacidad abre el Heatmap con ella desplegada y a la vista,
-   **sin tocar los filtros**. El cursor cambia a mano solo encima de un nombre o de un vértice.
+   Dashboard, pulsar el nombre de una capacidad abre el Assessment en su primera tarjeta, con todas
+   las de esa capacidad resaltadas y el foco en su primer score, **sin tocar los filtros**. Lo
+   mismo al pulsar una fila de cada tabla resumen. El cursor cambia a mano solo encima de un nombre o de un vértice.
 10. Cambiar de dominio y confirmar que los datos se recargan.
 11. Recargar la página y confirmar que el escenario persiste.
 12. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta

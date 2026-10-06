@@ -14,10 +14,10 @@
  * eso ataba el dibujo al estado.
  */
 
-import { formatMedia } from "../core/presentacion.js?v=20";
-import { els } from "./estado.js?v=20";
-import { showNotice } from "./avisos.js?v=20";
-import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=20";
+import { formatMedia } from "../core/presentacion.js?v=21";
+import { els } from "./estado.js?v=21";
+import { showNotice } from "./avisos.js?v=21";
+import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=21";
 
 
 

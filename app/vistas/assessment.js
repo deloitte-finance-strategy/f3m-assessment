@@ -16,16 +16,16 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=20";
-import { createDefaultTargets } from "../../core/objetivos.js?v=20";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=20";
-import { abrirDialogo, showNotice } from "../avisos.js?v=20";
+} from "../../core/calculo.js?v=21";
+import { createDefaultTargets } from "../../core/objetivos.js?v=21";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=21";
+import { abrirDialogo, showNotice } from "../avisos.js?v=21";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=20";
+} from "../celdas.js?v=21";
 import {
   DOMAINS,
   LEVERS,
@@ -33,17 +33,17 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=20";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=20";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=20";
-import { persistItemChange, persistTargetsDelDominioActivo } from "../persistencia.js?v=20";
-import { repintarTodo } from "../repintado.js?v=20";
+} from "../estado.js?v=21";
+import { describirObjetivos, getVisibleItems } from "../filtros.js?v=21";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=21";
+import { persistItemChange, persistTargetsDelDominioActivo } from "../persistencia.js?v=21";
+import { repintarTodo } from "../repintado.js?v=21";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=20";
+} from "../subcapacidad.js?v=21";
 
 
 export function renderCapabilityTargets() {
@@ -364,6 +364,7 @@ export function renderAssessments() {
     const card = fragment.querySelector(".assessment-card");
 
     card.dataset.id = item.id;
+    card.dataset.capacidad = item.capacidad;
 
     fragment.querySelector(".capability-chip").textContent = item.capacidad;
     fragment.querySelector("h3").textContent = item.subcapacidad;
