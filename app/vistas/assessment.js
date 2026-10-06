@@ -16,16 +16,16 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=19";
-import { createDefaultTargets } from "../../core/objetivos.js?v=19";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=19";
-import { abrirDialogo, showNotice } from "../avisos.js?v=19";
+} from "../../core/calculo.js?v=20";
+import { createDefaultTargets } from "../../core/objetivos.js?v=20";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=20";
+import { abrirDialogo, showNotice } from "../avisos.js?v=20";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=19";
+} from "../celdas.js?v=20";
 import {
   DOMAINS,
   LEVERS,
@@ -33,17 +33,17 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=19";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=19";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=19";
-import { persistItemChange, persistTargetsDelDominioActivo } from "../persistencia.js?v=19";
-import { repintarTodo } from "../repintado.js?v=19";
+} from "../estado.js?v=20";
+import { describirObjetivos, getVisibleItems } from "../filtros.js?v=20";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=20";
+import { persistItemChange, persistTargetsDelDominioActivo } from "../persistencia.js?v=20";
+import { repintarTodo } from "../repintado.js?v=20";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=19";
+} from "../subcapacidad.js?v=20";
 
 
 export function renderCapabilityTargets() {
