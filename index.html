@@ -159,7 +159,12 @@
       <div class="header-inner">
         <div>
           <p class="eyebrow">Deloitte · Finance Strategy</p>
-          <h1>F3M Assessment</h1>
+          <!--
+            El cliente va dentro del h1 y no en una linea aparte: es lo que
+            completa el titulo ("F3M Assessment · Acme"), y proyectado en la
+            sala es lo primero que se lee. Sin nombre puesto no se ve nada.
+          -->
+          <h1>F3M Assessment<span class="cabecera-cliente" id="headerCliente" hidden></span></h1>
           <p class="header-copy">Diagnóstico preliminar de madurez por subcapacidad, palanca y roadmap sugerido.</p>
         </div>
         <div class="header-actions">
@@ -216,6 +221,13 @@
 
             <div class="header-menu-panel" id="scenarioMenu" hidden>
               <p class="header-menu-title" id="scenarioMenuState">Copia de este navegador</p>
+
+              <button class="header-menu-item" id="clienteButton" type="button">
+                <span id="clienteLabel">Poner el nombre del cliente</span>
+                <span>Sale en la portada del informe y en los archivos</span>
+              </button>
+
+              <hr class="header-menu-separator">
 
               <button class="header-menu-item" id="createScenarioButton" type="button">
                 Crear escenario compartido

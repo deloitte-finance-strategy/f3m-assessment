@@ -239,6 +239,7 @@ function buildEnhancedPdfReportData() {
     domainId: activeDomain.id,
     domainLabel: activeDomain.label,
     domainTitle: activeDomain.title,
+    cliente: state.cliente,
     generatedAt: fechaLegible(ahora),
     fechaDeArchivo: fechaParaArchivo(ahora),
     // Nunca el identificador completo: este informe se envía al cliente.

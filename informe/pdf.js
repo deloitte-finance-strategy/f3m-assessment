@@ -325,9 +325,17 @@ function parteDeAccion(data) {
  * en la carpeta de descargas y se ordenan solos.
  */
 function tituloDelDocumento(data) {
+  // Con el cliente delante, que es como se busca un informe en la carpeta. Sin
+  // los caracteres que Windows no admite en un nombre: un cliente "A/B" haria
+  // que el dialogo de guardar propusiera una carpeta que no existe.
+  const partes = [data.cliente, data.domainLabel]
+    .filter(Boolean)
+    .map((parte) => String(parte).replace(/[<>:"/\\|?*]+/g, " ").trim())
+    .join(" - ");
+
   return data.fechaDeArchivo
-    ? `Informe F3M - ${data.domainLabel} - ${data.fechaDeArchivo}`
-    : `Informe ${data.domainLabel} · F3M Assessment`;
+    ? `Informe F3M - ${partes} - ${data.fechaDeArchivo}`
+    : `Informe ${partes} · F3M Assessment`;
 }
 
 
@@ -379,7 +387,7 @@ function cabecera(seccion) {
 function pie(seccion, plan, data) {
   return `
     <footer class="slide-pie">
-      <span><strong>F3M Assessment</strong> · ${escapeHtml(data.domainLabel)}</span>
+      <span><strong>F3M Assessment</strong>${data.cliente ? ` · ${escapeHtml(data.cliente)}` : ""} · ${escapeHtml(data.domainLabel)}</span>
       <span>${escapeHtml(data.generatedAt)}</span>
       <span class="slide-pie-numero">${seccion.numero} / ${plan.length}</span>
     </footer>

@@ -42,8 +42,10 @@ import {
 // Espejo de database.rules.json, para no enviar nunca algo que sera rechazado.
 import {
   ESTADOS_VALIDOS,
+  LIMITE_DE_CLIENTE,
   LIMITES_DE_TEXTO,
   normalizarAutoria,
+  normalizarCliente,
   normalizarEscenarioParaFirebase,
   normalizarEstado,
   normalizarItemCargado,
@@ -225,6 +227,7 @@ import {
 import {
   hayEscriturasEnVuelo,
   initializeSharedScenario,
+  persistCliente,
   persistItemChange,
   persistScenario,
   persistTargetsDelDominioActivo,
@@ -496,6 +499,9 @@ function cacheElements() {
     "scenarioMenuButton",
     "scenarioMenu",
     "scenarioMenuState",
+    "clienteButton",
+    "clienteLabel",
+    "headerCliente",
     "createScenarioButton",
     "copyScenarioLinkButton",
     "leaveScenarioButton",
@@ -618,6 +624,7 @@ function bindGlobalEvents() {
   enganchar("copyScenarioLinkButton", "click", copyScenarioLink);
   enganchar("leaveScenarioButton", "click", salirDelEscenario);
   enganchar("editorNameButton", "click", pedirNombreEditor);
+  enganchar("clienteButton", "click", pedirNombreDelCliente);
   enganchar("heatmapExpandToggle", "click", handleHeatmapExpandToggleAll);
   enganchar("loadNoticeClose", "click", ocultarAviso);
   enganchar("presentationModeButton", "click", alternarModoPresentacion);
@@ -952,6 +959,63 @@ function setupMenuDeEscenario() {
 }
 
 
+/**
+ * Para quien es el trabajo: en el titulo, en la pestana del navegador y en el
+ * menu. Sin nombre, la cabecera es la de siempre y el menu invita a ponerlo.
+ */
+function pintarCliente() {
+  const cliente = state.cliente;
+
+  if (els.headerCliente) {
+    els.headerCliente.textContent = cliente;
+    els.headerCliente.hidden = !cliente;
+  }
+
+  document.title = cliente ? `F3M Assessment · ${cliente}` : "F3M Assessment";
+
+  if (els.clienteLabel) {
+    els.clienteLabel.textContent = cliente
+      ? `Cliente: ${cliente}`
+      : "Poner el nombre del cliente";
+  }
+}
+
+
+async function pedirNombreDelCliente() {
+  const nombre = await abrirDialogo({
+    eyebrow: "Escenario",
+    titulo: "Nombre del cliente",
+    parrafos: [
+      "Saldrá en la cabecera, en la portada y en el pie de cada diapositiva del informe, y en el nombre del PDF, del CSV y de las copias.",
+      scenarioId
+        ? "Es del escenario compartido: lo verá todo el equipo que tenga el enlace."
+        : "Se guarda con el trabajo de este navegador y viaja en las copias que guardes.",
+    ],
+    campo: {
+      etiqueta: "Cliente",
+      valor: state.cliente,
+      placeholder: "Por ejemplo, Industrias Acme",
+      maxLength: LIMITE_DE_CLIENTE,
+    },
+    confirmar: "Guardar nombre",
+  });
+
+  if (nombre === false) {
+    return;
+  }
+
+  const limpio = normalizarCliente(nombre);
+
+  if (limpio === state.cliente) {
+    return;
+  }
+
+  state.cliente = limpio;
+  pintarCliente();
+  persistCliente();
+}
+
+
 /** Deja claro en el menu sobre que se esta trabajando. */
 function actualizarEstadoDelMenu() {
   if (!els.scenarioMenuState) {
@@ -1038,6 +1102,10 @@ function updateNavigationBadges() {
 
 
 function renderAll(opciones = {}) {
+  // Antes que nada: el nombre llega tambien con los cambios de otras personas
+  // del escenario, y no depende de la vista ni del dominio abierto.
+  pintarCliente();
+
   // El Overview agrega state.domains y no state.items: es la unica vista que
   // sigue teniendo algo que ensenar cuando el dominio abierto se queda sin
   // subcapacidades. Por eso va antes del corte de abajo, que las otras cuatro
@@ -1353,23 +1421,41 @@ async function importScenario(event) {
 }
 
 /**
- * El nombre del CSV, con el mismo patron que el PDF: «Datos F3M - FP&A -
- * 2026-10-05.csv». Antes era siempre «f3m_fpa_assessment_export.csv», y la
- * segunda exportacion del dia pisaba a la primera o salia como «(1)».
+ * El nombre del CSV, con el mismo patron que el PDF: «Datos F3M - Acme - FP&A -
+ * 2026-10-05.csv», con el cliente si lo hay. Antes era siempre
+ * «f3m_fpa_assessment_export.csv», y la segunda exportacion del dia pisaba a la
+ * primera o salia como «(1)».
+ */
+function nombreDelCsv(dominio, fecha) {
+  return `Datos F3M - ${partesDelNombre(state.cliente, dominio || "Dominio")} - ${fechaParaArchivo(fecha)}.csv`;
+}
+
+
+/**
+ * Lo que va entre «F3M» y la fecha en el nombre de un archivo.
  *
  * Solo se quitan los caracteres que Windows no admite en un nombre de archivo:
  * el «&» de FP&A si vale, y es como se llama el dominio.
  */
-function nombreDelCsv(dominio, fecha) {
-  const nombre = String(dominio || "Dominio").replace(/[<>:"/\\|?*]+/g, " ").trim();
-
-  return `Datos F3M - ${nombre} - ${fechaParaArchivo(fecha)}.csv`;
+function partesDelNombre(...partes) {
+  return partes
+    .filter(Boolean)
+    .map((parte) => String(parte).replace(/[<>:"/\\|?*]+/g, " ").trim())
+    .filter(Boolean)
+    .join(" - ");
 }
 
 
+/**
+ * La copia se llamaba siempre «f3m_multidomain_assessment_scenario.json»: con
+ * dos clientes en la carpeta de descargas no habia forma de saber cual era cual
+ * sin abrirlas. Ahora lleva el cliente y la fecha, como el PDF y el CSV.
+ */
 function exportScenarioJson() {
+  const nombre = partesDelNombre("Copia F3M", state.cliente, fechaParaArchivo(new Date()));
+
   downloadFile(
-    "f3m_multidomain_assessment_scenario.json",
+    `${nombre}.json`,
     JSON.stringify(buildScenarioPayload(), null, 2),
     "application/json",
   );

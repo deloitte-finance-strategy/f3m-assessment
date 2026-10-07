@@ -429,6 +429,10 @@ Al tocar el flujo de guardado, tener en cuenta:
   aplicarlo después en vez de descartarlo.
 - Las escrituras normales son **granulares por ruta** (`persistGranularChange()`), no del payload
   completo. Las únicas escrituras completas son crear escenario, importar y restaurar.
+- El **nombre del cliente** (`cliente`, en la raíz del escenario) viaja siempre en su propia
+  escritura, `persistCliente()`, y nunca dentro de una completa. Es el campo más nuevo de las
+  reglas: si las publicadas en la consola aún no lo conocen, una escritura completa que lo llevara
+  se rechazaría entera, puntuaciones incluidas. Separado, lo peor es que no se comparta el nombre.
 - El indicador de guardado tiene un estado `error` real. **Ningún `catch` puede terminar en un
   mensaje de éxito**: es el fallo que más caro sale en una sesión con cliente.
 

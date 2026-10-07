@@ -16,6 +16,7 @@ import {
 
 import {
   normalizarAutoria,
+  normalizarCliente,
   normalizarEscenarioParaFirebase,
   normalizarEstado,
   recortarAlLimite,
@@ -230,6 +231,12 @@ export function applyScenarioPayload(payload, { seguirDominioDelEscenario = fals
     return resultado;
   }
 
+  // Siempre, tambien cuando el payload no lo trae: abrir la copia de otro
+  // cliente, o un escenario anterior a este campo, no puede dejar en pantalla
+  // el nombre del que habia antes. En la portada de un informe ese error se
+  // envia por correo.
+  state.cliente = normalizarCliente(payload.cliente);
+
   if (payload.domains) {
     Object.keys(payload.domains).forEach((domainId) => {
       const domain = state.domains[domainId];
@@ -378,6 +385,7 @@ export function buildScenarioPayload() {
     version: 3,
     activeDomainId: state.activeDomainId,
     updatedAt: new Date().toISOString(),
+    ...(state.cliente ? { cliente: state.cliente } : {}),
     domains: domainsPayload,
   };
 }

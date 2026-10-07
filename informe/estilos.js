@@ -289,6 +289,15 @@ function estilosDePortada() {
       font-weight: 700;
     }
 
+    /* Para quien es: debajo del titulo y con menos peso que el, como en la
+       portada de cualquier propuesta. Sin nombre puesto no se pinta. */
+    .portada-cliente {
+      margin: 6mm 0 0;
+      font-size: 17pt;
+      font-weight: 600;
+      color: ${PALETA.marca};
+    }
+
     .portada-bajada {
       margin: 7mm 0 0;
       max-width: 180mm;

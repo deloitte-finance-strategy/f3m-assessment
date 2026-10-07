@@ -13,8 +13,10 @@
 import {
   CAMPOS_DE_AUTORIA,
   ESTADOS_VALIDOS,
+  LIMITE_DE_CLIENTE,
   LIMITES_DE_TEXTO,
   normalizarAutoria,
+  normalizarCliente,
   normalizarEscenarioParaFirebase,
   normalizarEstado,
   recortarAlLimite,
@@ -406,6 +408,41 @@ export const casos = [
         "id que Firebase rechaza",
         "y el del id invalido tambien",
       );
+    },
+  },
+
+  // ------------------------------------------------------------- cliente
+  {
+    grupo: "El nombre del cliente",
+    nombre: "viaja limpio y dentro del limite, y sin nombre no viaja",
+    ejecutar: (t) => {
+      const conNombre = escenarioSano();
+      conNombre.cliente = "  Acme   Industrial \n S.A.  ";
+      t.igual(normalizar(conNombre).cliente, "Acme Industrial S.A.", "espacios sobrantes fuera");
+
+      const largo = escenarioSano();
+      largo.cliente = "x".repeat(LIMITE_DE_CLIENTE + 30);
+      t.igual(normalizar(largo).cliente.length, LIMITE_DE_CLIENTE, "se recorta al limite");
+
+      const vacio = escenarioSano();
+      vacio.cliente = "   ";
+      t.igual("cliente" in normalizar(vacio), false, "un nombre en blanco no se envia");
+      t.igual("cliente" in normalizar(escenarioSano()), false, "un escenario antiguo tampoco");
+
+      t.igual(normalizarCliente(42), "", "lo que no es texto se queda en vacio");
+      t.igual(normalizarCliente(null), "", "y null tambien");
+    },
+  },
+  {
+    grupo: "El nombre del cliente",
+    nombre: "un archivo con cliente se importa sin avisos",
+    ejecutar: (t) => {
+      const payload = escenarioSano();
+      payload.cliente = "Acme";
+      const revision = revisarEscenario(payload);
+
+      t.igual(revision.valido, true);
+      t.igual(revision.problemas.length, 0, "cliente es un campo de la herramienta");
     },
   },
 ];

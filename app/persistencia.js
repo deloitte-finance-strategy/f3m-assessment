@@ -154,6 +154,10 @@ export async function initializeSharedScenario() {
           "saved",
           "Guardado ✓",
         );
+
+        if (state.cliente) {
+          persistCliente();
+        }
       } catch (error) {
         console.warn(
           "El escenario se ha guardado localmente, pero no se ha podido crear en Firebase.",
@@ -555,8 +559,9 @@ function hayIdentidadParaEscribir() {
  *
  * Con un update() multi-ruta, cada dominio cargado se reemplaza entero —que es
  * lo que se quiere al importar o al restaurar— y la rama de un dominio ausente
- * se queda intacta. Las claves raiz son exactamente las cuatro que admiten las
- * reglas, que rechazan cualquier otra con `$otroCampoRaiz: false`.
+ * se queda intacta. Las claves raiz son las que admiten las reglas, que
+ * rechazan cualquier otra con `$otroCampoRaiz: false`, menos el cliente, que
+ * va por su cuenta en persistCliente().
  */
 function rutasDeEscrituraCompleta(sanitizado) {
   const rutas = {
@@ -573,6 +578,24 @@ function rutasDeEscrituraCompleta(sanitizado) {
   });
 
   return rutas;
+}
+
+
+/**
+ * El nombre del cliente, en su propia escritura y nunca dentro de una completa.
+ *
+ * Es el campo mas nuevo de las reglas, y lo que hay en el repositorio no es por
+ * fuerza lo publicado en la consola de Firebase. Si las reglas publicadas aun no
+ * lo conocen, una escritura completa que lo llevara se rechazaria ENTERA, y con
+ * ella las puntuaciones: crear un escenario compartido con el nombre puesto
+ * subiria un escenario vacio. Separado, lo peor que puede pasar es que no se
+ * comparta el nombre, y eso el chip lo dice en rojo como cualquier otro fallo.
+ *
+ * Tras una escritura completa se envia siempre, tambien vacio: abrir la copia de
+ * otro cliente tiene que borrar el nombre anterior, no conservarlo.
+ */
+export function persistCliente() {
+  persistGranularChange({ cliente: state.cliente || null });
 }
 
 
@@ -783,6 +806,7 @@ export function persistScenario() {
   )
     .then(() => {
       marcarEscrituraCorrecta();
+      persistCliente();
     })
     .catch((error) => {
       console.warn(

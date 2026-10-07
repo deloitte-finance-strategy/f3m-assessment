@@ -82,6 +82,9 @@ export const STATUS_OPTIONS = ESTADOS_VALIDOS;
 /** El dominio abierto y sus subcapacidades. Se muta en el sitio. */
 export const state = {
   activeDomainId: DEFAULT_DOMAIN_ID,
+  // Para quien es el trabajo. Es del escenario, no de un dominio: sale en la
+  // cabecera, en la portada del informe y en el nombre de los archivos.
+  cliente: "",
   domains: {},
   meta: null,
   items: [],

@@ -84,6 +84,7 @@ export function portada(data) {
   return `
     <p class="portada-antetitulo">Finance Strategy · F3M Assessment</p>
     <h1>Informe preliminar de madurez<b>${escapeHtml(data.domainLabel)}</b></h1>
+    ${data.cliente ? `<p class="portada-cliente">${escapeHtml(data.cliente)}</p>` : ""}
     <p class="portada-bajada">
       Lectura de la función financiera, diagnóstico del dominio, brechas frente a
       objetivo, oportunidades de inteligencia artificial y roadmap de iniciativas.

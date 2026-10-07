@@ -466,6 +466,26 @@ h4 {
   color: var(--ink-3);
 }
 
+/* El cliente completa el titulo con menos peso que el, y el nombre de la
+   herramienta sigue mandando. Lo separa una raya verde y no un punto: con un
+   nombre largo pasa a la linea de abajo, y un punto suelto al principio de una
+   linea parece una errata; la raya se lee igual al lado que debajo. */
+.cabecera-cliente {
+  display: inline-block;
+  max-width: 100%;
+  margin-left: 0.3em;
+  padding-left: 0.4em;
+  border-left: 3px solid var(--green);
+  overflow: hidden;
+  line-height: 1.05;
+  color: var(--cabecera-texto);
+  font-size: 0.62em;
+  font-weight: var(--fw-normal);
+  text-overflow: ellipsis;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
 .header-copy {
   max-width: 760px;
   margin: 0;
