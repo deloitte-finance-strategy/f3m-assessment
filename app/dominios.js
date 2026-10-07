@@ -10,10 +10,10 @@
  * decia "no se pudo cargar el JSON de datos" con los otros ocho perfectos.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=21";
-import { normalizarItemCargado } from "../core/escenario.js?v=21";
-import { normalizeDomainTargets } from "../core/objetivos.js?v=21";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=21";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=22";
+import { normalizarItemCargado } from "../core/escenario.js?v=22";
+import { normalizeDomainTargets } from "../core/objetivos.js?v=22";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=22";
 
 import {
   CASOS_DE_IA,
@@ -27,11 +27,11 @@ import {
   expandedHeatmapCapabilities,
   state,
   syncActiveDomainState,
-} from "./estado.js?v=21";
+} from "./estado.js?v=22";
 
-import { comportamientoDeDesplazamiento } from "./preferencias.js?v=21";
-import { repintarTodo } from "./repintado.js?v=21";
-import { populateCapacityFilter } from "./filtros.js?v=21";
+import { comportamientoDeDesplazamiento } from "./preferencias.js?v=22";
+import { repintarTodo } from "./repintado.js?v=22";
+import { populateCapacityFilter } from "./filtros.js?v=22";
 
 
 /**
@@ -201,7 +201,12 @@ async function loadDomainData(domainId) {
     throw new Error(`Dominio no configurado: ${domainId}`);
   }
 
-  const response = await fetch(domain.dataUrl, { cache: "no-store" });
+  // "no-cache" y no "no-store": los dos garantizan que nunca se pinta un JSON
+  // viejo tras actualizar los datos, porque los dos preguntan al servidor cada
+  // vez. La diferencia es la respuesta: con "no-store" se volvian a bajar los
+  // nueve archivos enteros en cada visita; con "no-cache" el servidor contesta
+  // «no ha cambiado» y se usa la copia que ya habia.
+  const response = await fetch(domain.dataUrl, { cache: "no-cache" });
 
   if (!response.ok) {
     throw new Error(`No se pudo cargar ${domain.dataUrl}`);

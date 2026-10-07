@@ -799,8 +799,16 @@ transform: translateY(-1px);
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 9px 0;
+  /* El relleno lateral es el del conmutador de dominios de encima (14 px y su
+     borde). Sin el, la pildora de Overview y el «Dominio X» de la derecha
+     tocaban el borde de la franja blanca, y al quedarse fija arriba parecian
+     cortadas. Asi las pestanas caen en la misma vertical que los dominios. */
+  padding: 9px 15px;
   border-bottom: 1px solid var(--line-velo);
+  /* Envuelve a cualquier ancho, no solo en movil. En Presentacion a 900 px las
+     pestanas y el «Dominio X» ya no cabian y este se salia de la franja por la
+     derecha. Donde caben, que es casi siempre, esto no cambia nada. */
+  flex-wrap: wrap;
   background: var(--surface-translucida-alta);
   box-shadow: 0 5px 14px rgba(22, 26, 24, 0.04);
   backdrop-filter: blur(12px);
@@ -4777,13 +4785,10 @@ height: 100% !important;
     width: 100%;
   }
 
-  /* Las cuatro pestanas no caben en una fila de movil: 518 px de contenido en
-     375 de pantalla. Con overflow-x, "Roadmap" quedaba fuera y nada indicaba
-     que estuviera ahi; habia que arrastrar la fila para descubrirla.
-     Envolviendolas se ven las cuatro y no hace falta ninguna pista. */
-  .tabs {
-    flex-wrap: wrap;
-  }
+  /* Las pestanas no caben en una fila de movil: 518 px de contenido en 375 de
+     pantalla. Con overflow-x, "Roadmap" quedaba fuera y nada indicaba que
+     estuviera ahi; habia que arrastrar la fila para descubrirla. Por eso .tabs
+     envuelve, y ahora a cualquier ancho (ver su regla). */
 
   .kpi-grid,
   .split-grid,
