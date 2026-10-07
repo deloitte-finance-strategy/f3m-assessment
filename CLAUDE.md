@@ -51,6 +51,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 140 |
 | `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 766 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
+| `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 140 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 231 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe: datos, radares y tema | 487 |
@@ -131,9 +132,10 @@ Dependencias de terceros, sin bundler:
 
 ### `app/` es el reparto de `app.js`
 
-`app.js` es la raíz de composición; todo lo demás vive en `app/`: los quince módulos de
+`app.js` es la raíz de composición; todo lo demás vive en `app/`: los dieciséis módulos de
 infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, métricas, dominios,
-filtros, subcapacidad, escenario, Firebase, identidad, indicador, persistencia y repintado—, las
+filtros, subcapacidad, escenario, Firebase, identidad, indicador, persistencia, repintado y
+edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`
 y `app/biblioteca.js`. Lo nuevo nace ya en `app/`, no en `app.js`. Mover código entre módulos se
 verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
@@ -639,7 +641,10 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    - **Assessment**: cambiar un score y comprobar que se recalculan nivel, gap, prioridad y oleada,
      **sin perder el foco ni cerrar los paneles de detalle abiertos**. En «Ver detalle», el bloque
      de casos de IA trae de 2 a 4 fichas, cada una con sus dos etiquetas y su frase: un título
-     suelto, sin etiquetas, es un cruce roto.
+     suelto, sin etiquetas, es un cruce roto. Puntuar también con teclado: Tab llega a cada
+     palanca, las teclas 1 a 5 y las flechas puntúan, y Suprimir la deja sin puntuar; pulsar
+     otra vez el número elegido también. Las «Notas del taller» del detalle son el mismo
+     comentario que el Roadmap: lo escrito en uno aparece en el otro y en el informe.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
      Cuando cabe a lo ancho, la tabla crece con la página y su encabezado se queda bajo las

@@ -12,11 +12,13 @@
 
 import {
   DEFAULT_TARGET_MATURITY,
+  getMaturityLevel,
   getMaturityLevelNumber,
   normalizeTargetValue,
   toScore,
   unique,
 } from "../../core/calculo.js?v=23";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=23";
 import { createDefaultTargets } from "../../core/objetivos.js?v=23";
 import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=23";
 import { abrirDialogo, showNotice } from "../avisos.js?v=23";
@@ -34,6 +36,11 @@ import {
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
 } from "../estado.js?v=23";
+import {
+  actualizarContadorDeComentario,
+  guardarCampoAhora,
+  programarGuardado,
+} from "../edicion.js?v=23";
 import { describirObjetivos, getVisibleItems } from "../filtros.js?v=23";
 import { calculate, getCapabilityTargets } from "../metricas.js?v=23";
 import { persistItemChange, persistTargetsDelDominioActivo } from "../persistencia.js?v=23";
@@ -412,6 +419,8 @@ export function renderAssessments() {
     }
 
 
+    prepararNotasDelTaller(fragment, item);
+
     const details = fragment.querySelector("details");
     const summaryText = fragment.querySelector(".detail-summary-text");
 
@@ -439,15 +448,53 @@ export function renderAssessments() {
   els.assessmentList.appendChild(fragment);
   });
 
-  els.assessmentList.querySelectorAll(".score-select").forEach((select) => {
-    select.addEventListener("change", handleScoreChange);
+  els.assessmentList.querySelectorAll(".score-segmentos").forEach((grupo) => {
+    grupo.addEventListener("change", handleScoreChange);
+    grupo.addEventListener("click", handleScoreClick);
+    grupo.addEventListener("keydown", handleScoreKeydown);
   });
 
   restaurarFocoDeAssessment(foco);
 }
 
 
-/** Que selector de score tiene el foco, para devolverselo tras repintar. */
+/**
+ * Las notas del taller de una tarjeta: su texto, su guardado y la marca "Con
+ * notas" del resumen, para saber sin abrir el detalle que hay algo escrito.
+ */
+function prepararNotasDelTaller(fragment, item) {
+  const notas = fragment.querySelector(".notas-taller");
+  const marca = fragment.querySelector(".detail-summary-notas");
+  const bloque = fragment.querySelector(".notas-detail-block");
+
+  if (!notas) {
+    return;
+  }
+
+  notas.value = item.comentario || "";
+  notas.dataset.id = item.id;
+  notas.maxLength = LIMITES_DE_TEXTO.comentario;
+  notas.setAttribute("aria-label", `Notas del taller de ${item.subcapacidad}`);
+
+  const marcar = () => {
+    if (marca) {
+      marca.hidden = !notas.value.trim();
+    }
+  };
+
+  marcar();
+
+  notas.addEventListener("input", () => {
+    marcar();
+    actualizarContadorDeComentario(notas, bloque);
+    programarGuardado(item, "comentario", notas);
+  });
+
+  notas.addEventListener("change", () => guardarCampoAhora(item, "comentario", notas));
+}
+
+
+/** Que control de la tarjeta tiene el foco, para devolverselo tras repintar. */
 function capturarFocoDeAssessment() {
   const activo = document.activeElement;
 
@@ -455,7 +502,20 @@ function capturarFocoDeAssessment() {
     return null;
   }
 
-  if (!activo.classList.contains("score-select")) {
+  // Las notas se repintan con la lista, por ejemplo al llegar un cambio de otra
+  // persona del escenario. Lo que se esta escribiendo se devuelve tal cual esta
+  // en pantalla, con el cursor donde estaba: el guardado diferido lo envia
+  // poco despues, y perderlo a media frase en un taller no tiene arreglo.
+  if (activo.classList.contains("notas-taller")) {
+    return {
+      id: activo.dataset.id,
+      notas: activo.value,
+      inicio: activo.selectionStart,
+      fin: activo.selectionEnd,
+    };
+  }
+
+  if (!activo.classList.contains("score-radio")) {
     return null;
   }
 
@@ -468,38 +528,98 @@ function restaurarFocoDeAssessment(foco) {
     return;
   }
 
-  els.assessmentList
-    .querySelector(
-      `.score-select[data-id="${CSS.escape(foco.id)}"][data-lever="${CSS.escape(foco.palanca)}"]`,
-    )
-    ?.focus();
+  if (foco.notas !== undefined) {
+    const notas = els.assessmentList.querySelector(
+      `.notas-taller[data-id="${CSS.escape(foco.id)}"]`,
+    );
+
+    if (notas) {
+      notas.value = foco.notas;
+      notas.focus();
+      notas.setSelectionRange(foco.inicio, foco.fin);
+    }
+
+    return;
+  }
+
+  enfocarPalanca(
+    els.assessmentList.querySelector(
+      `.score-segmentos[data-id="${CSS.escape(foco.id)}"][data-lever="${CSS.escape(foco.palanca)}"]`,
+    ),
+  );
 }
 
 
-function getScoreSelectClass(score) {
-  return Number.isInteger(score)
-    ? `score-value-${score}`
-    : "score-value-empty";
+/**
+ * Pone el foco en una palanca: en su score si lo tiene, y si no en el 1.
+ *
+ * Es donde el navegador lo pondria al llegar tabulando a un grupo de radios, y
+ * lo usa tambien app.js al abrir el Assessment desde un radar.
+ */
+export function enfocarPalanca(grupo, opciones) {
+  const destino =
+    grupo?.querySelector(".score-radio:checked") || grupo?.querySelector(".score-radio");
+
+  destino?.focus(opciones);
 }
 
 
+/**
+ * Las cinco opciones de una palanca, como botones y no como desplegable.
+ *
+ * El desplegable pedia dos clics por palanca —abrir y elegir—, seis por
+ * subcapacidad y unos novecientos en un assessment completo, y solo enseñaba
+ * "1, 2, 3, 4, 5": para saber que era un 3 habia que abrir el detalle. Ahora es
+ * un clic, el numero elegido se ve desde el fondo de la sala con el color del
+ * heatmap, y al pasar el raton cada opcion dice que significa ese nivel en esta
+ * subcapacidad.
+ *
+ * Son radios de verdad, con el mismo nombre por palanca, y no botones sueltos:
+ * asi el grupo es una sola parada al tabular y las flechas lo recorren, como
+ * hacia el desplegable. Quitar una puntuacion, que antes era "Sin puntuar", es
+ * volver a pulsar la elegida, o Suprimir con el teclado.
+ */
 function scoreControl(item, lever) {
   const current = item.scores[lever.key];
-  const options = [`<option value="">Sin puntuar</option>`]
-    .concat([1, 2, 3, 4, 5].map((value) => `<option value="${value}" ${current === value ? "selected" : ""}>${value}</option>`))
+  const nombre = `score-${item.id}-${lever.key}`;
+
+  const opciones = [1, 2, 3, 4, 5]
+    .map((value) => {
+      const nivel = (getMaturityLevel(value) || String(value)).replace(" - ", " · ");
+      const criterio = item.maturity?.[value] || item.maturity?.[String(value)];
+      const ayuda = criterio ? `${nivel}: ${criterio}` : nivel;
+
+      return `
+        <label class="score-opcion score-opcion-${value}" title="${escapeAttr(ayuda)}">
+          <input
+            class="score-radio"
+            type="radio"
+            name="${escapeAttr(nombre)}"
+            value="${value}"
+            data-id="${escapeAttr(item.id)}"
+            data-lever="${lever.key}"
+            aria-label="${escapeAttr(nivel)}"
+            ${current === value ? "checked" : ""}
+          >
+          <span aria-hidden="true">${value}</span>
+        </label>
+      `;
+    })
     .join("");
+
   return `
-    <label class="score-field">
-      <span>${escapeHtml(lever.label)}</span>
-      <select
-        class="score-select ${getScoreSelectClass(current)}"
+    <div class="score-field">
+      <span class="score-field-label" aria-hidden="true">${escapeHtml(lever.label)}</span>
+      <div
+        class="score-segmentos"
+        role="radiogroup"
         data-id="${escapeAttr(item.id)}"
         data-lever="${lever.key}"
         aria-label="${escapeAttr(`${lever.label} de ${item.subcapacidad}`)}"
       >
-        ${options}
-      </select>
-    </label>
+        ${opciones}
+      </div>
+    </div>
   `;
 }
 
@@ -558,16 +678,82 @@ function scoreResult(metrics) {
 
 
 function handleScoreChange(event) {
-  const item = state.items.find(
-    (entry) => entry.id === event.target.dataset.id,
-  );
+  const radio = event.target;
 
-  if (!item) {
+  if (!radio.classList?.contains("score-radio")) {
     return;
   }
 
-  const leverKey = event.target.dataset.lever;
-  const score = toScore(event.target.value);
+  aplicarScore(radio.dataset.id, radio.dataset.lever, toScore(radio.value));
+}
+
+
+/**
+ * Pulsar la opcion que ya estaba elegida la quita. Un radio no avisa de eso con
+ * "change", porque para el no ha cambiado nada, asi que se mira en el clic
+ * comparando con el estado: si coinciden, es que ya estaba puesta.
+ */
+function handleScoreClick(event) {
+  const radio = event.target;
+
+  if (!radio.classList?.contains("score-radio")) {
+    return;
+  }
+
+  const item = state.items.find((entry) => entry.id === radio.dataset.id);
+
+  if (item && item.scores[radio.dataset.lever] === toScore(radio.value)) {
+    radio.checked = false;
+    aplicarScore(radio.dataset.id, radio.dataset.lever, null);
+  }
+}
+
+
+/**
+ * Con el foco en una palanca, las teclas 1 a 5 la puntuan y Suprimir o
+ * Retroceso la dejan sin puntuar. Las flechas ya las trae el grupo de radios.
+ */
+function handleScoreKeydown(event) {
+  const grupo = event.currentTarget;
+  const { id, lever } = grupo.dataset;
+
+  if (event.altKey || event.ctrlKey || event.metaKey) {
+    return;
+  }
+
+  if (/^[1-5]$/.test(event.key)) {
+    event.preventDefault();
+
+    const radio = grupo.querySelector(`.score-radio[value="${event.key}"]`);
+
+    if (radio && !radio.checked) {
+      radio.checked = true;
+      radio.focus();
+      aplicarScore(id, lever, Number(event.key));
+    }
+
+    return;
+  }
+
+  if (event.key === "Delete" || event.key === "Backspace") {
+    event.preventDefault();
+
+    const marcado = grupo.querySelector(".score-radio:checked");
+
+    if (marcado) {
+      marcado.checked = false;
+      aplicarScore(id, lever, null);
+    }
+  }
+}
+
+
+function aplicarScore(itemId, leverKey, score) {
+  const item = state.items.find((entry) => entry.id === itemId);
+
+  if (!item || item.scores[leverKey] === score) {
+    return;
+  }
 
   // Con un filtro de prioridad puesto, puntuar puede sacar la subcapacidad de
   // la lista. Solo en ese caso hay que reconstruirla.
@@ -610,14 +796,7 @@ function actualizarTarjetaDeAssessment(item) {
 
   card.querySelector(".score-result").innerHTML = scoreResult(metrics);
 
-  // El color del borde de cada selector depende de su valor.
-  card.querySelectorAll(".score-select").forEach((select) => {
-    select.className = `score-select ${getScoreSelectClass(
-      item.scores[select.dataset.lever],
-    )}`;
-  });
-
-  // Y el nivel de madurez resaltado cambia con el score medio.
+  // El nivel de madurez resaltado cambia con el score medio.
   const nivelActual = getMaturityLevelNumber(metrics.scoreMedio);
 
   card.querySelectorAll(".maturity-list li").forEach((li, indice) => {

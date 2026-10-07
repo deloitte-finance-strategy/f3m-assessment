@@ -243,10 +243,11 @@ import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js
 import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=23";
 
 // El Assessment: puntuar cada subcapacidad en las tres palancas.
-import { renderAssessments, renderCapabilityTargets } from "./app/vistas/assessment.js?v=23";
+import { enfocarPalanca, renderAssessments, renderCapabilityTargets } from "./app/vistas/assessment.js?v=23";
 
 // El Roadmap: las iniciativas priorizadas y sus campos editables.
-import { hayGuardadosPendientes, renderRoadmap, setupCajaDelRoadmap } from "./app/vistas/roadmap.js?v=23";
+import { hayGuardadosPendientes } from "./app/edicion.js?v=23";
+import { renderRoadmap, setupCajaDelRoadmap } from "./app/vistas/roadmap.js?v=23";
 
 // Los dos modales: criterios de puntuacion y ficha de caso de IA.
 import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=23";
@@ -817,7 +818,7 @@ function abrirCapacidadEnElAssessment(capacidad) {
     behavior: comportamientoDeDesplazamiento(),
     block: "start",
   });
-  tarjetas[0].querySelector(".score-select")?.focus({ preventScroll: true });
+  enfocarPalanca(tarjetas[0].querySelector(".score-segmentos"), { preventScroll: true });
 
   tarjetas.forEach((tarjeta) => {
     tarjeta.classList.remove("tarjeta-de-llegada");

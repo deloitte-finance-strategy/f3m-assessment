@@ -8,7 +8,15 @@
 
 import { rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=23";
 import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=23";
-import { celdaDeAvance, kpiCard, priorityBadge, renderLeverBars, renderPriorityBars } from "../celdas.js?v=23";
+import {
+  celdaDeAvance,
+  gapClass,
+  heatScoreCell,
+  kpiCard,
+  priorityBadge,
+  renderLeverBars,
+  renderPriorityBars,
+} from "../celdas.js?v=23";
 import {
   DOMAINS,
   GRUPOS_DE_DOMINIO,
@@ -246,6 +254,15 @@ function renderOverviewHeadline(filas, entradas) {
 }
 
 
+/**
+ * La tabla por dominio, con los colores del Heatmap en las medias y el gap.
+ *
+ * En gris era una rejilla de cifras que habia que leer una a una para saber que
+ * dominio y que palanca estaban peor, que es la primera pregunta del Overview.
+ * La escala es la misma del Heatmap, celda a celda, y no una propia: el mismo
+ * 2,40 tiene que salir del mismo color en las dos vistas. El objetivo se queda
+ * sin color porque es configuracion, no una medida.
+ */
 function renderOverviewSummaryTable(filas) {
   const rows = filas.map(
     (fila) => `
@@ -258,27 +275,16 @@ function renderOverviewSummaryTable(filas) {
           ${fila.capacidades}
         </td>
 
-        <td class="number">
-          ${formatMedia(fila.procesos)}
-        </td>
-
-        <td class="number">
-          ${formatMedia(fila.tecnologia)}
-        </td>
-
-        <td class="number">
-          ${formatMedia(fila.organizacion)}
-        </td>
-
-        <td class="number">
-          ${formatMedia(fila.scoreMedio)}
-        </td>
+        ${heatScoreCell(fila.procesos, formatMedia, "number")}
+        ${heatScoreCell(fila.tecnologia, formatMedia, "number")}
+        ${heatScoreCell(fila.organizacion, formatMedia, "number")}
+        ${heatScoreCell(fila.scoreMedio, formatMedia, "number")}
 
         <td class="number">
           ${formatMedia(fila.targetMedio)}
         </td>
 
-        <td class="number">
+        <td class="number heat-cell ${gapClass(fila.gap)}">
           ${formatMedia(fila.gap)}
         </td>
 

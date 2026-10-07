@@ -15,7 +15,7 @@
  * las pedia prestadas el modal del Roadmap; con la pestana IA ya son tres sitios.
  */
 
-import { average } from "../core/calculo.js?v=23";
+import { average, getMaturityLevelNumber, priorityFromGap } from "../core/calculo.js?v=23";
 import {
   escapeAttr,
   escapeHtml,
@@ -250,4 +250,56 @@ export function pintarContadorDeCasos(elemento, casos) {
 
   elemento.textContent = casos.length ? String(casos.length) : "";
   elemento.hidden = !casos.length;
+}
+
+
+/**
+ * Una celda del heatmap. Sin puntuar es un guion, nunca un cero.
+ *
+ * Number(null) es 0, y 0 pasa Number.isFinite. Por eso una capacidad sin
+ * ninguna subcapacidad puntuada se pintaba con un 0 en las cuatro columnas
+ * numericas, y en rojo, porque 0 cae en el tramo mas bajo de la escala.
+ *
+ * Delante de un cliente eso afirma algo que no es cierto: que esa capacidad
+ * esta evaluada y con la peor nota posible, cuando lo que pasa es que todavia
+ * no se ha evaluado. La tabla resumen del Dashboard, con los mismos datos,
+ * enseña un guion. Dos vistas de la misma herramienta decian cosas distintas.
+ *
+ * Por defecto escribe una media, con dos decimales. El score suelto de una
+ * palanca, en las filas de subcapacidad, es un entero y llega con formatNumber.
+ * 'clases' añade las de la tabla que la acoge, como el alineado de "number".
+ */
+export function heatScoreCell(value, formatear = formatMedia, clases = "") {
+  const sinValor = value === null || value === undefined || value === "";
+  const number = sinValor ? NaN : Number(value);
+
+  if (!Number.isFinite(number)) {
+    return `<td class="heat-cell heat-blank ${clases}">-</td>`;
+  }
+
+  // El nivel sale de getMaturityLevelNumber(), que es donde vive el redondeo
+  // acotado del modelo. Aqui estaba reimplementado en linea, asi que eran dos
+  // definiciones de "que nivel es un 3,5" a dos lineas de distancia.
+  return `<td class="heat-cell heat-${getMaturityLevelNumber(number)} ${clases}">${formatear(number)}</td>`;
+}
+
+
+/**
+ * La clase de color de una celda de gap.
+ *
+ * Los cortes los pone priorityFromGap(), que es la regla de negocio. Estaban
+ * repetidos aqui como 2 y 1 sueltos: mover el umbral de Alta en el motor habria
+ * dejado el heatmap pintando de rojo un gap que la tabla llamaba Media.
+ */
+const CLASE_DE_GAP = {
+  Alta: "gap-high",
+  Media: "gap-mid",
+  Baja: "gap-low",
+};
+
+
+export function gapClass(value) {
+  if (!Number.isFinite(value)) return "heat-blank";
+
+  return CLASE_DE_GAP[priorityFromGap(value)] || "gap-low";
 }

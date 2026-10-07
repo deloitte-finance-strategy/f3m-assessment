@@ -1485,7 +1485,6 @@ display: none;
 
 .filters input,
 .filters select,
-.score-select,
 .inline-input {
   min-height: var(--control-h);
   width: 100%;
@@ -1590,7 +1589,7 @@ display: none;
   gap: 4px;
 }
 
-.score-field span {
+.score-field-label {
   color: var(--muted);
   font-size: var(--fs-3xs);
   font-weight: var(--fw-bold);
@@ -1598,58 +1597,84 @@ display: none;
 }
 
 
-.score-select {
-  --score-accent: var(--line);
-  --score-text: var(--ink);
-
-  padding: 0 8px;
+/*
+  Las cinco opciones de una palanca, en una sola pieza con el borde del
+  desplegable al que sustituyen. La elegida toma el color del heatmap para ese
+  nivel, que es la misma escala que ya se lee en el resto de la herramienta: un
+  2 es ambar aqui y en el heatmap. Las demas se quedan en neutro para que la
+  elegida se vea desde el fondo de la sala.
+*/
+.score-segmentos {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: var(--control-h);
   border: 1px solid var(--line);
-  border-left: 4px solid var(--score-accent);
+  border-radius: var(--r-sm);
   background: var(--surface);
-  color: var(--score-text);
-  font-weight: var(--fw-medium);
+  overflow: hidden;
+}
+
+.score-opcion {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  border-left: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.score-opcion:first-child {
+  border-left: 0;
+}
+
+/* El radio sigue ahi para el teclado y los lectores; lo que se ve es el numero.
+   El estilo cuelga del radio con "+" y no de :has(), que algun portatil de
+   cliente con un navegador de hace dos años todavia no entiende. */
+.score-radio {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.score-opcion span {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
   transition:
-    border-color 150ms ease,
-    box-shadow 150ms ease,
-    background-color 150ms ease;
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
-
-.score-select.score-value-empty {
-  --score-accent: var(--score-0);
-  --score-text: var(--score-0-fg);
+.score-opcion:hover span {
+  background: var(--surface-hundida);
+  color: var(--ink);
 }
 
-.score-select.score-value-1 {
-  --score-accent: var(--score-1);
-  --score-text: var(--score-1-fg);
+.score-opcion-1 .score-radio:checked + span { background: var(--score-1); color: var(--score-1-fg); }
+.score-opcion-2 .score-radio:checked + span { background: var(--score-2); color: var(--score-2-fg); }
+.score-opcion-3 .score-radio:checked + span { background: var(--score-3); color: var(--score-3-fg); }
+.score-opcion-4 .score-radio:checked + span { background: var(--score-4); color: var(--score-4-fg); }
+.score-opcion-5 .score-radio:checked + span { background: var(--score-5); color: var(--score-5-fg); }
+
+/* El color por si solo no basta (forzado de colores, daltonismo): la elegida
+   lleva ademas un subrayado grueso, que no depende del tono. */
+.score-radio:checked + span {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
-.score-select.score-value-2 {
-  --score-accent: var(--score-2);
-  --score-text: var(--score-2-fg);
-}
-
-.score-select.score-value-3 {
-  --score-accent: var(--score-3);
-  --score-text: var(--score-3-fg);
-}
-
-.score-select.score-value-4 {
-  --score-accent: var(--score-4);
-  --score-text: var(--score-4-fg);
-}
-
-.score-select.score-value-5 {
-  --score-accent: var(--score-5);
-  --score-text: var(--score-5-fg);
-}
-
-.score-select:focus-visible {
-  border-color: var(--green);
-  border-left-color: var(--score-accent);
+.score-radio:focus-visible + span {
+  position: relative;
+  z-index: 1;
   outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
+  outline-offset: -3px;
 }
 
 
@@ -2247,6 +2272,11 @@ border-radius: var(--r-pill);
 .heatmap-table td.heat-cell {
   min-width: 92px;
   text-align: center;
+  font-weight: var(--fw-bold);
+}
+
+/* La tabla del Overview toma los colores del heatmap, y con ellos su peso. */
+#overviewSummaryTable td.heat-cell {
   font-weight: var(--fw-bold);
 }
 
@@ -2989,6 +3019,49 @@ border-color: var(--line-tenue);
 .ai-detail-block {
   grid-column: 1 / -1;
   border-left: 3px solid rgba(79, 89, 82, 0.75);
+}
+
+/* Las notas del taller ocupan las dos columnas, como los casos de IA: a media
+   rejilla el cuadro se queda en cuatro palabras por linea y no invita a
+   escribir. La linea lateral, neutra: no es una medida ni una palanca. */
+.notas-detail-block {
+  grid-column: 1 / -1;
+  border-left: 3px solid rgba(79, 89, 82, 0.75);
+}
+
+.notas-detail-block textarea {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  padding: 9px 10px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+
+.notas-detail-block textarea:focus-visible {
+  border-color: var(--green);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.notas-detail-block .small-note {
+  margin: 6px 0 0;
+}
+
+/* "Con notas" junto a "Ver detalle": que se sepa sin abrir la tarjeta. */
+.detail-summary-notas {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--graphite);
+  font-size: var(--fs-3xs);
+  font-weight: var(--fw-bold);
 }
 
 /* Donde aparece el caso. Solo en la pestana IA, donde la ficha va suelta.
@@ -5015,6 +5088,12 @@ height: 100% !important;
   hace por un motivo— sino dar a cada cosa un borde, que el sistema si respeta.
 */
 @media (forced-colors: active) {
+  /* El score elegido: sin su fondo solo quedaba el subrayado. */
+  .score-radio:checked + span {
+    background: Highlight;
+    color: HighlightText;
+  }
+
   /* Celdas del heatmap y de score: el numero ya esta, falta la reja. */
   .heat-cell,
   .legend-item {

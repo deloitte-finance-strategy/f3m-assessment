@@ -109,6 +109,7 @@
     <link rel="modulepreload" href="app/biblioteca.js?v=23">
     <link rel="modulepreload" href="app/celdas.js?v=23">
     <link rel="modulepreload" href="app/dominios.js?v=23">
+    <link rel="modulepreload" href="app/edicion.js?v=23">
     <link rel="modulepreload" href="app/escenario.js?v=23">
     <link rel="modulepreload" href="app/estado.js?v=23">
     <link rel="modulepreload" href="app/filtros.js?v=23">
@@ -759,6 +760,7 @@
         <details>
           <summary>
             <span class="detail-summary-text">Ver detalle de evaluación</span>
+            <span class="detail-summary-notas" hidden>Con notas</span>
           </summary>
             <div class="detail-grid">
               <section class="assessment-detail-block maturity-detail-block">
@@ -794,6 +796,26 @@
                   </div>
                 </section>
               </div>
+
+              <!--
+                Las notas del taller: por que este score y no otro, que
+                evidencias se vieron. Es el campo "comentario" de la
+                subcapacidad, el mismo que la columna Comentarios del Roadmap y
+                la diapositiva de comentarios del informe: un segundo campo
+                obligaba a cambiar las reglas de Firebase y partia en dos lo que
+                se sabe de cada subcapacidad.
+              -->
+              <section class="assessment-detail-block notas-detail-block">
+                <h4>Notas del taller</h4>
+                <textarea
+                  class="notas-taller"
+                  rows="3"
+                  placeholder="Por qué esta puntuación, qué evidencias se han visto, qué queda por confirmar…"
+                ></textarea>
+                <p class="small-note">
+                  Se guardan solas y salen también en la columna Comentarios del Roadmap y en el informe.
+                </p>
+              </section>
 
               <!--
                 Los casos de IA, aqui y no solo en el modal del roadmap.
