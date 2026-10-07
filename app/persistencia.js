@@ -14,17 +14,21 @@
  * rama intacta en vez de desaparecer para todo el equipo.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=22";
-import { serializeTargetsForFirebase } from "../core/objetivos.js?v=22";
-import { get, onValue, update } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=23";
+import { serializeTargetsForFirebase } from "../core/objetivos.js?v=23";
 
-import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=22";
-import { escribirAlmacenamiento } from "./almacenamiento.js?v=22";
-import { ocultarAviso, showNotice } from "./avisos.js?v=22";
-import { conLimiteDeEspera, scenarioDatabaseRef } from "./firebase.js?v=22";
-import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=22";
-import { repintarTodo } from "./repintado.js?v=22";
-import { populateCapacityFilter } from "./filtros.js?v=22";
+import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=23";
+import { escribirAlmacenamiento } from "./almacenamiento.js?v=23";
+import { ocultarAviso, showNotice } from "./avisos.js?v=23";
+import {
+  conLimiteDeEspera,
+  conectarFirebase,
+  enEscenarioCompartido,
+  getConexion,
+} from "./firebase.js?v=23";
+import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=23";
+import { repintarTodo } from "./repintado.js?v=23";
+import { populateCapacityFilter } from "./filtros.js?v=23";
 
 import {
   hayCanalDeVuelta,
@@ -32,14 +36,14 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./indicador.js?v=22";
+} from "./indicador.js?v=23";
 
 import {
   applyScenarioPayload,
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./escenario.js?v=22";
+} from "./escenario.js?v=23";
 
 
 
@@ -76,9 +80,14 @@ let cancelarSuscripcionRemota = null;
 // comparación descartaba cambios ajenos de forma arbitraria.
 
 
-function readScenarioFromFirebase(timeoutMs = 8000) {
+// Async porque puede tener que descargar antes el SDK: con un import estatico,
+// una red que bloqueara gstatic dejaba la herramienta sin arrancar. Si el SDK
+// no llega, rechaza igual que una lectura fallida y se trata igual.
+async function readScenarioFromFirebase(timeoutMs = 8000) {
+  const conexion = await conectarFirebase();
+
   return conLimiteDeEspera(
-    get(scenarioDatabaseRef),
+    conexion.get(conexion.escenario),
     "Tiempo de espera agotado al leer Firebase",
     timeoutMs,
   );
@@ -88,7 +97,7 @@ function readScenarioFromFirebase(timeoutMs = 8000) {
 
 
 export async function initializeSharedScenario() {
-  if (!scenarioDatabaseRef) {
+  if (!enEscenarioCompartido) {
     return;
   }
 
@@ -259,6 +268,29 @@ function avisarDeFalloDeLectura(error) {
     error,
   );
 
+  // Sin SDK, el fallo no es de permisos aunque no haya identidad: es que la
+  // conexion misma no ha llegado. Casi siempre, una red que bloquea los
+  // servidores de Google. Decir «no ha podido identificarse» mandaria a buscar
+  // un problema de cuenta que no existe.
+  if (!getConexion()) {
+    marcarFalloDeSincronia(
+      "Sin conexión con el escenario compartido",
+      "Este navegador no ha podido descargar la conexión con Firebase: lo más habitual es que esta red bloquee "
+        + "los servidores de Google. Estás trabajando sobre la copia de este navegador y tus cambios no le llegan "
+        + "al resto del equipo. Prueba con otra red y recarga; si vas a seguir así, exporta una copia antes de cerrar.",
+      { avisar: false },
+    );
+
+    avisarConReconexion(
+      "No se ha podido conectar con el escenario compartido: parece que esta red bloquea los servidores de "
+        + "Google. Tus cambios se guardan en este navegador, pero el resto del equipo no los ve. Prueba con otra "
+        + "red o con los datos del móvil.",
+      "aviso",
+    );
+
+    return;
+  }
+
   const esPermiso = esFalloDePermisos(error);
 
   marcarFalloDeSincronia(
@@ -288,7 +320,11 @@ function avisarDeFalloDeLectura(error) {
 
 
 function subscribeToSharedScenario() {
-  if (!scenarioDatabaseRef) {
+  const conexion = getConexion();
+
+  // Sin SDK no hay a que suscribirse. El aviso de la lectura ya lo ha dicho, y
+  // «Reconectar» vuelve a pasar por aqui cuando el SDK si llegue.
+  if (!conexion) {
     return;
   }
 
@@ -300,8 +336,8 @@ function subscribeToSharedScenario() {
     cancelarSuscripcionRemota = null;
   }
 
-  cancelarSuscripcionRemota = onValue(
-    scenarioDatabaseRef,
+  cancelarSuscripcionRemota = conexion.onValue(
+    conexion.escenario,
     (snapshot) => {
       // Que llegue un snapshot es la unica prueba de que hay canal de vuelta.
       // Se marca aqui, y no al suscribirse, porque suscribirse no garantiza
@@ -392,7 +428,7 @@ function avisarConReconexion(mensaje, tipo = "error") {
 
 /** Reintenta la conexión con el escenario compartido sin recargar la página. */
 async function reconectarEscenarioCompartido() {
-  if (!scenarioDatabaseRef) {
+  if (!enEscenarioCompartido) {
     return;
   }
 
@@ -478,8 +514,22 @@ function aplicarEscenarioRemoto(remoteScenario) {
  * cierra sin depender del orden de arranque, que es fragil por naturaleza.
  */
 function hayIdentidadParaEscribir() {
-  if (getUsuarioActual()) {
+  // La identidad solo se consigue a traves del SDK, asi que con usuario hay
+  // conexion. Se pregunta igual: es lo que garantiza a quien escribe despues
+  // que getConexion() no es null.
+  if (getUsuarioActual() && getConexion()) {
     return true;
+  }
+
+  if (!getConexion()) {
+    marcarFalloDeSincronia(
+      "Sin conexión con el escenario compartido",
+      "Este navegador no ha podido descargar la conexión con Firebase, así que tus cambios no se comparten. "
+        + "Están guardados aquí y no se han perdido. Prueba con otra red y recarga la página; si vas a seguir "
+        + "así, exporta una copia con Escenario → Guardar una copia.",
+    );
+
+    return false;
   }
 
   marcarFalloDeSincronia(
@@ -532,16 +582,22 @@ function saveScenarioToFirebase(
   payload,
   timeoutMs = 8000,
 ) {
-  if (!scenarioDatabaseRef) {
+  if (!enEscenarioCompartido) {
     return Promise.resolve();
+  }
+
+  const conexion = getConexion();
+
+  if (!conexion) {
+    return Promise.reject(new Error("La conexión con Firebase no se ha podido descargar"));
   }
 
   const sanitizedPayload =
     sanitizeScenarioForFirebase(payload);
 
   return conLimiteDeEspera(
-    update(
-      scenarioDatabaseRef,
+    conexion.update(
+      conexion.escenario,
       rutasDeEscrituraCompleta(sanitizedPayload),
     ),
     "Tiempo de espera agotado al guardar en Firebase",
@@ -569,7 +625,7 @@ function persistGranularChange(rutas) {
     JSON.stringify(buildScenarioPayload()),
   );
 
-  if (!scenarioDatabaseRef) {
+  if (!enEscenarioCompartido) {
     updateSaveStatus("saved", "Guardado local ✓");
     return;
   }
@@ -595,8 +651,10 @@ function persistGranularChange(rutas) {
   // mientras tanto TODOS los snapshots remotos se aparcan sin aplicarse: la red
   // degradada dejaba el chip en "Guardando..." y los cambios del equipo
   // invisibles, sin decir por que.
+  const conexion = getConexion();
+
   conLimiteDeEspera(
-    update(scenarioDatabaseRef, carga),
+    conexion.update(conexion.escenario, carga),
     "Tiempo de espera agotado al guardar el cambio en Firebase",
   )
     .then(() => {
@@ -695,7 +753,7 @@ export function persistScenario() {
     JSON.stringify(payload),
   );
 
-  if (!scenarioDatabaseRef) {
+  if (!enEscenarioCompartido) {
     updateSaveStatus(
       "saved",
       "Guardado local ✓",

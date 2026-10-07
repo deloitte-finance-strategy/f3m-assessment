@@ -7,17 +7,16 @@
  * hayGuardadosPendientes() para frenar el cierre.
  */
 
-import { ordenarPorPrioridadYGap } from "../../core/calculo.js?v=22";
-import { LIMITES_DE_TEXTO, recortarAlLimite } from "../../core/escenario.js?v=22";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=22";
-import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=22";
-import { STATUS_OPTIONS, els, state } from "../estado.js?v=22";
-import { getVisibleItems } from "../filtros.js?v=22";
-import { getUsuarioActual } from "../identidad.js?v=22";
-import { calculate } from "../metricas.js?v=22";
-import { persistItemChange } from "../persistencia.js?v=22";
-import { getAiDataForItem } from "../subcapacidad.js?v=22";
-import { get } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+import { ordenarPorPrioridadYGap } from "../../core/calculo.js?v=23";
+import { LIMITES_DE_TEXTO, recortarAlLimite } from "../../core/escenario.js?v=23";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=23";
+import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=23";
+import { STATUS_OPTIONS, els, state } from "../estado.js?v=23";
+import { getVisibleItems } from "../filtros.js?v=23";
+import { getUsuarioActual } from "../identidad.js?v=23";
+import { calculate } from "../metricas.js?v=23";
+import { persistItemChange } from "../persistencia.js?v=23";
+import { getAiDataForItem } from "../subcapacidad.js?v=23";
 
 
 function getWaveShortLabel(wave) {

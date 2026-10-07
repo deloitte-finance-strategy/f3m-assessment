@@ -12,25 +12,24 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=22";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=22";
-import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=22";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=22";
-import { showNotice } from "./avisos.js?v=22";
-import { getActiveDomainConfig } from "./dominios.js?v=22";
-import { DOMAINS, els, state } from "./estado.js?v=22";
-import { getVisibleItems } from "./filtros.js?v=22";
-import { getScenarioShortLabel } from "./firebase.js?v=22";
+} from "../core/calculo.js?v=23";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=23";
+import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=23";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=23";
+import { showNotice } from "./avisos.js?v=23";
+import { getActiveDomainConfig } from "./dominios.js?v=23";
+import { DOMAINS, els, state } from "./estado.js?v=23";
+import { getVisibleItems } from "./filtros.js?v=23";
+import { getScenarioShortLabel } from "./firebase.js?v=23";
 import {
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
-} from "./graficos.js?v=22";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=22";
-import { getAiDataForItem } from "./subcapacidad.js?v=22";
-import { renderDashboard } from "./vistas/dashboard.js?v=22";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=22";
-import { get } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+} from "./graficos.js?v=23";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=23";
+import { getAiDataForItem } from "./subcapacidad.js?v=23";
+import { renderDashboard } from "./vistas/dashboard.js?v=23";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=23";
 
 
 export function exportPdfReport() {

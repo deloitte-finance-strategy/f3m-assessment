@@ -12,9 +12,9 @@
  * herramienta.
  */
 
-import { els } from "./estado.js?v=22";
-import { showNotice } from "./avisos.js?v=22";
-import { scenarioDatabaseRef } from "./firebase.js?v=22";
+import { els } from "./estado.js?v=23";
+import { showNotice } from "./avisos.js?v=23";
+import { enEscenarioCompartido } from "./firebase.js?v=23";
 
 
 // Para retirar el chip de guardado cuando el estado ya no pide nada.
@@ -102,7 +102,7 @@ export function marcarFalloDeSincronia(mensaje, detalle, { avisar = true } = {})
  * bien mientras no llegaba nada del resto del equipo.
  */
 export function marcarEscrituraCorrecta() {
-  if (!scenarioDatabaseRef) {
+  if (!enEscenarioCompartido) {
     updateSaveStatus("saved", "Guardado local ✓");
     return;
   }

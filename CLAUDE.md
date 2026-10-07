@@ -108,7 +108,7 @@ cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScena
   → loadCoreDomains()            // Promise.allSettled de los 9; se piden sin esperar a las fichas
   → setActiveDomain("fpa")
   → applyStoredScenario()        // copia local de localStorage
-  → inicializarIdentidad()       // signInAnonymously, solo si hay ?scenario=
+  → inicializarIdentidad()       // signInAnonymously, solo si hay ?scenario= (el SDK se pidió al empezar)
   → initializeSharedScenario()   // lee Firebase, aplica lo remoto, se suscribe
   → populateCapacityFilter() → renderAll()
 ```
@@ -119,9 +119,15 @@ Dependencias de terceros, sin bundler:
   capacidad. **No va por CDN a propósito**: una red de cliente que filtre cdnjs dejaba los radares
   sin pintar y el PDF entregable con tres huecos. `vendor/LEEME.md` explica el porqué y cómo se
   actualiza.
-- **Firebase Realtime Database y Auth 12.15.0** importados desde `gstatic.com` (cabecera de
-  `app/firebase.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
-  ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
+- **Firebase Realtime Database y Auth 12.15.0** desde `gstatic.com`. Este sí sigue siendo externo:
+  son ~500 KB en tres módulos con imports relativos entre ellos, y `gstatic` tiene que funcionar de
+  todas formas para que funcione la base de datos. **Pero se descarga con `import()` y solo con
+  `?scenario=`**, desde `conectarFirebase()` en `app/firebase.js`. Con un import estático, una red
+  que bloqueara `gstatic` dejaba la herramienta en «Cargando assessment» para siempre, también en
+  modo local. Nada fuera de `app/firebase.js` importa de `gstatic`: el SDK se pide por
+  `conectarFirebase()` o `getConexion()`, y «estoy en un escenario compartido» se pregunta con
+  `enEscenarioCompartido`, no con si hay referencia — un escenario cuyo SDK no ha llegado no es
+  modo local.
 
 ### `app/` es el reparto de `app.js`
 
@@ -179,8 +185,9 @@ python scripts/check_module_version.py
 
 ### Todo el código se pide de golpe
 
-`index.html` lleva un `<link rel="modulepreload">` por cada módulo que carga `app.js`, Firebase
-incluido, y un `<link rel="preload">` para los tres JSON del arranque. Sin ellos el navegador
+`index.html` lleva un `<link rel="modulepreload">` por cada módulo que carga `app.js` y un
+`<link rel="preload">` para los tres JSON del arranque. Firebase no: se descarga aparte, solo con
+`?scenario=` (ver abajo). Sin ellos el navegador
 descubre los módulos por capas —baja `app.js`, lee sus imports, baja esos…— y eran cuatro viajes al
 servidor seguidos solo para tener el código, más tres para los datos. Medido con 100 ms de ida y
 vuelta, la carga bajó de 1,26 s a 0,94 s; con 200 ms, de 2,06 s a 1,33 s.

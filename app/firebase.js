@@ -10,14 +10,32 @@
  * El SDK se importa de gstatic y no se vendoriza, al reves que Chart.js: son
  * ~500 KB en tres modulos con imports relativos entre ellos, y gstatic tiene
  * que funcionar de todas formas para que funcione la base de datos.
+ *
+ * Pero se importa SOLO con ?scenario=, y en el momento, no al cargar la pagina.
+ * Con un import estatico, una red que bloqueara gstatic —la de un cliente que
+ * filtra los servidores de Google, por ejemplo— dejaba la herramienta en
+ * «Cargando assessment» para siempre, tambien en modo local, que no habla con
+ * Firebase para nada: un modulo que no carga tumba a todos los que lo importan.
+ * Comprobado en el navegador el 2026-10-07. Y en modo local son ~110 KB
+ * comprimidos que no se usaban.
  */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getDatabase, ref } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { scenarioId } from "./estado.js?v=23";
+import { borrarDeAlmacenamiento } from "./almacenamiento.js?v=23";
 
-import { scenarioId } from "./estado.js?v=22";
-import { borrarDeAlmacenamiento } from "./almacenamiento.js?v=22";
+
+const SDK = "https://www.gstatic.com/firebasejs/12.15.0";
+
+
+/**
+ * Si esta pestana trabaja sobre un escenario compartido.
+ *
+ * Es lo que antes se preguntaba con `if (scenarioDatabaseRef)`. Ya no vale esa
+ * pregunta: la referencia no existe hasta que el SDK ha llegado, y un escenario
+ * compartido cuyo SDK no ha cargado NO es modo local. Tratarlo como local daria
+ * «Guardado local ✓» en verde con el resto del equipo sin ver nada.
+ */
+export const enEscenarioCompartido = Boolean(scenarioId);
 
 
 // Configuración de Firebase del proyecto fpa-assessment-mvp
@@ -31,11 +49,6 @@ const firebaseConfig = {
   appId: "1:690455183937:web:e9be8095b43f341589fcc0",
   measurementId: "G-XBHVPCJFFD",
 };
-
-
-// Inicialización de Firebase
-const firebaseApp = initializeApp(firebaseConfig);
-
 
 
 /**
@@ -59,19 +72,89 @@ const firebaseApp = initializeApp(firebaseConfig);
  * long-polling igual. Lo que se gana es que el transporte que sí funciona se
  * vuelva a intentar siempre.
  */
-borrarDeAlmacenamiento("firebase:previous_websocket_failure");
+function olvidarFalloDeWebSocket() {
+  borrarDeAlmacenamiento("firebase:previous_websocket_failure");
+}
 
 
-export const firebaseDatabase = getDatabase(firebaseApp);
+// La conexion ya hecha, o null. Un valor suelto que cambia, asi que no se
+// exporta: sale por getConexion().
+let conexion = null;
+
+// La carga en curso, para que dos llamadas seguidas no descarguen el SDK dos
+// veces. Vuelve a null si falla, para poder reintentar.
+let cargaEnCurso = null;
 
 
+/**
+ * Descarga el SDK y prepara la conexion con el escenario de la URL.
+ *
+ * Devuelve lo que necesitan la identidad y la persistencia, juntos: la sesion,
+ * la referencia al escenario y las funciones del SDK que usan. En modo local
+ * resuelve a null sin descargar nada.
+ *
+ * Con limite de espera, como todo lo que habla con Firebase: un import que no
+ * resuelve dejaba la aplicacion en «Preparando datos» sin decir por que. Es
+ * mas largo que el de una lectura porque aqui viaja medio megabyte de codigo.
+ */
+export function conectarFirebase() {
+  if (!scenarioId) {
+    return Promise.resolve(null);
+  }
 
-export const firebaseAuth = getAuth(firebaseApp);
+  if (conexion) {
+    return Promise.resolve(conexion);
+  }
+
+  if (!cargaEnCurso) {
+    cargaEnCurso = conLimiteDeEspera(
+      Promise.all([
+        import(`${SDK}/firebase-app.js`),
+        import(`${SDK}/firebase-database.js`),
+        import(`${SDK}/firebase-auth.js`),
+      ]),
+      "Tiempo de espera agotado al descargar la conexión con Firebase",
+      20000,
+    )
+      .then(([app, database, auth]) => {
+        // Antes de getDatabase(), que es quien lee el flag.
+        olvidarFalloDeWebSocket();
+
+        const firebaseApp = app.initializeApp(firebaseConfig);
+        const baseDeDatos = database.getDatabase(firebaseApp);
+
+        conexion = {
+          auth: auth.getAuth(firebaseApp),
+          escenario: database.ref(baseDeDatos, `scenarios/${scenarioId}`),
+          get: database.get,
+          onValue: database.onValue,
+          update: database.update,
+          onAuthStateChanged: auth.onAuthStateChanged,
+          signInAnonymously: auth.signInAnonymously,
+        };
+
+        return conexion;
+      })
+      .catch((error) => {
+        cargaEnCurso = null;
+        throw error;
+      });
+  }
+
+  return cargaEnCurso;
+}
 
 
-
-
-export const scenarioDatabaseRef = scenarioId ? ref(firebaseDatabase, `scenarios/${scenarioId}`) : null;
+/**
+ * La conexion si el SDK ya ha llegado, o null.
+ *
+ * null no quiere decir modo local: para eso esta enEscenarioCompartido. Puede
+ * ser un escenario compartido cuyo SDK todavia no ha llegado o no ha podido
+ * descargarse.
+ */
+export function getConexion() {
+  return conexion;
+}
 
 
 /**
