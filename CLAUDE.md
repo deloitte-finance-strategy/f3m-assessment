@@ -83,7 +83,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `biblioteca/` | Los documentos de la biblioteca. **Públicos**, como el repositorio. Ver su `LEEME.md` | — |
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
 | `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
-| `scripts/check_module_version.py` | Que todos los módulos se pidan con la misma `?v=`. **En CI** | — |
+| `scripts/check_module_version.py` | Que todos los módulos se pidan con la misma `?v=` y que `index.html` los precargue todos. **En CI** | — |
 | `scripts/check_modules.py` | Que cada import encuentre su export y no quede un nombre sin declarar en `app/`. **En CI** | — |
 | `vendor/` | Chart.js, servido desde aquí y no desde un CDN. **Se versiona** | — |
 | `SECURITY.md` | Modelo de amenazas, qué protege y qué no, y los procedimientos | — |
@@ -102,10 +102,10 @@ Flujo de arranque, en `init()` de `app.js`:
 
 ```
 cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScenarioModeNotice()
-  → cargarCatalogoDeDominios()   // data/domains.json + pinta el conmutador
   → cargarCatalogoDeCasosDeIa()  // data/casos-ia.json; si falla, se sigue sin fichas
-    + cargarBiblioteca()         // a la vez, data/biblioteca.json; si falla, sin «Más información»
-  → loadCoreDomains()            // Promise.allSettled de los 9 dominios
+    + cargarBiblioteca()         // data/biblioteca.json; si falla, sin «Más información»
+    + cargarCatalogoDeDominios() // los tres a la vez; este pinta el conmutador
+  → loadCoreDomains()            // Promise.allSettled de los 9; se piden sin esperar a las fichas
   → setActiveDomain("fpa")
   → applyStoredScenario()        // copia local de localStorage
   → inicializarIdentidad()       // signInAnonymously, solo si hay ?scenario=
@@ -177,6 +177,23 @@ rojo, no un fallo silencioso en casa de un cliente:
 python scripts/check_module_version.py
 ```
 
+### Todo el código se pide de golpe
+
+`index.html` lleva un `<link rel="modulepreload">` por cada módulo que carga `app.js`, Firebase
+incluido, y un `<link rel="preload">` para los tres JSON del arranque. Sin ellos el navegador
+descubre los módulos por capas —baja `app.js`, lee sus imports, baja esos…— y eran cuatro viajes al
+servidor seguidos solo para tener el código, más tres para los datos. Medido con 100 ms de ida y
+vuelta, la carga bajó de 1,26 s a 0,94 s; con 200 ms, de 2,06 s a 1,33 s.
+
+**Un módulo nuevo necesita su línea de precarga.** Sin ella no se rompe nada, solo llega más tarde,
+así que `check_module_version.py` compara la lista con el árbol de imports y pone el CI en rojo con
+la línea exacta que hay que añadir o quitar. Los nueve JSON de dominio no se precargan a propósito:
+la lista de dominios vive en `data/domains.json` y no se repite en el HTML.
+
+Chart.js lleva `defer` por lo mismo: sin él, compartiendo la línea con todo lo demás, la cabecera
+tardaba 200 ms más en pintarse. Se sigue ejecutando antes que `app.js`, porque los scripts diferidos
+y los módulos corren en el orden del documento.
+
 ### El tema y la densidad se deciden antes de pintar
 
 `tema.js` va **síncrono en `<head>`**, sin `defer` y sin `type="module"`, y escribe `data-tema` y
@@ -232,7 +249,8 @@ después KPIs, roadmap, CSV y PDF. Chart.js no tiene eventos para las etiquetas 
 dónde se va lo decide `setupNavegacionDeRadares()` en `app.js`, que se lo inyecta a los radares.
 
 Añadir una vista son cinco sitios: `VISTAS` y `cacheElements()` en `app.js`, un `<a>` en
-`<nav class="tabs">`, una `<section id>` en `index.html`, y su rama en `renderAll()`.
+`<nav class="tabs">`, una `<section id>` en `index.html`, y su rama en `renderAll()`. Si la vista
+es un módulo nuevo, también su `modulepreload` en `index.html` (el CI lo pide).
 
 ### El ámbito de datos es uno solo, salvo en el Overview
 

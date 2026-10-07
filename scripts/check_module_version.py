@@ -27,6 +27,21 @@ navegadores y no toca la CSP. Lo que lo hace mantenible es esta comprobacion:
 olvidar una version al desplegar es un CI rojo, no un fallo silencioso en casa
 de un cliente.
 
+Y la lista de precargas
+-----------------------
+
+index.html pide por adelantado, con <link rel="modulepreload">, todos los
+modulos que app.js va a necesitar. Sin eso el navegador los descubre por
+capas: baja app.js, lee sus imports, baja esos, lee los suyos... y cada capa es
+un viaje al servidor. Eran cuatro viajes seguidos solo para tener el codigo, y
+en la wifi de un cliente cada viaje se nota.
+
+Esa lista repite el arbol de imports, y una lista repetida a mano acaba
+separandose del original. Por eso se comprueba aqui: un modulo nuevo que no se
+precarga no rompe nada —solo carga mas tarde, que es justo lo que no se veria—,
+y una precarga de un modulo que ya no existe es una peticion de mas. Las dos
+cosas ponen el CI en rojo, con las lineas exactas que hay que poner o quitar.
+
 Codigo de salida 1 si algo no cuadra.
 """
 
@@ -46,11 +61,18 @@ SUELTOS = ["app.js", "tema.js"]
 
 IMPORT = re.compile(r"""from\s+["'](\.\.?/[^"']+)["']""")
 DINAMICO = re.compile(r"""import\s*\(\s*["'](\.\.?/[^"']+)["']\s*\)""")
+EXTERNO = re.compile(r"""from\s+["'](https://[^"']+)["']""")
+PRECARGA = re.compile(r"""<link\s+rel="modulepreload"\s+href="([^"]+)"\s*>""")
+DATOS_PRECARGADOS = re.compile(r"""<link\s+rel="preload"\s+href="([^"]+)"\s+as="fetch"[^>]*>""")
+
+
+def html_de_index():
+    return (RAIZ / "index.html").read_text(encoding="utf-8")
 
 
 def version_de_index():
     """La version que declara index.html, que es la que manda."""
-    html = (RAIZ / "index.html").read_text(encoding="utf-8")
+    html = html_de_index()
     versiones = set(re.findall(r'(?:src|href)="[^"]+\?v=([^"]+)"', html))
 
     # chart.umd.min.js lleva la suya, que es la del propio Chart.js.
@@ -73,6 +95,72 @@ def archivos():
     for carpeta in CARPETAS:
         for ruta in sorted((RAIZ / carpeta).rglob("*.js")):
             yield ruta
+
+
+def arbol_de_imports(entrada):
+    """Todos los modulos que carga `entrada`, directa o indirectamente.
+
+    Devuelve rutas relativas a la raiz para los locales y la URL tal cual para
+    los externos (el SDK de Firebase). De los externos no se siguen sus propios
+    imports: firebase-database.js pide firebase-app.js, que ya se importa
+    directamente desde app/firebase.js.
+    """
+    vistos = set()
+    pendientes = [entrada]
+
+    while pendientes:
+        actual = pendientes.pop()
+
+        if actual in vistos:
+            continue
+
+        vistos.add(actual)
+
+        if actual.startswith("https://"):
+            continue
+
+        ruta = RAIZ / actual
+        texto = ruta.read_text(encoding="utf-8")
+
+        for especificador in EXTERNO.findall(texto):
+            pendientes.append(especificador)
+
+        for especificador in IMPORT.findall(texto):
+            destino = (ruta.parent / especificador.split("?")[0]).resolve()
+            pendientes.append(destino.relative_to(RAIZ).as_posix())
+
+    return vistos
+
+
+def comprobar_precargas(version):
+    """Que index.html precargue exactamente el arbol de imports de app.js."""
+    html = html_de_index()
+    precargados = {
+        href.split("?")[0] for href in PRECARGA.findall(html)
+    }
+    necesarios = arbol_de_imports("app.js") - {"app.js"}
+
+    faltan = sorted(necesarios - precargados)
+    sobran = sorted(precargados - necesarios)
+
+    print(f"Modulos precargados en index.html: {len(precargados)} de {len(necesarios)}")
+
+    if not faltan and not sobran:
+        return []
+
+    def linea(modulo):
+        href = modulo if modulo.startswith("https://") else f"{modulo}?v={version}"
+        return f'<link rel="modulepreload" href="{href}">'
+
+    problemas = []
+
+    for modulo in faltan:
+        problemas.append(f"falta la precarga de {modulo}. Anadir: {linea(modulo)}")
+
+    for modulo in sobran:
+        problemas.append(f"{modulo} se precarga y nadie lo importa. Quitar: {linea(modulo)}")
+
+    return problemas
 
 
 def main():
@@ -119,6 +207,41 @@ def main():
 
     print("")
     print("OK    todos los modulos se piden con la misma version.")
+
+    precargas = comprobar_precargas(version)
+
+    if precargas:
+        print("")
+        print(f"FALLA  la lista de precargas de index.html no cuadra con los imports:")
+        for problema in precargas:
+            print(f"  - {problema}")
+        print("")
+        print("Un modulo sin precarga no rompe nada, solo llega mas tarde: el")
+        print("navegador no lo descubre hasta haber bajado al que lo importa.")
+        sys.exit(1)
+
+    print("OK    index.html precarga todos los modulos, y solo esos.")
+
+    # Los JSON precargados, al reves: lo que no puede pasar es precargar uno
+    # que ya no se pide. Ademas de la peticion de mas, el navegador escribe un
+    # aviso en la consola a los pocos segundos, y la consola tiene que arrancar
+    # en silencio.
+    codigo = "".join(
+        ruta.read_text(encoding="utf-8") for ruta in archivos() if "tests" not in ruta.parts
+    )
+    huerfanos = [
+        href for href in DATOS_PRECARGADOS.findall(html_de_index())
+        if f'"{href}"' not in codigo
+    ]
+
+    if huerfanos:
+        print("")
+        print("FALLA  index.html precarga datos que ningun modulo pide:")
+        for href in huerfanos:
+            print(f"  - {href}: quitar su <link rel=\"preload\"> o volver a pedirlo")
+        sys.exit(1)
+
+    print("OK    los datos precargados son los que pide el arranque.")
 
 
 if __name__ == "__main__":
