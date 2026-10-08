@@ -8,11 +8,13 @@
  */
 
 import {
+  masUrgentes,
   ordenarPorPrioridadYGap,
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
 } from "../core/calculo.js?v=23";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=23";
 import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=23";
 import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=23";
 import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=23";
@@ -29,6 +31,7 @@ import {
 import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=23";
 import { getAiDataForItem } from "./subcapacidad.js?v=23";
 import { renderDashboard } from "./vistas/dashboard.js?v=23";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=23";
 import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=23";
 
 
@@ -338,8 +341,22 @@ function construirBloqueGlobalParaInforme() {
 
   const palancas = rankingDePalancas(entradas.map((entrada) => entrada.item));
 
+  // Las mismas diez que el Overview, con la funcion que usa el Overview.
+  const urgentes = masUrgentes(entradas, 10);
+  const nombreDe = new Map(filas.map((fila) => [fila.id, fila.label]));
+
   return {
     filas,
+    urgentes: {
+      total: urgentes.total,
+      lista: urgentes.lista.map(({ item, domainId, metrics }) => ({
+        dominio: nombreDe.get(domainId) || domainId,
+        capacidad: item.capacidad,
+        subcapacidad: item.subcapacidad,
+        gap: metrics.gap,
+        iniciativa: item.iniciativaSugerida,
+      })),
+    },
     dominios: filas.length,
     dominiosTotales: Object.keys(DOMAINS).length,
     subcapacidades: entradas.length,
@@ -376,6 +393,10 @@ function construirBloqueGlobalParaInforme() {
 function construirCasosDeIaParaInforme(items) {
   const porTitulo = new Map();
 
+  // Donde aparece cada caso, con su subcapacidad: lo que necesita el orden por
+  // prioridad del cliente, con la misma forma que en la pestana IA.
+  const apariciones = new Map();
+
   items.forEach((item) => {
     const ai = getAiDataForItem(item);
 
@@ -386,13 +407,19 @@ function construirCasosDeIaParaInforme(items) {
 
       if (!porTitulo.has(caso.titulo)) {
         porTitulo.set(caso.titulo, { ...caso, subcapacidades: [] });
+        apariciones.set(caso.titulo, []);
       }
 
       porTitulo.get(caso.titulo).subcapacidades.push(item.subcapacidad);
+      apariciones.get(caso.titulo).push({ item });
     });
   });
 
-  const casos = [...porTitulo.values()];
+  // Primero los que aplican a mas subcapacidades: son los que mas rendimiento
+  // dan por iniciativa y los que interesa ensenar si la seccion se corta.
+  let casos = [...porTitulo.values()].sort(
+    (a, b) => b.subcapacidades.length - a.subcapacidades.length,
+  );
 
   if (!casos.length) {
     return null;
@@ -418,10 +445,24 @@ function construirCasosDeIaParaInforme(items) {
     return [...grupos.values()].sort((a, b) => b.cuenta - a.cuenta);
   };
 
+  // Con el orden por prioridad del cliente elegido en la pestana IA, el informe
+  // lo sigue: primero lo que ataca las brechas altas de este dominio. Si nada
+  // ataca una brecha alta o media, se queda el orden de siempre, y la
+  // diapositiva no dice que este ordenada por algo que no ha movido nada.
+  let orden = "aplicacion";
+
+  if (getOrdenDeCasosDeIa() === "prioridad") {
+    const brechas = brechasDeCasos(apariciones, (aparicion) => calculate(aparicion.item));
+
+    if ([...brechas.values()].some((brecha) => brecha.altas || brecha.medias)) {
+      casos = ordenarPorBrechas(casos, brechas);
+      orden = "prioridad";
+    }
+  }
+
   return {
-    // Primero los que aplican a mas subcapacidades: son los que mas rendimiento
-    // dan por iniciativa y los que interesa ensenar si la seccion se corta.
-    casos: casos.sort((a, b) => b.subcapacidades.length - a.subcapacidades.length),
+    casos,
+    orden,
     porTipoDeValor: agrupar("tipoValor", "definicionTipoValor"),
     porTipoDeIa: agrupar("tipoIa", "definicionTipoIa"),
     total: casos.length,

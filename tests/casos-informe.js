@@ -223,6 +223,44 @@ export const casos = [
   },
   {
     grupo: "El deck",
+    nombre: "lo mas urgente: sus diez en dos diapositivas, y sin nada alto no hay diapositiva",
+    ejecutar: (t) => {
+      const global = (urgentes) => ({
+        filas: [],
+        urgentes,
+        dominios: 9,
+        dominiosTotales: 9,
+        subcapacidades: 152,
+        evaluadas: 130,
+        scoreGlobal: 2.5,
+        gapMedio: 1.5,
+        objetivoMedio: 4,
+        highCount: 12,
+        titulares: { mayorBrecha: null, palancaMasDebil: null, pendientes: 22 },
+        radarImages: { procesos: "", tecnologia: "", organizacion: "" },
+      });
+
+      const diez = Array.from({ length: 10 }, (_, i) => ({
+        dominio: i % 2 ? "Controlling" : "FP&A",
+        capacidad: "Cierre",
+        subcapacidad: `${i + 1}.1 Urgente numero ${i + 1}`,
+        gap: 3 - i / 10,
+        iniciativa: "Hacer algo",
+      }));
+
+      const con = buildEnhancedPdfReportHtml(datos({ global: global({ total: 12, lista: diez }) }));
+      const sin = buildEnhancedPdfReportHtml(datos({ global: global({ total: 0, lista: [] }) }));
+
+      t.igual((con.match(/Lo más urgente/g) || []).length >= 2, true, "titulo en las dos diapositivas");
+      t.igual(con.includes("10.1 Urgente numero 10"), true, "la decima esta en el documento");
+      t.igual(con.includes("Las 10 de mayor gap, de 12"), true, "dice cuantas hay en total");
+      t.igual(con.includes("FP&amp;A · Cierre"), true, "con su dominio, escapado");
+      t.igual(cuentaDeDiapositivas(con) - cuentaDeDiapositivas(sin), 2, "dos diapositivas, ni una mas");
+      t.igual(sin.includes("Lo más urgente"), false, "sin nada alto no hay diapositiva");
+    },
+  },
+  {
+    grupo: "El deck",
     nombre: "un roadmap largo se reparte, no se trunca",
     ejecutar: (t) => {
       // POR_DIAPOSITIVA.roadmap es 6: quince filas tienen que ocupar tres

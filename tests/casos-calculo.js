@@ -18,6 +18,7 @@ import {
   calcularMetricas,
   getMaturityLevel,
   getMaturityLevelNumber,
+  masUrgentes,
   normalizeTargetValue,
   oleadaDesdePrioridad,
   priorityFromGap,
@@ -627,6 +628,28 @@ export const casos = [
       ]);
 
       t.igual(ranking.length, 0, "lista vacia, no tres ceros");
+    },
+  },
+  {
+    grupo: "Agregacion por dominio",
+    nombre: "lo mas urgente: solo prioridad alta, por gap, y cuantas hay",
+    ejecutar: (t) => {
+      const entrada = (id, prioridad, gap) => ({ item: { id }, metrics: { prioridad, gap } });
+      const entradas = [
+        entrada("a", "Alta", 2.33),
+        entrada("b", "Media", 1.9),
+        entrada("c", "Alta", 3),
+        entrada("d", "Pendiente", null),
+        entrada("e", "Alta", 2.33),
+        entrada("f", "Alta", 2),
+      ];
+
+      const urgentes = masUrgentes(entradas, 3);
+
+      t.igual(urgentes.lista.map((x) => x.item.id).join(","), "c,a,e", "por gap, y a igualdad el orden de llegada");
+      t.igual(urgentes.total, 4, "cuenta todas las altas, no solo las que caben");
+      t.igual(masUrgentes(entradas).lista.length, 4, "por defecto, hasta diez");
+      t.igual(masUrgentes([entrada("b", "Media", 1.9)]).total, 0, "sin altas, nada");
     },
   },
 ];

@@ -50,6 +50,9 @@ const POR_DIAPOSITIVA = {
   // de 6+6+3—, asi que no cuesta ninguna pagina de mas y ademas quedan mejor
   // equilibradas.
   roadmap: 5,
+  // Las mismas filas que el roadmap, que es la tabla a la que se parece: una
+  // iniciativa sugerida de largo variable por fila.
+  urgentes: 5,
   brechas: 10,
   casosDeIa: 9,
   comentarios: 6,
@@ -418,6 +421,51 @@ export function rankingDeDominios(data) {
     <p class="nota" style="margin-top:4mm;">
       Ordenados por brecha descendente. La barra es la madurez media del dominio y la marca vertical, su objetivo medio.
       ${data.global.filas.some((fila) => fila.id === data.domainId) ? "El dominio de este informe va señalado." : ""}
+    </p>
+  `;
+}
+
+
+/**
+ * Lo mas urgente de la funcion financiera: las mismas iniciativas que el
+ * Overview, de cualquier dominio. 'desde' es cuantas van en diapositivas
+ * anteriores, para numerar seguido.
+ */
+export function masUrgentes(urgentes, tanda, desde) {
+  const cuerpo = tanda
+    .map((fila, indice) => `
+      <tr>
+        <td class="num">${desde + indice + 1}</td>
+        <td>
+          <span class="brecha-capacidad">${escapeHtml(fila.dominio)} · ${escapeHtml(fila.capacidad)}</span>
+          <span class="principal">${escapeHtml(fila.subcapacidad)}</span>
+        </td>
+        <td class="num">${escapeHtml(formatMedia(fila.gap))}</td>
+        <td>${escapeHtml(fila.iniciativa || "-")}</td>
+      </tr>
+    `)
+    .join("");
+
+  const cuantas = urgentes.total > urgentes.lista.length
+    ? `Las ${urgentes.lista.length} de mayor gap, de ${urgentes.total} subcapacidades con prioridad alta en toda la función financiera.`
+    : `${urgentes.total === 1 ? "La única subcapacidad" : `Las ${urgentes.total} subcapacidades`} con prioridad alta en toda la función financiera.`;
+
+  return `
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th class="num" style="width:5%;">#</th>
+          <th style="width:33%;">Subcapacidad</th>
+          <th class="num" style="width:8%;">Gap</th>
+          <th style="width:54%;">Iniciativa sugerida</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${cuerpo}
+      </tbody>
+    </table>
+    <p class="nota" style="margin-top:4mm;">
+      ${escapeHtml(cuantas)} No dependen de los filtros de la herramienta.
     </p>
   `;
 }

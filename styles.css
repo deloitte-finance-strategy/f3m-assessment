@@ -1505,6 +1505,7 @@ display: none;
 
 .filters input,
 .filters select,
+.score-select,
 .inline-input {
   min-height: var(--control-h);
   width: 100%;
@@ -1609,7 +1610,7 @@ display: none;
   gap: 4px;
 }
 
-.score-field-label {
+.score-field span {
   color: var(--muted);
   font-size: var(--fs-3xs);
   font-weight: var(--fw-bold);
@@ -1617,84 +1618,58 @@ display: none;
 }
 
 
-/*
-  Las cinco opciones de una palanca, en una sola pieza con el borde del
-  desplegable al que sustituyen. La elegida toma el color del heatmap para ese
-  nivel, que es la misma escala que ya se lee en el resto de la herramienta: un
-  2 es ambar aqui y en el heatmap. Las demas se quedan en neutro para que la
-  elegida se vea desde el fondo de la sala.
-*/
-.score-segmentos {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  min-height: var(--control-h);
+.score-select {
+  --score-accent: var(--line);
+  --score-text: var(--ink);
+
+  padding: 0 8px;
   border: 1px solid var(--line);
-  border-radius: var(--r-sm);
+  border-left: 4px solid var(--score-accent);
   background: var(--surface);
-  overflow: hidden;
-}
-
-.score-opcion {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  border-left: 1px solid var(--line);
-  cursor: pointer;
-}
-
-.score-opcion:first-child {
-  border-left: 0;
-}
-
-/* El radio sigue ahi para el teclado y los lectores; lo que se ve es el numero.
-   El estilo cuelga del radio con "+" y no de :has(), que algun portatil de
-   cliente con un navegador de hace dos años todavia no entiende. */
-.score-radio {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.score-opcion span {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  font-weight: var(--fw-bold);
-  font-variant-numeric: tabular-nums;
-  pointer-events: none;
+  color: var(--score-text);
+  font-weight: var(--fw-medium);
   transition:
-    background-color 150ms ease,
-    color 150ms ease;
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
 }
 
-.score-opcion:hover span {
-  background: var(--surface-hundida);
-  color: var(--ink);
+
+.score-select.score-value-empty {
+  --score-accent: var(--score-0);
+  --score-text: var(--score-0-fg);
 }
 
-.score-opcion-1 .score-radio:checked + span { background: var(--score-1); color: var(--score-1-fg); }
-.score-opcion-2 .score-radio:checked + span { background: var(--score-2); color: var(--score-2-fg); }
-.score-opcion-3 .score-radio:checked + span { background: var(--score-3); color: var(--score-3-fg); }
-.score-opcion-4 .score-radio:checked + span { background: var(--score-4); color: var(--score-4-fg); }
-.score-opcion-5 .score-radio:checked + span { background: var(--score-5); color: var(--score-5-fg); }
-
-/* El color por si solo no basta (forzado de colores, daltonismo): la elegida
-   lleva ademas un subrayado grueso, que no depende del tono. */
-.score-radio:checked + span {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
+.score-select.score-value-1 {
+  --score-accent: var(--score-1);
+  --score-text: var(--score-1-fg);
 }
 
-.score-radio:focus-visible + span {
-  position: relative;
-  z-index: 1;
+.score-select.score-value-2 {
+  --score-accent: var(--score-2);
+  --score-text: var(--score-2-fg);
+}
+
+.score-select.score-value-3 {
+  --score-accent: var(--score-3);
+  --score-text: var(--score-3-fg);
+}
+
+.score-select.score-value-4 {
+  --score-accent: var(--score-4);
+  --score-text: var(--score-4-fg);
+}
+
+.score-select.score-value-5 {
+  --score-accent: var(--score-5);
+  --score-text: var(--score-5-fg);
+}
+
+.score-select:focus-visible {
+  border-color: var(--green);
+  border-left-color: var(--score-accent);
   outline: 3px solid var(--focus-ring);
-  outline-offset: -3px;
+  outline-offset: 2px;
 }
 
 
@@ -2214,6 +2189,115 @@ border-radius: var(--r-pill);
 }
 
 
+/*
+  «Lo más urgente de la función financiera», al final del Overview.
+
+  Una lista y no una tabla: cada iniciativa es una frase larga, y en una tabla
+  con caja propia diez de ellas no cabian en el alto de un portatil y la caja
+  se desplazaba por dentro. En dos columnas, diez caben en lo que ocupan cinco.
+  El gap va en el color del Heatmap, que en esta lista siempre es el de
+  prioridad alta: lo que dice el color lo confirma la cifra.
+*/
+.urgentes-panel {
+  margin-top: 16px;
+}
+
+.urgentes-lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.urgentes-lista .urgentes-vacio {
+  grid-column: 1 / -1;
+}
+
+.urgente {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.urgente:hover {
+  border-color: var(--green);
+  background: var(--surface-realce);
+}
+
+.urgente:focus-visible {
+  border-color: var(--green);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.urgente-gap {
+  display: grid;
+  justify-items: center;
+  min-width: 54px;
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  line-height: 1.1;
+}
+
+.urgente-gap strong {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-heavy);
+  font-variant-numeric: tabular-nums;
+}
+
+.urgente-gap span {
+  font-size: var(--fs-3xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+}
+
+.urgente-cuerpo {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.urgente-donde {
+  color: var(--muted);
+  font-size: var(--fs-3xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.urgente-titulo {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+
+.urgente:hover .urgente-titulo,
+.urgente:focus-visible .urgente-titulo {
+  color: var(--green-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.urgente-iniciativa {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+}
+
 #sourceNote,
 #overviewSourceNote {
   max-width: 420px;
@@ -2588,6 +2672,68 @@ border-color: var(--line-tenue);
 }
 
 
+/*
+  Cada oleada abre con su fila, como se cuenta en un comite: «Oleada 1 ·
+  prioridad alta · 4 iniciativas». La raya de la izquierda lleva el color de la
+  prioridad, el mismo de las etiquetas de la columna Prioridad.
+
+  No es fija a la izquierda como el resto de la primera columna: ocupa la
+  tabla entera, y lo que se queda quieto al desplazar en horizontal es solo su
+  texto. La linea de corte de la columna fija tampoco va aqui, porque no hay
+  columna que cortar.
+*/
+.roadmap-table tbody tr.roadmap-oleada-cabecera,
+.roadmap-table tbody tr.roadmap-oleada-cabecera:hover {
+  background: var(--surface-muted);
+}
+
+.roadmap-table .roadmap-oleada-cabecera th {
+  position: static;
+  width: auto;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-left: 4px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-normal);
+  text-align: left;
+}
+
+.roadmap-table .roadmap-oleada-cabecera th::after {
+  content: none;
+}
+
+.roadmap-table .roadmap-oleada-alta th {
+  border-left-color: var(--red);
+}
+
+.roadmap-table .roadmap-oleada-media th {
+  border-left-color: var(--amber);
+}
+
+.roadmap-table .roadmap-oleada-baja th {
+  border-left-color: var(--green);
+}
+
+.roadmap-oleada-texto {
+  position: sticky;
+  left: 16px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.roadmap-oleada-texto strong {
+  font-weight: var(--fw-heavy);
+}
+
+.roadmap-oleada-texto span {
+  color: var(--muted);
+}
+
+
 
 /*
   Los anchos van en pixeles y no en porcentajes. Con porcentajes, la columna de
@@ -2802,6 +2948,61 @@ border-color: var(--line-tenue);
   border-color: var(--green);
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+
+/*
+  Presentacion: lo editable se lee como texto.
+
+  Proyectado, un desplegable con su flecha y su caja dice "formulario a medio
+  rellenar", y un campo vacio con «Responsable» en gris parece un dato. En este
+  modo los controles pierden la caja, la flecha y el texto de ejemplo, y siguen
+  siendo controles: se puede puntuar y escribir igual, porque en un taller se
+  proyecta mientras se trabaja. La caja vuelve al pasar el raton o con el foco,
+  que es cuando hace falta saber donde se esta escribiendo.
+
+  El borde izquierdo de color del score se queda: es el dato, no la caja.
+*/
+:root[data-densidad="presentacion"] .score-select,
+:root[data-densidad="presentacion"] .roadmap-owner,
+:root[data-densidad="presentacion"] .roadmap-status,
+:root[data-densidad="presentacion"] .roadmap-table textarea,
+:root[data-densidad="presentacion"] .notas-taller {
+  -webkit-appearance: none;
+  appearance: none;
+  border-color: transparent;
+  background-color: transparent;
+  resize: none;
+}
+
+:root[data-densidad="presentacion"] .score-select {
+  border-left-color: var(--score-accent);
+  font-weight: var(--fw-bold);
+}
+
+:root[data-densidad="presentacion"] .score-select:hover,
+:root[data-densidad="presentacion"] .score-select:focus-visible,
+:root[data-densidad="presentacion"] .roadmap-owner:hover,
+:root[data-densidad="presentacion"] .roadmap-owner:focus,
+:root[data-densidad="presentacion"] .roadmap-status:hover,
+:root[data-densidad="presentacion"] .roadmap-status:focus-visible,
+:root[data-densidad="presentacion"] .roadmap-table textarea:hover,
+:root[data-densidad="presentacion"] .roadmap-table textarea:focus,
+:root[data-densidad="presentacion"] .notas-taller:hover,
+:root[data-densidad="presentacion"] .notas-taller:focus {
+  border-color: var(--line);
+  background-color: var(--surface);
+}
+
+:root[data-densidad="presentacion"] .score-select:hover,
+:root[data-densidad="presentacion"] .score-select:focus-visible {
+  border-left-color: var(--score-accent);
+}
+
+:root[data-densidad="presentacion"] .roadmap-owner::placeholder,
+:root[data-densidad="presentacion"] .roadmap-table textarea::placeholder,
+:root[data-densidad="presentacion"] .notas-taller::placeholder {
+  color: transparent;
 }
 
 
@@ -3049,11 +3250,12 @@ border-color: var(--line-tenue);
   border-left: 3px solid rgba(79, 89, 82, 0.75);
 }
 
+/* Dos lineas y no mas: es para apuntar el porque mientras se habla, no para
+   redactar, y el detalle ya es largo. Quien necesite mas lo estira. */
 .notas-detail-block textarea {
   display: block;
   width: 100%;
-  min-height: 72px;
-  padding: 9px 10px;
+  padding: 7px 10px;
   resize: vertical;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
@@ -3070,8 +3272,13 @@ border-color: var(--line-tenue);
   outline-offset: 2px;
 }
 
-.notas-detail-block .small-note {
-  margin: 6px 0 0;
+/* La explicacion va en la misma linea del titulo, en vez de en un parrafo
+   debajo: era otra linea mas para decir algo que solo hace falta leer una vez. */
+.notas-pista {
+  color: var(--muted);
+  font-weight: var(--fw-normal);
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 /* "Con notas" junto a "Ver detalle": que se sepa sin abrir la tarjeta. */
@@ -3082,6 +3289,11 @@ border-color: var(--line-tenue);
   color: var(--graphite);
   font-size: var(--fs-3xs);
   font-weight: var(--fw-bold);
+}
+
+/* Por que va donde va, con el orden por prioridad del cliente. */
+.ai-case .ai-case-brecha {
+  margin: 0;
 }
 
 /* Donde aparece el caso. Solo en la pestana IA, donde la ficha va suelta.
@@ -3287,7 +3499,7 @@ border-color: var(--line-tenue);
 }
 
 .filters.ia-filtros {
-  grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(150px, 1fr));
+  grid-template-columns: minmax(220px, 2fr) repeat(5, minmax(140px, 1fr));
   margin-bottom: 12px;
 }
 
@@ -4499,6 +4711,54 @@ height: 100% !important;
   line-height: 1;
 }
 
+/* En el centro, entre «Volver arriba» y el chip de guardado, que ya ocupan las
+   dos esquinas. Verde lleno, como el boton principal y con su texto: es la
+   accion que se repite en un taller, no una ayuda como la de la izquierda. */
+.siguiente-pendiente-button {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--control-h);
+  padding: 0 16px;
+  border: 1px solid var(--green);
+  border-radius: var(--r-pill);
+  background: var(--green);
+  color: var(--sobre-marca);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  white-space: nowrap;
+  box-shadow: 0 10px 24px rgba(22, 26, 24, 0.18);
+  transform: translateX(-50%);
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.siguiente-pendiente-button[hidden] {
+  display: none;
+}
+
+.siguiente-pendiente-button:hover {
+  border-color: var(--green-claro);
+  background: var(--green-claro);
+  box-shadow: 0 12px 28px rgba(22, 26, 24, 0.22);
+}
+
+.siguiente-pendiente-button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.siguiente-pendiente-cuenta {
+  padding-left: 8px;
+  border-left: 1px solid currentColor;
+  font-weight: var(--fw-normal);
+}
+
 
 
 
@@ -5026,6 +5286,16 @@ height: 100% !important;
     display: none;
   }
 
+  .urgentes-lista {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sin sitio entre las dos esquinas: sube un piso y deja libre el chip de
+     guardado, que es el que avisa de un fallo. */
+  .siguiente-pendiente-button {
+    bottom: 64px;
+  }
+
   .capability-targets-header {
     align-items: flex-start;
   }
@@ -5108,12 +5378,6 @@ height: 100% !important;
   hace por un motivo— sino dar a cada cosa un borde, que el sistema si respeta.
 */
 @media (forced-colors: active) {
-  /* El score elegido: sin su fondo solo quedaba el subrayado. */
-  .score-radio:checked + span {
-    background: Highlight;
-    color: HighlightText;
-  }
-
   /* Celdas del heatmap y de score: el numero ya esta, falta la reja. */
   .heat-cell,
   .legend-item {

@@ -24,19 +24,22 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
 
 ## Qué permite hacer
 
-- Editar scores de Procesos, Tecnología y Organización para cada subcapacidad.
+- Editar scores de Procesos, Tecnología y Organización para cada subcapacidad, y apuntar las
+  **notas del taller** en su detalle. «Siguiente sin puntuar» lleva a la próxima pendiente.
 - Calcular automáticamente score medio, nivel resultante, gap vs objetivo y prioridad.
 - Consultar resumen ejecutivo por dominio y por capacidad.
 - Ver en **Overview** los nueve dominios agregados en una sola lectura: score global, gap medio,
-  avance y prioridad alta, radares por dominio y una tabla de resumen dominio a dominio. Cada
+  avance y prioridad alta, radares por dominio, una tabla de resumen dominio a dominio y **lo más
+  urgente de la función financiera**, las diez iniciativas de prioridad alta con más gap. Cada
   dominio se mide contra sus propios objetivos, y la vista **no depende de los filtros activos** ni
   del dominio abierto en el conmutador.
 - Ver heatmap por subcapacidad y palanca.
-- Revisar roadmap ordenado por prioridad y gap.
+- Revisar el roadmap agrupado por oleada y ordenado por gap.
 - Consultar en la pestaña **IA** los 100 casos de uso de inteligencia artificial del modelo, con
-  buscador y filtros por dominio, etiqueta y documento, y la **biblioteca** de los documentos de los
-  que salen. **«Más información»**, en cualquier ficha de caso, abre su documento de origen dentro
-  de la herramienta, en la página o diapositiva donde aparece.
+  buscador y filtros por dominio, etiqueta y documento, en el orden del catálogo o **por prioridad
+  del cliente** —primero los que atacan sus brechas más altas—, y la **biblioteca** de los
+  documentos de los que salen. **«Más información»**, en cualquier ficha de caso, abre su documento
+  de origen dentro de la herramienta, en la página o diapositiva donde aparece.
 - Guardar una copia del trabajo en un archivo y volver a abrirla más adelante, desde el menú
   **Escenario** de la cabecera.
 - Exportar resumen y roadmap en CSV.

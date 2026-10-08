@@ -39,10 +39,11 @@ export function renderRoadmap() {
 
   const roadmapItems = getVisibleItems(); // Roadmap respeta filtros activos
 
-  const rows = ordenarPorPrioridadYGap(
+  const entradas = ordenarPorPrioridadYGap(
     roadmapItems.map((item) => ({ item, metrics: calculate(item) })),
-  )
-    .map(({ item, metrics }) => `
+  );
+
+  const filaDeIniciativa = ({ item, metrics }) => `
       <tr>
         <td>${escapeHtml(item.capacidad)}</td>
         <td>${escapeHtml(item.subcapacidad)}</td>
@@ -100,11 +101,19 @@ export function renderRoadmap() {
         </td>
         <td class="roadmap-authorship">${celdaDeAutoria(item)}</td>
       </tr>
+    `;
+
+  const grupos = agruparPorOleada(entradas)
+    .map((grupo) => `
+      <tbody class="roadmap-oleada">
+        ${cabeceraDeOleada(grupo)}
+        ${grupo.entradas.map(filaDeIniciativa).join("")}
+      </tbody>
     `)
     .join("");
 
   els.roadmapTable.innerHTML = `
-    <caption class="solo-lectores">Roadmap de iniciativas, ordenado por prioridad y gap, con responsable, estado y comentarios.</caption>
+    <caption class="solo-lectores">Roadmap de iniciativas, agrupado por oleada y ordenado por gap, con responsable, estado y comentarios.</caption>
 
     <thead>
       <tr>
@@ -121,15 +130,15 @@ export function renderRoadmap() {
         <th scope="col">Último cambio</th>
       </tr>
     </thead>
-    <tbody>
-      ${rows || `
+    ${grupos || `
+      <tbody>
         <tr>
           <td colspan="11" class="table-empty-cell">
             ${buildFilteredEmptyState()}
           </td>
         </tr>
-      `}
-    </tbody>
+      </tbody>
+    `}
   `;
 
   els.roadmapTable.querySelectorAll(".roadmap-owner").forEach((input) => {
@@ -155,6 +164,63 @@ els.roadmapTable.querySelectorAll(".roadmap-comment").forEach((textarea) => {
 
 
 /**
+ * Las oleadas en el orden en que se cuentan en un comite: primero lo urgente, y
+ * lo que aun no tiene puntuacion al final, aparte, porque todavia no es una
+ * iniciativa con fecha. Una oleada sin iniciativas no se ensena: una cabecera
+ * con un cero debajo parece una tabla que no ha cargado.
+ *
+ * La oleada sale de la prioridad, asi que el orden de las filas es el de
+ * siempre: agrupar solo pone nombre a los cortes que ya estaban.
+ */
+const OLEADAS = [
+  { oleada: "Oleada 1", prioridad: "Alta" },
+  { oleada: "Oleada 2", prioridad: "Media" },
+  { oleada: "Oleada 3", prioridad: "Baja" },
+  { oleada: "Pendiente", prioridad: "Pendiente" },
+];
+
+
+function agruparPorOleada(entradas) {
+  // Una oleada que no fuera ninguna de las cuatro iria al grupo de pendientes y
+  // no a ninguno: una fila que desaparece descuadra la cifra de iniciativas sin
+  // que nada lo diga.
+  const conocidas = new Set(OLEADAS.map((grupo) => grupo.oleada));
+  const oleadaDe = ({ metrics }) => (conocidas.has(metrics.oleada) ? metrics.oleada : "Pendiente");
+
+  return OLEADAS.map((grupo) => ({
+    ...grupo,
+    entradas: entradas.filter((entrada) => oleadaDe(entrada) === grupo.oleada),
+  })).filter((grupo) => grupo.entradas.length);
+}
+
+
+/**
+ * La fila que abre cada oleada. Es un <th scope="rowgroup">: un lector de
+ * pantalla anuncia "Oleada 1" al entrar en cualquiera de sus filas, igual que
+ * se ve. El texto va en un span fijo a la izquierda para que no se vaya con el
+ * desplazamiento horizontal cuando la tabla esta en su caja.
+ */
+function cabeceraDeOleada({ oleada, prioridad, entradas }) {
+  const cuantas = entradas.length === 1 ? "1 iniciativa" : `${entradas.length} iniciativas`;
+  const nombre = oleada === "Pendiente" ? "Sin oleada" : oleada;
+  const detalle = oleada === "Pendiente"
+    ? `${cuantas} pendientes de puntuar`
+    : `prioridad ${prioridad.toLowerCase()} · ${cuantas}`;
+
+  return `
+    <tr class="roadmap-oleada-cabecera roadmap-oleada-${prioridad.toLowerCase()}">
+      <th colspan="11" scope="rowgroup">
+        <span class="roadmap-oleada-texto">
+          <strong>${escapeHtml(nombre)}</strong>
+          <span>${escapeHtml(detalle)}</span>
+        </span>
+      </th>
+    </tr>
+  `;
+}
+
+
+/**
  * Cuantas iniciativas hay, encima de la tabla. Sin la cifra no habia forma de
  * saber si la lista acababa en la pantalla o seguia: con filtros, ademas, es
  * la confirmacion de que el Roadmap dice lo mismo que el KPI.
@@ -168,7 +234,7 @@ function pintarRecuentoDeIniciativas(total) {
 
   const recuento = total === 1 ? "1 iniciativa" : `${total} iniciativas`;
 
-  nota.innerHTML = `<strong>${recuento}</strong> · Ordenadas por prioridad y gap. Respetan los filtros del Assessment.`;
+  nota.innerHTML = `<strong>${recuento}</strong> · Agrupadas por oleada y ordenadas por gap. Respetan los filtros del Assessment.`;
 }
 
 

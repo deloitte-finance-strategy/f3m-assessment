@@ -204,8 +204,12 @@ function aiCaseTag(valor, definicion, clases) {
  * 'donde' solo lo trae la pestana IA. En la tarjeta y en el modal la ficha ya
  * esta dentro de una subcapacidad; suelta en el catalogo, lo primero que se
  * pregunta de un caso es en que parte del modelo aparece.
+ *
+ * 'brecha' tambien es solo de la pestana IA, con el orden por prioridad del
+ * cliente: «Ataca 2 brechas altas», con el color de la prioridad mas alta que
+ * ataca, que es lo que explica por que la ficha va donde va.
  */
-function aiCaseCard(caso, donde = "") {
+function aiCaseCard(caso, donde = "", brecha = null) {
   const etiquetas = [
     aiCaseTag(caso.tipoValor, caso.definicionTipoValor, CLASES_DE_TIPO_DE_VALOR),
     aiCaseTag(caso.tipoIa, caso.definicionTipoIa, clasesDeTipoDeIa(caso.tipoIa)),
@@ -220,6 +224,11 @@ function aiCaseCard(caso, donde = "") {
           ? `<p class="ai-case-description">${escapeHtml(caso.descripcion)}</p>`
           : ""
       }
+      ${
+        brecha?.texto
+          ? `<p class="ai-case-brecha"><span class="priority-badge ${brecha.prioridad === "Alta" ? "alta" : "media"}">${escapeHtml(brecha.texto)}</span></p>`
+          : ""
+      }
       ${donde ? `<p class="ai-case-donde">${escapeHtml(donde)}</p>` : ""}
       ${pieDeFuente(caso)}
     </li>
@@ -229,14 +238,17 @@ function aiCaseCard(caso, donde = "") {
 
 /**
  * La lista de fichas, igual en la tarjeta, en el modal del roadmap y en la
- * pestana IA. 'donde', si llega, es una funcion caso -> texto.
+ * pestana IA. 'donde', si llega, es una funcion caso -> texto, y 'brecha', una
+ * caso -> { texto, prioridad }.
  */
-export function aiCaseCards(casos, { donde } = {}) {
+export function aiCaseCards(casos, { donde, brecha } = {}) {
   if (!casos?.length) {
     return `<p class="small-note">Sin casos de uso de IA asociados informados.</p>`;
   }
 
-  const fichas = casos.map((caso) => aiCaseCard(caso, donde ? donde(caso) : ""));
+  const fichas = casos.map((caso) =>
+    aiCaseCard(caso, donde ? donde(caso) : "", brecha ? brecha(caso) : null),
+  );
 
   return `<ul class="ai-case-list">${fichas.join("")}</ul>`;
 }

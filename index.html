@@ -426,6 +426,19 @@
           </div>
           <table class="data-table" id="overviewSummaryTable"></table>
         </div>
+
+        <!--
+          Al final y no arriba: el Overview se lee de lo general a lo concreto,
+          y esto es lo concreto. Cada iniciativa lleva a su tarjeta en el
+          Assessment de su dominio. Lo pinta app/vistas/overview.js.
+        -->
+        <div class="panel urgentes-panel">
+          <div class="panel-heading">
+            <h3>Lo más urgente de la función financiera</h3>
+            <span class="small-note" id="overviewUrgentesNota"></span>
+          </div>
+          <ol class="urgentes-lista" id="overviewUrgentes"></ol>
+        </div>
       </section>
 
       <section id="dashboard" class="section-block">
@@ -569,6 +582,21 @@
     ></div>
 
     <div class="assessment-list" id="assessmentList"></div>
+
+    <!--
+      Flotante y dentro de la seccion: se ve solo en el Assessment, sin que
+      nadie tenga que esconderlo al cambiar de vista, y queda a mano a cualquier
+      altura de la lista. Lo pinta y lo esconde app/vistas/assessment.js.
+    -->
+    <button
+      class="siguiente-pendiente-button"
+      id="siguientePendienteButton"
+      type="button"
+      hidden
+    >
+      Siguiente sin puntuar
+      <span class="siguiente-pendiente-cuenta"></span>
+    </button>
 </section>
 
 
@@ -618,7 +646,7 @@
             <p class="eyebrow">Roadmap</p>
             <h2>Iniciativas sugeridas</h2>
           </div>
-          <p class="small-note" id="roadmapNote">Ordenadas por prioridad y gap. Respetan los filtros del Assessment.</p>
+          <p class="small-note" id="roadmapNote">Agrupadas por oleada y ordenadas por gap. Respetan los filtros del Assessment.</p>
         </div>
 
         <div class="active-filters active-filters-block" data-active-filters hidden></div>
@@ -688,6 +716,14 @@
             <label>
               <span>Documento</span>
               <select id="iaFiltroDocumento"></select>
+            </label>
+
+            <label>
+              <span>Orden</span>
+              <select id="iaOrden">
+                <option value="catalogo">Catálogo</option>
+                <option value="prioridad">Prioridad del cliente</option>
+              </select>
             </label>
           </div>
 
@@ -818,15 +854,15 @@
                 se sabe de cada subcapacidad.
               -->
               <section class="assessment-detail-block notas-detail-block">
-                <h4>Notas del taller</h4>
+                <h4>
+                  Notas del taller
+                  <span class="notas-pista">· se guardan solas y salen también en el Roadmap y en el informe</span>
+                </h4>
                 <textarea
                   class="notas-taller"
-                  rows="3"
+                  rows="2"
                   placeholder="Por qué esta puntuación, qué evidencias se han visto, qué queda por confirmar…"
                 ></textarea>
-                <p class="small-note">
-                  Se guardan solas y salen también en la columna Comentarios del Roadmap y en el informe.
-                </p>
               </section>
 
               <!--

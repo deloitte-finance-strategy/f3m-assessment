@@ -6,7 +6,7 @@
  * via getDominiosDelOverview() y no getScopedItems().
  */
 
-import { rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=23";
+import { masUrgentes, rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=23";
 import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=23";
 import {
   celdaDeAvance,
@@ -183,7 +183,73 @@ export function renderOverview() {
     els.overviewLeverBars,
   );
   renderOverviewSummaryTable(filas);
+  renderLoMasUrgente(filas, entradas);
   renderOverviewRadar(filas);
+}
+
+
+/**
+ * «Lo más urgente de la función financiera»: las diez iniciativas de prioridad
+ * alta con mas gap, de cualquier dominio. Para saberlo antes habia que abrir el
+ * Roadmap de los nueve uno a uno y comparar de memoria.
+ *
+ * Cada una es un boton que lleva a su tarjeta en el Assessment de su dominio,
+ * donde estan sus scores y el porque. A donde se va lo decide app.js, que es
+ * quien cambia de dominio y de vista.
+ */
+function renderLoMasUrgente(filas, entradas) {
+  if (!els.overviewUrgentes) {
+    return;
+  }
+
+  const { lista, total } = masUrgentes(entradas, 10);
+  const nombreDe = new Map(filas.map((fila) => [fila.id, fila.label]));
+  const evaluadas = entradas.some((entrada) => !entrada.metrics.isPending);
+
+  if (els.overviewUrgentesNota) {
+    els.overviewUrgentesNota.textContent = !total
+      ? "Iniciativas de prioridad alta de todos los dominios, por gap"
+      : total > lista.length
+        ? `Las ${lista.length} de mayor gap, de ${total} con prioridad alta en todos los dominios. Pulsa una para verla en su dominio`
+        : `${total === 1 ? "La única" : `Las ${total}`} con prioridad alta en todos los dominios, por gap. Pulsa una para verla en su dominio`;
+  }
+
+  if (!lista.length) {
+    els.overviewUrgentes.innerHTML = `
+      <li class="urgentes-vacio small-note">
+        ${evaluadas
+          ? "Ninguna subcapacidad tiene prioridad alta: ningún gap llega a 2 en lo puntuado."
+          : "Todavía no hay nada puntuado. Aquí saldrán las iniciativas de prioridad alta de todos los dominios."}
+      </li>
+    `;
+    return;
+  }
+
+  els.overviewUrgentes.innerHTML = lista
+    .map(({ item, domainId, metrics }) => `
+      <li>
+        <button
+          class="urgente"
+          type="button"
+          data-dominio="${escapeAttr(domainId)}"
+          data-id="${escapeAttr(item.id)}"
+          title="${escapeAttr(`Abrir en el Assessment de ${nombreDe.get(domainId) || domainId}`)}"
+        >
+          <span class="urgente-gap ${gapClass(metrics.gap)}">
+            <strong>${escapeHtml(formatMedia(metrics.gap))}</strong>
+            <span>gap</span>
+          </span>
+          <span class="urgente-cuerpo">
+            <span class="urgente-donde">${escapeHtml(nombreDe.get(domainId) || domainId)} · ${escapeHtml(item.capacidad)}</span>
+            <span class="urgente-titulo">${escapeHtml(item.subcapacidad)}</span>
+            ${item.iniciativaSugerida
+              ? `<span class="urgente-iniciativa">${escapeHtml(item.iniciativaSugerida)}</span>`
+              : ""}
+          </span>
+        </button>
+      </li>
+    `)
+    .join("");
 }
 
 

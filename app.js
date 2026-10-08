@@ -246,7 +246,12 @@ import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js
 import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=23";
 
 // El Assessment: puntuar cada subcapacidad en las tres palancas.
-import { enfocarPalanca, renderAssessments, renderCapabilityTargets } from "./app/vistas/assessment.js?v=23";
+import {
+  llevarALasTarjetas,
+  renderAssessments,
+  renderCapabilityTargets,
+  setupSiguientePendiente,
+} from "./app/vistas/assessment.js?v=23";
 
 // El Roadmap: las iniciativas priorizadas y sus campos editables.
 import { hayGuardadosPendientes } from "./app/edicion.js?v=23";
@@ -444,6 +449,8 @@ function cacheElements() {
     "overviewPriorityBars",
     "overviewLeverBars",
     "overviewSummaryTable",
+    "overviewUrgentes",
+    "overviewUrgentesNota",
     "overviewRadarProcessesChart",
     "overviewRadarTechnologyChart",
     "overviewRadarOrganizationChart",
@@ -491,6 +498,7 @@ function cacheElements() {
     "criteriaSubcapabilityLevels",
     "saveStatus", // NUEVO: indicador visual de guardado
     "backToTopButton",
+    "siguientePendienteButton",
     "importJsonButton",
     "exportJsonButton",
     "exportCsvButton",
@@ -517,6 +525,7 @@ function cacheElements() {
     "iaFiltroValor",
     "iaFiltroTipoIa",
     "iaFiltroDocumento",
+    "iaOrden",
     "iaCatalogoTitulo",
     "iaCatalogoRecuento",
     "iaCatalogo",
@@ -640,6 +649,8 @@ function bindGlobalEvents() {
   setupNavegacionDeRadares();
   setupFilasDelOverview();
   setupFilasDelDashboard();
+  setupLoMasUrgente();
+  setupSiguientePendiente();
   setupAltoDePestanas();
   setupCajaDelRoadmap();
   setupBackToTopButton();
@@ -813,31 +824,11 @@ function setupNavegacionDeRadares() {
 function abrirCapacidadEnElAssessment(capacidad) {
   mostrarVista("assessment");
 
-  const tarjetas = [...els.assessmentList.querySelectorAll(".assessment-card")].filter(
-    (tarjeta) => tarjeta.dataset.capacidad === capacidad,
+  llevarALasTarjetas(
+    [...els.assessmentList.querySelectorAll(".assessment-card")].filter(
+      (tarjeta) => tarjeta.dataset.capacidad === capacidad,
+    ),
   );
-
-  if (!tarjetas.length) {
-    return;
-  }
-
-  tarjetas[0].scrollIntoView({
-    behavior: comportamientoDeDesplazamiento(),
-    block: "start",
-  });
-  enfocarPalanca(tarjetas[0].querySelector(".score-segmentos"), { preventScroll: true });
-
-  tarjetas.forEach((tarjeta) => {
-    tarjeta.classList.remove("tarjeta-de-llegada");
-    // Forzar el reflujo reinicia la animacion si se llega dos veces seguidas.
-    void tarjeta.offsetWidth;
-    tarjeta.classList.add("tarjeta-de-llegada");
-    tarjeta.addEventListener(
-      "animationend",
-      () => tarjeta.classList.remove("tarjeta-de-llegada"),
-      { once: true },
-    );
-  });
 }
 
 
@@ -871,6 +862,51 @@ function setupFilasDelOverview() {
     }
 
     abrirDominioEnSuDashboard(fila.dataset.abrirDominio);
+  });
+}
+
+
+/**
+ * «Lo más urgente» del Overview: cada iniciativa abre el Assessment de su
+ * dominio en su tarjeta, resaltada y con el foco en su primer score, como al
+ * llegar desde un radar.
+ *
+ * Si los filtros del Assessment la esconden, se dice: llevar a una lista en la
+ * que no esta, sin explicacion, parece que el boton no funciona. Los filtros no
+ * se quitan solos, por lo mismo que en los radares: un filtro que cambia sin
+ * que nadie lo toque cambia despues KPIs, roadmap, CSV y PDF.
+ */
+function setupLoMasUrgente() {
+  els.overviewUrgentes?.addEventListener("click", async (event) => {
+    const boton = event.target.closest("button.urgente");
+
+    if (!boton) {
+      return;
+    }
+
+    try {
+      await switchDomain(boton.dataset.dominio);
+    } catch (error) {
+      showNotice(`No se ha podido abrir el dominio ${DOMAINS[boton.dataset.dominio]?.label || boton.dataset.dominio}. Recarga la página e inténtalo de nuevo.`, "error");
+      console.error(error);
+      return;
+    }
+
+    mostrarVista("assessment");
+
+    const tarjeta = els.assessmentList.querySelector(
+      `.assessment-card[data-id="${CSS.escape(boton.dataset.id)}"]`,
+    );
+
+    if (tarjeta) {
+      llevarALasTarjetas([tarjeta]);
+      return;
+    }
+
+    showNotice(
+      "Esa subcapacidad no se ve con los filtros activos del Assessment. Quítalos para llegar a ella.",
+      "aviso",
+    );
   });
 }
 

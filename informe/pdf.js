@@ -34,6 +34,7 @@ import {
   fichasDeIa,
   heatmap,
   indice,
+  masUrgentes,
   panoramaDeIa,
   panoramaGlobal,
   paginar,
@@ -124,6 +125,22 @@ function planDelDeck(data) {
 
 
 function parteGlobal(data) {
+  // Sin nada de prioridad alta no hay diapositiva: una que solo dijera "no hay
+  // nada urgente" en un deck que se entrega parece un apartado sin terminar.
+  const urgentes = data.global.urgentes?.lista?.length
+    ? paginar(data.global.urgentes.lista, POR_DIAPOSITIVA.urgentes).map((tanda, indiceDeTanda, tandas) => ({
+        parte: PARTE_GLOBAL,
+        titulo: "Lo más urgente",
+        subtitulo: deTantas(indiceDeTanda, tandas.length),
+        entradilla:
+          indiceDeTanda === 0
+            ? "Las iniciativas de prioridad alta con más gap, de cualquiera de los dominios."
+            : "",
+        cuerpo: () =>
+          masUrgentes(data.global.urgentes, tanda, indiceDeTanda * POR_DIAPOSITIVA.urgentes),
+      }))
+    : [];
+
   return [
     {
       clase: "separador slide-oscura",
@@ -159,6 +176,7 @@ function parteGlobal(data) {
       entradilla: "Madurez actual frente a objetivo en las tres palancas, con un eje por dominio.",
       cuerpo: () => radarGlobal(data),
     },
+    ...urgentes,
   ];
 }
 
@@ -292,7 +310,9 @@ function parteDeAccion(data) {
         subtitulo: deTantas(indiceDeTanda, tandas.length),
         entradilla:
           indiceDeTanda === 0
-            ? "Cada ficha lleva sus dos etiquetas: qué tipo de IA es y qué tipo de valor mueve."
+            ? (data.ia.orden === "prioridad"
+                ? "Primero las que atacan las brechas más altas de este dominio, con su tipo de IA y de valor."
+                : "Cada ficha lleva sus dos etiquetas: qué tipo de IA es y qué tipo de valor mueve.")
             : "",
         cuerpo: () => fichasDeIa(tanda),
       });
