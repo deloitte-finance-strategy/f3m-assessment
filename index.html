@@ -235,25 +235,59 @@
           </button>
 
           <!--
-            Modo presentacion. La herramienta se usa proyectada en taller, y a
-            0,88rem las tablas no se leen desde el fondo de la sala. Redefine
-            los tokens de tipografia y densidad; no toca ni una regla de
-            maquetacion. aria-pressed porque es un conmutador, no una accion.
+            «Presentacion» agrupa las dos formas de proyectar: el modo taller,
+            una subcapacidad a pantalla completa, y la letra grande para toda la
+            herramienta. Las dos se usan en el mismo momento, delante de la
+            sala, y estaban en sitios distintos de la cabecera.
+
+            La letra grande sigue siendo un conmutador, y por eso lleva
+            aria-pressed aunque viva en un menu. Con ella puesta, el boton del
+            menu se queda en verde como antes: quien la dejo puesta ayer tiene
+            que saber por que hoy todo se ve mas grande sin abrir nada.
           -->
-          <button
-            class="header-secondary-action"
-            id="presentationModeButton"
-            type="button"
-            aria-pressed="false"
-            title="Agranda la tipografía y las tablas para proyectar en sala"
-          >
-            Presentación
-          </button>
+          <div class="header-menu">
+            <button
+              class="header-menu-button"
+              id="presentacionMenuButton"
+              type="button"
+              aria-expanded="false"
+              aria-controls="presentacionMenu"
+            >
+              Presentación
+              <span class="header-menu-caret" aria-hidden="true"></span>
+            </button>
+
+            <div class="header-menu-panel" id="presentacionMenu" hidden>
+              <!--
+                Una subcapacidad a pantalla completa, para proyectarla. Abre el
+                Assessment si se esta en otra vista. Ver app/taller.js.
+              -->
+              <button class="header-menu-item" id="modoTallerButton" type="button" aria-haspopup="dialog">
+                Modo taller
+                <span>Una subcapacidad a pantalla completa, para puntuar con el cliente</span>
+              </button>
+
+              <!--
+                Redefine los tokens de tipografia y densidad; no toca ni una
+                regla de maquetacion. A 0,88rem las tablas no se leen desde el
+                fondo de la sala.
+              -->
+              <button
+                class="header-menu-item header-menu-conmutador"
+                id="presentationModeButton"
+                type="button"
+                aria-pressed="false"
+              >
+                Letra grande
+                <span>Agranda la letra y las tablas de toda la herramienta, para proyectarla</span>
+              </button>
+            </div>
+          </div>
 
           <!--
             Tema oscuro. Arranca siguiendo la preferencia del sistema; pulsarlo
             fija una elección que manda sobre ella, en los dos sentidos.
-            aria-pressed, como «Presentación»: los dos son conmutadores.
+            aria-pressed, como «Letra grande»: los dos son conmutadores.
           -->
           <button
             class="header-secondary-action"
@@ -266,9 +300,9 @@
           </button>
 
           <!--
-            «Sesion» y no «Escenario»: aqui esta todo lo de la sesion con el
-            cliente, empezando por el modo taller. El modo taller estuvo en la
-            barra de pestanas, pero no cabia sin acortar todo lo demas.
+            «Sesion» y no «Escenario»: aqui esta lo de la sesion con el
+            cliente, del nombre del cliente a las copias. El modo taller
+            empezo aqui y paso a «Presentacion», con la letra grande.
           -->
           <div class="header-menu">
             <button
@@ -283,18 +317,6 @@
             </button>
 
             <div class="header-menu-panel" id="scenarioMenu" hidden>
-              <!--
-                Una subcapacidad a pantalla completa, para proyectarla. Abre el
-                Assessment si se esta en otra vista. Ver app/taller.js. Va antes
-                del rotulo de donde se guarda, que es de lo que viene debajo.
-              -->
-              <button class="header-menu-item" id="modoTallerButton" type="button" aria-haspopup="dialog">
-                Modo taller
-                <span>Una subcapacidad a pantalla completa, para proyectar</span>
-              </button>
-
-              <hr class="header-menu-separator">
-
               <p class="header-menu-title" id="scenarioMenuState">Copia de este navegador</p>
 
               <button class="header-menu-item" id="clienteButton" type="button">
@@ -1211,7 +1233,20 @@
 <div class="modal-backdrop modo-taller" id="modoTaller" role="dialog" aria-modal="true" aria-labelledby="modoTallerTitulo" hidden>
   <div class="modo-taller-marco">
     <header class="modo-taller-barra">
-      <p class="modo-taller-donde"><strong>Modo taller</strong> <span id="modoTallerDonde"></span></p>
+      <!--
+        El dominio se cambia desde aqui sin salir: un taller suele recorrer
+        varios dominios seguidos, y salir, cambiar en el conmutador y volver a
+        entrar eran tres pasos delante del cliente. Es un <select> y no los
+        nueve botones del conmutador, que no caben en la banda.
+      -->
+      <div class="modo-taller-donde">
+        <strong>Modo taller</strong>
+        <label class="modo-taller-dominio">
+          <span class="solo-lectores">Dominio</span>
+          <select id="modoTallerDominio"></select>
+        </label>
+        <span id="modoTallerDonde"></span>
+      </div>
       <p class="modo-taller-posicion" id="modoTallerPosicion" aria-live="polite"></p>
       <button class="modo-taller-salir" id="modoTallerSalir" type="button">
         Salir <kbd aria-hidden="true">Esc</kbd>

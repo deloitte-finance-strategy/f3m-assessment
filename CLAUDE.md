@@ -33,16 +33,16 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.316 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.351 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.897 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.900 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 183 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 341 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
-| `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 253 |
+| `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 257 |
 | `app/graficos.js` | Los seis radares de Chart.js, y a dónde lleva pulsar sus ejes | 718 |
 | `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 185 |
-| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 479 |
+| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 486 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
 | `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 88 |
 | `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 403 |
@@ -57,7 +57,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe, a la preparación y al acta del taller | 750 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 471 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 612 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 224 |
@@ -65,7 +65,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 172 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.325 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.444 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -305,7 +305,7 @@ urgente», con la misma función, `abrirTarjetaEnSuDominio()` en `app.js`: su ta
 los filtros. Es un `<dialog>` nativo y no uno de los modales: `showModal()` ya deja el fondo
 inerte, atrapa el foco y cierra con Escape.
 
-**El modo taller** (**Sesión → Modo taller**, en la cabecera) proyecta una subcapacidad a pantalla
+**El modo taller** (**Presentación → Modo taller**, en la cabecera) proyecta una subcapacidad a pantalla
 completa: los cinco niveles en columnas, con las palancas y el objetivo marcados encima, la escala
 para puntuar, las preguntas clave, las notas del taller y los casos de IA. **Sí usa el ámbito**: recorre las tarjetas
 que enseña el Assessment, con sus filtros, y la lista se fija al abrir, para que puntuar una que el
@@ -314,6 +314,16 @@ mismo que las tarjetas —`conectarPuntuacion()` y `app/edicion.js`—, y `rende
 con `refrescarModoTaller()`. Desde otra vista, primero abre el Assessment: empieza en la tarjeta en
 la que se estaba y vuelve a ella al salir. Cambiar de vista es del orquestador, así que `app.js` se
 lo inyecta a `setupModoTaller()`.
+
+**El dominio se cambia sin salir**, con el desplegable de la banda de arriba, que dice el avance de
+cada uno («Fiscal · 3/16»). Cambia el de toda la herramienta, con `switchDomain()`, igual que el
+conmutador: se quitan los filtros y el recorrido empieza en la primera subcapacidad del nuevo. El
+foco se queda en el desplegable, porque con las flechas un `<select>` cerrado cambia de opción a
+cada pulsación. Mientras dura el cambio, `refrescarModoTaller()` no hace nada: el repintado no
+encontraría la subcapacidad de antes y cerraría el modo taller.
+
+Con el modo taller abierto, **el chip de guardado sube por encima del pie** (`apartarElChipDelPie()`):
+sale al puntuar, justo cuando se va a pulsar «Siguiente», y en su sitio de siempre se llevaba el clic.
 
 Es un `.modal-backdrop` y no un `<dialog>`, al revés que el buscador y a propósito: la capa superior
 de `showModal()` taparía el chip de guardado y los avisos, y en un taller tienen que seguir a la
@@ -327,9 +337,12 @@ quedaban con la mitad de su alto y una de cada tres subcapacidades se desplazaba
 etiquetas de cada caso van en su `title`. El nombre accesible del botón lo da
 `nombreDeMasInformacion()`, el mismo que el del pie de las fichas.
 
-El menú de la cabecera se llamaba «Escenario» y ahora es **«Sesión»**: agrupa lo de la sesión con el
-cliente, del modo taller a las copias. El modo taller estuvo primero en la barra de pestañas, pero
-no cabía a 1366 px sin acortar todo lo demás.
+**«Presentación»** es un menú con las dos formas de proyectar: el modo taller y la **letra grande**,
+que es el conmutador de densidad de siempre con otro nombre. Con la letra grande puesta, el botón
+del menú se queda en verde, como cuando era un conmutador suelto. El menú de al lado se llamaba
+«Escenario» y ahora es **«Sesión»**: lo de la sesión con el cliente, del nombre a las copias. El
+modo taller estuvo primero en la barra de pestañas, que a 1366 px no tenía sitio, y después en
+«Sesión».
 
 «Volver arriba» flota abajo a la derecha, en un círculo, y sube por encima del chip de guardado
 mientras este se ve (`apartarDelChip()` en `app/indicador.js`). A la izquierda tapaba la primera
@@ -747,7 +760,7 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 1. `python -m http.server 8000` → `http://localhost:8000/`.
 2. Consola del navegador **en silencio**. Un arranque correcto no imprime nada: lo que aparezca
    ahí es un `warn` o un `error` de verdad, y hay que mirarlo.
-3. **Los dos temas y las dos densidades.** El conmutador «Oscuro» y el de «Presentación» son
+3. **Los dos temas y las dos densidades.** El conmutador «Oscuro» y el de «Presentación → Letra grande» son
    independientes y se combinan: probar las cuatro combinaciones al menos en Overview y Heatmap,
    que son las que codifican datos en color y en tamaño. Sin elección guardada, cambiar el tema del
    sistema con la pestaña abierta tiene que arrastrar la herramienta. En Presentación, los campos
@@ -769,15 +782,18 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      sin puntuar», en la barra de pestañas junto al dominio, lleva desde cualquier vista del
      dominio a la próxima tarjeta sin ninguna palanca puntuada, con el foco en su primer score, y
      sin filtros su cifra cuadra con la de la pestaña Assessment.
-   - **Modo taller**: **Sesión → Modo taller**, desde cualquier vista, abre el Assessment y en él,
+   - **Modo taller**: **Presentación → Modo taller**, desde cualquier vista, abre el Assessment y en él,
      a pantalla completa, la tarjeta en la que se estaba trabajando, la última tocada o la primera
      que se ve. Puntuar ahí se ve en la tarjeta al salir y el chip de guardado sigue a la vista; las
      notas son las mismas del detalle. «Siguiente» y Av Pág recorren solo lo que dejan los filtros
      («1 de 4» con una capacidad elegida). Tab no sale del modo taller, Ctrl+K no abre el buscador
      encima, y Escape vuelve a la tarjeta en la que se estaba, con el foco en su primer score.
      Pulsar un caso de IA abre su documento encima: el primer Escape cierra solo el visor y deja
-     el foco en el caso, y el segundo sale del modo taller. Probarlo en los cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades
-     necesita desplazarse.
+     el foco en el caso, y el segundo sale del modo taller. Cambiar de dominio en el desplegable
+     de arriba lleva a «1 de N» del nuevo sin salir, y al salir el Assessment está en ese dominio.
+     Puntuar y pulsar enseguida «Siguiente»: el chip de guardado no lo tapa. Probarlo en los
+     cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita
+     desplazarse.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
      Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final.

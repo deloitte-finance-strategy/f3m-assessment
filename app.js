@@ -458,6 +458,8 @@ function cacheElements() {
     "loadNoticeClose",
     "loadNoticeAction",
     "presentationModeButton",
+    "presentacionMenuButton",
+    "presentacionMenu",
     "themeButton",
     "initialLoadingState", // NUEVO: estado visual de carga inicial
     "sourceNote",
@@ -671,6 +673,7 @@ function bindGlobalEvents() {
   enganchar("presentationModeButton", "click", alternarModoPresentacion);
   enganchar("themeButton", "click", alternarTema);
   window.addEventListener("beforeunload", avisarSiQuedaAlgoSinGuardar);
+  setupMenuDeCabecera(els.presentacionMenuButton, els.presentacionMenu);
   setupMenuDeCabecera(els.scenarioMenuButton, els.scenarioMenu, pintarAvisoDeCopia);
   setupMenuDeCabecera(els.exportPdfButton, els.informeMenu, pintarMenuDeInforme);
   setupVistas();

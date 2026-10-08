@@ -26,13 +26,13 @@ import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=2
 import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=27";
 import { nombreDeMasInformacion } from "./biblioteca.js?v=27";
 import { priorityBadge } from "./celdas.js?v=27";
-import { getActiveDomainConfig } from "./dominios.js?v=27";
+import { avanceDeDominio, switchDomain } from "./dominios.js?v=27";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
 } from "./edicion.js?v=27";
-import { LEVERS, state } from "./estado.js?v=27";
+import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=27";
 import { getVisibleItems } from "./filtros.js?v=27";
 import { calculate, getCapabilityTargets } from "./metricas.js?v=27";
 import { repintarTodo } from "./repintado.js?v=27";
@@ -53,6 +53,7 @@ let posicion = null;
 let resultado = null;
 let anterior = null;
 let siguiente = null;
+let selectorDeDominio = null;
 
 // Las subcapacidades del recorrido, fijadas al abrir. Si se recalculara en cada
 // paso, con un filtro de prioridad puesto, puntuar una podria sacarla de la
@@ -60,6 +61,10 @@ let siguiente = null;
 let recorrido = [];
 let indice = 0;
 let disparador = null;
+
+// Mientras se cambia de dominio desde aqui, el repintado que lo acompaña no
+// encuentra la subcapacidad de antes y cerraria el modo taller.
+let cambiandoDeDominio = false;
 
 
 const abierto = () => Boolean(panel) && !panel.hidden;
@@ -70,7 +75,7 @@ const nombreDelNivel = (nivel) => (getMaturityLevel(nivel) || "").split(" - ")[1
 
 
 /**
- * `irAlAssessment` lo pone app.js: el boton esta en el menu «Sesion», que se ve
+ * `irAlAssessment` lo pone app.js: el boton esta en el menu «Presentacion», que se ve
  * desde cualquier vista, y el modo taller recorre las tarjetas del Assessment y
  * vuelve a ellas al salir. Se inyecta porque cambiar de vista es cosa del
  * orquestador, y importarlo de app.js cerraria un ciclo con el.
@@ -83,6 +88,7 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   resultado = document.getElementById("modoTallerResultado");
   anterior = document.getElementById("modoTallerAnterior");
   siguiente = document.getElementById("modoTallerSiguiente");
+  selectorDeDominio = document.getElementById("modoTallerDominio");
 
   const boton = document.getElementById("modoTallerButton");
 
@@ -93,7 +99,7 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
 
   // Al salir, el foco va a la tarjeta. Si no la hubiera, al boton del menu y
   // no a la entrada, que se queda escondida con el menu cerrado.
-  const menu = document.getElementById("scenarioMenuButton") || boton;
+  const menu = document.getElementById("presentacionMenuButton") || boton;
 
   boton.addEventListener("click", () => {
     irAlAssessment();
@@ -102,6 +108,7 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   document.getElementById("modoTallerSalir")?.addEventListener("click", () => cerrarModoTaller());
   anterior?.addEventListener("click", () => irA(indice - 1));
   siguiente?.addEventListener("click", () => irA(indice + 1));
+  selectorDeDominio?.addEventListener("change", () => cambiarDeDominio(selectorDeDominio.value));
 
   document.addEventListener("keydown", alPulsarTecla);
 }
@@ -134,6 +141,22 @@ export function abrirModoTaller(desde = null) {
   panel.hidden = false;
   updateModalOpenState();
   pintar();
+  apartarElChipDelPie(true);
+}
+
+
+/**
+ * El chip de guardado sale abajo a la derecha, justo encima de «Siguiente», y
+ * sale cada vez que se puntua: es decir, en el momento exacto en que se va a
+ * pulsar «Siguiente». Durante sus cuatro segundos, el clic se lo llevaba el
+ * chip. Con el modo taller abierto sube por encima del pie, sobre la esquina
+ * de las columnas de abajo, que es la parte con menos texto de la pantalla.
+ */
+function apartarElChipDelPie(abierto) {
+  const pie = panel.querySelector(".modo-taller-pie");
+
+  document.documentElement.classList.toggle("en-modo-taller", abierto);
+  document.documentElement.style.setProperty("--pie-del-taller", `${abierto && pie ? pie.offsetHeight : 0}px`);
 }
 
 
@@ -163,6 +186,7 @@ export function cerrarModoTaller({ volver = true } = {}) {
   panel.hidden = true;
   cuerpo.innerHTML = "";
   updateModalOpenState();
+  apartarElChipDelPie(false);
 
   if (!volver) {
     return;
@@ -188,7 +212,7 @@ export function cerrarModoTaller({ volver = true } = {}) {
  * sitio, sin reconstruir nada, para no quitarle el foco a quien puntua.
  */
 export function refrescarModoTaller() {
-  if (!abierto()) {
+  if (!abierto() || cambiandoDeDominio) {
     return;
   }
 
@@ -212,6 +236,59 @@ export function refrescarModoTaller() {
 
   pintarMarcas(item);
   pintarResultado(item);
+  pintarAvanceDeDominios();
+}
+
+
+/**
+ * Cambia el dominio de toda la herramienta, no solo el del taller: al salir,
+ * el Assessment esta en el dominio en el que se termino. Como al pulsar el
+ * conmutador, los filtros del dominio anterior se quitan —el de capacidad ni
+ * existe en el nuevo—, asi que el recorrido son todas sus subcapacidades.
+ *
+ * Empieza por la primera y no por «la ultima tocada», que es de otro dominio.
+ * El foco se queda en el selector: con las flechas del teclado, un <select>
+ * cerrado cambia de opcion a cada pulsacion, y quitarle el foco al primer
+ * cambio dejaba a quien recorre la lista en el dominio de al lado.
+ */
+async function cambiarDeDominio(domainId) {
+  if (!abierto() || !domainId || domainId === state.activeDomainId) {
+    return;
+  }
+
+  const notas = cuerpo.querySelector(".modo-taller-notas");
+  const item = itemActual();
+
+  if (notas && item) {
+    guardarCampoAhora(item, "comentario", notas);
+  }
+
+  cambiandoDeDominio = true;
+
+  try {
+    await switchDomain(domainId);
+  } catch (error) {
+    console.error(error);
+    showNotice("No se ha podido abrir ese dominio. Sigues en el que estabas.", "error");
+  } finally {
+    cambiandoDeDominio = false;
+  }
+
+  // Si el cambio fallo, se sigue en la misma subcapacidad; si no, no esta en
+  // el dominio nuevo y se empieza por la primera.
+  const antes = recorrido[indice];
+
+  recorrido = getVisibleItems().map((entrada) => entrada.id);
+  indice = Math.max(0, recorrido.indexOf(antes));
+
+  if (!recorrido.length) {
+    cerrarModoTaller({ volver: false });
+    repintarTodo();
+    showNotice("Este dominio no tiene subcapacidades cargadas: no hay nada que enseñar en el modo taller.", "aviso");
+    return;
+  }
+
+  pintar({ enfocar: false });
 }
 
 
@@ -232,7 +309,7 @@ function irA(nuevo) {
 }
 
 
-function pintar() {
+function pintar({ enfocar = true } = {}) {
   const item = itemActual();
 
   if (!item) {
@@ -241,10 +318,10 @@ function pintar() {
   }
 
   const objetivos = getCapabilityTargets(item.capacidad);
-  const dominio = getActiveDomainConfig();
   const casos = getAiDataForItem(item)?.casos || [];
 
-  donde.textContent = [dominio.label, state.cliente].filter(Boolean).join(" · ");
+  donde.textContent = state.cliente || "";
+  pintarSelectorDeDominio();
 
   cuerpo.innerHTML = `
     <div class="modo-taller-cabecera">
@@ -317,7 +394,70 @@ function pintar() {
   siguiente.disabled = indice === recorrido.length - 1;
 
   // Con el foco en la primera palanca, las teclas 1 a 5 ya puntuan.
-  enfocarPalanca(cuerpo.querySelector(".score-segmentos"), { preventScroll: true });
+  if (enfocar) {
+    enfocarPalanca(cuerpo.querySelector(".score-segmentos"), { preventScroll: true });
+  }
+}
+
+
+/**
+ * Los nueve dominios, agrupados como en el conmutador y con su avance, que es
+ * la pregunta de quien decide a cual pasar: cual queda por hacer. Los que no
+ * se pudieron cargar salen, pero apagados.
+ */
+function pintarSelectorDeDominio() {
+  if (!selectorDeDominio) {
+    return;
+  }
+
+  const dominios = Object.values(DOMAINS);
+  const grupos = GRUPOS_DE_DOMINIO.length ? GRUPOS_DE_DOMINIO : [...new Set(dominios.map((dominio) => dominio.group))];
+
+  selectorDeDominio.innerHTML = grupos
+    .map((grupo) => {
+      const opciones = dominios
+        .filter((dominio) => dominio.group === grupo)
+        .map(
+          (dominio) => `
+            <option
+              value="${escapeAttr(dominio.id)}"
+              ${dominio.id === state.activeDomainId ? "selected" : ""}
+              ${state.domains[dominio.id] ? "" : "disabled"}
+            >${escapeHtml(textoDeDominio(dominio))}</option>
+          `,
+        )
+        .join("");
+
+      return opciones ? `<optgroup label="${escapeAttr(grupo)}">${opciones}</optgroup>` : "";
+    })
+    .join("");
+}
+
+
+/**
+ * Al puntuar cambia el avance del dominio abierto. Se reescribe el texto de
+ * cada opcion en su sitio: reconstruir la lista con ella desplegada la cerraria.
+ */
+function pintarAvanceDeDominios() {
+  selectorDeDominio?.querySelectorAll("option").forEach((opcion) => {
+    const dominio = DOMAINS[opcion.value];
+    const texto = dominio ? textoDeDominio(dominio) : opcion.textContent;
+
+    if (opcion.textContent !== texto) {
+      opcion.textContent = texto;
+    }
+  });
+}
+
+
+function textoDeDominio(dominio) {
+  if (!state.domains[dominio.id]) {
+    return `${dominio.label} · no disponible`;
+  }
+
+  const { puntuadas, total } = avanceDeDominio(dominio.id);
+
+  return `${dominio.label} · ${puntuadas}/${total}`;
 }
 
 
@@ -447,7 +587,8 @@ function alPulsarTecla(event) {
     return;
   }
 
-  const escribiendo = event.target.closest?.("textarea, input:not(.score-radio)");
+  // Un <select> tambien: con el foco en el de dominio, las flechas cambian de dominio.
+  const escribiendo = event.target.closest?.("textarea, select, input:not(.score-radio)");
   const enPalanca = event.target.classList?.contains("score-radio");
 
   if (event.key === "Escape") {

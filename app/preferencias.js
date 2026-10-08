@@ -207,6 +207,10 @@ function aplicarModoPresentacion(activo) {
   }
 
   els.presentationModeButton?.setAttribute("aria-pressed", String(Boolean(activo)));
+
+  // El conmutador vive dentro del menu «Presentacion», y con el menu cerrado
+  // no se ve: es el boton del menu el que tiene que decir que esta puesto.
+  els.presentacionMenuButton?.classList.toggle("activo", Boolean(activo));
 }
 
 
