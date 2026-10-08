@@ -145,6 +145,7 @@
     <link rel="modulepreload" href="informe/estilos.js?v=26">
     <link rel="modulepreload" href="informe/graficos.js?v=26">
     <link rel="modulepreload" href="informe/pdf.js?v=26">
+    <link rel="modulepreload" href="informe/preparacion.js?v=26">
     <link rel="modulepreload" href="informe/secciones.js?v=26">
     <link rel="preload" href="data/domains.json" as="fetch" crossorigin>
     <link rel="preload" href="data/casos-ia.json" as="fetch" crossorigin>
@@ -205,6 +206,17 @@
                 Informe de todo el proyecto
                 <span id="informeProyectoNota">La función financiera y un capítulo por dominio evaluado</span>
               </button>
+
+              <hr class="header-menu-separator">
+
+              <!--
+                Lo que se envia al cliente antes del taller: preguntas y
+                documentacion, sin una puntuacion. Ver informe/preparacion.js.
+              -->
+              <button class="header-menu-item" id="informePreparacionButton" type="button">
+                <span id="informePreparacionLabel">Preparación del taller</span>
+                <span id="informePreparacionNota">Preguntas y documentación para enviar al cliente antes de la sesión</span>
+              </button>
             </div>
           </div>
 
@@ -243,6 +255,11 @@
             Oscuro
           </button>
 
+          <!--
+            «Sesion» y no «Escenario»: aqui esta todo lo de la sesion con el
+            cliente, empezando por el modo taller. El modo taller estuvo en la
+            barra de pestanas, pero no cabia sin acortar todo lo demas.
+          -->
           <div class="header-menu">
             <button
               class="header-menu-button"
@@ -251,11 +268,23 @@
               aria-expanded="false"
               aria-controls="scenarioMenu"
             >
-              Escenario
+              Sesión
               <span class="header-menu-caret" aria-hidden="true"></span>
             </button>
 
             <div class="header-menu-panel" id="scenarioMenu" hidden>
+              <!--
+                Una subcapacidad a pantalla completa, para proyectarla. Abre el
+                Assessment si se esta en otra vista. Ver app/taller.js. Va antes
+                del rotulo de donde se guarda, que es de lo que viene debajo.
+              -->
+              <button class="header-menu-item" id="modoTallerButton" type="button" aria-haspopup="dialog">
+                Modo taller
+                <span>Una subcapacidad a pantalla completa, para proyectar</span>
+              </button>
+
+              <hr class="header-menu-separator">
+
               <p class="header-menu-title" id="scenarioMenuState">Copia de este navegador</p>
 
               <button class="header-menu-item" id="clienteButton" type="button">
@@ -370,7 +399,7 @@
           <span class="tab-badge tab-badge-alert" id="roadmapTabBadge">0 Alta</span>
         </a>
         <a href="#ia">IA</a>
-        <span class="tabs-dominio" aria-hidden="true"><span class="tabs-dominio-prefijo">Dominio </span><strong id="tabsDominio"></strong></span>
+        <span class="tabs-dominio" aria-hidden="true">Dominio <strong id="tabsDominio"></strong></span>
         <!--
           Junto al dominio porque es suyo: cuenta y recorre lo que queda por
           puntuar en el dominio abierto. En la barra sigue a la vista a cualquier
@@ -386,27 +415,6 @@
           <span class="tabs-siguiente-largo">Siguiente sin puntuar</span>
           <span class="tabs-siguiente-corto">Sin puntuar</span>
           <span class="tab-badge siguiente-pendiente-cuenta" aria-hidden="true"></span>
-        </button>
-        <!--
-          Una subcapacidad a pantalla completa, para proyectarla. Solo en el
-          Assessment, y en la barra y no junto al titulo: al bajar por la lista
-          sigue a la vista y abre donde se esta trabajando, y junto al titulo
-          lo tapaba el recuadro de «Filtrando por». Ver app/taller.js.
-        -->
-        <button
-          class="tabs-taller"
-          id="modoTallerButton"
-          type="button"
-          aria-haspopup="dialog"
-          aria-label="Modo taller"
-          title="Modo taller: proyectar una subcapacidad a pantalla completa"
-        >
-          <svg class="tabs-taller-icono" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-            <rect x="1.5" y="2" width="13" height="9" rx="1"></rect>
-            <path d="M8 11v3M5 14h6"></path>
-          </svg>
-          <span class="tabs-taller-largo" aria-hidden="true">Modo taller</span>
-          <span class="tabs-taller-corto" aria-hidden="true">Taller</span>
         </button>
         <!--
           Ir a cualquier subcapacidad de los nueve dominios escribiendo un trozo

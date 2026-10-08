@@ -269,7 +269,7 @@ import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=26";
 import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=26";
 
 // Lo que la aplicacion le pasa al informe: datos, radares y tema claro.
-import { dominiosDelProyecto, exportPdfReport } from "./app/informe.js?v=26";
+import { dominiosDelProyecto, exportPdfReport, exportarPreparacion } from "./app/informe.js?v=26";
 
 // Si el trabajo en modo local tiene una copia fuera del navegador.
 import {
@@ -526,6 +526,9 @@ function cacheElements() {
     "informeDominioLabel",
     "informeProyectoButton",
     "informeProyectoNota",
+    "informePreparacionButton",
+    "informePreparacionLabel",
+    "informePreparacionNota",
     "resetButton",
     "scenarioMenuButton",
     "scenarioMenu",
@@ -652,6 +655,7 @@ function bindGlobalEvents() {
   enganchar("exportCsvButton", "click", exportCsv);
   enganchar("informeDominioButton", "click", () => exportPdfReport());
   enganchar("informeProyectoButton", "click", () => exportPdfReport({ proyecto: true }));
+  enganchar("informePreparacionButton", "click", () => exportarPreparacion());
   enganchar("resetButton", "click", resetScenario);
   enganchar("createScenarioButton", "click", createSharedScenario);
   enganchar("copyScenarioLinkButton", "click", copyScenarioLink);
@@ -678,7 +682,13 @@ function bindGlobalEvents() {
   setupBuscador({ alElegir: abrirTarjetaEnSuDominio });
   setupSiguientePendiente();
   setupSiguienteSinPuntuar();
-  setupModoTaller();
+  setupModoTaller({
+    irAlAssessment: () => {
+      if (vistaActiva !== "assessment") {
+        mostrarVista("assessment");
+      }
+    },
+  });
   setupAltoDePestanas();
   setupCajaDelRoadmap();
   setupBackToTopButton();
@@ -1087,6 +1097,20 @@ function pintarMenuDeInforme() {
 
   if (els.informeProyectoButton) {
     els.informeProyectoButton.disabled = !evaluados;
+  }
+
+  // La preparacion lleva lo que dejan los filtros, y va al cliente: el menu lo
+  // dice antes de generarla, no solo el aviso de despues.
+  const alcance = getScopeSummary();
+
+  if (els.informePreparacionLabel) {
+    els.informePreparacionLabel.textContent = `Preparación del taller de ${dominio.label || "este dominio"}`;
+  }
+
+  if (els.informePreparacionNota) {
+    els.informePreparacionNota.textContent = alcance.hayFiltros
+      ? `Solo ${alcance.visibles === 1 ? "la subcapacidad que dejan" : `las ${alcance.visibles} subcapacidades que dejan`} los filtros, para enviar al cliente`
+      : "Preguntas y documentación para enviar al cliente antes de la sesión";
   }
 
   if (els.informeProyectoNota) {

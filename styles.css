@@ -914,19 +914,13 @@ transform: translateY(-1px);
   display: none;
 }
 
-/* El modo taller recorre las tarjetas del Assessment: solo se ofrece ahi. */
-.tabs:not([data-vista="assessment"]) .tabs-taller {
-  display: none;
-}
-
 /*
   «Siguiente sin puntuar», pegado al dominio porque cuenta lo que le falta a
   ese dominio. Mas bajo y mas callado que una pestana: sin relleno de color y
   con el texto en gris, para que no compita con ellas ni con el dominio. Al
   pasar por encima responde como una pestana, que es lo que dice que se pulsa.
 */
-.tabs-siguiente,
-.tabs-taller {
+.tabs-siguiente {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -965,94 +959,15 @@ transform: translateY(-1px);
   }
 }
 
-.tabs-siguiente:hover,
-.tabs-taller:hover {
+.tabs-siguiente:hover {
   border-color: rgba(134, 188, 37, 0.65);
   background: var(--surface-realce);
   color: var(--green-dark);
 }
 
-.tabs-siguiente:focus-visible,
-.tabs-taller:focus-visible {
+.tabs-siguiente:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
-}
-
-.tabs-taller {
-  padding: 0 11px;
-}
-
-.tabs-taller[hidden] {
-  display: none;
-}
-
-.tabs-taller-icono {
-  width: 15px;
-  height: 15px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  flex: none;
-}
-
-/*
-  «Modo taller» no cabia sin pagar: a 1366 px, con «Siguiente sin puntuar» a la
-  vista, mandaba el buscador a un segundo piso de la barra, que es la que se
-  queda fija arriba. Medido en los nueve dominios con la barra de
-  desplazamiento de Windows, el peor es Relacion con Inversores.
-
-  Por debajo de 1500, y siempre en Presentacion, la barra de un dominio se
-  compacta: «Taller», «Sin puntuar» y el buscador sin el «Ctrl K». Asi el
-  modo taller conserva su nombre en el portatil de la sala, que es donde se
-  usa, y la barra no queda peor que antes en ningun ancho. Los nombres enteros
-  siguen en el aria-label y el atajo en el title. Se compacta en las cuatro
-  vistas de dominio y no solo en el Assessment, para que al cambiar de pestana
-  no cambie de tamano lo que ya estaba.
-*/
-.tabs-taller-corto {
-  display: none;
-}
-
-@media (max-width: 1500px) {
-  .tabs-taller-largo {
-    display: none;
-  }
-
-  .tabs-taller-corto {
-    display: inline;
-  }
-
-  .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-siguiente-largo,
-  .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-buscar-atajo {
-    display: none;
-  }
-
-  .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-siguiente-corto {
-    display: inline;
-  }
-}
-
-:root[data-densidad="presentacion"] .tabs-taller-largo,
-:root[data-densidad="presentacion"] .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-siguiente-largo,
-:root[data-densidad="presentacion"] .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-buscar-atajo {
-  display: none;
-}
-
-:root[data-densidad="presentacion"] .tabs-taller-corto,
-:root[data-densidad="presentacion"] .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-siguiente-corto {
-  display: inline;
-}
-
-/* Por debajo de 1200 el buscador ya se queda en la lupa, y aun asi el taller
-   no cabia en una tableta apaisada (1180 px): ahi va en el icono y el dominio
-   pierde el «Dominio», que el nombre en negrita ya dice. */
-@media (max-width: 1200px) {
-  .tabs-taller-corto,
-  .tabs-dominio-prefijo {
-    display: none;
-  }
 }
 
 /*

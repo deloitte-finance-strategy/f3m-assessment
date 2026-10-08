@@ -68,7 +68,13 @@ const itemActual = () => state.items.find((item) => item.id === recorrido[indice
 const nombreDelNivel = (nivel) => (getMaturityLevel(nivel) || "").split(" - ")[1] || "";
 
 
-export function setupModoTaller() {
+/**
+ * `irAlAssessment` lo pone app.js: el boton esta en el menu «Sesion», que se ve
+ * desde cualquier vista, y el modo taller recorre las tarjetas del Assessment y
+ * vuelve a ellas al salir. Se inyecta porque cambiar de vista es cosa del
+ * orquestador, y importarlo de app.js cerraria un ciclo con el.
+ */
+export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   panel = document.getElementById("modoTaller");
   cuerpo = document.getElementById("modoTallerCuerpo");
   donde = document.getElementById("modoTallerDonde");
@@ -84,7 +90,14 @@ export function setupModoTaller() {
     return;
   }
 
-  boton.addEventListener("click", () => abrirModoTaller(boton));
+  // Al salir, el foco va a la tarjeta. Si no la hubiera, al boton del menu y
+  // no a la entrada, que se queda escondida con el menu cerrado.
+  const menu = document.getElementById("scenarioMenuButton") || boton;
+
+  boton.addEventListener("click", () => {
+    irAlAssessment();
+    abrirModoTaller(menu);
+  });
   document.getElementById("modoTallerSalir")?.addEventListener("click", () => cerrarModoTaller());
   anterior?.addEventListener("click", () => irA(indice - 1));
   siguiente?.addEventListener("click", () => irA(indice + 1));
@@ -105,7 +118,12 @@ export function abrirModoTaller(desde = null) {
   recorrido = getVisibleItems().map((item) => item.id);
 
   if (!recorrido.length) {
-    showNotice("Con los filtros puestos no queda ninguna subcapacidad para el modo taller.", "aviso");
+    showNotice(
+      state.items.length
+        ? "Con los filtros puestos no queda ninguna subcapacidad para el modo taller."
+        : "Este dominio no tiene subcapacidades cargadas: no hay nada que enseñar en el modo taller.",
+      "aviso",
+    );
     return;
   }
 

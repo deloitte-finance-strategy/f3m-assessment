@@ -33,9 +33,9 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.298 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.306 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.847 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.871 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 183 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 341 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
@@ -55,9 +55,9 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 137 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 317 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
-| `app/informe.js` | Lo que la aplicación le pasa al informe: datos, radares y tema | 606 |
+| `app/informe.js` | Lo que la aplicación le pasa al informe y a la preparación del taller | 674 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 399 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 417 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 417 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 224 |
@@ -65,7 +65,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 172 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.370 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.285 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -79,6 +79,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 307 |
 | `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.016 |
 | `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 112 |
+| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 544 |
 | `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
@@ -303,24 +304,24 @@ urgente», con la misma función, `abrirTarjetaEnSuDominio()` en `app.js`: su ta
 los filtros. Es un `<dialog>` nativo y no uno de los modales: `showModal()` ya deja el fondo
 inerte, atrapa el foco y cierra con Escape.
 
-**El modo taller** (el botón «Taller» de la barra de pestañas, que solo sale en el Assessment)
-proyecta una subcapacidad a pantalla completa: los cinco niveles en columnas, con las palancas y
-el objetivo marcados encima, la escala para puntuar, las preguntas clave y las notas del taller.
-**Sí usa el ámbito**: recorre las tarjetas que enseña el Assessment, con sus filtros, y la lista se
-fija al abrir, para que puntuar una que el filtro de prioridad deja fuera no la saque del recorrido
-a mitad de sesión. Puntúa y guarda con lo mismo que las tarjetas —`conectarPuntuacion()` y
-`app/edicion.js`—, y `renderAll()` lo pone al día con `refrescarModoTaller()`.
+**El modo taller** (**Sesión → Modo taller**, en la cabecera) proyecta una subcapacidad a pantalla
+completa: los cinco niveles en columnas, con las palancas y el objetivo marcados encima, la escala
+para puntuar, las preguntas clave y las notas del taller. **Sí usa el ámbito**: recorre las tarjetas
+que enseña el Assessment, con sus filtros, y la lista se fija al abrir, para que puntuar una que el
+filtro de prioridad deja fuera no la saque del recorrido a mitad de sesión. Puntúa y guarda con lo
+mismo que las tarjetas —`conectarPuntuacion()` y `app/edicion.js`—, y `renderAll()` lo pone al día
+con `refrescarModoTaller()`. Desde otra vista, primero abre el Assessment: empieza en la tarjeta en
+la que se estaba y vuelve a ella al salir. Cambiar de vista es del orquestador, así que `app.js` se
+lo inyecta a `setupModoTaller()`.
 
 Es un `.modal-backdrop` y no un `<dialog>`, al revés que el buscador y a propósito: la capa superior
 de `showModal()` taparía el chip de guardado y los avisos, y en un taller tienen que seguir a la
 vista. Sus radios llevan el prefijo `taller` en el `name` porque los grupos de radios son de todo el
 documento: con el mismo nombre que la tarjeta, puntuar en uno desmarcaba el otro.
 
-La barra de pestañas no tenía sitio para un botón más. Por debajo de 1500 px, y siempre en
-Presentación, la barra de un dominio se compacta —«Taller», «Sin puntuar», el buscador sin «Ctrl
-K»—, y por debajo de 1200 el taller se queda en el icono. Medido en los nueve dominios contra
-`main`: en ningún ancho salta a dos pisos donde antes no lo hacía. **Relación con Inversores**,
-con el nombre más largo, es el que aprieta.
+El menú de la cabecera se llamaba «Escenario» y ahora es **«Sesión»**: agrupa lo de la sesión con el
+cliente, del modo taller a las copias. El modo taller estuvo primero en la barra de pestañas, pero
+no cabía a 1366 px sin acortar todo lo demás.
 
 «Volver arriba» flota abajo a la derecha, en un círculo, y sube por encima del chip de guardado
 mientras este se ve (`apartarDelChip()` en `app/indicador.js`). A la izquierda tapaba la primera
@@ -356,7 +357,8 @@ la aplicación, para que el descuadre no se lea como un fallo.
 
 **Hay dos informes**, y «Exportar PDF» abre un menú para elegir. Es un menú y no un diálogo a
 propósito: `window.open()` tiene que ir en el mismo clic que lo pide, o el navegador lo bloquea como
-ventana emergente.
+ventana emergente. El mismo menú lleva además la **preparación del taller**, que no es un informe
+(ver abajo).
 
 - **El del dominio** es el de siempre: la parte global y el dominio abierto, con los filtros activos.
 - **El de todo el proyecto** lleva, tras la parte global, un **capítulo por cada dominio con algo
@@ -367,6 +369,16 @@ ventana emergente.
   de qué dominio es. El índice pasa a ser **por partes**, con el rango de cada sección, porque una
   línea por sección no cabe con nueve dominios. Los radares de cada dominio se pintan uno detrás de
   otro en los canvas del Dashboard y se capturan; al acabar se repinta el Dashboard.
+
+**La preparación del taller** (`informe/preparacion.js`) es lo que se envía al cliente antes de
+la sesión: para cada subcapacidad, su objetivo, las preguntas clave y la documentación que conviene
+traer, con casillas, y la escala de la rúbrica general. **No lleva ni una puntuación ni las notas**,
+que son del equipo. Es un documento y no un deck: **A4 vertical**, fluye de página en página y no
+reparte en diapositivas, así que no pasa por `?comprobar=desbordes`; una subcapacidad no se parte
+entre dos páginas y el número de página va en el margen con `@page`. Lleva lo que dejan los filtros,
+como el modo taller —un taller de una sola capacidad tiene su preparación—, y como va al cliente, el
+menú y el aviso dicen cuántas quedan fuera. La rúbrica es una copia de la del modal «Criterios F3M»
+de `index.html`, y `tests/casos-preparacion.js` compara las dos.
 
 Las cifras de un capítulo salen de `datosDeDominio()`, que recibe el dominio en vez de leer el
 abierto: el informe de un dominio usa la misma función, así que los dos no pueden decir cosas
@@ -488,7 +500,7 @@ recalcula. No hay que acordarse de vaciar nada al tocar el estado.
   En modo local el trabajo solo vive en ese navegador, así que `app/copias.js` lleva la cuenta de
   si tiene copia fuera: `f3m-ultima-copia` (cuándo se guardó o se abrió la última) y
   `f3m-cambios-sin-copia-desde` (el primer cambio después). «Guardar una copia» dice cuándo fue la
-  última, y con cambios de **más de un día** sin copia, el botón «Escenario» lleva un punto ámbar.
+  última, y con cambios de **más de un día** sin copia, el botón «Sesión» lleva un punto ámbar.
   Un día y no antes: durante el taller el trabajo está a salvo, y un aviso que salta delante del
   cliente a los cinco minutos acaba ignorado. En un escenario compartido no se dice nada.
 - **Compartido**: parámetro de URL `?scenario=<id>`. Lee y escribe en `scenarios/<id>` de la
@@ -683,8 +695,9 @@ de cada caso y que los 9 JSON coinciden con sus Excel. Código de salida `1` si 
 Se prueban en `tests/`, sin dependencias, todos los módulos que no necesitan navegador: las reglas
 de negocio, los objetivos, la coincidencia de subcapacidades, el contrato de escenario y su espejo
 con `database.rules.json`, el formato de presentación, la exportación a CSV, la biblioteca de IA
-—que una fuente rota no llegue a la pantalla—, el buscador y el informe —el deck que arma `informe/pdf.js`, las
-primitivas SVG y la lectura de las medidas de desborde.
+—que una fuente rota no llegue a la pantalla—, el buscador, el informe —el deck que arma `informe/pdf.js`, las
+primitivas SVG y la lectura de las medidas de desborde— y la preparación del taller, con su rúbrica
+comparada con la de `index.html`.
 
 - **En el navegador**: con el servidor en marcha, abrir `http://localhost:8000/tests/`. Es la forma
   que funciona en cualquier equipo, sin instalar nada.
@@ -733,15 +746,14 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      sin puntuar», en la barra de pestañas junto al dominio, lleva desde cualquier vista del
      dominio a la próxima tarjeta sin ninguna palanca puntuada, con el foco en su primer score, y
      sin filtros su cifra cuadra con la de la pestaña Assessment.
-   - **Modo taller**: «Taller», en la barra, abre a pantalla completa la tarjeta en la que se
-     está trabajando, la última tocada o la primera que se ve. Puntuar ahí se ve en la tarjeta al
-     salir y el chip de guardado sigue a la vista; las notas son las mismas del detalle.
-     «Siguiente» y Av Pág recorren solo lo que dejan los filtros («1 de 4» con una capacidad
-     elegida). Tab no sale del modo taller, Ctrl+K no abre el buscador encima, y Escape vuelve a
-     la tarjeta en la que se estaba, con el foco en su primer score. Probarlo en los cuatro modos
-     de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita desplazarse. Y con
-     «Siguiente sin puntuar» a la vista, la barra de pestañas cabe en una fila a 1366 px en los
-     nueve dominios.
+   - **Modo taller**: **Sesión → Modo taller**, desde cualquier vista, abre el Assessment y en él,
+     a pantalla completa, la tarjeta en la que se estaba trabajando, la última tocada o la primera
+     que se ve. Puntuar ahí se ve en la tarjeta al salir y el chip de guardado sigue a la vista; las
+     notas son las mismas del detalle. «Siguiente» y Av Pág recorren solo lo que dejan los filtros
+     («1 de 4» con una capacidad elegida). Tab no sale del modo taller, Ctrl+K no abre el buscador
+     encima, y Escape vuelve a la tarjeta en la que se estaba, con el foco en su primer score.
+     Probarlo en los cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades
+     necesita desplazarse.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
      Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final.
@@ -769,6 +781,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    proyecto**, con los nueve dominios puntuados: un capítulo por dominio, cada uno con sus tres
    radares, el índice por partes y ninguna diapositiva recortada. Al terminar, el Dashboard
    tiene que seguir enseñando los radares del dominio abierto.
+   **La preparación del taller**, del mismo menú: vertical, sin una puntuación, cada subcapacidad
+   entera en su página y el índice entero en la primera. Con un filtro de capacidad, el menú y el
+   aviso dicen cuántas lleva, y el número de su capacidad es el suyo («3», no «1»).
 8. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
    la fila de Fiscal. En la fila «Todas las capacidades», cambiar una palanca la pone igual en
    todas y cambiar después una sola la deja en «Varios»; «Usar estos objetivos en los nueve
@@ -780,7 +795,7 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 10. Cambiar de dominio y confirmar que los datos se recargan. Con **Ctrl+K**, escribir
    «conciliacion» sin tilde: salen las de varios dominios, las flechas mueven la selección e Intro
    abre su tarjeta en su dominio, con el foco en su primer score. Escape cierra y devuelve el foco.
-11. Recargar la página y confirmar que el escenario persiste. En modo local, «Escenario → Guardar
+11. Recargar la página y confirmar que el escenario persiste. En modo local, «Sesión → Guardar
    una copia» dice cuándo fue la última; para ver el punto ámbar sin esperar un día, poner
    `f3m-cambios-sin-copia-desde` a una fecha de anteayer en `localStorage` y recargar. Guardar
    una copia lo quita.
@@ -806,7 +821,7 @@ extracción del informe PDF no cambiaban ningún número.
 `meta.targetMaturity` a 4, así que con los valores por defecto todos los caminos dan el mismo
 número y el A/B saldría idéntico aunque el cambio estuviera mal. Hay que **editar objetivos por
 capacidad en al menos dos dominios**, con valores distintos entre sí, guardar una copia con
-**Escenario → Guardar una copia**, abrirla en la versión antigua y comparar entonces.
+**Sesión → Guardar una copia**, abrirla en la versión antigua y comparar entonces.
 
 Ya no hay en los datos un par de dominios con una capacidad del mismo nombre —era Fiscal y Tesorería
 con "Contabilidad y provisión fiscal", hasta el cambio de nombre en Tesorería—, así que el A/B no

@@ -17,6 +17,7 @@ import { casos as casosDeExportacion } from "./casos-exportacion.js?v=26";
 import { casos as casosDeInforme } from "./casos-informe.js?v=26";
 import { casos as casosDeBiblioteca } from "./casos-biblioteca.js?v=26";
 import { casos as casosDeBusqueda } from "./casos-busqueda.js?v=26";
+import { casos as casosDePreparacion } from "./casos-preparacion.js?v=26";
 
 
 /** Todos los casos, en el orden en que se quieren leer. */
@@ -30,6 +31,7 @@ export const casos = [
   ...casosDeExportacion,
   ...casosDeGraficos,
   ...casosDeInforme,
+  ...casosDePreparacion,
   ...casosDeBiblioteca,
   ...casosDeBusqueda,
 ];
