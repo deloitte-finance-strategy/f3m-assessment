@@ -11,16 +11,16 @@
  * getUsuarioActual(), que ademas deja claro que puede ser null.
  */
 
-import { NOMBRE_STORAGE_KEY, els } from "./estado.js?v=25";
+import { NOMBRE_STORAGE_KEY, els } from "./estado.js?v=26";
 import {
   borrarDeAlmacenamiento,
   escribirAlmacenamiento,
   leerAlmacenamiento,
-} from "./almacenamiento.js?v=25";
-import { abrirDialogo, showNotice } from "./avisos.js?v=25";
-import { conLimiteDeEspera, conectarFirebase, enEscenarioCompartido } from "./firebase.js?v=25";
-import { marcarFalloDeSincronia } from "./indicador.js?v=25";
-import { repintarTodo } from "./repintado.js?v=25";
+} from "./almacenamiento.js?v=26";
+import { abrirDialogo, showNotice } from "./avisos.js?v=26";
+import { conLimiteDeEspera, conectarFirebase, enEscenarioCompartido } from "./firebase.js?v=26";
+import { marcarFalloDeSincronia } from "./indicador.js?v=26";
+import { repintarTodo } from "./repintado.js?v=26";
 
 
 // Identidad de quien edita. Queda a null si la autenticación no está disponible:

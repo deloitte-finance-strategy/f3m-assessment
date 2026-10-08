@@ -5,7 +5,7 @@
  * portatil. Si alguien borra los datos del navegador, o se abre la herramienta
  * en otro, el trabajo no esta, y hasta ahora nada decia que no habia ninguna
  * copia. «Guardar una copia» dice ahora cuando se guardo la ultima, y si hay
- * cambios de hace mas de un dia que no estan en ninguna, el boton Escenario
+ * cambios de hace mas de un dia que no estan en ninguna, el boton «Sesion»
  * lleva un punto.
  *
  * Un dia y no antes a proposito: durante el taller el trabajo esta a salvo en
@@ -15,13 +15,13 @@
  * En un escenario compartido no se dice nada: el trabajo esta en Firebase.
  */
 
-import { cuandoFue } from "../core/presentacion.js?v=25";
+import { cuandoFue } from "../core/presentacion.js?v=26";
 import {
   borrarDeAlmacenamiento,
   escribirAlmacenamiento,
   leerAlmacenamiento,
-} from "./almacenamiento.js?v=25";
-import { els, state } from "./estado.js?v=25";
+} from "./almacenamiento.js?v=26";
+import { els, state } from "./estado.js?v=26";
 
 
 const CLAVE_ULTIMA_COPIA = "f3m-ultima-copia";

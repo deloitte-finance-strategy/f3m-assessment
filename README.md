@@ -168,7 +168,7 @@ https://deloitte-finance-strategy.github.io/f3m-assessment/
 
 ### Escenarios compartidos
 
-Para crear uno, usa **Escenario → "Crear escenario compartido"** en la cabecera. Genera un
+Para crear uno, usa **Sesión → "Crear escenario compartido"** en la cabecera. Genera un
 identificador aleatorio de 128 bits y te lleva a la URL correspondiente:
 
 ```text
@@ -184,7 +184,7 @@ https://deloitte-finance-strategy.github.io/f3m-assessment/?scenario=<id-generad
 > explica en detalle qué protege la herramienta y qué no.**
 >
 > Por eso la herramienta no lo enseña entero: ni en pantalla ni en la portada del PDF, que es un
-> documento que se envía al cliente. Para obtener el enlace completo, **Escenario → "Copiar
+> documento que se envía al cliente. Para obtener el enlace completo, **Sesión → "Copiar
 > enlace"**.
 
 ### Escenario de pruebas
@@ -203,7 +203,7 @@ nunca para trabajo real** — cualquiera puede leerlo y sobrescribirlo.
 
 En un escenario compartido la app se autentica de forma anónima contra Firebase: no pide
 credenciales, pero asigna un identificador estable a cada navegador. Sirve para atribuir cada
-cambio, con **Escenario → "Poner mi nombre"** para elegir cómo apareces ante el resto.
+cambio, con **Sesión → "Poner mi nombre"** para elegir cómo apareces ante el resto.
 La columna **"Último cambio"** del Roadmap muestra quién tocó cada subcapacidad por última vez.
 
 **La identidad es obligatoria para escribir.** Sin ella, la aplicación no intenta guardar en el

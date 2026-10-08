@@ -12,9 +12,9 @@
  * herramienta.
  */
 
-import { els } from "./estado.js?v=25";
-import { showNotice } from "./avisos.js?v=25";
-import { enEscenarioCompartido } from "./firebase.js?v=25";
+import { els } from "./estado.js?v=26";
+import { showNotice } from "./avisos.js?v=26";
+import { enEscenarioCompartido } from "./firebase.js?v=26";
 
 
 // Para retirar el chip de guardado cuando el estado ya no pide nada.
@@ -45,6 +45,7 @@ export function updateSaveStatus(status, message, detalle = "") {
   els.saveStatus.hidden = false;
   els.saveStatus.className = `save-status ${status || ""}`.trim();
   els.saveStatus.textContent = message;
+  apartarDelChip();
 
   // El detalle explica qué ha pasado, qué implica y qué puede hacer el usuario.
   // No cabe en el chip, así que va también al tooltip; desde que
@@ -65,8 +66,22 @@ export function updateSaveStatus(status, message, detalle = "") {
   if (status === "saved") {
     temporizadorDelChip = window.setTimeout(() => {
       els.saveStatus.hidden = true;
+      apartarDelChip();
     }, 4000);
   }
+}
+
+
+/**
+ * «Volver arriba» comparte esquina con el chip, y el chip manda: mientras se
+ * ve, el boton sube por encima. El alto cambia con el mensaje —un error ocupa
+ * dos lineas—, asi que se mide cada vez que el chip cambia, y es aqui donde
+ * cambia.
+ */
+function apartarDelChip() {
+  const alto = els.saveStatus.hidden ? 0 : els.saveStatus.offsetHeight + 10;
+
+  document.documentElement.style.setProperty("--alto-del-chip", `${alto}px`);
 }
 
 

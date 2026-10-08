@@ -13,28 +13,34 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=25";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=25";
-import { filasDeResumen } from "../core/exportacion.js?v=25";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=25";
-import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=25";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=25";
-import { showNotice } from "./avisos.js?v=25";
-import { getActiveDomainConfig } from "./dominios.js?v=25";
-import { DOMAINS, els, state } from "./estado.js?v=25";
-import { getVisibleItems } from "./filtros.js?v=25";
-import { getScenarioShortLabel } from "./firebase.js?v=25";
+} from "../core/calculo.js?v=26";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=26";
+import { filasDeResumen } from "../core/exportacion.js?v=26";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=26";
+import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=26";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=26";
+import { documentoDePreparacion } from "../informe/preparacion.js?v=26";
+import { showNotice } from "./avisos.js?v=26";
+import { getActiveDomainConfig } from "./dominios.js?v=26";
+import { DOMAINS, els, state } from "./estado.js?v=26";
+import { getVisibleItems } from "./filtros.js?v=26";
+import { getScenarioShortLabel } from "./firebase.js?v=26";
 import {
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
   renderCapabilityRadar,
-} from "./graficos.js?v=25";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=25";
-import { getAiDataForItem } from "./subcapacidad.js?v=25";
-import { renderDashboard } from "./vistas/dashboard.js?v=25";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=25";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=25";
+} from "./graficos.js?v=26";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=26";
+import {
+  getAiDataForItem,
+  getItemEvidenceText,
+  getItemObjective,
+  getItemQuestions,
+} from "./subcapacidad.js?v=26";
+import { renderDashboard } from "./vistas/dashboard.js?v=26";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=26";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=26";
 
 
 /**
@@ -110,6 +116,68 @@ export function exportPdfReport({ proyecto = false } = {}) {
       reportWindow.print();
     });
   }, 900);
+}
+
+
+/**
+ * El documento de preparacion del taller, para enviar al cliente antes.
+ *
+ * Del dominio abierto y con los filtros del Assessment, como el modo taller:
+ * con uno de capacidad puesto, el taller y su preparacion son de esa
+ * capacidad. Pero este documento sale hacia el cliente, asi que si los
+ * filtros dejan algo fuera, el aviso lo dice.
+ */
+export function exportarPreparacion() {
+  const items = getVisibleItems();
+
+  if (!items.length) {
+    showNotice("Con los filtros puestos no queda ninguna subcapacidad para el documento de preparación.", "aviso");
+    return;
+  }
+
+  // En el mismo gesto del clic, como el informe, y por lo mismo.
+  const ventana = window.open("", "_blank");
+
+  if (!ventana) {
+    showNotice("El navegador ha bloqueado la ventana del documento. Permite las ventanas emergentes de esta página y vuelve a pedirlo.", "aviso");
+    return;
+  }
+
+  ventana.opener = null;
+
+  const dominio = getActiveDomainConfig();
+
+  ventana.document.open();
+  ventana.document.write(documentoDePreparacion({
+    cliente: state.cliente,
+    domainLabel: dominio.label,
+    domainTitle: dominio.title,
+    fechaDeArchivo: fechaParaArchivo(new Date()),
+    subcapacidades: items.map((item) => ({
+      capacidad: item.capacidad,
+      subcapacidad: item.subcapacidad,
+      objetivo: getItemObjective(item),
+      preguntas: getItemQuestions(item),
+      evidencias: getItemEvidenceText(item),
+    })),
+  }));
+  ventana.document.close();
+
+  const total = state.items.length;
+  const alcance = items.length < total
+    ? `Lleva ${items.length} de las ${total} subcapacidades de ${dominio.label}: las que dejan los filtros. `
+    : "";
+
+  showNotice(
+    `Documento de preparación generado. ${alcance}En el diálogo de impresión, elige «Guardar como PDF» `
+      + "y activa «Gráficos de fondo» para que salgan los colores.",
+    alcance ? "aviso" : "info",
+  );
+
+  setTimeout(() => {
+    ventana.focus();
+    ventana.print();
+  }, 300);
 }
 
 

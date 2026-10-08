@@ -17,17 +17,17 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=25";
-import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=25";
-import { createDefaultTargets } from "../../core/objetivos.js?v=25";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=25";
-import { abrirDialogo, showNotice } from "../avisos.js?v=25";
+} from "../../core/calculo.js?v=26";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=26";
+import { createDefaultTargets } from "../../core/objetivos.js?v=26";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=26";
+import { abrirDialogo, showNotice } from "../avisos.js?v=26";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=25";
+} from "../celdas.js?v=26";
 import {
   DOMAINS,
   LEVERS,
@@ -35,27 +35,27 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=25";
+} from "../estado.js?v=26";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "../edicion.js?v=25";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=25";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=25";
+} from "../edicion.js?v=26";
+import { describirObjetivos, getVisibleItems } from "../filtros.js?v=26";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=26";
 import {
   persistItemChange,
   persistTargetsDeDominios,
   persistTargetsDelDominioActivo,
-} from "../persistencia.js?v=25";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=25";
-import { repintarTodo } from "../repintado.js?v=25";
+} from "../persistencia.js?v=26";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=26";
+import { repintarTodo } from "../repintado.js?v=26";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=25";
+} from "../subcapacidad.js?v=26";
 
 
 export function renderCapabilityTargets() {
@@ -719,13 +719,23 @@ export function renderAssessments() {
   els.assessmentList.appendChild(fragment);
   });
 
-  els.assessmentList.querySelectorAll(".score-segmentos").forEach((grupo) => {
+  conectarPuntuacion(els.assessmentList);
+
+  restaurarFocoDeAssessment(foco);
+}
+
+
+/**
+ * Engancha los grupos de score de un contenedor: el clic, el que lo quita y las
+ * teclas. Lo usan la lista y el modo taller, que puntuan igual porque
+ * comparten aplicarScore(): una sola forma de cambiar un score y de guardarlo.
+ */
+export function conectarPuntuacion(contenedor) {
+  contenedor.querySelectorAll(".score-segmentos").forEach((grupo) => {
     grupo.addEventListener("change", handleScoreChange);
     grupo.addEventListener("click", handleScoreClick);
     grupo.addEventListener("keydown", handleScoreKeydown);
   });
-
-  restaurarFocoDeAssessment(foco);
 }
 
 
@@ -822,6 +832,31 @@ export function irASiguientePendiente() {
     return Boolean(item) && calculate(item).isPending;
   };
 
+  const { indice, esLaTocada } = tarjetaEnCurso(tarjetas);
+  const desde = esLaTocada ? indice + 1 : indice;
+
+  const destino = [...tarjetas.slice(desde), ...tarjetas.slice(0, desde)].find(pendiente);
+
+  if (destino) {
+    llevarALasTarjetas([destino]);
+  }
+}
+
+
+/** La subcapacidad en la que se esta trabajando, para abrir ahi el modo taller. */
+export function idDeLaTarjetaEnCurso() {
+  const tarjetas = [...els.assessmentList.querySelectorAll(".assessment-card")];
+
+  return tarjetas[tarjetaEnCurso(tarjetas).indice]?.dataset.id || null;
+}
+
+
+/**
+ * Donde se esta trabajando: la ultima tarjeta tocada si sigue a la vista, y si
+ * no la primera que se ve. «Siguiente sin puntuar» sigue desde despues de ella
+ * y el modo taller empieza en ella.
+ */
+function tarjetaEnCurso(tarjetas) {
   const arriba = parseFloat(
     getComputedStyle(document.documentElement).getPropertyValue("--alto-pestanas"),
   ) || 0;
@@ -832,23 +867,12 @@ export function irASiguientePendiente() {
   };
 
   const tocada = tarjetas.findIndex((tarjeta) => tarjeta.dataset.id === ultimaTarjetaTocada);
-  let desde;
 
   if (tocada >= 0 && seVe(tarjetas[tocada])) {
-    desde = tocada + 1;
-  } else {
-    desde = tarjetas.findIndex(seVe);
-
-    if (desde < 0) {
-      desde = 0;
-    }
+    return { indice: tocada, esLaTocada: true };
   }
 
-  const destino = [...tarjetas.slice(desde), ...tarjetas.slice(0, desde)].find(pendiente);
-
-  if (destino) {
-    llevarALasTarjetas([destino]);
-  }
+  return { indice: Math.max(0, tarjetas.findIndex(seVe)), esLaTocada: false };
 }
 
 
@@ -951,7 +975,7 @@ function restaurarFocoDeAssessment(foco) {
  * lo usa tambien llevarALasTarjetas(), al llegar desde un radar, una fila,
  * «Lo mas urgente» o «Siguiente sin puntuar».
  */
-function enfocarPalanca(grupo, opciones) {
+export function enfocarPalanca(grupo, opciones) {
   const destino =
     grupo?.querySelector(".score-radio:checked") || grupo?.querySelector(".score-radio");
 
@@ -974,18 +998,25 @@ function enfocarPalanca(grupo, opciones) {
  * hacia el desplegable. Quitar una puntuacion, que antes era "Sin puntuar", es
  * volver a pulsar la elegida, o Suprimir con el teclado.
  */
-function scoreControl(item, lever) {
+export function scoreControl(item, lever, { prefijo = "score", objetivo = null } = {}) {
   const current = item.scores[lever.key];
-  const nombre = `score-${item.id}-${lever.key}`;
+  // El nombre agrupa los radios en todo el documento, no dentro de su
+  // contenedor: el modo taller pinta la misma palanca encima de la lista y,
+  // con el mismo nombre, marcar un score alli desmarcaba el de la tarjeta.
+  const nombre = `${prefijo}-${item.id}-${lever.key}`;
 
   const opciones = [1, 2, 3, 4, 5]
     .map((value) => {
       const nivel = (getMaturityLevel(value) || String(value)).replace(" - ", " · ");
       const criterio = item.maturity?.[value] || item.maturity?.[String(value)];
-      const ayuda = criterio ? `${nivel}: ${criterio}` : nivel;
+      const esObjetivo = value === objetivo;
+      const ayuda = [nivel, esObjetivo ? "objetivo" : null].filter(Boolean).join(" · ");
 
       return `
-        <label class="score-opcion score-opcion-${value}" title="${escapeAttr(ayuda)}">
+        <label
+          class="score-opcion score-opcion-${value}${esObjetivo ? " es-objetivo" : ""}"
+          title="${escapeAttr(criterio ? `${ayuda}: ${criterio}` : ayuda)}"
+        >
           <input
             class="score-radio"
             type="radio"
@@ -993,7 +1024,7 @@ function scoreControl(item, lever) {
             value="${value}"
             data-id="${escapeAttr(item.id)}"
             data-lever="${lever.key}"
-            aria-label="${escapeAttr(nivel)}"
+            aria-label="${escapeAttr(ayuda)}"
             ${current === value ? "checked" : ""}
           >
           <span aria-hidden="true">${value}</span>

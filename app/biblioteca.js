@@ -24,15 +24,15 @@ import {
   normalizarBiblioteca,
   ubicacionDeFuente,
   urlDeDocumento,
-} from "../core/biblioteca.js?v=25";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=25";
+} from "../core/biblioteca.js?v=26";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=26";
 import {
   SELECTOR_DE_MODAL_ABIERTO,
   atraparFoco,
   showNotice,
   updateModalOpenState,
-} from "./avisos.js?v=25";
-import { BIBLIOTECA, BIBLIOTECA_URL, CASOS_DE_IA, els } from "./estado.js?v=25";
+} from "./avisos.js?v=26";
+import { BIBLIOTECA, BIBLIOTECA_URL, CASOS_DE_IA, els } from "./estado.js?v=26";
 
 
 /**
@@ -69,19 +69,14 @@ export function fuentesDelCaso(caso) {
  * botones que se anuncian todos como "Más información" no distinguen nada.
  */
 export function pieDeFuente(caso) {
-  const [fuente] = fuentesDelCaso(caso);
+  const nombre = nombreDeMasInformacion(caso);
 
-  // Sin el visor en la pagina —un index.html cacheado de antes— el boton no
-  // abriria nada, y un boton que no responde delante del cliente es peor que
-  // no tenerlo.
-  if (!fuente || !caso?.id || !els.visorDocumento) {
+  if (!nombre) {
     return "";
   }
 
+  const [fuente] = fuentesDelCaso(caso);
   const documento = BIBLIOTECA.get(fuente.documento);
-  const nombre =
-    `Más información sobre «${caso.titulo}»: ${documento.titulo}, ` +
-    ubicacionDeFuente(fuente, documento).toLowerCase();
 
   return `
     <div class="ai-case-fuente">
@@ -96,6 +91,30 @@ export function pieDeFuente(caso) {
       </button>
     </div>
   `;
+}
+
+
+/**
+ * El nombre accesible del boton que abre la fuente de un caso, o "" si no hay
+ * nada que abrir. Lo comparten el pie de la ficha y la lista del modo taller,
+ * que pone el boton en el propio titulo del caso.
+ */
+export function nombreDeMasInformacion(caso) {
+  const [fuente] = fuentesDelCaso(caso);
+
+  // Sin el visor en la pagina —un index.html cacheado de antes— el boton no
+  // abriria nada, y un boton que no responde delante del cliente es peor que
+  // no tenerlo.
+  if (!fuente || !caso?.id || !els.visorDocumento) {
+    return "";
+  }
+
+  const documento = BIBLIOTECA.get(fuente.documento);
+
+  return (
+    `Más información sobre «${caso.titulo}»: ${documento.titulo}, ` +
+    ubicacionDeFuente(fuente, documento).toLowerCase()
+  );
 }
 
 
