@@ -7,37 +7,56 @@
  * suyos. Por eso se pinta antes del corte de renderAll(), y por eso su nota de
  * ambito lo dice en pantalla.
  *
- * Nada de lo que ensena depende de las puntuaciones, asi que no se repinta con
- * cada score: renderAll() llega aqui muchas veces por sesion y casi nunca con
- * algo nuevo. Repintar cien fichas sin motivo le quitaba el foco a quien estaba
- * sobre un «Más información» cuando entraba un cambio de otro consultor.
+ * Casi nada de lo que ensena depende de las puntuaciones, asi que no se repinta
+ * con cada score: renderAll() llega aqui muchas veces por sesion y casi nunca
+ * con algo nuevo. Repintar cien fichas sin motivo le quitaba el foco a quien
+ * estaba sobre un «Más información» cuando entraba un cambio de otro consultor.
+ * La excepcion es el orden por prioridad del cliente, que si sale de los
+ * scores: entonces el catalogo se repinta cuando cambia el orden o lo que dice
+ * cada ficha de sus brechas, y solo entonces.
  */
 
 import {
   UNIDADES,
   aparicionesDeCasos,
+  brechasDeCasos,
   contarPorCampo,
   filtrarCasos,
+  ordenarPorBrechas,
   resumenDeFuentes,
+  textoDeBrechas,
   titulosDeCasos,
-} from "../../core/biblioteca.js?v=22";
-import { escapeAttr, escapeHtml } from "../../core/presentacion.js?v=22";
-import { fuentesDelCaso } from "../biblioteca.js?v=22";
+} from "../../core/biblioteca.js?v=23";
+import { escapeAttr, escapeHtml } from "../../core/presentacion.js?v=23";
+import { fuentesDelCaso } from "../biblioteca.js?v=23";
 import {
   CLASES_DE_TIPO_DE_VALOR,
   aiCaseCards,
   clasesDeTipoDeIa,
   kpiCard,
-} from "../celdas.js?v=22";
-import { BIBLIOTECA, CASOS_DE_IA, ETIQUETAS_DE_CASOS, els } from "../estado.js?v=22";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=22";
-import { getDominiosDelOverview } from "./overview.js?v=22";
+} from "../celdas.js?v=23";
+import { BIBLIOTECA, CASOS_DE_IA, ETIQUETAS_DE_CASOS, els } from "../estado.js?v=23";
+import { calculate } from "../metricas.js?v=23";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=23";
+import { getDominiosDelOverview } from "./overview.js?v=23";
 
 
 const FILTROS_VACIOS = { texto: "", dominio: "", tipoValor: "", tipoIa: "", documento: "" };
 
 /** Los filtros del catalogo. Se conservan al cambiar de pestana. */
 const filtros = { ...FILTROS_VACIOS };
+
+/**
+ * En que orden van los casos: el del catalogo, que es el mismo para cualquier
+ * cliente, o primero los que atacan sus brechas. No es un filtro —no quita
+ * ningun caso—, asi que «Limpiar filtros» no lo toca. El informe lo sigue.
+ */
+const ORDENES = ["catalogo", "prioridad"];
+let orden = "catalogo";
+
+export function getOrdenDeCasosDeIa() {
+  return orden;
+}
 
 /** Lo que se calcula una vez por catalogo: casos, apariciones y resumen. */
 let contexto = null;
@@ -487,20 +506,48 @@ function dondeAparece(caso) {
 }
 
 
+/**
+ * Las brechas que ataca cada caso, con las puntuaciones de ahora.
+ *
+ * Las apariciones se vuelven a leer en cada pasada y no se toman del contexto:
+ * el contexto se arma una vez por catalogo, y al importar o restaurar un
+ * escenario las subcapacidades son objetos nuevos. Con las de antes, el orden
+ * seguiria las puntuaciones que ya no estan.
+ */
+function brechasDeAhora() {
+  return brechasDeCasos(
+    aparicionesDeCasos(getDominiosDelOverview()),
+    (aparicion) => calculate(aparicion.item, aparicion.domainId),
+    filtros.dominio,
+  );
+}
+
+
 function pintarCatalogo() {
   if (!contexto || !els.iaCatalogo) {
     return;
   }
 
-  const firma = `${firmaDeLaVista}|${JSON.stringify(filtros)}`;
+  const { casos, apariciones } = contexto;
+  const brechas = orden === "prioridad" ? brechasDeAhora() : null;
+  const filtrados = filtrarCasos(casos, filtros, apariciones);
+  const visibles = brechas ? ordenarPorBrechas(filtrados, brechas) : filtrados;
+  const brechaDe = (caso) => textoDeBrechas(brechas?.get(caso.titulo));
+
+  // Con el orden por prioridad, la firma lleva el orden y lo que dice cada
+  // ficha: un score que no mueve nada no repinta cien fichas.
+  const firma = [
+    firmaDeLaVista,
+    JSON.stringify(filtros),
+    orden,
+    brechas ? visibles.map((caso) => `${caso.id}:${brechaDe(caso)}`).join(",") : "",
+  ].join("|");
 
   if (firma === firmaDelCatalogo) {
     return;
   }
 
   firmaDelCatalogo = firma;
-
-  const { casos, apariciones } = contexto;
 
   if (!casos.length) {
     els.iaCatalogoRecuento.textContent = "";
@@ -513,20 +560,35 @@ function pintarCatalogo() {
     return;
   }
 
-  const visibles = filtrarCasos(casos, filtros, apariciones);
   const filtrado = hayFiltros();
+  const hayBrechas = Boolean(brechas) && visibles.some((caso) => brechaDe(caso));
+
+  let comoVan = "en el orden del catálogo";
+
+  if (brechas) {
+    comoVan = hayBrechas
+      ? "primero los que atacan las brechas más altas del cliente"
+      : "en el orden del catálogo: aún no hay brechas altas ni medias puntuadas";
+  }
 
   els.iaCatalogoRecuento.innerHTML = filtrado
     ? `
-      <span>Mostrando ${visibles.length} de ${plural(casos.length, "caso")}</span>
+      <span>Mostrando ${visibles.length} de ${plural(casos.length, "caso")}, ${escapeHtml(comoVan)}</span>
       <button class="clear-filters-button" type="button" data-limpiar-filtros-ia>
         Limpiar filtros
       </button>
     `
-    : `<span>${plural(casos.length, "caso")}, en el orden del catálogo</span>`;
+    : `<span>${plural(casos.length, "caso")}, ${escapeHtml(comoVan)}</span>`;
+
+  const brecha = brechas
+    ? (caso) => ({
+        texto: brechaDe(caso),
+        prioridad: brechas.get(caso.titulo)?.altas ? "Alta" : "Media",
+      })
+    : undefined;
 
   els.iaCatalogo.innerHTML = visibles.length
-    ? aiCaseCards(visibles, { donde: dondeAparece })
+    ? aiCaseCards(visibles, { donde: dondeAparece, brecha })
     : `
       <div class="filtered-empty-state">
         <strong>Ningún caso cumple estos filtros</strong>
@@ -589,6 +651,11 @@ export function setupVistaIa() {
       filtros[clave] = select.value;
       pintarCatalogo();
     });
+  });
+
+  els.iaOrden?.addEventListener("change", () => {
+    orden = ORDENES.includes(els.iaOrden.value) ? els.iaOrden.value : "catalogo";
+    pintarCatalogo();
   });
 
   seccion.addEventListener("click", (event) => {

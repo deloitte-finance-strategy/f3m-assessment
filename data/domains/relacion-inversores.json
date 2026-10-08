@@ -31,7 +31,7 @@
         "¿Se coordina con Finanzas, Legal y Compliance?"
       ],
       "evidencias": "Calendario regulatorio; matriz RACI; filings; aprobaciones; evidencias de revisión; control de versiones; actas de comité.",
-      "iniciativaSugerida": "Diseñar modelo de gobierno de reporting regulatorio con calendario, RACI, workflow de revisión, control de versiones y evidencias de aprobación.",
+      "iniciativaSugerida": "Diseñar modelo de gobierno de la información regulatoria con calendario, RACI, flujo de revisión, control de versiones y evidencias de aprobación.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -66,7 +66,7 @@
         "¿Hay owners de remediación?"
       ],
       "evidencias": "Matriz de obligaciones; alertas regulatorias; análisis de impacto; actas de seguimiento; políticas actualizadas; evidencias de acciones.",
-      "iniciativaSugerida": "Implantar regulatory intelligence para RI con matriz de obligaciones, alertas, análisis de impacto, owners y seguimiento de acciones.",
+      "iniciativaSugerida": "Implantar vigilancia regulatoria para RI con matriz de obligaciones, alertas, análisis de impacto, responsables y seguimiento de acciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -101,7 +101,7 @@
         "¿Se guardan evidencias?"
       ],
       "evidencias": "Política de disclosure; insider lists; versionado; aprobaciones; actas; comunicaciones externas; checklist de revisión.",
-      "iniciativaSugerida": "Formalizar controles de disclosure con criterios de materialidad, workflow, revisión de consistencia, evidencias y gestión de información sensible.",
+      "iniciativaSugerida": "Formalizar controles de difusión de información con criterios de materialidad, flujo de trabajo, revisión de consistencia, evidencias y gestión de información sensible.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -136,7 +136,7 @@
         "¿Se trazan aprobaciones?"
       ],
       "evidencias": "Calendario de comités; actas; briefing books; versiones de mensajes; aprobaciones; inputs de áreas; documentación del Consejo.",
-      "iniciativaSugerida": "Crear rutina de coordinación de RI con stakeholders internos, agenda, inputs, decisiones, mensajes clave y trazabilidad de aprobaciones.",
+      "iniciativaSugerida": "Crear rutina de coordinación de RI con interlocutores internos, agenda, aportaciones, decisiones, mensajes clave y trazabilidad de aprobaciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -171,7 +171,7 @@
         "¿Se actualizan mensajes con feedback del mercado?"
       ],
       "evidencias": "Plan RI; equity story; investor targeting; calendario; KPIs; feedback de inversores; presentaciones; análisis de percepción.",
-      "iniciativaSugerida": "Definir estrategia de RI con equity story, segmentación de inversores, mensajes clave, calendario, KPIs y mecanismo de feedback.",
+      "iniciativaSugerida": "Definir estrategia de RI con argumentario de inversión (equity story), segmentación de inversores, mensajes clave, calendario, KPIs y recogida de opiniones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -206,7 +206,7 @@
         "¿Se hace seguimiento de acciones?"
       ],
       "evidencias": "Calendario RI; earnings materials; Q&A; roadshow tracker; investor day materials; feedback logs; approvals; follow-up actions.",
-      "iniciativaSugerida": "Implantar modelo de planificación de eventos RI con calendario, materiales, Q&A, approvals, feedback y seguimiento de acciones.",
+      "iniciativaSugerida": "Implantar modelo de planificación de eventos de RI con calendario, materiales, preguntas y respuestas, aprobaciones, opiniones y seguimiento de acciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -241,7 +241,7 @@
         "¿Se traduce feedback en acciones o mensajes?"
       ],
       "evidencias": "CRM RI; logs de reuniones; feedback de inversores; informes de analistas; Q&A; trackers de acciones; segmentación.",
-      "iniciativaSugerida": "Crear modelo de investor intelligence con CRM, feedback estructurado, análisis de temas, percepción, acciones y reporting ejecutivo.",
+      "iniciativaSugerida": "Crear modelo de inteligencia de inversores con CRM, opiniones estructuradas, análisis de temas, percepción, acciones e informes a la dirección.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -276,7 +276,7 @@
         "¿Se generan acciones de mejora?"
       ],
       "evidencias": "Dashboard RI; encuestas de percepción; coverage de analistas; feedback; benchmarking; KPIs de actividad; acciones de mejora.",
-      "iniciativaSugerida": "Implantar scorecard de RI con KPIs de actividad, percepción, cobertura, feedback, benchmarking y mejora continua.",
+      "iniciativaSugerida": "Implantar cuadro de mando de RI con KPIs de actividad, percepción, cobertura, opiniones, comparación con referentes y mejora continua.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -311,7 +311,7 @@
         "¿Se explican variaciones de mercado?"
       ],
       "evidencias": "Modelo de valoración; comparables; consensus; informes de analistas; evolución de múltiplos; presentaciones; análisis de sensibilidad.",
-      "iniciativaSugerida": "Crear modelo de valoración y percepción de mercado con peers, consensus, drivers, sensibilidad y recomendaciones de comunicación.",
+      "iniciativaSugerida": "Crear modelo de valoración y percepción de mercado con comparables, consenso de analistas, drivers, sensibilidad y recomendaciones de comunicación.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -346,7 +346,7 @@
         "¿Se recopila feedback post-operación?"
       ],
       "evidencias": "Deal materials; Q&A; calendario de operación; actas; feedback de bancos/inversores; approvals; documentación financiera.",
-      "iniciativaSugerida": "Definir playbook de RI para operaciones de mercado con roles, materiales, Q&A, approvals, feedback y coordinación con stakeholders.",
+      "iniciativaSugerida": "Definir guía de actuación de RI para operaciones de mercado con roles, materiales, preguntas y respuestas, aprobaciones, opiniones y coordinación con las partes implicadas.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -381,7 +381,7 @@
         "¿Se preparan mensajes o Q&A?"
       ],
       "evidencias": "Consensus tracker; guidance; forecast interno; informes de analistas; Q&A; earnings prep; análisis de gaps.",
-      "iniciativaSugerida": "Implantar modelo de consensus management con tracker de analistas, comparación con forecast, gaps de expectativa y recomendaciones de mensajes.",
+      "iniciativaSugerida": "Implantar gestión del consenso de analistas con seguimiento por analista, comparación con la previsión, diferencias de expectativas y recomendaciones de mensajes.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -416,7 +416,7 @@
         "¿Se conectan con decisiones de capital?"
       ],
       "evidencias": "Pack ejecutivo RI; actas de comité; análisis de mercado; feedback inversor; coverage de analistas; recomendaciones; decisiones.",
-      "iniciativaSugerida": "Crear pack ejecutivo de RI/capital markets con valoración, consensus, feedback, riesgos, oportunidades y recomendaciones de acción.",
+      "iniciativaSugerida": "Crear informe ejecutivo de RI y mercados de capitales con valoración, consenso, opiniones, riesgos, oportunidades y recomendaciones de acción.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",

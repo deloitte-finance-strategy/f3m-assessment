@@ -31,7 +31,7 @@
         "¿Se documentan ajustes y supuestos?"
       ],
       "evidencias": "Calendario de cierre fiscal; RACI; workpapers de provisión; aprobaciones; conciliaciones; políticas contables/fiscales; evidencias de revisión.",
-      "iniciativaSugerida": "Diseñar modelo de gobierno de tax accounting con calendario, RACI, controles, aprobaciones, trazabilidad de supuestos y conexión con cierre/reporting.",
+      "iniciativaSugerida": "Diseñar modelo de gobierno de la contabilidad fiscal con calendario, RACI, controles, aprobaciones, trazabilidad de supuestos y conexión con cierre e informes.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -66,7 +66,7 @@
         "¿Hay reconciliación entre tax accounting y reporting?"
       ],
       "evidencias": "Modelo de provisión; conciliación contable-fiscal; cálculo ETR; detalle de diferidos; ajustes permanentes/temporales; evidencias de revisión.",
-      "iniciativaSugerida": "Estandarizar cálculo de impuesto corriente, diferido y ETR con reglas, conciliaciones, validaciones automáticas y análisis de drivers.",
+      "iniciativaSugerida": "Estandarizar cálculo de impuesto corriente, diferido y tipo efectivo (ETR) con reglas, conciliaciones, validaciones automáticas y análisis de drivers.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -101,7 +101,7 @@
         "¿Hay owners de datos clave?"
       ],
       "evidencias": "Modelo de datos fiscal; fuentes oficiales; reglas de calidad; reconciliaciones; incidencias de dato; documentación de ajustes; metadata.",
-      "iniciativaSugerida": "Implantar capa de datos fiscal-contables con fuentes oficiales, reglas de calidad, reconciliaciones, owners y workflow de remediación.",
+      "iniciativaSugerida": "Implantar capa de datos fiscal-contables con fuentes oficiales, reglas de calidad, conciliaciones, responsables y flujo de corrección.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -136,7 +136,7 @@
         "¿Se generan acciones?"
       ],
       "evidencias": "Tax reporting pack; análisis ETR; cash tax; comentarios ejecutivos; actas de revisión; auditoría; acciones de seguimiento.",
-      "iniciativaSugerida": "Crear reporting fiscal financiero con KPIs, narrativa ejecutiva, análisis de variaciones, riesgos, acciones y conexión con reporting externo.",
+      "iniciativaSugerida": "Crear informes fiscales financieros con KPIs, narrativa ejecutiva, análisis de variaciones, riesgos, acciones y conexión con la información externa.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -171,7 +171,7 @@
         "¿Se monitorizan cambios regulatorios?"
       ],
       "evidencias": "Calendario fiscal; matriz de obligaciones; declaraciones; workflow de aprobación; evidencias; repositorio documental; alertas regulatorias.",
-      "iniciativaSugerida": "Implantar gobierno de cumplimiento directo con calendario, matriz de obligaciones, workflow, repositorio de evidencias y alertas regulatorias.",
+      "iniciativaSugerida": "Implantar gobierno de cumplimiento directo con calendario, matriz de obligaciones, flujo de trabajo, repositorio de evidencias y alertas regulatorias.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -206,7 +206,7 @@
         "¿Se trazan ajustes y soportes?"
       ],
       "evidencias": "Declaraciones directas; plantillas; fuentes de datos; logs de revisión; aprobaciones; documentación soporte; justificantes de presentación.",
-      "iniciativaSugerida": "Estandarizar preparación y revisión de declaraciones directas con fuentes oficiales, validaciones, workflow y trazabilidad de ajustes.",
+      "iniciativaSugerida": "Estandarizar preparación y revisión de declaraciones directas con fuentes oficiales, validaciones, flujo de trabajo y trazabilidad de ajustes.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -241,7 +241,7 @@
         "¿Se reutilizan aprendizajes?"
       ],
       "evidencias": "Tracker de controversias; requerimientos; respuestas; evidencias; actas con asesores; estimación de exposición; documentación de cierre.",
-      "iniciativaSugerida": "Crear modelo de gestión de controversias fiscales con workflow, repositorio de evidencias, scoring de riesgo, reporting y lessons learned.",
+      "iniciativaSugerida": "Crear modelo de gestión de controversias fiscales con flujo de trabajo, repositorio de evidencias, puntuación de riesgo, informes y lecciones aprendidas.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -311,7 +311,7 @@
         "¿Se controlan reglas de IVA/impuestos indirectos?"
       ],
       "evidencias": "Modelo operativo; calendario IVA; RACI; reglas fiscales; matriz de jurisdicciones; controles; incidencias; documentación de procesos.",
-      "iniciativaSugerida": "Definir modelo operativo de impuestos indirectos con roles, calendario, reglas fiscales, controles, integración con procesos y reporting de incidencias.",
+      "iniciativaSugerida": "Definir modelo operativo de impuestos indirectos con roles, calendario, reglas fiscales, controles, integración con procesos e informe de incidencias.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -381,7 +381,7 @@
         "¿Se explican variaciones por periodo?"
       ],
       "evidencias": "Declaraciones IVA; conciliaciones; libros registro; fuentes de datos; aprobaciones; ajustes; justificantes de presentación; reportes de errores.",
-      "iniciativaSugerida": "Estandarizar preparación de declaraciones indirectas con conciliación contable-fiscal, validaciones automáticas, workflow y análisis de variaciones.",
+      "iniciativaSugerida": "Estandarizar preparación de declaraciones indirectas con conciliación contable-fiscal, validaciones automáticas, flujo de trabajo y análisis de variaciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -416,7 +416,7 @@
         "¿Se priorizan riesgos por exposición?"
       ],
       "evidencias": "Alertas regulatorias; análisis de impacto; cambios de configuración; matriz de controles; KRIs; incidencias; actas de seguimiento.",
-      "iniciativaSugerida": "Crear modelo de monitorización de riesgos indirectos con regulatory tracking, análisis de impacto, KRIs, controles y actualización de reglas.",
+      "iniciativaSugerida": "Crear modelo de monitorización de riesgos indirectos con seguimiento normativo, análisis de impacto, KRIs, controles y actualización de reglas.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -451,7 +451,7 @@
         "¿Se mide impacto del advisory?"
       ],
       "evidencias": "Registro de consultas; tax memos; criterios de priorización; aprobaciones; actas con negocio; seguimiento de decisiones; feedback.",
-      "iniciativaSugerida": "Definir modelo de tax advisory con intake, priorización por riesgo/valor, documentación estándar, approval workflow y seguimiento de impacto.",
+      "iniciativaSugerida": "Definir modelo de asesoramiento fiscal con recepción de consultas, priorización por riesgo y valor, documentación estándar, flujo de aprobación y seguimiento de impacto.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -486,7 +486,7 @@
         "¿Se valida con governance fiscal?"
       ],
       "evidencias": "Tax planning memos; escenarios; cálculos de cash tax; análisis de sensibilidad; approvals; políticas de riesgo fiscal; business cases.",
-      "iniciativaSugerida": "Crear framework de planificación fiscal con escenarios, cash tax, sensibilidad, riesgos, aprobaciones y conexión con forecast/estrategia.",
+      "iniciativaSugerida": "Crear marco de planificación fiscal con escenarios, impuestos pagados en caja, sensibilidad, riesgos, aprobaciones y conexión con previsión y estrategia.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -521,7 +521,7 @@
         "¿Se reportan a governance?"
       ],
       "evidencias": "Tax risk register; posiciones inciertas; cuantificación de exposición; mitigantes; actas de comité; provisiones; controversias.",
-      "iniciativaSugerida": "Implantar tax risk register con clasificación, probabilidad/impacto, owners, mitigantes, conexión con provisión y reporting a governance.",
+      "iniciativaSugerida": "Implantar registro de riesgos fiscales con clasificación, probabilidad e impacto, responsables, mitigantes, conexión con provisión e información a los órganos de gobierno.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -556,7 +556,7 @@
         "¿Se controla versión y aprobación?"
       ],
       "evidencias": "Repositorio fiscal; tax memos; criterios técnicos; alertas normativas; plantillas; control de versiones; materiales de formación.",
-      "iniciativaSugerida": "Crear tax knowledge hub con normativa, criterios, precedentes, templates, alertas de cambios y asistente de búsqueda/resumen.",
+      "iniciativaSugerida": "Crear centro de conocimiento fiscal con normativa, criterios, precedentes, plantillas, alertas de cambios y asistente de búsqueda y resumen.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",

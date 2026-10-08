@@ -15,16 +15,16 @@
  * las pedia prestadas el modal del Roadmap; con la pestana IA ya son tres sitios.
  */
 
-import { average } from "../core/calculo.js?v=22";
+import { average, getMaturityLevelNumber, priorityFromGap } from "../core/calculo.js?v=23";
 import {
   escapeAttr,
   escapeHtml,
   formatMedia,
   priorityColor,
-} from "../core/presentacion.js?v=22";
-import { pieDeFuente } from "./biblioteca.js?v=22";
-import { LEVERS, els, state } from "./estado.js?v=22";
-import { getScopedItems } from "./filtros.js?v=22";
+} from "../core/presentacion.js?v=23";
+import { pieDeFuente } from "./biblioteca.js?v=23";
+import { LEVERS, els, state } from "./estado.js?v=23";
+import { getScopedItems } from "./filtros.js?v=23";
 
 
 export function buildFilteredEmptyState() {
@@ -204,8 +204,12 @@ function aiCaseTag(valor, definicion, clases) {
  * 'donde' solo lo trae la pestana IA. En la tarjeta y en el modal la ficha ya
  * esta dentro de una subcapacidad; suelta en el catalogo, lo primero que se
  * pregunta de un caso es en que parte del modelo aparece.
+ *
+ * 'brecha' tambien es solo de la pestana IA, con el orden por prioridad del
+ * cliente: «Ataca 2 brechas altas», con el color de la prioridad mas alta que
+ * ataca, que es lo que explica por que la ficha va donde va.
  */
-function aiCaseCard(caso, donde = "") {
+function aiCaseCard(caso, donde = "", brecha = null) {
   const etiquetas = [
     aiCaseTag(caso.tipoValor, caso.definicionTipoValor, CLASES_DE_TIPO_DE_VALOR),
     aiCaseTag(caso.tipoIa, caso.definicionTipoIa, clasesDeTipoDeIa(caso.tipoIa)),
@@ -220,6 +224,11 @@ function aiCaseCard(caso, donde = "") {
           ? `<p class="ai-case-description">${escapeHtml(caso.descripcion)}</p>`
           : ""
       }
+      ${
+        brecha?.texto
+          ? `<p class="ai-case-brecha"><span class="priority-badge ${brecha.prioridad === "Alta" ? "alta" : "media"}">${escapeHtml(brecha.texto)}</span></p>`
+          : ""
+      }
       ${donde ? `<p class="ai-case-donde">${escapeHtml(donde)}</p>` : ""}
       ${pieDeFuente(caso)}
     </li>
@@ -229,14 +238,17 @@ function aiCaseCard(caso, donde = "") {
 
 /**
  * La lista de fichas, igual en la tarjeta, en el modal del roadmap y en la
- * pestana IA. 'donde', si llega, es una funcion caso -> texto.
+ * pestana IA. 'donde', si llega, es una funcion caso -> texto, y 'brecha', una
+ * caso -> { texto, prioridad }.
  */
-export function aiCaseCards(casos, { donde } = {}) {
+export function aiCaseCards(casos, { donde, brecha } = {}) {
   if (!casos?.length) {
     return `<p class="small-note">Sin casos de uso de IA asociados informados.</p>`;
   }
 
-  const fichas = casos.map((caso) => aiCaseCard(caso, donde ? donde(caso) : ""));
+  const fichas = casos.map((caso) =>
+    aiCaseCard(caso, donde ? donde(caso) : "", brecha ? brecha(caso) : null),
+  );
 
   return `<ul class="ai-case-list">${fichas.join("")}</ul>`;
 }
@@ -250,4 +262,56 @@ export function pintarContadorDeCasos(elemento, casos) {
 
   elemento.textContent = casos.length ? String(casos.length) : "";
   elemento.hidden = !casos.length;
+}
+
+
+/**
+ * Una celda del heatmap. Sin puntuar es un guion, nunca un cero.
+ *
+ * Number(null) es 0, y 0 pasa Number.isFinite. Por eso una capacidad sin
+ * ninguna subcapacidad puntuada se pintaba con un 0 en las cuatro columnas
+ * numericas, y en rojo, porque 0 cae en el tramo mas bajo de la escala.
+ *
+ * Delante de un cliente eso afirma algo que no es cierto: que esa capacidad
+ * esta evaluada y con la peor nota posible, cuando lo que pasa es que todavia
+ * no se ha evaluado. La tabla resumen del Dashboard, con los mismos datos,
+ * enseña un guion. Dos vistas de la misma herramienta decian cosas distintas.
+ *
+ * Por defecto escribe una media, con dos decimales. El score suelto de una
+ * palanca, en las filas de subcapacidad, es un entero y llega con formatNumber.
+ * 'clases' añade las de la tabla que la acoge, como el alineado de "number".
+ */
+export function heatScoreCell(value, formatear = formatMedia, clases = "") {
+  const sinValor = value === null || value === undefined || value === "";
+  const number = sinValor ? NaN : Number(value);
+
+  if (!Number.isFinite(number)) {
+    return `<td class="heat-cell heat-blank ${clases}">-</td>`;
+  }
+
+  // El nivel sale de getMaturityLevelNumber(), que es donde vive el redondeo
+  // acotado del modelo. Aqui estaba reimplementado en linea, asi que eran dos
+  // definiciones de "que nivel es un 3,5" a dos lineas de distancia.
+  return `<td class="heat-cell heat-${getMaturityLevelNumber(number)} ${clases}">${formatear(number)}</td>`;
+}
+
+
+/**
+ * La clase de color de una celda de gap.
+ *
+ * Los cortes los pone priorityFromGap(), que es la regla de negocio. Estaban
+ * repetidos aqui como 2 y 1 sueltos: mover el umbral de Alta en el motor habria
+ * dejado el heatmap pintando de rojo un gap que la tabla llamaba Media.
+ */
+const CLASE_DE_GAP = {
+  Alta: "gap-high",
+  Media: "gap-mid",
+  Baja: "gap-low",
+};
+
+
+export function gapClass(value) {
+  if (!Number.isFinite(value)) return "heat-blank";
+
+  return CLASE_DE_GAP[priorityFromGap(value)] || "gap-low";
 }

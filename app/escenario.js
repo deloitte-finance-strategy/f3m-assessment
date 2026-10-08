@@ -12,30 +12,31 @@ import {
   DEFAULT_TARGET_MATURITY,
   normalizeTargetValue,
   toScore,
-} from "../core/calculo.js?v=22";
+} from "../core/calculo.js?v=23";
 
 import {
   normalizarAutoria,
+  normalizarCliente,
   normalizarEscenarioParaFirebase,
   normalizarEstado,
   recortarAlLimite,
-} from "../core/escenario.js?v=22";
+} from "../core/escenario.js?v=23";
 
 import {
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "../core/objetivos.js?v=22";
+} from "../core/objetivos.js?v=23";
 
 import {
   findMatchingScenarioItem,
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
-} from "../core/coincidencias.js?v=22";
+} from "../core/coincidencias.js?v=23";
 
-import { LEVERS, STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=22";
-import { leerAlmacenamiento } from "./almacenamiento.js?v=22";
-import { setActiveDomain } from "./dominios.js?v=22";
+import { LEVERS, STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=23";
+import { leerAlmacenamiento } from "./almacenamiento.js?v=23";
+import { setActiveDomain } from "./dominios.js?v=23";
 
 
 
@@ -230,6 +231,12 @@ export function applyScenarioPayload(payload, { seguirDominioDelEscenario = fals
     return resultado;
   }
 
+  // Siempre, tambien cuando el payload no lo trae: abrir la copia de otro
+  // cliente, o un escenario anterior a este campo, no puede dejar en pantalla
+  // el nombre del que habia antes. En la portada de un informe ese error se
+  // envia por correo.
+  state.cliente = normalizarCliente(payload.cliente);
+
   if (payload.domains) {
     Object.keys(payload.domains).forEach((domainId) => {
       const domain = state.domains[domainId];
@@ -378,6 +385,7 @@ export function buildScenarioPayload() {
     version: 3,
     activeDomainId: state.activeDomainId,
     updatedAt: new Date().toISOString(),
+    ...(state.cliente ? { cliente: state.cliente } : {}),
     domains: domainsPayload,
   };
 }

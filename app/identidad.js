@@ -11,17 +11,16 @@
  * getUsuarioActual(), que ademas deja claro que puede ser null.
  */
 
-import { NOMBRE_STORAGE_KEY, els } from "./estado.js?v=22";
+import { NOMBRE_STORAGE_KEY, els } from "./estado.js?v=23";
 import {
   borrarDeAlmacenamiento,
   escribirAlmacenamiento,
   leerAlmacenamiento,
-} from "./almacenamiento.js?v=22";
-import { abrirDialogo, showNotice } from "./avisos.js?v=22";
-import { conLimiteDeEspera, firebaseAuth, scenarioDatabaseRef } from "./firebase.js?v=22";
-import { marcarFalloDeSincronia } from "./indicador.js?v=22";
-import { repintarTodo } from "./repintado.js?v=22";
-import { onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+} from "./almacenamiento.js?v=23";
+import { abrirDialogo, showNotice } from "./avisos.js?v=23";
+import { conLimiteDeEspera, conectarFirebase, enEscenarioCompartido } from "./firebase.js?v=23";
+import { marcarFalloDeSincronia } from "./indicador.js?v=23";
+import { repintarTodo } from "./repintado.js?v=23";
 
 
 // Identidad de quien edita. Queda a null si la autenticación no está disponible:
@@ -45,12 +44,12 @@ let vigilanciaDeIdentidad = null;
  * Se registra una sola vez: reconectar vuelve a llamar a inicializarIdentidad()
  * y dos vigilantes escribirian `usuarioActual` dos veces por cada cambio.
  */
-function vigilarIdentidad() {
-  if (vigilanciaDeIdentidad || !firebaseAuth) {
+function vigilarIdentidad(conexion) {
+  if (vigilanciaDeIdentidad) {
     return;
   }
 
-  vigilanciaDeIdentidad = onAuthStateChanged(firebaseAuth, (user) => {
+  vigilanciaDeIdentidad = conexion.onAuthStateChanged(conexion.auth, (user) => {
     if (user) {
       // El nombre es cosa del navegador, no de Firebase: se relee de su sitio
       // para no perderlo cuando el SDK refresca la sesion.
@@ -79,15 +78,31 @@ function vigilarIdentidad() {
  * herramienta deje de funcionar por un ajuste que no está en este repositorio.
  */
 export async function inicializarIdentidad() {
-  if (!scenarioDatabaseRef) {
+  if (!enEscenarioCompartido) {
     return;
   }
 
-  vigilarIdentidad();
+  let conexion;
+
+  try {
+    conexion = await conectarFirebase();
+  } catch (error) {
+    // Sin SDK no hay identidad posible, y sin identidad no se escribe: la
+    // puerta de la persistencia lo corta y pone el chip en rojo. El aviso con
+    // lo que hacer lo da la lectura del escenario, que falla justo despues por
+    // el mismo motivo; darlo tambien aqui serian dos avisos para un fallo.
+    console.warn("No se ha podido descargar la conexión con Firebase.", error);
+
+    usuarioActual = null;
+    actualizarIndicadorDeIdentidad();
+    return;
+  }
+
+  vigilarIdentidad(conexion);
 
   try {
     const credencial = await conLimiteDeEspera(
-      signInAnonymously(firebaseAuth),
+      conexion.signInAnonymously(conexion.auth),
       "Tiempo de espera agotado al autenticar",
     );
 
@@ -190,7 +205,7 @@ export function actualizarIndicadorDeIdentidad() {
   }
 
   // Solo tiene sentido en un escenario compartido: en modo local no hay a quién atribuir.
-  boton.hidden = !scenarioDatabaseRef;
+  boton.hidden = !enEscenarioCompartido;
 
   const nombre = getNombreEditor();
 

@@ -172,6 +172,24 @@ export function ordenarPorPrioridadYGap(entradas) {
 }
 
 
+/**
+ * Lo mas urgente de la funcion financiera: las subcapacidades de prioridad
+ * alta de todos los dominios, de mayor a menor gap, y cuantas hay en total.
+ *
+ * Una sola funcion para el Overview y para el informe, que tienen que decir las
+ * mismas: si cada uno eligiera las suyas, la diapositiva y la pantalla que se
+ * proyectan en el mismo taller no coincidirian. A igualdad de gap se respeta el
+ * orden de llegada, que es el de los dominios en el conmutador.
+ */
+export function masUrgentes(entradas, limite = 10) {
+  const altas = ordenarPorPrioridadYGap(
+    entradas.filter((entrada) => entrada.metrics.prioridad === "Alta"),
+  );
+
+  return { lista: altas.slice(0, limite), total: altas.length };
+}
+
+
 export function priorityFromGap(gap) {
   if (!Number.isFinite(gap)) return "Pendiente";
   if (gap >= 2) return "Alta";

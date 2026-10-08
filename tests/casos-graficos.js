@@ -18,7 +18,7 @@
  * tests/comprobar-desbordes.js.
  */
 
-import { getMaturityLevel } from "../core/calculo.js?v=22";
+import { getMaturityLevel } from "../core/calculo.js?v=23";
 
 import {
   barrasHtml,
@@ -26,7 +26,7 @@ import {
   svgBullet,
   svgDonut,
   svgEscalaDeMadurez,
-} from "../informe/graficos.js?v=22";
+} from "../informe/graficos.js?v=23";
 
 
 /** El valor del atributo pedido, en la enesima etiqueta de ese tipo. */

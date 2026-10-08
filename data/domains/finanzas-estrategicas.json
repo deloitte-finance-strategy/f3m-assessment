@@ -31,7 +31,7 @@
         "¿Se actualiza con señales internas y externas?"
       ],
       "evidencias": "Documento de visión financiera; estrategia corporativa; prioridades del CFO; roadmap; KPIs; presentaciones a comité; entrevistas con stakeholders.",
-      "iniciativaSugerida": "Definir o actualizar la visión financiera corporativa con narrativa estratégica, prioridades, capacidades objetivo, KPIs y roadmap asociado.",
+      "iniciativaSugerida": "Definir o actualizar la visión financiera corporativa con narrativa estratégica, prioridades, capacidades objetivo, KPIs y hoja de ruta asociada.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -66,7 +66,7 @@
         "¿Se reasignan recursos según evolución?"
       ],
       "evidencias": "Política de capital allocation; portfolio de inversiones; business cases; actas de comité; benefit tracking; escenarios; decisiones de reasignación.",
-      "iniciativaSugerida": "Diseñar modelo de capital allocation con criterios de valor/riesgo, escenarios, seguimiento de beneficios y revisión dinámica del portfolio.",
+      "iniciativaSugerida": "Diseñar modelo de asignación de capital con criterios de valor y riesgo, escenarios, seguimiento de beneficios y revisión dinámica de la cartera.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -101,7 +101,7 @@
         "¿Se traducen insights en decisiones?"
       ],
       "evidencias": "Informes de mercado; benchmarks; análisis de competidores; dashboards externos; actas de comité; escenarios macro/sectoriales.",
-      "iniciativaSugerida": "Crear modelo de financial market intelligence con fuentes, benchmarks, señales externas, implicaciones financieras y rutina ejecutiva.",
+      "iniciativaSugerida": "Crear modelo de inteligencia de mercados financieros con fuentes, referencias de mercado, señales externas, implicaciones financieras y rutina ejecutiva.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -136,7 +136,7 @@
         "¿Se generan decisiones y acciones?"
       ],
       "evidencias": "Cuadro de mando estratégico; KPIs; targets; actas de comité; análisis de desviaciones; planes de acción; alertas.",
-      "iniciativaSugerida": "Implantar executive financial health dashboard con KPIs estratégicos, drivers, riesgos, alertas, owners y acciones de seguimiento.",
+      "iniciativaSugerida": "Implantar cuadro de mando ejecutivo de salud financiera con KPIs estratégicos, drivers, riesgos, alertas, responsables y acciones de seguimiento.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -171,7 +171,7 @@
         "¿Se prioriza el portfolio por valor y riesgo?"
       ],
       "evidencias": "Roadmap de transformación; portfolio de iniciativas; comité de transformación; KPIs; benefit tracker; matriz de dependencias; riesgos.",
-      "iniciativaSugerida": "Definir modelo de gobierno de transformación financiera con portfolio, priorización, dependencias, beneficios, owners y reporting ejecutivo.",
+      "iniciativaSugerida": "Definir modelo de gobierno de transformación financiera con cartera de iniciativas, priorización, dependencias, beneficios, responsables e informes a la dirección.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -206,7 +206,7 @@
         "¿Se mide productividad y capacidad liberada?"
       ],
       "evidencias": "TOM financiero; RACI; mapa de procesos; catálogo de servicios; estructura organizativa; business partnering model; KPIs de productividad.",
-      "iniciativaSugerida": "Diseñar target operating model financiero con servicios, roles, procesos, capacidades, tecnología, datos y métricas de productividad.",
+      "iniciativaSugerida": "Diseñar el modelo operativo objetivo de Finanzas con servicios, roles, procesos, capacidades, tecnología, datos y métricas de productividad.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -241,7 +241,7 @@
         "¿Se miden beneficios digitales?"
       ],
       "evidencias": "Arquitectura objetivo; roadmap digital; catálogo de automatizaciones; data governance; modelos de datos; KPIs de automatización; business cases.",
-      "iniciativaSugerida": "Construir roadmap digital de Finanzas con arquitectura, datos, automatización, casos de uso de IA, gobierno y medición de beneficios.",
+      "iniciativaSugerida": "Construir hoja de ruta digital de Finanzas con arquitectura, datos, automatización, casos de uso de IA, gobierno y medición de beneficios.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -276,7 +276,7 @@
         "¿Se ajustan intervenciones según uso real?"
       ],
       "evidencias": "Plan de change; mapa de stakeholders; materiales de formación; métricas de adopción; encuestas; red de champions; comunicaciones.",
-      "iniciativaSugerida": "Implantar modelo de gestión del cambio con stakeholders, formación, adopción, champions, métricas de uso y refuerzo de capacidades digitales.",
+      "iniciativaSugerida": "Implantar modelo de gestión del cambio con grupos de interés, formación, adopción, referentes internos, métricas de uso y refuerzo de capacidades digitales.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -311,7 +311,7 @@
         "¿Se reporta impacto empresarial?"
       ],
       "evidencias": "Portfolio de transformación; business cases; comités de transformación; roles de Finanzas; reportes de beneficios; decisiones de financiación.",
-      "iniciativaSugerida": "Definir rol de Finanzas en transformación empresarial con governance, business case, funding, riesgos, beneficios y reporting de valor.",
+      "iniciativaSugerida": "Definir el rol de Finanzas en la transformación empresarial con gobierno, business case, financiación, riesgos, beneficios e informes de valor.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -346,7 +346,7 @@
         "¿Se revisa el portfolio periódicamente?"
       ],
       "evidencias": "Portfolio estratégico; criterios de priorización; roadmap; matriz de dependencias; capacity planning; actas de comité; benefit tracker.",
-      "iniciativaSugerida": "Implantar modelo de portfolio estratégico con priorización por valor, riesgo, capacidad, dependencias, escenarios y seguimiento de beneficios.",
+      "iniciativaSugerida": "Implantar modelo de cartera estratégica con priorización por valor, riesgo, capacidad, dependencias, escenarios y seguimiento de beneficios.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -381,7 +381,7 @@
         "¿Se realiza seguimiento post-deal?"
       ],
       "evidencias": "Modelos de valoración; due diligence; clean room outputs; synergy tracker; integration plan; business case; post-deal review.",
-      "iniciativaSugerida": "Diseñar metodología financiera para M&A e integración con valoración, sinergias, riesgos, escenarios, governance y seguimiento post-deal.",
+      "iniciativaSugerida": "Diseñar metodología financiera para M&A e integración con valoración, sinergias, riesgos, escenarios, gobierno y seguimiento tras la operación.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -416,7 +416,7 @@
         "¿Se incorporan aprendizajes a futuras decisiones?"
       ],
       "evidencias": "Benefit tracker; líneas base; KPIs de valor; reportes de impacto; acciones correctivas; post-mortems; decisiones de portfolio.",
-      "iniciativaSugerida": "Implantar modelo de value realization con línea base, owners, métricas, seguimiento, acciones correctivas y aprendizaje para futuros casos.",
+      "iniciativaSugerida": "Implantar modelo de materialización del valor con línea base, responsables, métricas, seguimiento, acciones correctivas y aprendizaje para futuros casos.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",

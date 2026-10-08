@@ -15,7 +15,7 @@
  * que algo se ha roto.
  */
 
-import { normalizeMatchKey } from "./coincidencias.js?v=22";
+import { normalizeMatchKey } from "./coincidencias.js?v=23";
 
 
 /**
@@ -289,12 +289,111 @@ export function aparicionesDeCasos(dominios) {
           dominio: dominio.label || dominio.id,
           capacidad: item.capacidad || "",
           subcapacidad: item.subcapacidad || "",
+          // La subcapacidad entera, para pedirle sus metricas al motor cuando
+          // el catalogo se ordena por las brechas del cliente.
+          item,
         });
       });
     });
   });
 
   return apariciones;
+}
+
+
+/**
+ * Las brechas del cliente que ataca cada caso: cuantas de las subcapacidades
+ * en las que aparece tienen prioridad alta, media o baja, y cuanto suman sus
+ * gaps. Lo que esta sin puntuar no cuenta: no se inventa una brecha que nadie
+ * ha medido.
+ *
+ * 'metricasDe' recibe una aparicion y devuelve sus metricas. Se inyecta porque
+ * el objetivo de cada subcapacidad depende de su dominio y de lo que el equipo
+ * haya ajustado, y eso lo sabe la aplicacion, no el catalogo. Con 'dominio',
+ * solo cuentan las apariciones de ese dominio: con el filtro de dominio puesto,
+ * una brecha de otro dominio no explica por que un caso va primero.
+ */
+export function brechasDeCasos(apariciones, metricasDe, dominio = "") {
+  const brechas = new Map();
+
+  (apariciones || new Map()).forEach((lista, titulo) => {
+    const cuenta = { altas: 0, medias: 0, bajas: 0, gap: 0 };
+
+    lista.forEach((aparicion) => {
+      if (dominio && aparicion.domainId !== dominio) {
+        return;
+      }
+
+      const metricas = metricasDe(aparicion);
+
+      if (!metricas || metricas.isPending) {
+        return;
+      }
+
+      if (metricas.prioridad === "Alta") cuenta.altas += 1;
+      else if (metricas.prioridad === "Media") cuenta.medias += 1;
+      else if (metricas.prioridad === "Baja") cuenta.bajas += 1;
+
+      cuenta.gap += Number.isFinite(metricas.gap) ? metricas.gap : 0;
+    });
+
+    brechas.set(titulo, cuenta);
+  });
+
+  return brechas;
+}
+
+
+/**
+ * Los casos por las brechas que atacan: primero los que tienen mas
+ * subcapacidades de prioridad alta detras, luego media, y a igualdad, mas gap
+ * acumulado. Lo que empata del todo —tambien todo lo que no ataca nada
+ * puntuado— conserva el orden en que llego, asi que sin nada puntuado el
+ * resultado es el orden de partida.
+ */
+export function ordenarPorBrechas(casos, brechas) {
+  const vacio = { altas: 0, medias: 0, bajas: 0, gap: 0 };
+
+  return (casos || [])
+    .map((caso, indice) => ({ caso, indice, brecha: brechas.get(caso.titulo) || vacio }))
+    .sort(
+      (a, b) =>
+        b.brecha.altas - a.brecha.altas ||
+        b.brecha.medias - a.brecha.medias ||
+        b.brecha.gap - a.brecha.gap ||
+        a.indice - b.indice,
+    )
+    .map(({ caso }) => caso);
+}
+
+
+/**
+ * "Ataca 2 brechas altas y 1 media". Vacio si no ataca nada puntuado con
+ * prioridad alta o media: una brecha baja no es lo que se viene a contar.
+ */
+export function textoDeBrechas(brecha) {
+  const altas = brecha?.altas || 0;
+  const medias = brecha?.medias || 0;
+
+  if (!altas && !medias) {
+    return "";
+  }
+
+  const partes = [];
+
+  if (altas) {
+    partes.push(`${altas} ${altas === 1 ? "brecha alta" : "brechas altas"}`);
+  }
+
+  if (medias) {
+    const nombre = altas
+      ? (medias === 1 ? "media" : "medias")
+      : (medias === 1 ? "brecha media" : "brechas medias");
+
+    partes.push(`${medias} ${nombre}`);
+  }
+
+  return `Ataca ${partes.join(" y ")}`;
 }
 
 

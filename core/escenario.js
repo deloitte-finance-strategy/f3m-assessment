@@ -21,9 +21,9 @@ import {
   DEFAULT_TARGET_MATURITY,
   normalizeTargetValue,
   toScore,
-} from "./calculo.js?v=22";
+} from "./calculo.js?v=23";
 
-import { serializeTargetsForFirebase } from "./objetivos.js?v=22";
+import { serializeTargetsForFirebase } from "./objetivos.js?v=23";
 
 
 
@@ -60,8 +60,29 @@ export const CAMPOS_RAIZ = [
   "version",
   "activeDomainId",
   "updatedAt",
+  "cliente",
   "domains",
 ];
+
+
+/** Longitud maxima del nombre del cliente, segun las reglas. */
+export const LIMITE_DE_CLIENTE = 120;
+
+
+/**
+ * El nombre del cliente, limpio: sin espacios sobrantes y dentro del limite.
+ *
+ * Vacio significa "sin nombre", y es lo que devuelve cualquier cosa que no sea
+ * un texto: un escenario anterior a este campo no trae nada, y no por eso deja
+ * de ser valido.
+ */
+export function normalizarCliente(valor) {
+  if (typeof valor !== "string") {
+    return "";
+  }
+
+  return valor.replace(/\s+/g, " ").trim().slice(0, LIMITE_DE_CLIENTE);
+}
 
 
 /** Campos que las reglas admiten dentro de cada dominio. */
@@ -385,6 +406,12 @@ export function normalizarEscenarioParaFirebase(
 
   if (payload.activeDomainId !== undefined) {
     escenario.activeDomainId = String(payload.activeDomainId).slice(0, 64);
+  }
+
+  const cliente = normalizarCliente(payload.cliente);
+
+  if (cliente) {
+    escenario.cliente = cliente;
   }
 
   Object.entries(payload.domains || {}).forEach(([domainId, dominio]) => {

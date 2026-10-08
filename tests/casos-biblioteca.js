@@ -14,6 +14,7 @@
 
 import {
   aparicionesDeCasos,
+  brechasDeCasos,
   contarPorCampo,
   etiquetaDeFuente,
   filtrarCasos,
@@ -22,12 +23,14 @@ import {
   normalizarDocumento,
   normalizarFuente,
   normalizarTextoDeBusqueda,
+  ordenarPorBrechas,
   rangoDePaginas,
   resumenDeFuentes,
+  textoDeBrechas,
   titulosDeCasos,
   ubicacionDeFuente,
   urlDeDocumento,
-} from "../core/biblioteca.js?v=22";
+} from "../core/biblioteca.js?v=23";
 
 
 function dossier(extra = {}) {
@@ -420,6 +423,63 @@ export const casos = [
           `la tarjeta de ${documento} y su filtro dicen lo mismo`,
         );
       });
+    },
+  },
+  {
+    grupo: "Catalogo de casos de IA",
+    nombre: "por brechas: primero lo que ataca prioridades altas, y sin puntuar no cuenta",
+    ejecutar: (t) => {
+      const catalogo = [
+        caso("IA-1", "Checklist de cierre"),
+        caso("IA-2", "Asientos inusuales"),
+        caso("IA-3", "Previsión de caja"),
+        caso("IA-4", "Sin apariciones"),
+      ];
+
+      // El motor de verdad necesita el dominio y los objetivos; aqui cada
+      // subcapacidad trae ya sus metricas, que es lo que importa al ordenar.
+      const sub = (subcapacidad, ia, metricas) => ({ subcapacidad, ai: { cases: ia }, metricas });
+      const apariciones = aparicionesDeCasos([
+        {
+          id: "controlling",
+          label: "Controlling",
+          items: [
+            sub("1.1", "Checklist de cierre; Asientos inusuales", { prioridad: "Media", gap: 1.5 }),
+            sub("1.2", "Asientos inusuales", { prioridad: "Alta", gap: 2.5 }),
+            sub("1.3", "Checklist de cierre", { isPending: true, prioridad: "Pendiente", gap: null }),
+          ],
+        },
+        {
+          id: "tesoreria",
+          label: "Tesorería",
+          items: [
+            sub("2.1", "Previsión de caja", { prioridad: "Media", gap: 1.2 }),
+            sub("2.2", "Checklist de cierre", { prioridad: "Baja", gap: 0.5 }),
+          ],
+        },
+      ]);
+
+      const metricasDe = (aparicion) => aparicion.item.metricas;
+      const brechas = brechasDeCasos(apariciones, metricasDe);
+
+      t.igual(JSON.stringify(brechas.get("Asientos inusuales")), JSON.stringify({ altas: 1, medias: 1, bajas: 0, gap: 4 }), "suma por caso");
+      t.igual(brechas.get("Checklist de cierre").medias, 1, "lo pendiente no cuenta");
+      t.igual(brechas.get("Checklist de cierre").bajas, 1, "las bajas se cuentan aparte");
+
+      const orden = (lista) => lista.map((entrada) => entrada.id).join(",");
+
+      t.igual(orden(ordenarPorBrechas(catalogo, brechas)), "IA-2,IA-1,IA-3,IA-4", "altas, luego medias, luego gap");
+      t.igual(
+        orden(ordenarPorBrechas(catalogo, brechasDeCasos(apariciones, metricasDe, "tesoreria"))),
+        "IA-3,IA-1,IA-2,IA-4",
+        "con un dominio, solo sus brechas",
+      );
+      t.igual(orden(ordenarPorBrechas(catalogo, new Map())), "IA-1,IA-2,IA-3,IA-4", "sin nada puntuado, el orden de partida");
+
+      t.igual(textoDeBrechas(brechas.get("Asientos inusuales")), "Ataca 1 brecha alta y 1 media", "texto con las dos");
+      t.igual(textoDeBrechas({ altas: 0, medias: 2 }), "Ataca 2 brechas medias", "solo medias");
+      t.igual(textoDeBrechas({ altas: 3, medias: 0 }), "Ataca 3 brechas altas", "solo altas");
+      t.igual(textoDeBrechas({ altas: 0, medias: 0, bajas: 4 }), "", "una brecha baja no se cuenta");
     },
   },
 ];

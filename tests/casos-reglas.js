@@ -23,9 +23,10 @@ import {
   CAMPOS_DE_ITEM,
   CAMPOS_RAIZ,
   ESTADOS_VALIDOS,
+  LIMITE_DE_CLIENTE,
   LIMITE_DE_META,
   LIMITES_DE_TEXTO,
-} from "../core/escenario.js?v=22";
+} from "../core/escenario.js?v=23";
 
 
 const RAIZ = new URL("../", import.meta.url);
@@ -151,6 +152,13 @@ export const casos = [
     nombre: "LIMITE_DE_META coincide con las reglas",
     ejecutar: (t) => {
       t.igual(limiteDe(DOMINIO?.meta?.$campoMeta), LIMITE_DE_META, "meta");
+    },
+  },
+  {
+    grupo: "Espejo de las reglas · longitudes",
+    nombre: "LIMITE_DE_CLIENTE coincide con las reglas",
+    ejecutar: (t) => {
+      t.igual(limiteDe(ESCENARIO?.cliente), LIMITE_DE_CLIENTE, "cliente");
     },
   },
   {

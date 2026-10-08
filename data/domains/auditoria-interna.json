@@ -66,7 +66,7 @@
         "¿La evidencia es trazable y revisable?"
       ],
       "evidencias": "Programas de auditoría; matrices riesgo-control; papeles de trabajo; evidencias de testing; revisiones de calidad; muestras.",
-      "iniciativaSugerida": "Estandarizar metodología de auditoría y testing con matrices riesgo-control, evidencias, analytics y trazabilidad de ejecución.",
+      "iniciativaSugerida": "Estandarizar metodología de auditoría y pruebas con matrices riesgo-control, evidencias, analítica de datos y trazabilidad de ejecución.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -101,7 +101,7 @@
         "¿Se revisa la calidad de los trabajos?"
       ],
       "evidencias": "Informes de auditoría; ratings; papeles de trabajo; evidencias; revisiones de calidad; dashboards de assurance.",
-      "iniciativaSugerida": "Rediseñar reporting de assurance con estructura común, ratings, causa-raíz, trazabilidad de evidencia y dashboard ejecutivo.",
+      "iniciativaSugerida": "Rediseñar los informes de aseguramiento con estructura común, calificaciones, causa-raíz, trazabilidad de evidencia y cuadro de mando ejecutivo.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -136,7 +136,7 @@
         "¿Se analizan recurrencias?"
       ],
       "evidencias": "Tracker de hallazgos; planes de acción; evidencias de cierre; actas de comité; reportes de aging; validaciones.",
-      "iniciativaSugerida": "Implantar modelo de remediación con workflow, alertas, evidencias, validación de efectividad, escalado y análisis de recurrencias.",
+      "iniciativaSugerida": "Implantar modelo de remediación con flujo de trabajo, alertas, evidencias, validación de efectividad, escalado y análisis de recurrencias.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -171,7 +171,7 @@
         "¿Se mide el valor aportado?"
       ],
       "evidencias": "Modelo de advisory; criterios de independencia; portfolio de advisory; actas de steering; feedback de stakeholders; entregables.",
-      "iniciativaSugerida": "Definir modelo de advisory de Auditoría Interna con criterios de independencia, priorización por riesgo, entregables y métricas de valor.",
+      "iniciativaSugerida": "Definir modelo de asesoramiento de Auditoría Interna con criterios de independencia, priorización por riesgo, entregables y métricas de valor.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -206,7 +206,7 @@
         "¿Se documentan recomendaciones preventivas?"
       ],
       "evidencias": "Comités de proyecto; risk/control design reviews; matrices SoD; recomendaciones; checkpoints; documentación de transformación.",
-      "iniciativaSugerida": "Crear metodología de advisory en transformación con control by design, checkpoints, criterios de riesgo y coordinación con segunda línea/PMO.",
+      "iniciativaSugerida": "Crear metodología de asesoramiento en transformación con control desde el diseño, puntos de control, criterios de riesgo y coordinación con segunda línea y PMO.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -241,7 +241,7 @@
         "¿Se hace seguimiento?"
       ],
       "evidencias": "Actas de comité; recomendaciones de Auditoría; análisis de riesgos; escenarios; documentación de decisiones; seguimiento.",
-      "iniciativaSugerida": "Formalizar modelo de challenge independiente con criterios, evidencias, escenarios, recomendaciones y seguimiento de decisiones de riesgo.",
+      "iniciativaSugerida": "Formalizar modelo de contraste independiente con criterios, evidencias, escenarios, recomendaciones y seguimiento de decisiones de riesgo.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -276,7 +276,7 @@
         "¿Se mide adopción?"
       ],
       "evidencias": "Repositorio; guías de control; planes de formación; comunicaciones; encuestas; analytics de hallazgos; lecciones aprendidas.",
-      "iniciativaSugerida": "Implantar repositorio y programa de cultura de control con guías, formación por riesgo, lecciones aprendidas y knowledge assistant.",
+      "iniciativaSugerida": "Implantar repositorio y programa de cultura de control con guías, formación por riesgo, lecciones aprendidas y asistente de conocimiento.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -311,7 +311,7 @@
         "¿Se generan alertas tempranas?"
       ],
       "evidencias": "Mapa KRIs/KCIs; dashboards; umbrales; logs de excepción; controles automatizados; workflows; actas de seguimiento.",
-      "iniciativaSugerida": "Diseñar modelo de continuous auditing con KRIs/KCIs, datos transaccionales, alertas, workflows y priorización por riesgo.",
+      "iniciativaSugerida": "Diseñar modelo de auditoría continua con KRIs y KCIs, datos transaccionales, alertas, flujos de trabajo y priorización por riesgo.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -346,7 +346,7 @@
         "¿Se documenta investigación y resolución?"
       ],
       "evidencias": "Alertas de fraude; reglas de detección; modelos analíticos; casos investigados; logs de excepciones; informes de investigación.",
-      "iniciativaSugerida": "Implantar monitor de fraude y anomalías con reglas, modelos predictivos, scoring, explicación y workflow de investigación.",
+      "iniciativaSugerida": "Implantar monitor de fraude y anomalías con reglas, modelos predictivos, puntuación de riesgo, explicación y flujo de investigación.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -416,7 +416,7 @@
         "¿Se analizan patrones recurrentes?"
       ],
       "evidencias": "Registros de incidentes; informes de investigación; evidencias; causa-raíz; planes de remediación; reportes de tendencia.",
-      "iniciativaSugerida": "Formalizar proceso de investigación y respuesta con taxonomy de incidentes, workflow, causa-raíz, acciones y aprendizaje preventivo.",
+      "iniciativaSugerida": "Formalizar proceso de investigación y respuesta con taxonomía de incidentes, flujo de trabajo, causa-raíz, acciones y aprendizaje preventivo.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",

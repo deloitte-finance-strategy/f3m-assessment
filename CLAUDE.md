@@ -51,6 +51,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 140 |
 | `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 766 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
+| `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 140 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 231 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe: datos, radares y tema | 487 |
@@ -108,7 +109,7 @@ cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScena
   → loadCoreDomains()            // Promise.allSettled de los 9; se piden sin esperar a las fichas
   → setActiveDomain("fpa")
   → applyStoredScenario()        // copia local de localStorage
-  → inicializarIdentidad()       // signInAnonymously, solo si hay ?scenario=
+  → inicializarIdentidad()       // signInAnonymously, solo si hay ?scenario= (el SDK se pidió al empezar)
   → initializeSharedScenario()   // lee Firebase, aplica lo remoto, se suscribe
   → populateCapacityFilter() → renderAll()
 ```
@@ -119,15 +120,22 @@ Dependencias de terceros, sin bundler:
   capacidad. **No va por CDN a propósito**: una red de cliente que filtre cdnjs dejaba los radares
   sin pintar y el PDF entregable con tres huecos. `vendor/LEEME.md` explica el porqué y cómo se
   actualiza.
-- **Firebase Realtime Database y Auth 12.15.0** importados desde `gstatic.com` (cabecera de
-  `app/firebase.js`). Este sí sigue siendo externo: son ~500 KB en tres módulos con imports relativos entre
-  ellos, y `gstatic` tiene que funcionar de todas formas para que funcione la base de datos.
+- **Firebase Realtime Database y Auth 12.15.0** desde `gstatic.com`. Este sí sigue siendo externo:
+  son ~500 KB en tres módulos con imports relativos entre ellos, y `gstatic` tiene que funcionar de
+  todas formas para que funcione la base de datos. **Pero se descarga con `import()` y solo con
+  `?scenario=`**, desde `conectarFirebase()` en `app/firebase.js`. Con un import estático, una red
+  que bloqueara `gstatic` dejaba la herramienta en «Cargando assessment» para siempre, también en
+  modo local. Nada fuera de `app/firebase.js` importa de `gstatic`: el SDK se pide por
+  `conectarFirebase()` o `getConexion()`, y «estoy en un escenario compartido» se pregunta con
+  `enEscenarioCompartido`, no con si hay referencia — un escenario cuyo SDK no ha llegado no es
+  modo local.
 
 ### `app/` es el reparto de `app.js`
 
-`app.js` es la raíz de composición; todo lo demás vive en `app/`: los quince módulos de
+`app.js` es la raíz de composición; todo lo demás vive en `app/`: los dieciséis módulos de
 infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, métricas, dominios,
-filtros, subcapacidad, escenario, Firebase, identidad, indicador, persistencia y repintado—, las
+filtros, subcapacidad, escenario, Firebase, identidad, indicador, persistencia, repintado y
+edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`
 y `app/biblioteca.js`. Lo nuevo nace ya en `app/`, no en `app.js`. Mover código entre módulos se
 verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
@@ -179,8 +187,9 @@ python scripts/check_module_version.py
 
 ### Todo el código se pide de golpe
 
-`index.html` lleva un `<link rel="modulepreload">` por cada módulo que carga `app.js`, Firebase
-incluido, y un `<link rel="preload">` para los tres JSON del arranque. Sin ellos el navegador
+`index.html` lleva un `<link rel="modulepreload">` por cada módulo que carga `app.js` y un
+`<link rel="preload">` para los tres JSON del arranque. Firebase no: se descarga aparte, solo con
+`?scenario=` (ver abajo). Sin ellos el navegador
 descubre los módulos por capas —baja `app.js`, lee sus imports, baja esos…— y eran cuatro viajes al
 servidor seguidos solo para tener el código, más tres para los datos. Medido con 100 ms de ida y
 vuelta, la carga bajó de 1,26 s a 0,94 s; con 200 ms, de 2,06 s a 1,33 s.
@@ -269,8 +278,18 @@ nota de ámbito lo dice en pantalla para que el descuadre con el Dashboard no se
 **La pestaña IA tampoco usa ese ámbito**, por otro motivo: no habla de subcapacidades puntuadas sino
 del catálogo de casos, que es el mismo para los nueve dominios. Va antes del corte de `renderAll()`,
 como el Overview, y sus filtros —buscador, dominio, las dos etiquetas y documento— son suyos: no
-tocan ni leen los del Assessment. Como nada de lo que enseña depende de las puntuaciones, no se
-repinta con cada score; solo cuando cambian el catálogo, la biblioteca o los dominios cargados.
+tocan ni leen los del Assessment. Como casi nada de lo que enseña depende de las puntuaciones, no
+se repinta con cada score; solo cuando cambian el catálogo, la biblioteca o los dominios cargados.
+La excepción es su desplegable **Orden**: «Prioridad del cliente» pone primero los casos que atacan
+más brechas altas y medias (`brechasDeCasos()` y `ordenarPorBrechas()` en `core/biblioteca.js`), y
+entonces sí se repinta, pero solo cuando cambia el orden o lo que dice alguna ficha. Ese orden lo
+sigue también la diapositiva «Oportunidades de IA» del informe, que lo dice en su entradilla.
+
+**«Lo más urgente de la función financiera»**, al final del Overview, son las diez subcapacidades de
+prioridad alta con más gap de los nueve dominios, con `masUrgentes()` de `core/calculo.js`. La
+misma función alimenta las diapositivas del mismo nombre en la parte global del informe, para que
+pantalla y deck digan las mismas diez. Cada una lleva a su tarjeta en el Assessment de su dominio,
+sin tocar los filtros: si un filtro la esconde, un aviso lo dice.
 
 ### Los objetivos se resuelven por dominio
 
@@ -420,6 +439,10 @@ Al tocar el flujo de guardado, tener en cuenta:
   aplicarlo después en vez de descartarlo.
 - Las escrituras normales son **granulares por ruta** (`persistGranularChange()`), no del payload
   completo. Las únicas escrituras completas son crear escenario, importar y restaurar.
+- El **nombre del cliente** (`cliente`, en la raíz del escenario) viaja siempre en su propia
+  escritura, `persistCliente()`, y nunca dentro de una completa. Es el campo más nuevo de las
+  reglas: si las publicadas en la consola aún no lo conocen, una escritura completa que lo llevara
+  se rechazaría entera, puntuaciones incluidas. Separado, lo peor es que no se comparta el nombre.
 - El indicador de guardado tiene un estado `error` real. **Ningún `catch` puede terminar en un
   mensaje de éxito**: es el fallo que más caro sale en una sesión con cliente.
 
@@ -624,17 +647,28 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 3. **Los dos temas y las dos densidades.** El conmutador «Oscuro» y el de «Presentación» son
    independientes y se combinan: probar las cuatro combinaciones al menos en Overview y Heatmap,
    que son las que codifican datos en color y en tamaño. Sin elección guardada, cambiar el tema del
-   sistema con la pestaña abierta tiene que arrastrar la herramienta.
+   sistema con la pestaña abierta tiene que arrastrar la herramienta. En Presentación, los campos
+   del Roadmap y de las notas se ven como texto, sin caja ni flecha, y los scores como la escala
+   «1 2 3 4 5» con el elegido en su color; todo se sigue pudiendo editar, y la caja vuelve con el
+   ratón encima o con el foco.
 4. Recorrer las seis vistas:
-   - **Overview**: los 4 KPIs, el titular, las barras, la tabla por dominio y los 3 radares de 9
-     ejes. Cambiar de dominio en el conmutador **no** debe cambiar ninguna cifra del Overview.
+   - **Overview**: los 4 KPIs, el titular, las barras, la tabla por dominio, los 3 radares de 9
+     ejes y «Lo más urgente», cuyas fichas abren su tarjeta en el Assessment de su dominio.
+     Cambiar de dominio en el conmutador **no** debe cambiar ninguna cifra del Overview.
    - **Dashboard**: KPIs, titulares ejecutivos, barras de prioridad y palanca, y los 3 radares.
    - **Assessment**: cambiar un score y comprobar que se recalculan nivel, gap, prioridad y oleada,
      **sin perder el foco ni cerrar los paneles de detalle abiertos**. En «Ver detalle», el bloque
      de casos de IA trae de 2 a 4 fichas, cada una con sus dos etiquetas y su frase: un título
-     suelto, sin etiquetas, es un cruce roto.
+     suelto, sin etiquetas, es un cruce roto. Puntuar también con teclado: Tab llega a cada
+     palanca, las teclas 1 a 5 y las flechas puntúan, y Suprimir la deja sin puntuar; pulsar
+     otra vez el número elegido también. Las «Notas del taller» del detalle son el mismo
+     comentario que el Roadmap: lo escrito en uno aparece en el otro y en el informe. «Siguiente
+     sin puntuar», en la barra de pestañas junto al dominio, lleva desde cualquier vista del
+     dominio a la próxima tarjeta sin ninguna palanca puntuada, con el foco en su primer score, y
+     sin filtros su cifra cuadra con la de la pestaña Assessment.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
+     Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final.
      Cuando cabe a lo ancho, la tabla crece con la página y su encabezado se queda bajo las
      pestañas; cuando no cabe —Presentación, o menos de 1366 px— vuelve a su caja con desplazamiento
      propio. Lo decide `setupCajaDelRoadmap()`. Al tocar los anchos de sus columnas, medir con la
@@ -643,7 +677,8 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      deja exactamente N fichas. «Más información» abre el documento en la página del caso, con su
      texto en inglés encima para encontrarlo; probarlo también desde el detalle del Assessment y
      desde el modal de IA del Roadmap, donde **Escape cierra solo el visor** y el foco vuelve al
-     modal. Cambiar de dominio no cambia nada en esta pestaña.
+     modal. Cambiar de dominio no cambia nada en esta pestaña, salvo con el orden «Prioridad del
+     cliente», que sigue las puntuaciones y no el dominio abierto.
 5. Con un filtro puesto, comprobar que **KPIs, tabla, radares, heatmap, roadmap, CSV y PDF dan el
    mismo recuento** — y que el **Overview no cambia**, que es lo suyo.
 6. Ir y volver entre Overview y Dashboard: los radares de los dos siguen correctos (5 ejes de

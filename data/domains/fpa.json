@@ -31,7 +31,7 @@
         "¿El proceso permite reforecast ágil ante cambios?"
       ],
       "evidencias": "Calendario presupuestario; RACI; workflow de aprobación; plantillas; actas de comités; control de versiones.",
-      "iniciativaSugerida": "Diseñar modelo de gobierno FP&A con calendario integrado, RACI, workflow de aprobación, criterios comunes y control de versiones.",
+      "iniciativaSugerida": "Diseñar modelo de gobierno FP&A con calendario integrado, RACI, flujo de aprobación, criterios comunes y control de versiones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -66,7 +66,7 @@
         "¿Se realizan sensibilidades y escenarios?"
       ],
       "evidencias": "Catálogo de drivers; modelo de planificación; documentación de supuestos; análisis de sensibilidad; inputs operativos.",
-      "iniciativaSugerida": "Evolucionar hacia un modelo driver-based planning con catálogo de drivers, reglas de cálculo, trazabilidad y análisis de sensibilidad.",
+      "iniciativaSugerida": "Evolucionar hacia una planificación basada en drivers, con catálogo de drivers, reglas de cálculo, trazabilidad y análisis de sensibilidad.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -102,7 +102,7 @@
         "¿Se usan alertas tempranas?"
       ],
       "evidencias": "Modelos de forecast; supuestos; escenarios; calendario de reforecast; reporting de desviaciones; alertas.",
-      "iniciativaSugerida": "Implantar rolling forecast con escenarios base/optimista/pesimista, supuestos documentados y automatización de inputs críticos.",
+      "iniciativaSugerida": "Implantar previsión continua (rolling forecast) con escenarios base, optimista y pesimista, supuestos documentados y automatización de los datos de entrada críticos.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -137,7 +137,7 @@
         "¿La accountability se mantiene tras la aprobación?"
       ],
       "evidencias": "RACI; workflows; aprobaciones; trazabilidad de cambios; actas de challenge; seguimiento de compromisos.",
-      "iniciativaSugerida": "Definir ownership presupuestario por dimensión/unidad, con workflow colaborativo, challenge financiero y seguimiento de compromisos.",
+      "iniciativaSugerida": "Definir la responsabilidad presupuestaria por dimensión y unidad, con flujo colaborativo, contraste financiero y seguimiento de compromisos.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -172,7 +172,7 @@
         "¿Genera acciones y seguimiento?"
       ],
       "evidencias": "Catálogo de KPIs; paquetes de reporting; dashboards; actas de revisión; planes de acción.",
-      "iniciativaSugerida": "Rediseñar el reporting de gestión alrededor de objetivos, KPIs, desviaciones, causas, owners y acciones.",
+      "iniciativaSugerida": "Rediseñar los informes de gestión alrededor de objetivos, KPIs, desviaciones, causas, responsables y acciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -207,7 +207,7 @@
         "¿El análisis actualiza previsiones?"
       ],
       "evidencias": "Reportes de desviaciones; árboles de drivers; actas con acciones; forecast actualizado; dashboards.",
-      "iniciativaSugerida": "Crear metodología de variance analysis por driver, dimensión, owner, causa-raíz, acción y seguimiento.",
+      "iniciativaSugerida": "Crear metodología de análisis de desviaciones por driver, dimensión, responsable, causa-raíz, acción y seguimiento.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -242,7 +242,7 @@
         "¿Se automatiza la generación?"
       ],
       "evidencias": "Dashboards; modelo semántico; guía de KPIs; evidencias de automatización; accesos por perfil.",
-      "iniciativaSugerida": "Implantar cuadro de mando FP&A con KPIs homologados, drill-down, acceso por perfil y automatización de datos.",
+      "iniciativaSugerida": "Implantar cuadro de mando FP&A con KPIs homologados, navegación al detalle, acceso por perfil y automatización de datos.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -277,7 +277,7 @@
         "¿Se mide impacto de acciones?"
       ],
       "evidencias": "Calendario de comités; actas; trackers de acciones; KPIs de impacto; reportes de seguimiento.",
-      "iniciativaSugerida": "Formalizar rutinas de performance con agenda estándar, tracker de acciones, owners, beneficios esperados y seguimiento.",
+      "iniciativaSugerida": "Formalizar rutinas de revisión del rendimiento con agenda estándar, registro de acciones, responsables, beneficios esperados y seguimiento.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -347,7 +347,7 @@
         "¿Se documentan supuestos?"
       ],
       "evidencias": "Modelos financieros; bibliotecas de supuestos; análisis de sensibilidad; outputs de comité; documentación metodológica.",
-      "iniciativaSugerida": "Construir modelo financiero estándar para iniciativas con P&L, cash, balance, sensibilidad, escenarios y trazabilidad de supuestos.",
+      "iniciativaSugerida": "Construir modelo financiero estándar para iniciativas con cuenta de resultados, caja, balance, sensibilidad, escenarios y trazabilidad de supuestos.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -417,7 +417,7 @@
         "¿Los aprendizajes mejoran futuros business cases?"
       ],
       "evidencias": "Benefit tracker; informes post-implementación; actas de revisión; acciones correctivas; repositorio de aprendizajes.",
-      "iniciativaSugerida": "Implantar benefit tracking con owners, métricas, línea base, seguimiento periódico y revisión post-implementación.",
+      "iniciativaSugerida": "Implantar seguimiento de beneficios con responsables, métricas, línea base, revisiones periódicas y revisión posterior a la implantación.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -487,7 +487,7 @@
         "¿Se usan modelos predictivos?"
       ],
       "evidencias": "Modelos de escenarios; análisis de sensibilidad; documentación de supuestos; dashboards; outputs de comités.",
-      "iniciativaSugerida": "Crear framework de análisis de escenarios para decisiones clave, con drivers, impactos, sensibilidad y recomendaciones.",
+      "iniciativaSugerida": "Crear marco de análisis de escenarios para decisiones clave, con drivers, impactos, sensibilidad y recomendaciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -522,7 +522,7 @@
         "¿Se mide el valor aportado?"
       ],
       "evidencias": "Modelo organizativo; RACI; agendas de comités; actas de decisiones; objetivos de business partnering; feedback del negocio.",
-      "iniciativaSugerida": "Definir modelo de finance business partnering con roles, responsabilidades, foros de decisión, capacidades requeridas y métricas de valor.",
+      "iniciativaSugerida": "Definir modelo de Finanzas como socio del negocio (business partnering) con roles, responsabilidades, foros de decisión, capacidades requeridas y métricas de valor.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -627,7 +627,7 @@
         "¿Hay planes de contingencia?"
       ],
       "evidencias": "Modelos de escenarios; stress tests; supuestos macro/operativos; planes de contingencia; actas de comité.",
-      "iniciativaSugerida": "Crear metodología de escenarios estratégicos y stress testing con variables clave, impactos financieros y planes de respuesta.",
+      "iniciativaSugerida": "Crear metodología de escenarios estratégicos y pruebas de estrés con variables clave, impactos financieros y planes de respuesta.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -662,7 +662,7 @@
         "¿Se reasignan recursos según evolución?"
       ],
       "evidencias": "Mapa estratégico; KPIs; presupuesto por iniciativas; portfolio; comités de seguimiento; roadmap estratégico.",
-      "iniciativaSugerida": "Diseñar puente estrategia-presupuesto-ejecución con objetivos financieros, iniciativas, KPIs, owners y seguimiento de recursos.",
+      "iniciativaSugerida": "Diseñar puente estrategia-presupuesto-ejecución con objetivos financieros, iniciativas, KPIs, responsables y seguimiento de recursos.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -697,7 +697,7 @@
         "¿Se toman acciones de reasignación?"
       ],
       "evidencias": "KPIs de valor; benefit tracking estratégico; reportes de plan; actas de comité; decisiones de reasignación.",
-      "iniciativaSugerida": "Implantar modelo de seguimiento de creación de valor con KPIs, beneficios, riesgos, owners y revisión periódica de asignación de recursos.",
+      "iniciativaSugerida": "Implantar modelo de seguimiento de creación de valor con KPIs, beneficios, riesgos, responsables y revisión periódica de asignación de recursos.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",

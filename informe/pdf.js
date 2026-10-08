@@ -21,9 +21,9 @@
  * reescalar, que es lo mas cerca de una ppt sin generar una ppt.
  */
 
-import { escapeHtml } from "../core/presentacion.js?v=22";
+import { escapeHtml } from "../core/presentacion.js?v=23";
 
-import { getEnhancedPdfReportStyles } from "./estilos.js?v=22";
+import { getEnhancedPdfReportStyles } from "./estilos.js?v=23";
 
 import {
   POR_DIAPOSITIVA,
@@ -34,6 +34,7 @@ import {
   fichasDeIa,
   heatmap,
   indice,
+  masUrgentes,
   panoramaDeIa,
   panoramaGlobal,
   paginar,
@@ -46,7 +47,7 @@ import {
   resumenPorCapacidad,
   roadmap,
   separador,
-} from "./secciones.js?v=22";
+} from "./secciones.js?v=23";
 
 
 const PARTE_GLOBAL = "La función financiera";
@@ -124,6 +125,22 @@ function planDelDeck(data) {
 
 
 function parteGlobal(data) {
+  // Sin nada de prioridad alta no hay diapositiva: una que solo dijera "no hay
+  // nada urgente" en un deck que se entrega parece un apartado sin terminar.
+  const urgentes = data.global.urgentes?.lista?.length
+    ? paginar(data.global.urgentes.lista, POR_DIAPOSITIVA.urgentes).map((tanda, indiceDeTanda, tandas) => ({
+        parte: PARTE_GLOBAL,
+        titulo: "Lo más urgente",
+        subtitulo: deTantas(indiceDeTanda, tandas.length),
+        entradilla:
+          indiceDeTanda === 0
+            ? "Las iniciativas de prioridad alta con más gap, de cualquiera de los dominios."
+            : "",
+        cuerpo: () =>
+          masUrgentes(data.global.urgentes, tanda, indiceDeTanda * POR_DIAPOSITIVA.urgentes),
+      }))
+    : [];
+
   return [
     {
       clase: "separador slide-oscura",
@@ -159,6 +176,7 @@ function parteGlobal(data) {
       entradilla: "Madurez actual frente a objetivo en las tres palancas, con un eje por dominio.",
       cuerpo: () => radarGlobal(data),
     },
+    ...urgentes,
   ];
 }
 
@@ -292,7 +310,9 @@ function parteDeAccion(data) {
         subtitulo: deTantas(indiceDeTanda, tandas.length),
         entradilla:
           indiceDeTanda === 0
-            ? "Cada ficha lleva sus dos etiquetas: qué tipo de IA es y qué tipo de valor mueve."
+            ? (data.ia.orden === "prioridad"
+                ? "Primero las que atacan las brechas más altas de este dominio, con su tipo de IA y de valor."
+                : "Cada ficha lleva sus dos etiquetas: qué tipo de IA es y qué tipo de valor mueve.")
             : "",
         cuerpo: () => fichasDeIa(tanda),
       });
@@ -325,9 +345,17 @@ function parteDeAccion(data) {
  * en la carpeta de descargas y se ordenan solos.
  */
 function tituloDelDocumento(data) {
+  // Con el cliente delante, que es como se busca un informe en la carpeta. Sin
+  // los caracteres que Windows no admite en un nombre: un cliente "A/B" haria
+  // que el dialogo de guardar propusiera una carpeta que no existe.
+  const partes = [data.cliente, data.domainLabel]
+    .filter(Boolean)
+    .map((parte) => String(parte).replace(/[<>:"/\\|?*]+/g, " ").trim())
+    .join(" - ");
+
   return data.fechaDeArchivo
-    ? `Informe F3M - ${data.domainLabel} - ${data.fechaDeArchivo}`
-    : `Informe ${data.domainLabel} · F3M Assessment`;
+    ? `Informe F3M - ${partes} - ${data.fechaDeArchivo}`
+    : `Informe ${partes} · F3M Assessment`;
 }
 
 
@@ -379,7 +407,7 @@ function cabecera(seccion) {
 function pie(seccion, plan, data) {
   return `
     <footer class="slide-pie">
-      <span><strong>F3M Assessment</strong> · ${escapeHtml(data.domainLabel)}</span>
+      <span><strong>F3M Assessment</strong>${data.cliente ? ` · ${escapeHtml(data.cliente)}` : ""} · ${escapeHtml(data.domainLabel)}</span>
       <span>${escapeHtml(data.generatedAt)}</span>
       <span class="slide-pie-numero">${seccion.numero} / ${plan.length}</span>
     </footer>

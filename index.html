@@ -69,7 +69,7 @@
     -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23012169'/%3E%3Crect x='7' y='19' width='5' height='7' rx='1.5' fill='%2386BC25'/%3E%3Crect x='13.5' y='14' width='5' height='12' rx='1.5' fill='%2386BC25'/%3E%3Crect x='20' y='8' width='5' height='18' rx='1.5' fill='%2386BC25'/%3E%3C/svg%3E">
 
-    <link rel="stylesheet" href="styles.css?v=22">
+    <link rel="stylesheet" href="styles.css?v=23">
 
     <!--
       Resuelve el tema y la densidad antes del primer pintado. Va aqui, sincrono
@@ -79,7 +79,7 @@
       En linea no puede ir: la CSP no admite scripts sin archivo, que es
       justamente la directiva que cierra la inyeccion de codigo.
     -->
-    <script src="tema.js?v=22"></script>
+    <script src="tema.js?v=23"></script>
 
     <!--
       Todo el codigo que app.js va a necesitar, pedido de golpe al llegar el
@@ -97,47 +97,51 @@
       app.js los pedia uno detras de otro. Los nueve de dominio no estan aqui
       a proposito: la lista de dominios vive en data/domains.json y no se
       repite en este archivo.
+
+      El SDK de Firebase NO se precarga. Se descarga solo con ?scenario=, y
+      desde app/firebase.js: aqui obligaria a pedirlo siempre, tambien en modo
+      local, que es justo lo que se vino a quitar. Y en una red que bloquee
+      gstatic, una precarga fallida deja un error en la consola, que tiene que
+      arrancar en silencio.
     -->
-    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js">
-    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js">
-    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js">
-    <link rel="modulepreload" href="app/almacenamiento.js?v=22">
-    <link rel="modulepreload" href="app/avisos.js?v=22">
-    <link rel="modulepreload" href="app/biblioteca.js?v=22">
-    <link rel="modulepreload" href="app/celdas.js?v=22">
-    <link rel="modulepreload" href="app/dominios.js?v=22">
-    <link rel="modulepreload" href="app/escenario.js?v=22">
-    <link rel="modulepreload" href="app/estado.js?v=22">
-    <link rel="modulepreload" href="app/filtros.js?v=22">
-    <link rel="modulepreload" href="app/firebase.js?v=22">
-    <link rel="modulepreload" href="app/graficos.js?v=22">
-    <link rel="modulepreload" href="app/identidad.js?v=22">
-    <link rel="modulepreload" href="app/indicador.js?v=22">
-    <link rel="modulepreload" href="app/informe.js?v=22">
-    <link rel="modulepreload" href="app/metricas.js?v=22">
-    <link rel="modulepreload" href="app/modales.js?v=22">
-    <link rel="modulepreload" href="app/persistencia.js?v=22">
-    <link rel="modulepreload" href="app/preferencias.js?v=22">
-    <link rel="modulepreload" href="app/repintado.js?v=22">
-    <link rel="modulepreload" href="app/subcapacidad.js?v=22">
-    <link rel="modulepreload" href="app/vistas/assessment.js?v=22">
-    <link rel="modulepreload" href="app/vistas/dashboard.js?v=22">
-    <link rel="modulepreload" href="app/vistas/heatmap.js?v=22">
-    <link rel="modulepreload" href="app/vistas/ia.js?v=22">
-    <link rel="modulepreload" href="app/vistas/overview.js?v=22">
-    <link rel="modulepreload" href="app/vistas/roadmap.js?v=22">
-    <link rel="modulepreload" href="core/biblioteca.js?v=22">
-    <link rel="modulepreload" href="core/calculo.js?v=22">
-    <link rel="modulepreload" href="core/coincidencias.js?v=22">
-    <link rel="modulepreload" href="core/escenario.js?v=22">
-    <link rel="modulepreload" href="core/exportacion.js?v=22">
-    <link rel="modulepreload" href="core/objetivos.js?v=22">
-    <link rel="modulepreload" href="core/presentacion.js?v=22">
-    <link rel="modulepreload" href="informe/desbordes.js?v=22">
-    <link rel="modulepreload" href="informe/estilos.js?v=22">
-    <link rel="modulepreload" href="informe/graficos.js?v=22">
-    <link rel="modulepreload" href="informe/pdf.js?v=22">
-    <link rel="modulepreload" href="informe/secciones.js?v=22">
+    <link rel="modulepreload" href="app/almacenamiento.js?v=23">
+    <link rel="modulepreload" href="app/avisos.js?v=23">
+    <link rel="modulepreload" href="app/biblioteca.js?v=23">
+    <link rel="modulepreload" href="app/celdas.js?v=23">
+    <link rel="modulepreload" href="app/dominios.js?v=23">
+    <link rel="modulepreload" href="app/edicion.js?v=23">
+    <link rel="modulepreload" href="app/escenario.js?v=23">
+    <link rel="modulepreload" href="app/estado.js?v=23">
+    <link rel="modulepreload" href="app/filtros.js?v=23">
+    <link rel="modulepreload" href="app/firebase.js?v=23">
+    <link rel="modulepreload" href="app/graficos.js?v=23">
+    <link rel="modulepreload" href="app/identidad.js?v=23">
+    <link rel="modulepreload" href="app/indicador.js?v=23">
+    <link rel="modulepreload" href="app/informe.js?v=23">
+    <link rel="modulepreload" href="app/metricas.js?v=23">
+    <link rel="modulepreload" href="app/modales.js?v=23">
+    <link rel="modulepreload" href="app/persistencia.js?v=23">
+    <link rel="modulepreload" href="app/preferencias.js?v=23">
+    <link rel="modulepreload" href="app/repintado.js?v=23">
+    <link rel="modulepreload" href="app/subcapacidad.js?v=23">
+    <link rel="modulepreload" href="app/vistas/assessment.js?v=23">
+    <link rel="modulepreload" href="app/vistas/dashboard.js?v=23">
+    <link rel="modulepreload" href="app/vistas/heatmap.js?v=23">
+    <link rel="modulepreload" href="app/vistas/ia.js?v=23">
+    <link rel="modulepreload" href="app/vistas/overview.js?v=23">
+    <link rel="modulepreload" href="app/vistas/roadmap.js?v=23">
+    <link rel="modulepreload" href="core/biblioteca.js?v=23">
+    <link rel="modulepreload" href="core/calculo.js?v=23">
+    <link rel="modulepreload" href="core/coincidencias.js?v=23">
+    <link rel="modulepreload" href="core/escenario.js?v=23">
+    <link rel="modulepreload" href="core/exportacion.js?v=23">
+    <link rel="modulepreload" href="core/objetivos.js?v=23">
+    <link rel="modulepreload" href="core/presentacion.js?v=23">
+    <link rel="modulepreload" href="informe/desbordes.js?v=23">
+    <link rel="modulepreload" href="informe/estilos.js?v=23">
+    <link rel="modulepreload" href="informe/graficos.js?v=23">
+    <link rel="modulepreload" href="informe/pdf.js?v=23">
+    <link rel="modulepreload" href="informe/secciones.js?v=23">
     <link rel="preload" href="data/domains.json" as="fetch" crossorigin>
     <link rel="preload" href="data/casos-ia.json" as="fetch" crossorigin>
     <link rel="preload" href="data/biblioteca.json" as="fetch" crossorigin>
@@ -152,11 +156,20 @@
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
     <header class="app-header">
+      <!--
+        Una sola linea: titulo y cliente a la izquierda, botones a la derecha.
+        Tenia tres (el «Deloitte · Finance Strategy», el titulo y una frase
+        descriptiva) y ocupaba 185 px: en un portatil de 768 de alto la primera
+        tarjeta del Assessment empezaba en el 723. Asi empieza en el 603.
+      -->
       <div class="header-inner">
-        <div>
-          <p class="eyebrow">Deloitte · Finance Strategy</p>
-          <h1>F3M Assessment</h1>
-          <p class="header-copy">Diagnóstico preliminar de madurez por subcapacidad, palanca y roadmap sugerido.</p>
+        <div class="header-titulo">
+          <!--
+            El cliente va dentro del h1 y no en una linea aparte: es lo que
+            completa el titulo ("F3M Assessment · Acme"), y proyectado en la
+            sala es lo primero que se lee. Sin nombre puesto no se ve nada.
+          -->
+          <h1>F3M Assessment<span class="cabecera-cliente" id="headerCliente" hidden></span></h1>
         </div>
         <div class="header-actions">
           <button class="primary-button" id="exportPdfButton" type="button">
@@ -212,6 +225,13 @@
 
             <div class="header-menu-panel" id="scenarioMenu" hidden>
               <p class="header-menu-title" id="scenarioMenuState">Copia de este navegador</p>
+
+              <button class="header-menu-item" id="clienteButton" type="button">
+                <span id="clienteLabel">Poner el nombre del cliente</span>
+                <span>Sale en la portada del informe y en los archivos</span>
+              </button>
+
+              <hr class="header-menu-separator">
 
               <button class="header-menu-item" id="createScenarioButton" type="button">
                 Crear escenario compartido
@@ -319,6 +339,22 @@
         </a>
         <a href="#ia">IA</a>
         <span class="tabs-dominio" aria-hidden="true">Dominio <strong id="tabsDominio"></strong></span>
+        <!--
+          Junto al dominio porque es suyo: cuenta y recorre lo que queda por
+          puntuar en el dominio abierto. En la barra sigue a la vista a cualquier
+          altura de la lista y desde cualquier vista del dominio, sin tapar nada.
+          Lo pinta app/vistas/assessment.js y lo engancha app.js.
+        -->
+        <button
+          class="tabs-siguiente"
+          id="siguientePendienteButton"
+          type="button"
+          hidden
+        >
+          <span class="tabs-siguiente-largo">Siguiente sin puntuar</span>
+          <span class="tabs-siguiente-corto">Sin puntuar</span>
+          <span class="tab-badge siguiente-pendiente-cuenta" aria-hidden="true"></span>
+        </button>
       </nav>
 
       <!--
@@ -409,6 +445,19 @@
             <span class="small-note">Cada dominio contra sus propios objetivos por capacidad y palanca</span>
           </div>
           <table class="data-table" id="overviewSummaryTable"></table>
+        </div>
+
+        <!--
+          Al final y no arriba: el Overview se lee de lo general a lo concreto,
+          y esto es lo concreto. Cada iniciativa lleva a su tarjeta en el
+          Assessment de su dominio. Lo pinta app/vistas/overview.js.
+        -->
+        <div class="panel urgentes-panel">
+          <div class="panel-heading">
+            <h3>Lo más urgente de la función financiera</h3>
+            <span class="small-note" id="overviewUrgentesNota"></span>
+          </div>
+          <ol class="urgentes-lista" id="overviewUrgentes"></ol>
         </div>
       </section>
 
@@ -553,6 +602,7 @@
     ></div>
 
     <div class="assessment-list" id="assessmentList"></div>
+
 </section>
 
 
@@ -602,7 +652,7 @@
             <p class="eyebrow">Roadmap</p>
             <h2>Iniciativas sugeridas</h2>
           </div>
-          <p class="small-note" id="roadmapNote">Ordenadas por prioridad y gap. Respetan los filtros del Assessment.</p>
+          <p class="small-note" id="roadmapNote">Agrupadas por oleada y ordenadas por gap. Respetan los filtros del Assessment.</p>
         </div>
 
         <div class="active-filters active-filters-block" data-active-filters hidden></div>
@@ -672,6 +722,14 @@
             <label>
               <span>Documento</span>
               <select id="iaFiltroDocumento"></select>
+            </label>
+
+            <label>
+              <span>Orden</span>
+              <select id="iaOrden">
+                <option value="catalogo">Catálogo</option>
+                <option value="prioridad">Prioridad del cliente</option>
+              </select>
             </label>
           </div>
 
@@ -756,6 +814,7 @@
         <details>
           <summary>
             <span class="detail-summary-text">Ver detalle de evaluación</span>
+            <span class="detail-summary-notas" hidden>Con notas</span>
           </summary>
             <div class="detail-grid">
               <section class="assessment-detail-block maturity-detail-block">
@@ -791,6 +850,26 @@
                   </div>
                 </section>
               </div>
+
+              <!--
+                Las notas del taller: por que este score y no otro, que
+                evidencias se vieron. Es el campo "comentario" de la
+                subcapacidad, el mismo que la columna Comentarios del Roadmap y
+                la diapositiva de comentarios del informe: un segundo campo
+                obligaba a cambiar las reglas de Firebase y partia en dos lo que
+                se sabe de cada subcapacidad.
+              -->
+              <section class="assessment-detail-block notas-detail-block">
+                <h4>
+                  Notas del taller
+                  <span class="notas-pista">· se guardan solas y salen también en el Roadmap y en el informe</span>
+                </h4>
+                <textarea
+                  class="notas-taller"
+                  rows="2"
+                  placeholder="Por qué esta puntuación, qué evidencias se han visto, qué queda por confirmar…"
+                ></textarea>
+              </section>
 
               <!--
                 Los casos de IA, aqui y no solo en el modal del roadmap.
@@ -1080,7 +1159,7 @@
       NUMERO AQUI Y EN TODOS LOS IMPORTS. Lo comprueba el CI:
       python scripts/check_module_version.py
     -->
-    <script type="module" src="app.js?v=22"></script>
+    <script type="module" src="app.js?v=23"></script>
   </body>
 </html>
 

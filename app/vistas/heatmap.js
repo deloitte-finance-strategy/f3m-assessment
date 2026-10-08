@@ -1,9 +1,9 @@
 /**
  * El Heatmap: una fila por capacidad, desplegable a sus subcapacidades.
  *
- * Primera vista que sale de app.js. Se lleva heatScoreCell() y gapClass()
- * porque no las usa nadie mas; priorityBadge() y buildFilteredEmptyState() se
- * quedan en app/celdas.js, que es de donde tiran las otras cuatro vistas.
+ * Primera vista que sale de app.js. heatScoreCell() y gapClass() nacieron aqui
+ * y se fueron a app/celdas.js cuando la tabla del Overview empezo a pintar el
+ * mismo color: una escala copiada en dos vistas acaba diciendo dos cosas.
  *
  * Lo que pinta sale de getScopedItems(), que es la unica fuente de
  * subcapacidades del dominio abierto. Leer state.items directamente daria otro
@@ -11,13 +11,12 @@
  * existe para impedir.
  */
 
-import { getMaturityLevelNumber, priorityFromGap } from "../../core/calculo.js?v=22";
-import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../../core/presentacion.js?v=22";
+import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../../core/presentacion.js?v=23";
 
-import { LEVERS, els, expandedHeatmapCapabilities } from "../estado.js?v=22";
-import { agregarPorCapacidad } from "../metricas.js?v=22";
-import { getScopedItems } from "../filtros.js?v=22";
-import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=22";
+import { LEVERS, els, expandedHeatmapCapabilities } from "../estado.js?v=23";
+import { agregarPorCapacidad } from "../metricas.js?v=23";
+import { getScopedItems } from "../filtros.js?v=23";
+import { buildFilteredEmptyState, gapClass, heatScoreCell, priorityBadge } from "../celdas.js?v=23";
 
 export function renderHeatmap() {
   const capabilityRows = agregarPorCapacidad(getScopedItems());
@@ -170,55 +169,4 @@ function updateHeatmapExpandAllButton(capabilityRows) {
 
   els.heatmapExpandToggle.textContent = allExpanded ? "Colapsar todo" : "Expandir todo";
   els.heatmapExpandToggle.disabled = visibleCapabilities.length === 0;
-}
-
-
-/**
- * Una celda del heatmap. Sin puntuar es un guion, nunca un cero.
- *
- * Number(null) es 0, y 0 pasa Number.isFinite. Por eso una capacidad sin
- * ninguna subcapacidad puntuada se pintaba con un 0 en las cuatro columnas
- * numericas, y en rojo, porque 0 cae en el tramo mas bajo de la escala.
- *
- * Delante de un cliente eso afirma algo que no es cierto: que esa capacidad
- * esta evaluada y con la peor nota posible, cuando lo que pasa es que todavia
- * no se ha evaluado. La tabla resumen del Dashboard, con los mismos datos,
- * enseña un guion. Dos vistas de la misma herramienta decian cosas distintas.
- *
- * Por defecto escribe una media, con dos decimales. El score suelto de una
- * palanca, en las filas de subcapacidad, es un entero y llega con formatNumber.
- */
-function heatScoreCell(value, formatear = formatMedia) {
-  const sinValor = value === null || value === undefined || value === "";
-  const number = sinValor ? NaN : Number(value);
-
-  if (!Number.isFinite(number)) {
-    return `<td class="heat-cell heat-blank">-</td>`;
-  }
-
-  // El nivel sale de getMaturityLevelNumber(), que es donde vive el redondeo
-  // acotado del modelo. Aqui estaba reimplementado en linea, asi que eran dos
-  // definiciones de "que nivel es un 3,5" a dos lineas de distancia.
-  return `<td class="heat-cell heat-${getMaturityLevelNumber(number)}">${formatear(number)}</td>`;
-}
-
-
-/**
- * La clase de color de una celda de gap.
- *
- * Los cortes los pone priorityFromGap(), que es la regla de negocio. Estaban
- * repetidos aqui como 2 y 1 sueltos: mover el umbral de Alta en el motor habria
- * dejado el heatmap pintando de rojo un gap que la tabla llamaba Media.
- */
-const CLASE_DE_GAP = {
-  Alta: "gap-high",
-  Media: "gap-mid",
-  Baja: "gap-low",
-};
-
-
-function gapClass(value) {
-  if (!Number.isFinite(value)) return "heat-blank";
-
-  return CLASE_DE_GAP[priorityFromGap(value)] || "gap-low";
 }

@@ -10,7 +10,7 @@
  * todavia, asi que escribe los suyos literales y tienen que ser los mismos.
  */
 
-import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=22";
+import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=23";
 
 
 /**
@@ -287,6 +287,15 @@ function estilosDePortada() {
     .portada h1 b {
       display: block;
       font-weight: 700;
+    }
+
+    /* Para quien es: debajo del titulo y con menos peso que el, como en la
+       portada de cualquier propuesta. Sin nombre puesto no se pinta. */
+    .portada-cliente {
+      margin: 6mm 0 0;
+      font-size: 17pt;
+      font-weight: 600;
+      color: ${PALETA.marca};
     }
 
     .portada-bajada {

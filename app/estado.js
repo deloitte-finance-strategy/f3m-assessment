@@ -13,9 +13,9 @@
  * una funcion de lectura.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=22";
-import { ESTADOS_VALIDOS } from "../core/escenario.js?v=22";
-import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=22";
+import { PALANCAS } from "../core/calculo.js?v=23";
+import { ESTADOS_VALIDOS } from "../core/escenario.js?v=23";
+import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=23";
 
 
 export const DEFAULT_DOMAIN_ID = "fpa";
@@ -82,6 +82,9 @@ export const STATUS_OPTIONS = ESTADOS_VALIDOS;
 /** El dominio abierto y sus subcapacidades. Se muta en el sitio. */
 export const state = {
   activeDomainId: DEFAULT_DOMAIN_ID,
+  // Para quien es el trabajo. Es del escenario, no de un dominio: sale en la
+  // cabecera, en la portada del informe y en el nombre de los archivos.
+  cliente: "",
   domains: {},
   meta: null,
   items: [],

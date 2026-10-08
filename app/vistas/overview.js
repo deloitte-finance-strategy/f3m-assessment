@@ -6,9 +6,17 @@
  * via getDominiosDelOverview() y no getScopedItems().
  */
 
-import { rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=22";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=22";
-import { celdaDeAvance, kpiCard, priorityBadge, renderLeverBars, renderPriorityBars } from "../celdas.js?v=22";
+import { masUrgentes, rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=23";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=23";
+import {
+  celdaDeAvance,
+  gapClass,
+  heatScoreCell,
+  kpiCard,
+  priorityBadge,
+  renderLeverBars,
+  renderPriorityBars,
+} from "../celdas.js?v=23";
 import {
   DOMAINS,
   GRUPOS_DE_DOMINIO,
@@ -16,9 +24,9 @@ import {
   els,
   state,
   syncActiveDomainState,
-} from "../estado.js?v=22";
-import { renderOverviewRadar } from "../graficos.js?v=22";
-import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=22";
+} from "../estado.js?v=23";
+import { renderOverviewRadar } from "../graficos.js?v=23";
+import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=23";
 
 
 /**
@@ -175,7 +183,73 @@ export function renderOverview() {
     els.overviewLeverBars,
   );
   renderOverviewSummaryTable(filas);
+  renderLoMasUrgente(filas, entradas);
   renderOverviewRadar(filas);
+}
+
+
+/**
+ * «Lo más urgente de la función financiera»: las diez iniciativas de prioridad
+ * alta con mas gap, de cualquier dominio. Para saberlo antes habia que abrir el
+ * Roadmap de los nueve uno a uno y comparar de memoria.
+ *
+ * Cada una es un boton que lleva a su tarjeta en el Assessment de su dominio,
+ * donde estan sus scores y el porque. A donde se va lo decide app.js, que es
+ * quien cambia de dominio y de vista.
+ */
+function renderLoMasUrgente(filas, entradas) {
+  if (!els.overviewUrgentes) {
+    return;
+  }
+
+  const { lista, total } = masUrgentes(entradas, 10);
+  const nombreDe = new Map(filas.map((fila) => [fila.id, fila.label]));
+  const evaluadas = entradas.some((entrada) => !entrada.metrics.isPending);
+
+  if (els.overviewUrgentesNota) {
+    els.overviewUrgentesNota.textContent = !total
+      ? "Iniciativas de prioridad alta de todos los dominios, por gap"
+      : total > lista.length
+        ? `Las ${lista.length} de mayor gap, de ${total} con prioridad alta en todos los dominios. Pulsa una para verla en su dominio`
+        : `${total === 1 ? "La única" : `Las ${total}`} con prioridad alta en todos los dominios, por gap. Pulsa una para verla en su dominio`;
+  }
+
+  if (!lista.length) {
+    els.overviewUrgentes.innerHTML = `
+      <li class="urgentes-vacio small-note">
+        ${evaluadas
+          ? "Ninguna subcapacidad tiene prioridad alta: ningún gap llega a 2 en lo puntuado."
+          : "Todavía no hay nada puntuado. Aquí saldrán las iniciativas de prioridad alta de todos los dominios."}
+      </li>
+    `;
+    return;
+  }
+
+  els.overviewUrgentes.innerHTML = lista
+    .map(({ item, domainId, metrics }) => `
+      <li>
+        <button
+          class="urgente"
+          type="button"
+          data-dominio="${escapeAttr(domainId)}"
+          data-id="${escapeAttr(item.id)}"
+          title="${escapeAttr(`Abrir en el Assessment de ${nombreDe.get(domainId) || domainId}`)}"
+        >
+          <span class="urgente-gap ${gapClass(metrics.gap)}">
+            <strong>${escapeHtml(formatMedia(metrics.gap))}</strong>
+            <span>gap</span>
+          </span>
+          <span class="urgente-cuerpo">
+            <span class="urgente-donde">${escapeHtml(nombreDe.get(domainId) || domainId)} · ${escapeHtml(item.capacidad)}</span>
+            <span class="urgente-titulo">${escapeHtml(item.subcapacidad)}</span>
+            ${item.iniciativaSugerida
+              ? `<span class="urgente-iniciativa">${escapeHtml(item.iniciativaSugerida)}</span>`
+              : ""}
+          </span>
+        </button>
+      </li>
+    `)
+    .join("");
 }
 
 
@@ -246,6 +320,15 @@ function renderOverviewHeadline(filas, entradas) {
 }
 
 
+/**
+ * La tabla por dominio, con los colores del Heatmap en las medias y el gap.
+ *
+ * En gris era una rejilla de cifras que habia que leer una a una para saber que
+ * dominio y que palanca estaban peor, que es la primera pregunta del Overview.
+ * La escala es la misma del Heatmap, celda a celda, y no una propia: el mismo
+ * 2,40 tiene que salir del mismo color en las dos vistas. El objetivo se queda
+ * sin color porque es configuracion, no una medida.
+ */
 function renderOverviewSummaryTable(filas) {
   const rows = filas.map(
     (fila) => `
@@ -258,27 +341,16 @@ function renderOverviewSummaryTable(filas) {
           ${fila.capacidades}
         </td>
 
-        <td class="number">
-          ${formatMedia(fila.procesos)}
-        </td>
-
-        <td class="number">
-          ${formatMedia(fila.tecnologia)}
-        </td>
-
-        <td class="number">
-          ${formatMedia(fila.organizacion)}
-        </td>
-
-        <td class="number">
-          ${formatMedia(fila.scoreMedio)}
-        </td>
+        ${heatScoreCell(fila.procesos, formatMedia, "number")}
+        ${heatScoreCell(fila.tecnologia, formatMedia, "number")}
+        ${heatScoreCell(fila.organizacion, formatMedia, "number")}
+        ${heatScoreCell(fila.scoreMedio, formatMedia, "number")}
 
         <td class="number">
           ${formatMedia(fila.targetMedio)}
         </td>
 
-        <td class="number">
+        <td class="number heat-cell ${gapClass(fila.gap)}">
           ${formatMedia(fila.gap)}
         </td>
 

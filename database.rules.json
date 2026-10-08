@@ -9,6 +9,7 @@
         "version": { ".validate": "newData.isNumber()" },
         "updatedAt": { ".validate": "newData.isString() && newData.val().length <= 40" },
         "activeDomainId": { ".validate": "newData.isString() && newData.val().length <= 64" },
+        "cliente": { ".validate": "newData.isString() && newData.val().length <= 120" },
 
         "domains": {
           "$domainId": {

@@ -399,10 +399,6 @@ summary:focus-visible,
   --focus-ring: var(--green);
 }
 
-.app-header .eyebrow {
-  color: var(--green);
-}
-
 .app-header {
   background: var(--cabecera-bg);
   /* Claro sobre la banda negra, que es negra en los dos temas. Decia
@@ -416,10 +412,26 @@ summary:focus-visible,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 32px;
+  gap: 24px;
   width: min(1440px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 30px 0;
+  padding: 10px 0;
+}
+
+/* Puede encogerse: con un nombre de cliente largo es el nombre el que se corta
+   con puntos suspensivos, y no los botones los que bajan de linea. */
+.header-titulo {
+  min-width: 0;
+}
+
+.app-header h1 {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--fs-2xl);
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 /* El verde de marca sobre fondo claro da 2,27:1, muy lejos del 4,5:1 que pide
@@ -466,15 +478,31 @@ h4 {
   color: var(--ink-3);
 }
 
-.header-copy {
-  max-width: 760px;
-  margin: 0;
+/* El cliente completa el titulo con menos peso que el, y el nombre de la
+   herramienta sigue mandando. Lo separa una raya verde y no un punto, que
+   entre dos textos de tamaños distintos parece una errata. En la cabecera de
+   una linea, un nombre largo se corta con puntos suspensivos: el entero sigue
+   en el menu Escenario, en el informe y en los archivos. */
+.cabecera-cliente {
+  display: inline-block;
+  min-width: 0;
+  margin-left: 0.3em;
+  padding-left: 0.4em;
+  border-left: 3px solid var(--green);
+  overflow: hidden;
+  line-height: 1.05;
   color: var(--cabecera-texto);
+  font-size: 0.62em;
+  font-weight: var(--fw-normal);
+  text-overflow: ellipsis;
+  vertical-align: baseline;
+  white-space: nowrap;
 }
 
 
 .header-actions {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
@@ -835,8 +863,66 @@ transform: translateY(-1px);
 }
 
 .tabs[data-vista="overview"] .tabs-dominio,
-.tabs[data-vista="ia"] .tabs-dominio {
+.tabs[data-vista="ia"] .tabs-dominio,
+.tabs[data-vista="overview"] .tabs-siguiente,
+.tabs[data-vista="ia"] .tabs-siguiente {
   display: none;
+}
+
+/*
+  «Siguiente sin puntuar», pegado al dominio porque cuenta lo que le falta a
+  ese dominio. Mas bajo y mas callado que una pestana: sin relleno de color y
+  con el texto en gris, para que no compita con ellas ni con el dominio. Al
+  pasar por encima responde como una pestana, que es lo que dice que se pulsa.
+*/
+.tabs-siguiente {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: calc(var(--control-h) - 8px);
+  padding: 0 6px 0 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink-3);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.tabs-siguiente[hidden],
+.tabs-siguiente-corto {
+  display: none;
+}
+
+/* En una tableta apaisada (1180 px) el texto entero mandaba la barra a dos
+   pisos, y es la que se queda fija arriba. «Sin puntuar» y la cifra dicen lo
+   mismo; el nombre completo sigue en el aria-label y en el title. */
+@media (max-width: 1200px) {
+  .tabs-siguiente-largo {
+    display: none;
+  }
+
+  .tabs-siguiente-corto {
+    display: inline;
+  }
+}
+
+.tabs-siguiente:hover {
+  border-color: rgba(134, 188, 37, 0.65);
+  background: var(--surface-realce);
+  color: var(--green-dark);
+}
+
+.tabs-siguiente:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 
@@ -1485,7 +1571,6 @@ display: none;
 
 .filters input,
 .filters select,
-.score-select,
 .inline-input {
   min-height: var(--control-h);
   width: 100%;
@@ -1590,7 +1675,7 @@ display: none;
   gap: 4px;
 }
 
-.score-field span {
+.score-field-label {
   color: var(--muted);
   font-size: var(--fs-3xs);
   font-weight: var(--fw-bold);
@@ -1598,58 +1683,84 @@ display: none;
 }
 
 
-.score-select {
-  --score-accent: var(--line);
-  --score-text: var(--ink);
-
-  padding: 0 8px;
+/*
+  Las cinco opciones de una palanca, en una sola pieza con el borde del
+  desplegable al que sustituyen. La elegida toma el color del heatmap para ese
+  nivel, que es la misma escala que ya se lee en el resto de la herramienta: un
+  2 es ambar aqui y en el heatmap. Las demas se quedan en neutro para que la
+  elegida se vea desde el fondo de la sala.
+*/
+.score-segmentos {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: var(--control-h);
   border: 1px solid var(--line);
-  border-left: 4px solid var(--score-accent);
+  border-radius: var(--r-sm);
   background: var(--surface);
-  color: var(--score-text);
-  font-weight: var(--fw-medium);
+  overflow: hidden;
+}
+
+.score-opcion {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  border-left: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.score-opcion:first-child {
+  border-left: 0;
+}
+
+/* El radio sigue ahi para el teclado y los lectores; lo que se ve es el numero.
+   El estilo cuelga del radio con "+" y no de :has(), que algun portatil de
+   cliente con un navegador de hace dos años todavia no entiende. */
+.score-radio {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.score-opcion span {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
   transition:
-    border-color 150ms ease,
-    box-shadow 150ms ease,
-    background-color 150ms ease;
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
-
-.score-select.score-value-empty {
-  --score-accent: var(--score-0);
-  --score-text: var(--score-0-fg);
+.score-opcion:hover span {
+  background: var(--surface-hundida);
+  color: var(--ink);
 }
 
-.score-select.score-value-1 {
-  --score-accent: var(--score-1);
-  --score-text: var(--score-1-fg);
+.score-opcion-1 .score-radio:checked + span { background: var(--score-1); color: var(--score-1-fg); }
+.score-opcion-2 .score-radio:checked + span { background: var(--score-2); color: var(--score-2-fg); }
+.score-opcion-3 .score-radio:checked + span { background: var(--score-3); color: var(--score-3-fg); }
+.score-opcion-4 .score-radio:checked + span { background: var(--score-4); color: var(--score-4-fg); }
+.score-opcion-5 .score-radio:checked + span { background: var(--score-5); color: var(--score-5-fg); }
+
+/* El color por si solo no basta (forzado de colores, daltonismo): la elegida
+   lleva ademas un subrayado grueso, que no depende del tono. */
+.score-radio:checked + span {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
-.score-select.score-value-2 {
-  --score-accent: var(--score-2);
-  --score-text: var(--score-2-fg);
-}
-
-.score-select.score-value-3 {
-  --score-accent: var(--score-3);
-  --score-text: var(--score-3-fg);
-}
-
-.score-select.score-value-4 {
-  --score-accent: var(--score-4);
-  --score-text: var(--score-4-fg);
-}
-
-.score-select.score-value-5 {
-  --score-accent: var(--score-5);
-  --score-text: var(--score-5-fg);
-}
-
-.score-select:focus-visible {
-  border-color: var(--green);
-  border-left-color: var(--score-accent);
+.score-radio:focus-visible + span {
+  position: relative;
+  z-index: 1;
   outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
+  outline-offset: -3px;
 }
 
 
@@ -2169,6 +2280,115 @@ border-radius: var(--r-pill);
 }
 
 
+/*
+  «Lo más urgente de la función financiera», al final del Overview.
+
+  Una lista y no una tabla: cada iniciativa es una frase larga, y en una tabla
+  con caja propia diez de ellas no cabian en el alto de un portatil y la caja
+  se desplazaba por dentro. En dos columnas, diez caben en lo que ocupan cinco.
+  El gap va en el color del Heatmap, que en esta lista siempre es el de
+  prioridad alta: lo que dice el color lo confirma la cifra.
+*/
+.urgentes-panel {
+  margin-top: 16px;
+}
+
+.urgentes-lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.urgentes-lista .urgentes-vacio {
+  grid-column: 1 / -1;
+}
+
+.urgente {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.urgente:hover {
+  border-color: var(--green);
+  background: var(--surface-realce);
+}
+
+.urgente:focus-visible {
+  border-color: var(--green);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.urgente-gap {
+  display: grid;
+  justify-items: center;
+  min-width: 54px;
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  line-height: 1.1;
+}
+
+.urgente-gap strong {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-heavy);
+  font-variant-numeric: tabular-nums;
+}
+
+.urgente-gap span {
+  font-size: var(--fs-3xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+}
+
+.urgente-cuerpo {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.urgente-donde {
+  color: var(--muted);
+  font-size: var(--fs-3xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.urgente-titulo {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+
+.urgente:hover .urgente-titulo,
+.urgente:focus-visible .urgente-titulo {
+  color: var(--green-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.urgente-iniciativa {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+}
+
 #sourceNote,
 #overviewSourceNote {
   max-width: 420px;
@@ -2247,6 +2467,11 @@ border-radius: var(--r-pill);
 .heatmap-table td.heat-cell {
   min-width: 92px;
   text-align: center;
+  font-weight: var(--fw-bold);
+}
+
+/* La tabla del Overview toma los colores del heatmap, y con ellos su peso. */
+#overviewSummaryTable td.heat-cell {
   font-weight: var(--fw-bold);
 }
 
@@ -2538,6 +2763,68 @@ border-color: var(--line-tenue);
 }
 
 
+/*
+  Cada oleada abre con su fila, como se cuenta en un comite: «Oleada 1 ·
+  prioridad alta · 4 iniciativas». La raya de la izquierda lleva el color de la
+  prioridad, el mismo de las etiquetas de la columna Prioridad.
+
+  No es fija a la izquierda como el resto de la primera columna: ocupa la
+  tabla entera, y lo que se queda quieto al desplazar en horizontal es solo su
+  texto. La linea de corte de la columna fija tampoco va aqui, porque no hay
+  columna que cortar.
+*/
+.roadmap-table tbody tr.roadmap-oleada-cabecera,
+.roadmap-table tbody tr.roadmap-oleada-cabecera:hover {
+  background: var(--surface-muted);
+}
+
+.roadmap-table .roadmap-oleada-cabecera th {
+  position: static;
+  width: auto;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-left: 4px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-normal);
+  text-align: left;
+}
+
+.roadmap-table .roadmap-oleada-cabecera th::after {
+  content: none;
+}
+
+.roadmap-table .roadmap-oleada-alta th {
+  border-left-color: var(--red);
+}
+
+.roadmap-table .roadmap-oleada-media th {
+  border-left-color: var(--amber);
+}
+
+.roadmap-table .roadmap-oleada-baja th {
+  border-left-color: var(--green);
+}
+
+.roadmap-oleada-texto {
+  position: sticky;
+  left: 16px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.roadmap-oleada-texto strong {
+  font-weight: var(--fw-heavy);
+}
+
+.roadmap-oleada-texto span {
+  color: var(--muted);
+}
+
+
 
 /*
   Los anchos van en pixeles y no en porcentajes. Con porcentajes, la columna de
@@ -2752,6 +3039,62 @@ border-color: var(--line-tenue);
   border-color: var(--green);
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+
+/*
+  Presentacion: lo editable se lee como texto.
+
+  Proyectado, un desplegable con su flecha y su caja dice "formulario a medio
+  rellenar", y un campo vacio con «Responsable» en gris parece un dato. En este
+  modo los controles pierden la caja, la flecha y el texto de ejemplo, y siguen
+  siendo controles: se puede puntuar y escribir igual, porque en un taller se
+  proyecta mientras se trabaja. La caja vuelve al pasar el raton o con el foco,
+  que es cuando hace falta saber donde se esta escribiendo.
+
+  Los scores pierden la caja y las rayas entre numeros: queda la escala
+  «1 2 3 4 5» con el elegido en su color, que se lee como un dato y no como
+  un formulario. Se sigue puntuando igual.
+*/
+:root[data-densidad="presentacion"] .score-segmentos,
+:root[data-densidad="presentacion"] .roadmap-owner,
+:root[data-densidad="presentacion"] .roadmap-status,
+:root[data-densidad="presentacion"] .roadmap-table textarea,
+:root[data-densidad="presentacion"] .notas-taller {
+  -webkit-appearance: none;
+  appearance: none;
+  border-color: transparent;
+  background-color: transparent;
+  resize: none;
+}
+
+:root[data-densidad="presentacion"] .score-opcion {
+  border-left-color: transparent;
+}
+
+:root[data-densidad="presentacion"] .score-segmentos:hover,
+:root[data-densidad="presentacion"] .score-segmentos:focus-within,
+:root[data-densidad="presentacion"] .roadmap-owner:hover,
+:root[data-densidad="presentacion"] .roadmap-owner:focus,
+:root[data-densidad="presentacion"] .roadmap-status:hover,
+:root[data-densidad="presentacion"] .roadmap-status:focus-visible,
+:root[data-densidad="presentacion"] .roadmap-table textarea:hover,
+:root[data-densidad="presentacion"] .roadmap-table textarea:focus,
+:root[data-densidad="presentacion"] .notas-taller:hover,
+:root[data-densidad="presentacion"] .notas-taller:focus {
+  border-color: var(--line);
+  background-color: var(--surface);
+}
+
+:root[data-densidad="presentacion"] .score-segmentos:hover .score-opcion,
+:root[data-densidad="presentacion"] .score-segmentos:focus-within .score-opcion {
+  border-left-color: var(--line);
+}
+
+:root[data-densidad="presentacion"] .roadmap-owner::placeholder,
+:root[data-densidad="presentacion"] .roadmap-table textarea::placeholder,
+:root[data-densidad="presentacion"] .notas-taller::placeholder {
+  color: transparent;
 }
 
 
@@ -2991,6 +3334,60 @@ border-color: var(--line-tenue);
   border-left: 3px solid rgba(79, 89, 82, 0.75);
 }
 
+/* Las notas del taller ocupan las dos columnas, como los casos de IA: a media
+   rejilla el cuadro se queda en cuatro palabras por linea y no invita a
+   escribir. La linea lateral, neutra: no es una medida ni una palanca. */
+.notas-detail-block {
+  grid-column: 1 / -1;
+  border-left: 3px solid rgba(79, 89, 82, 0.75);
+}
+
+/* Dos lineas y no mas: es para apuntar el porque mientras se habla, no para
+   redactar, y el detalle ya es largo. Quien necesite mas lo estira. */
+.notas-detail-block textarea {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+
+.notas-detail-block textarea:focus-visible {
+  border-color: var(--green);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* La explicacion va en la misma linea del titulo, en vez de en un parrafo
+   debajo: era otra linea mas para decir algo que solo hace falta leer una vez. */
+.notas-pista {
+  color: var(--muted);
+  font-weight: var(--fw-normal);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* "Con notas" junto a "Ver detalle": que se sepa sin abrir la tarjeta. */
+.detail-summary-notas {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--graphite);
+  font-size: var(--fs-3xs);
+  font-weight: var(--fw-bold);
+}
+
+/* Por que va donde va, con el orden por prioridad del cliente. */
+.ai-case .ai-case-brecha {
+  margin: 0;
+}
+
 /* Donde aparece el caso. Solo en la pestana IA, donde la ficha va suelta.
    var(--graphite) sobre var(--surface-hundida) da 7,01:1. */
 .ai-case .ai-case-donde {
@@ -3194,7 +3591,7 @@ border-color: var(--line-tenue);
 }
 
 .filters.ia-filtros {
-  grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(150px, 1fr));
+  grid-template-columns: minmax(220px, 2fr) repeat(5, minmax(140px, 1fr));
   margin-bottom: 12px;
 }
 
@@ -4414,6 +4811,7 @@ height: 100% !important;
 
 
 
+
 /* ==================================================
    OBJETIVOS DE MADUREZ POR CAPACIDAD
    ================================================== */
@@ -4662,7 +5060,19 @@ height: 100% !important;
    ======================================== */
 
 @media (max-width: 1100px) {
-  .header-inner,
+  /* Titulo arriba y botones debajo. En una fila cabrian los botones, pero el
+     nombre del cliente se quedaba en tres letras y unos puntos suspensivos, y
+     es lo que mas se lee cuando se proyecta. */
+  .header-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .header-titulo {
+    max-width: 100%;
+  }
+
   .section-heading,
   .panel-heading {
     align-items: flex-start;
@@ -4676,10 +5086,6 @@ height: 100% !important;
   .section-heading > .small-note {
     max-width: none;
     text-align: left;
-  }
-
-  .header-actions {
-    justify-content: flex-start;
   }
 
   .assessment-controls {
@@ -4933,6 +5339,10 @@ height: 100% !important;
     display: none;
   }
 
+  .urgentes-lista {
+    grid-template-columns: 1fr;
+  }
+
   .capability-targets-header {
     align-items: flex-start;
   }
@@ -5015,6 +5425,12 @@ height: 100% !important;
   hace por un motivo— sino dar a cada cosa un borde, que el sistema si respeta.
 */
 @media (forced-colors: active) {
+  /* El score elegido: sin su fondo solo quedaba el subrayado. */
+  .score-radio:checked + span {
+    background: Highlight;
+    color: HighlightText;
+  }
+
   /* Celdas del heatmap y de score: el numero ya esta, falta la reja. */
   .heat-cell,
   .legend-item {
