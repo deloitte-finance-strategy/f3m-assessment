@@ -31,7 +31,7 @@
         "¿Se anticipan necesidades recurrentes?"
       ],
       "evidencias": "Plan de compras; category plans; forecast de gasto; contratos; presupuestos; análisis spend.",
-      "iniciativaSugerida": "Implantar planificación de demanda de compras por categoría con forecast de gasto contractual y conexión con presupuesto.",
+      "iniciativaSugerida": "Implantar planificación de demanda de compras por categoría con previsión de gasto contractual y conexión con presupuesto.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -66,7 +66,7 @@
         "¿Se usan datos externos?"
       ],
       "evidencias": "Scorecards proveedor; homologaciones; SLAs; incidencias; evaluación de riesgo; contratos.",
-      "iniciativaSugerida": "Crear modelo de supplier intelligence con indicadores de desempeño, riesgo, compliance y recomendaciones de sourcing.",
+      "iniciativaSugerida": "Crear modelo de inteligencia de proveedores con indicadores de desempeño, riesgo, cumplimiento y recomendaciones de aprovisionamiento.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -136,7 +136,7 @@
         "¿Se detectan excepciones?"
       ],
       "evidencias": "PR/PO; workflow; recepción; aprobaciones; excepciones; controles presupuestarios.",
-      "iniciativaSugerida": "Digitalizar workflow PR/PO/recepción con controles automáticos, excepciones y recomendaciones de aprobación/pago.",
+      "iniciativaSugerida": "Digitalizar el flujo de solicitud, pedido y recepción con controles automáticos, excepciones y recomendaciones de aprobación y pago.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -171,7 +171,7 @@
         "¿Se controla leakage?"
       ],
       "evidencias": "Pedidos; contratos; pricing; aprobaciones; incidencias; ajustes comerciales; revenue leakage.",
-      "iniciativaSugerida": "Crear controles automáticos de pedido/contrato/precio con detección de condiciones atípicas y revenue leakage.",
+      "iniciativaSugerida": "Crear controles automáticos de pedido/contrato/precio con detección de condiciones atípicas y fugas de ingresos.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -241,7 +241,7 @@
         "¿Se segmenta la cartera?"
       ],
       "evidencias": "Aging; DSO; cash application; disputas; recordatorios; comunicaciones; write-offs.",
-      "iniciativaSugerida": "Desplegar asistente de cobranzas/intelligent collections con priorización, outreach automatizado y recomendaciones de términos.",
+      "iniciativaSugerida": "Desplegar asistente inteligente de gestión de cobros con priorización, contacto automatizado con clientes y recomendaciones de condiciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -310,7 +310,7 @@
         "¿Hay errores de clasificación?"
       ],
       "evidencias": "Política CAPEX; altas de activos; facturas; órdenes de compra; controles; maestro de activos.",
-      "iniciativaSugerida": "Implantar clasificación asistida CAPEX/OPEX y workflow de alta de activos con controles de soporte documental.",
+      "iniciativaSugerida": "Implantar clasificación asistida CAPEX/OPEX y flujo de alta de activos con controles de soporte documental.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -345,7 +345,7 @@
         "¿Se conocen activos críticos?"
       ],
       "evidencias": "Maestro de activos; inventario físico; conciliaciones; incidencias; ubicación; bajas/traslados.",
-      "iniciativaSugerida": "Crear modelo de asset intelligence con calidad de master data, inventario, conciliación y trazabilidad de ciclo de vida.",
+      "iniciativaSugerida": "Crear modelo de inteligencia de activos con calidad de datos maestros, inventario, conciliación y trazabilidad del ciclo de vida.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -414,7 +414,7 @@
         "¿Se vincula con business case?"
       ],
       "evidencias": "Bajas; autorizaciones; CAPEX; business cases; desviaciones; resultados de disposición.",
-      "iniciativaSugerida": "Implantar control de CAPEX/asset lifecycle con analítica de coste evitado, riesgo y priorización de inversión/desinversión.",
+      "iniciativaSugerida": "Implantar control del CAPEX y del ciclo de vida de los activos con analítica de coste evitado, riesgo y priorización de inversión y desinversión.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -449,7 +449,7 @@
         "¿Se detectan desviaciones?"
       ],
       "evidencias": "Catálogo de KPIs; dashboards; fuentes; definiciones; owners; actas de revisión.",
-      "iniciativaSugerida": "Rediseñar reporting operativo-financiero con KPIs homogéneos, alertas y explicación automática de desviaciones.",
+      "iniciativaSugerida": "Rediseñar los informes operativo-financieros con KPIs homogéneos, alertas y explicación automática de desviaciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -484,7 +484,7 @@
         "¿Se mide calidad de dato?"
       ],
       "evidencias": "Modelo de datos; fuentes; reglas de calidad; incidencias; maestro; logs de carga.",
-      "iniciativaSugerida": "Implantar gobierno de datos operativos-financieros con controles de calidad, master data management y workflow de remediación.",
+      "iniciativaSugerida": "Implantar gobierno de datos operativos-financieros con controles de calidad, gestión de datos maestros y flujo de corrección.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -519,7 +519,7 @@
         "¿Se puede hacer drill-down?"
       ],
       "evidencias": "Dashboards; reportes; logs de actualización; usuarios; permisos; plantillas.",
-      "iniciativaSugerida": "Construir reporting operativo autoservicio con capa conversacional, extracción de datos y generación automática de insights.",
+      "iniciativaSugerida": "Construir informes operativos en autoservicio con capa conversacional, extracción de datos y generación automática de conclusiones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -554,7 +554,7 @@
         "¿Se mide impacto de mejoras?"
       ],
       "evidencias": "Trackers de acciones; incidencias; actas; KPIs; planes de mejora; análisis causa-raíz.",
-      "iniciativaSugerida": "Implantar workflow de gestión de incidencias con priorización IA, root cause y seguimiento de beneficios.",
+      "iniciativaSugerida": "Implantar flujo de gestión de incidencias con priorización por IA, causa raíz y seguimiento de beneficios.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -589,7 +589,7 @@
         "¿Se controla WBS?"
       ],
       "evidencias": "Alta proyecto; WBS; presupuesto; contrato; SoW; maestro de proyectos; aprobaciones.",
-      "iniciativaSugerida": "Crear workflow de alta de proyectos con estructura estándar, metadata automática y conexión con contrato/presupuesto.",
+      "iniciativaSugerida": "Crear flujo de alta de proyectos con estructura estándar, metadatos automáticos y conexión con contrato y presupuesto.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -659,7 +659,7 @@
         "¿Hay leakage?"
       ],
       "evidencias": "Contrato; hitos; facturas; ingresos; margen; avance; notas de crédito; revenue recognition.",
-      "iniciativaSugerida": "Crear control IA de contrato-hito-factura-ingreso-margen para proyectos, con alertas de leakage y desviaciones.",
+      "iniciativaSugerida": "Crear control con IA de contrato-hito-factura-ingreso-margen para proyectos, con alertas de fugas y desviaciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -694,7 +694,7 @@
         "¿Se anticipan desviaciones?"
       ],
       "evidencias": "Forecast; margen; cash flow proyecto; cierre; post-mortem; acciones de mejora; reporting ejecutivo.",
-      "iniciativaSugerida": "Implantar forecast predictivo de proyectos con escenarios, alertas de margen/caja y recomendaciones de acción.",
+      "iniciativaSugerida": "Implantar previsión predictiva de proyectos con escenarios, alertas de margen y caja y recomendaciones de acción.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",

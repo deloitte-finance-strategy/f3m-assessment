@@ -31,7 +31,7 @@
         "¿Hay trazabilidad de ajustes?"
       ],
       "evidencias": "Políticas contables; registros de operaciones; conciliaciones; evidencias de revisión; workpapers; reporting financiero.",
-      "iniciativaSugerida": "Definir gobierno del tratamiento contable de tesorería con políticas, controles, trazabilidad, owners y revisión recurrente de excepciones.",
+      "iniciativaSugerida": "Definir gobierno del tratamiento contable de tesorería con políticas, controles, trazabilidad, responsables y revisión recurrente de excepciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -101,7 +101,7 @@
         "¿Se mide calidad de dato?"
       ],
       "evidencias": "Maestros bancarios; workflows de alta/cambio; logs; controles de calidad; incidencias; aprobaciones; políticas de datos.",
-      "iniciativaSugerida": "Implantar gobierno de master data financiero/bancario con owners, workflow, controles automáticos, trazabilidad y gestión de incidencias.",
+      "iniciativaSugerida": "Implantar gobierno de datos maestros financieros y bancarios con responsables, flujo de trabajo, controles automáticos, trazabilidad y gestión de incidencias.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -136,7 +136,7 @@
         "¿Se generan acciones?"
       ],
       "evidencias": "Reporting de tesorería; análisis de variaciones; KPIs de coste financiero; comité financiero; forecast; acciones de gestión.",
-      "iniciativaSugerida": "Crear reporting financiero de tesorería con drivers, KPIs, narrativa ejecutiva, conexión con forecast y recomendaciones de acción.",
+      "iniciativaSugerida": "Crear informes financieros de tesorería con drivers, KPIs, narrativa ejecutiva, conexión con la previsión y recomendaciones de acción.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -171,7 +171,7 @@
         "¿Hay reporting a comité?"
       ],
       "evidencias": "Política de riesgos; límites; exposiciones; reportes de comité; aprobaciones; métricas VaR/sensibilidad; excepciones.",
-      "iniciativaSugerida": "Definir marco integral de riesgos financieros con políticas, límites, métricas, reporting, governance y workflow de excepciones.",
+      "iniciativaSugerida": "Definir marco integral de riesgos financieros con políticas, límites, métricas, informes, gobierno y flujo de excepciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -206,7 +206,7 @@
         "¿Se simulan escenarios?"
       ],
       "evidencias": "Mapa de exposición FX; forecast por moneda; contratos de cobertura; sensibilidad; hedge effectiveness; reporting de límites.",
-      "iniciativaSugerida": "Implantar modelo de gestión FX con forecast de exposición, límites, escenarios, tracking de coberturas y recomendaciones de mitigación.",
+      "iniciativaSugerida": "Implantar modelo de gestión del riesgo de divisa con previsión de exposición, límites, escenarios, seguimiento de coberturas y recomendaciones de mitigación.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -276,7 +276,7 @@
         "¿Hay alertas tempranas?"
       ],
       "evidencias": "Modelos de escenarios; supuestos macro; sensibilidad; reportes de stress; actas de comité; decisiones preventivas.",
-      "iniciativaSugerida": "Crear framework de stress testing financiero con variables clave, impactos, alertas y planes de respuesta.",
+      "iniciativaSugerida": "Crear marco de pruebas de estrés financieras con variables clave, impactos, alertas y planes de respuesta.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -346,7 +346,7 @@
         "¿Se controla documentación?"
       ],
       "evidencias": "Contratos de deuda; covenant tracker; calendario de vencimientos; reportes a bancos; actas; forecasts; documentación financiera.",
-      "iniciativaSugerida": "Implantar gestión integrada de deuda con covenant tracking, alertas, forecast, repositorio documental y estrategia de relación bancaria.",
+      "iniciativaSugerida": "Implantar gestión integrada de deuda con seguimiento de covenants, alertas, previsión, repositorio documental y estrategia de relación bancaria.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -381,7 +381,7 @@
         "¿Existe proceso de aprobación?"
       ],
       "evidencias": "Análisis de alternativas; term sheets; comparativas de coste; aprobaciones; rating; investor/bank materials; documentación de operación.",
-      "iniciativaSugerida": "Crear metodología de evaluación y ejecución de instrumentos financieros con escenarios de mercado, coste/riesgo, approvals y lessons learned.",
+      "iniciativaSugerida": "Crear metodología de evaluación y ejecución de instrumentos financieros con escenarios de mercado, coste y riesgo, aprobaciones y lecciones aprendidas.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -416,7 +416,7 @@
         "¿Se generan alertas?"
       ],
       "evidencias": "Reportes de mercado; benchmarks; curvas de tipos; spreads; actas de comité; recomendaciones de financiación; alertas.",
-      "iniciativaSugerida": "Implantar capital markets intelligence con fuentes, indicadores, alertas, benchmarks y conexión con estrategia de financiación.",
+      "iniciativaSugerida": "Implantar inteligencia de mercados de capitales con fuentes, indicadores, alertas, referencias de mercado y conexión con la estrategia de financiación.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -451,7 +451,7 @@
         "¿Se analizan desviaciones?"
       ],
       "evidencias": "Modelo de forecast; calendario; inputs; histórico de precisión; desviaciones; TMS/ERP; comités de liquidez.",
-      "iniciativaSugerida": "Implantar modelo de cash forecasting con metodología, owners, integración de fuentes, medición de precisión y escenarios.",
+      "iniciativaSugerida": "Implantar modelo de previsión de tesorería con metodología, responsables, integración de fuentes, medición de precisión y escenarios.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -486,7 +486,7 @@
         "¿Se optimizan saldos?"
       ],
       "evidencias": "Reportes de posición; extractos bancarios; TMS; cash pooling; saldos por divisa; restricciones; alertas; conciliaciones.",
-      "iniciativaSugerida": "Implantar visibilidad integrada de liquidez con conexiones bancarias, cash pooling, alertas y análisis de saldos disponibles/restringidos.",
+      "iniciativaSugerida": "Implantar visibilidad integrada de liquidez con conexiones bancarias, centralización de tesorería, alertas y análisis de saldos disponibles y restringidos.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -521,7 +521,7 @@
         "¿Se recomiendan acciones de caja?"
       ],
       "evidencias": "KPIs working capital; aging; pagos; cobros; inventario; cash forecast; acciones de mejora; comités de cash.",
-      "iniciativaSugerida": "Crear modelo de optimización de liquidez y working capital con KPIs, escenarios, acciones y recomendaciones de cobro/pago/inventario.",
+      "iniciativaSugerida": "Crear modelo de optimización de liquidez y capital circulante con KPIs, escenarios, acciones y recomendaciones de cobro, pago e inventario.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -556,7 +556,7 @@
         "¿Se reportan riesgos de liquidez?"
       ],
       "evidencias": "Pack de tesorería; actas de comité; KPIs; forecast; tracker de acciones; escenarios; reportes de desviación.",
-      "iniciativaSugerida": "Formalizar reporting y rutinas de liquidez con pack estándar, decisiones, actions tracker, escenarios y recomendaciones ejecutivas.",
+      "iniciativaSugerida": "Formalizar informes y rutinas de liquidez con un paquete estándar, decisiones, seguimiento de acciones, escenarios y recomendaciones ejecutivas.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -591,7 +591,7 @@
         "¿Se reporta rentabilidad y riesgo?"
       ],
       "evidencias": "Política de inversiones; cartera; límites; aprobaciones; reportes de rentabilidad; cash forecast; rating contrapartes.",
-      "iniciativaSugerida": "Definir política y gobierno de inversiones de excedentes con límites, instrumentos, contrapartes, liquidez, reporting y revisión periódica.",
+      "iniciativaSugerida": "Definir política y gobierno de inversiones de excedentes con límites, instrumentos, contrapartes, liquidez, informes y revisión periódica.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -661,7 +661,7 @@
         "¿Se alinea con deuda/capital allocation?"
       ],
       "evidencias": "Cash forecast; plan financiero; cartera de inversiones; vencimientos; escenarios; decisiones de inversión/desinversión; comités.",
-      "iniciativaSugerida": "Diseñar proceso integrado de inversiones y liquidez con escenarios, restricciones, vencimientos, necesidades futuras y capital allocation.",
+      "iniciativaSugerida": "Diseñar proceso integrado de inversiones y liquidez con escenarios, restricciones, vencimientos, necesidades futuras y asignación de capital.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -696,7 +696,7 @@
         "¿Se explica performance?"
       ],
       "evidencias": "Reporting de inversiones; policy compliance; excepciones; aprobaciones; logs; actas de comité; análisis de rendimiento/riesgo.",
-      "iniciativaSugerida": "Crear reporting y control de inversiones con límites, evidencias, alertas, performance, compliance y decisiones trazables.",
+      "iniciativaSugerida": "Crear informes y control de inversiones con límites, evidencias, alertas, rentabilidad, cumplimiento y decisiones trazables.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",

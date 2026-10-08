@@ -31,7 +31,7 @@
         "¿Se revisa periódicamente la continuidad de las iniciativas?"
       ],
       "evidencias": "Portfolio de I+D; criterios de priorización; actas de comité; business cases; presupuesto por iniciativa; matriz de ownership.",
-      "iniciativaSugerida": "Diseñar modelo de gobierno del portfolio de I+D con criterios de valor, riesgo, alineamiento estratégico, funding y seguimiento periódico.",
+      "iniciativaSugerida": "Diseñar modelo de gobierno de la cartera de I+D con criterios de valor, riesgo, alineamiento estratégico, financiación y seguimiento periódico.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -66,7 +66,7 @@
         "¿Se conectan costes con avance y beneficios esperados?"
       ],
       "evidencias": "Presupuesto de I+D; forecast por proyecto; informes de desviaciones; hitos técnicos; costes reales; actas de seguimiento.",
-      "iniciativaSugerida": "Implantar modelo de control económico de proyectos de I+D con presupuesto, forecast, hitos, desviaciones, riesgos y acciones correctivas.",
+      "iniciativaSugerida": "Implantar modelo de control económico de proyectos de I+D con presupuesto, previsión, hitos, desviaciones, riesgos y acciones correctivas.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -101,7 +101,7 @@
         "¿Se integran incentivos en forecast y reporting?"
       ],
       "evidencias": "Mapa de incentivos; expedientes de subvención; justificaciones; documentación técnica; registros contables; calendario de obligaciones.",
-      "iniciativaSugerida": "Crear proceso estructurado de funding e incentivos de I+D con screening de elegibilidad, evidencias, workflow de aprobación y tracking financiero.",
+      "iniciativaSugerida": "Crear proceso estructurado de financiación e incentivos de I+D con análisis de elegibilidad, evidencias, flujo de aprobación y seguimiento financiero.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -136,7 +136,7 @@
         "¿Se usan aprendizajes para futuras decisiones?"
       ],
       "evidencias": "KPIs de innovación; benefit tracking; business cases; informes post-implementación; decisiones de portfolio; lecciones aprendidas.",
-      "iniciativaSugerida": "Definir modelo de medición de valor de I+D con KPIs, beneficios esperados/reales, owners, revisión de portfolio y aprendizaje recurrente.",
+      "iniciativaSugerida": "Definir modelo de medición de valor de I+D con KPIs, beneficios esperados y reales, responsables, revisión de la cartera y aprendizaje recurrente.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -171,7 +171,7 @@
         "¿Se conectan condiciones comerciales con contrato y forecast?"
       ],
       "evidencias": "Políticas comerciales; matriz de descuentos; aprobaciones; CRM; ofertas; contratos; análisis de margen por oportunidad.",
-      "iniciativaSugerida": "Diseñar gobierno financiero de propuestas comerciales con reglas de margen, descuentos, riesgos, aprobaciones y trazabilidad end-to-end.",
+      "iniciativaSugerida": "Diseñar gobierno financiero de propuestas comerciales con reglas de margen, descuentos, riesgos, aprobaciones y trazabilidad de principio a fin.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -206,7 +206,7 @@
         "¿Se prioriza el pipeline por valor ajustado?"
       ],
       "evidencias": "RFPs; plantillas de análisis; pipeline comercial; modelos de margen; actas de bid/no-bid; aprobaciones de ofertas.",
-      "iniciativaSugerida": "Implantar modelo de evaluación financiera de oportunidades y RFPs con economics, riesgos, capacidad, probabilidad y priorización de pipeline.",
+      "iniciativaSugerida": "Implantar modelo de evaluación financiera de oportunidades y RFPs con análisis económico, riesgos, capacidad, probabilidad y priorización de la cartera comercial.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -241,7 +241,7 @@
         "¿Se conectan riesgos con pricing y aprobación?"
       ],
       "evidencias": "Política de crédito; límites; exposición por cliente; contratos; términos comerciales; aging; aprobaciones de riesgo.",
-      "iniciativaSugerida": "Construir modelo de riesgo comercial financiero con scoring, límites, términos, exposición, alertas y workflow de aprobación.",
+      "iniciativaSugerida": "Construir modelo de riesgo comercial financiero con puntuación de riesgo, límites, condiciones, exposición, alertas y flujo de aprobación.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -276,7 +276,7 @@
         "¿Se generan acciones comerciales-financieras?"
       ],
       "evidencias": "Dashboard comercial-financiero; pipeline; márgenes; descuentos; revenue leakage; actas de performance; acciones comerciales.",
-      "iniciativaSugerida": "Rediseñar reporting comercial-financiero con KPIs de margen, conversión, leakage, forecast, owners y acciones de mejora.",
+      "iniciativaSugerida": "Rediseñar los informes comercial-financieros con KPIs de margen, conversión, fugas, previsión, responsables y acciones de mejora.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -311,7 +311,7 @@
         "¿Se conecta con presupuesto y forecast?"
       ],
       "evidencias": "Plan operativo-financiero; S&OP/IBP; forecast de demanda; capacidad; costes logísticos; inventarios; escenarios.",
-      "iniciativaSugerida": "Implantar planificación financiera integrada de operaciones y supply chain con drivers, escenarios, capacidad, inventario y forecast.",
+      "iniciativaSugerida": "Implantar planificación financiera integrada de operaciones y cadena de suministro con drivers, escenarios, capacidad, inventario y previsión.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -381,7 +381,7 @@
         "¿Hay acciones sobre working capital?"
       ],
       "evidencias": "KPIs de inventario; DIO; obsolescencia; stock-outs; slow movers; forecast de inventario; reporting de working capital.",
-      "iniciativaSugerida": "Implantar modelo financiero de inventarios y working capital con KPIs, escenarios, alertas de obsolescencia y acciones de optimización.",
+      "iniciativaSugerida": "Implantar modelo financiero de inventarios y capital circulante con KPIs, escenarios, alertas de obsolescencia y acciones de optimización.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -416,7 +416,7 @@
         "¿Hay planes de contingencia financieros?"
       ],
       "evidencias": "Mapa de riesgos; escenarios; proveedores críticos; planes de contingencia; KPIs de servicio; costes logísticos; análisis de impacto.",
-      "iniciativaSugerida": "Desarrollar modelo financiero de resiliencia supply chain con riesgos, escenarios, impacto económico, planes de mitigación y seguimiento.",
+      "iniciativaSugerida": "Desarrollar modelo financiero de resiliencia de la cadena de suministro con riesgos, escenarios, impacto económico, planes de mitigación y seguimiento.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -451,7 +451,7 @@
         "¿Se revisan precios de forma recurrente?"
       ],
       "evidencias": "Política de pricing; catálogo de precios; matriz de descuentos; aprobaciones; análisis competitivo; reporting de margen.",
-      "iniciativaSugerida": "Definir modelo de gobierno de pricing con estrategia, roles, reglas, descuentos, excepciones, KPIs y ciclo de revisión.",
+      "iniciativaSugerida": "Definir modelo de gobierno de precios con estrategia, roles, reglas, descuentos, excepciones, KPIs y ciclo de revisión.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -486,7 +486,7 @@
         "¿Se generan acciones comerciales o de servicio?"
       ],
       "evidencias": "Modelo de rentabilidad; P&L por dimensión; coste de servir; márgenes; descuentos; análisis de leakage; acciones comerciales.",
-      "iniciativaSugerida": "Construir modelo granular de rentabilidad con coste de servir, margen neto, leakage, segmentación y acciones por cliente/producto/canal.",
+      "iniciativaSugerida": "Construir modelo granular de rentabilidad con coste de servir, margen neto, fugas, segmentación y acciones por cliente, producto y canal.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -521,7 +521,7 @@
         "¿Se usan aprendizajes para nuevas campañas?"
       ],
       "evidencias": "Calendario promocional; análisis ROI; baseline/uplift; descuentos; margen incremental; post-mortems; decisiones de pricing.",
-      "iniciativaSugerida": "Implantar modelo de optimización promocional con ROI, uplift, margen, elasticidad, canibalización y recomendaciones de descuento.",
+      "iniciativaSugerida": "Implantar modelo de optimización promocional con ROI, incremento de ventas, margen, elasticidad, canibalización y recomendaciones de descuento.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -556,7 +556,7 @@
         "¿Se cuantifica impacto de acciones?"
       ],
       "evidencias": "Dashboard de margen; análisis de leakage; variaciones de precio/mix/coste; contratos; acciones; seguimiento de beneficios.",
-      "iniciativaSugerida": "Crear modelo de margin performance management con drivers, leakage, owners, acciones, forecast e impacto económico cuantificado.",
+      "iniciativaSugerida": "Crear modelo de gestión del rendimiento del margen con drivers, fugas, responsables, acciones, previsión e impacto económico cuantificado.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",

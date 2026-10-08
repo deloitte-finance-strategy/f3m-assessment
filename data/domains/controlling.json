@@ -31,7 +31,7 @@
         "¿Se monitorizan KPIs de cierre?"
       ],
       "evidencias": "Calendario de cierre; RACI; checklist; actas de cierre; KPIs de días de cierre; evidencias de aprobaciones.",
-      "iniciativaSugerida": "Implantar gobierno de cierre con calendario, RACI, checklist digital, KPIs y tracking de dependencias.",
+      "iniciativaSugerida": "Implantar gobierno de cierre con calendario, RACI, lista de verificación digital, KPIs y seguimiento de dependencias.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -66,7 +66,7 @@
         "¿Se revisan excepciones?"
       ],
       "evidencias": "Listado de asientos recurrentes; plantillas de accruals; logs de automatización; conciliación de ajustes; workflow de aprobación.",
-      "iniciativaSugerida": "Crear modelo de automatización de asientos y accruals con reglas, históricos, validaciones y alertas de omisión.",
+      "iniciativaSugerida": "Crear modelo de automatización de asientos y periodificaciones con reglas, históricos, validaciones y alertas de omisión.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -101,7 +101,7 @@
         "¿Hay evidencia de control?"
       ],
       "evidencias": "Matriz de controles; logs de excepción; evidencias de revisión; reportes de anomalías; auditoría de cambios.",
-      "iniciativaSugerida": "Implantar monitor de anomalías de cierre con reglas, modelos de detección, scoring y workflow de revisión.",
+      "iniciativaSugerida": "Implantar monitor de anomalías de cierre con reglas, modelos de detección, puntuación de riesgo y flujo de revisión.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -136,7 +136,7 @@
         "¿Se ejecutan planes de mejora?"
       ],
       "evidencias": "KPIs de cierre; backlog de incidencias; planes de mejora; análisis causa-raíz; métricas de retrabajo.",
-      "iniciativaSugerida": "Crear programa de mejora continua del cierre con KPIs, process mining, análisis de excepciones y roadmap de automatización.",
+      "iniciativaSugerida": "Crear programa de mejora continua del cierre con KPIs, minería de procesos, análisis de excepciones y hoja de ruta de automatización.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -171,7 +171,7 @@
         "¿Hay owners por entidad?"
       ],
       "evidencias": "Perímetro; jerarquías; manual de consolidación; logs de cambios; matriz de ownership.",
-      "iniciativaSugerida": "Formalizar gobierno de perímetro y jerarquías con workflow de cambios, validaciones y trazabilidad.",
+      "iniciativaSugerida": "Formalizar gobierno de perímetro y jerarquías con flujo de cambios, validaciones y trazabilidad.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -276,7 +276,7 @@
         "¿Está automatizado?"
       ],
       "evidencias": "Pack de reporting; estados consolidados; análisis de variaciones; actas de revisión; evidencias de control.",
-      "iniciativaSugerida": "Desarrollar reporting consolidado automatizado con narrative commentary, explicación de variaciones y control de consistencia.",
+      "iniciativaSugerida": "Desarrollar informes consolidados automatizados con comentario narrativo, explicación de variaciones y control de consistencia.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -346,7 +346,7 @@
         "¿Se monitorizan cambios regulatorios?"
       ],
       "evidencias": "Calendario regulatorio; filings; matriz de requisitos; evidencias de revisión; control de fuentes.",
-      "iniciativaSugerida": "Implantar workflow de filings regulatorios con generación asistida, validaciones, trazabilidad y tracking de cambios normativos.",
+      "iniciativaSugerida": "Implantar flujo de presentaciones a reguladores con generación asistida, validaciones, trazabilidad y seguimiento de cambios normativos.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -416,7 +416,7 @@
         "¿Se detectan inconsistencias?"
       ],
       "evidencias": "Matriz de control; evidencias; auditoría de cambios; checklists; incidencias; aprobaciones.",
-      "iniciativaSugerida": "Implantar governance digital de reporting externo con evidencias, workflow de revisión y detección de inconsistencias.",
+      "iniciativaSugerida": "Implantar gobierno digital de la información externa con evidencias, flujo de revisión y detección de inconsistencias.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -451,7 +451,7 @@
         "¿Se conectan acciones?"
       ],
       "evidencias": "Reportes de variaciones; árboles de drivers; comentarios; actas; acciones; dashboards.",
-      "iniciativaSugerida": "Crear modelo estándar de variance analysis con drivers, explicaciones, owners y acciones.",
+      "iniciativaSugerida": "Crear modelo estándar de análisis de desviaciones con drivers, explicaciones, responsables y acciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -486,7 +486,7 @@
         "¿Existe metadata?"
       ],
       "evidencias": "Catálogo de datos; reglas de calidad; incidencias; maestros; documentación de metadata; logs de corrección.",
-      "iniciativaSugerida": "Implementar control de calidad y clasificación financiera con detección de anomalías, metadata y workflows de remediación.",
+      "iniciativaSugerida": "Implementar control de calidad y clasificación financiera con detección de anomalías, metadatos y flujos de corrección.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -521,7 +521,7 @@
         "¿Se usa para decidir?"
       ],
       "evidencias": "Packs ejecutivos; dashboards; one-pagers; recomendaciones; comités de performance; decisiones documentadas.",
-      "iniciativaSugerida": "Desarrollar capa de insights financieros con narrativa, drivers, recomendaciones y conexión con decisiones.",
+      "iniciativaSugerida": "Desarrollar capa de análisis financiero con narrativa, drivers, recomendaciones y conexión con decisiones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -556,7 +556,7 @@
         "¿Se recomiendan acciones?"
       ],
       "evidencias": "Modelos predictivos; dashboards de alertas; backtesting; supuestos; acciones derivadas.",
-      "iniciativaSugerida": "Implantar modelos predictivos de performance, desviaciones y oportunidades con alertas y recomendaciones.",
+      "iniciativaSugerida": "Implantar modelos predictivos de rendimiento, desviaciones y oportunidades con alertas y recomendaciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -591,7 +591,7 @@
         "¿Incluye análisis y comentarios?"
       ],
       "evidencias": "Catálogo de reporting; KPIs; dashboards; periodicidad; owners; evidencias de automatización.",
-      "iniciativaSugerida": "Rediseñar reporting interno con KPIs homologados, automatización, narrative commentary y drill-down.",
+      "iniciativaSugerida": "Rediseñar los informes internos con KPIs homologados, automatización, comentario narrativo y navegación al detalle.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -626,7 +626,7 @@
         "¿Se detectan inconsistencias?"
       ],
       "evidencias": "Modelo de datos; fuentes oficiales; logs de carga; definición de KPIs; validaciones; controles de calidad.",
-      "iniciativaSugerida": "Implantar capa de datos financieros para reporting interno con integración, calidad y gobierno de definiciones.",
+      "iniciativaSugerida": "Implantar capa de datos financieros para informes internos con integración, calidad y gobierno de definiciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -661,7 +661,7 @@
         "¿Se controlan accesos?"
       ],
       "evidencias": "Dashboards; permisos; modelo semántico; guías de uso; logs de consulta; feedback de usuarios.",
-      "iniciativaSugerida": "Habilitar self-service financiero gobernado con capa conversacional, narrativa y trazabilidad de definiciones.",
+      "iniciativaSugerida": "Habilitar autoservicio financiero gobernado con capa conversacional, narrativa y trazabilidad de definiciones.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -696,7 +696,7 @@
         "¿Se mide impacto?"
       ],
       "evidencias": "Actas; trackers de acciones; KPIs de impacto; packs de reporting; decisiones documentadas.",
-      "iniciativaSugerida": "Formalizar rutinas de reporting interno con decisiones, acciones, owners, seguimiento e insights automatizados.",
+      "iniciativaSugerida": "Formalizar rutinas de informes internos con decisiones, acciones, responsables, seguimiento y conclusiones automatizadas.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -731,7 +731,7 @@
         "¿Hay escalados?"
       ],
       "evidencias": "Calendario; RACI; reportes IC; KPIs; actas de escalado; evidencias.",
-      "iniciativaSugerida": "Diseñar gobierno de conciliación IC con calendario, umbrales, workflow y seguimiento de partidas abiertas.",
+      "iniciativaSugerida": "Diseñar gobierno de conciliación intercompañía con calendario, umbrales, flujo de trabajo y seguimiento de partidas abiertas.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -766,7 +766,7 @@
         "¿Hay workflow?"
       ],
       "evidencias": "Reportes de matching; partidas abiertas; logs de excepción; workflow de resolución; análisis causa-raíz.",
-      "iniciativaSugerida": "Implantar matching inteligente y workflow de resolución IC con análisis causa-raíz y priorización por materialidad.",
+      "iniciativaSugerida": "Implantar casación inteligente y flujo de resolución intercompañía con análisis causa-raíz y priorización por materialidad.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -801,7 +801,7 @@
         "¿Se reducen partidas abiertas?"
       ],
       "evidencias": "Análisis de recurrencia; planes de acción; acuerdos IC; reglas de eliminación; KPIs de aging.",
-      "iniciativaSugerida": "Crear programa de reducción de diferencias IC con análisis de patrones, acciones preventivas y seguimiento de aging.",
+      "iniciativaSugerida": "Crear programa de reducción de diferencias intercompañía con análisis de patrones, acciones preventivas y seguimiento de antigüedad.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
@@ -836,7 +836,7 @@
         "¿Se mide impacto?"
       ],
       "evidencias": "Reportes IC; consolidación; eliminaciones; ajustes; logs de integración; KPIs de late adjustments.",
-      "iniciativaSugerida": "Integrar conciliación IC con consolidación, eliminaciones, reporting y alertas de impacto antes del cierre.",
+      "iniciativaSugerida": "Integrar conciliación intercompañía con consolidación, eliminaciones, informes y alertas de impacto antes del cierre.",
       "comentario": "",
       "owner": "",
       "status": "No iniciado",
