@@ -568,6 +568,22 @@ h4 {
   color: var(--sobre-marca);
 }
 
+/* «Presentacion» es un menu, pero lleva dentro la letra grande, que cambia la
+   herramienta entera. Con ella puesta, el boton sigue en verde como cuando era
+   un conmutador suelto. */
+.header-menu-button.activo,
+.header-menu-button.activo[aria-expanded="true"] {
+  border-color: var(--green);
+  background: var(--green);
+  color: var(--sobre-marca);
+}
+
+.header-menu-button.activo:hover {
+  border-color: var(--green-claro);
+  background: var(--green-claro);
+  color: var(--sobre-marca);
+}
+
 /* Cambios de hace mas de un dia sin ninguna copia guardada, en modo local.
    Un punto ambar y no un rotulo: tiene que verlo quien trabaja, pero delante
    del cliente no puede parecer una alarma. Lo explica el propio menu. */
@@ -675,6 +691,48 @@ h4 {
 
 .header-menu-item-danger:hover {
   background: var(--error-panel);
+}
+
+/* Un conmutador dentro de un menu: el interruptor de la derecha dice si esta
+   puesto sin tener que leer nada. Fondo y bola con colores fijos de marca, que
+   valen en los dos temas. */
+.header-menu-conmutador {
+  position: relative;
+  padding-right: 58px;
+}
+
+.header-menu-conmutador::before,
+.header-menu-conmutador::after {
+  position: absolute;
+  content: "";
+  transition: background 0.15s ease, right 0.15s ease;
+}
+
+.header-menu-conmutador::before {
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--line-fuerte);
+}
+
+.header-menu-conmutador::after {
+  top: 13px;
+  right: 27px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.header-menu-conmutador[aria-pressed="true"]::before {
+  background: var(--green);
+}
+
+.header-menu-conmutador[aria-pressed="true"]::after {
+  right: 13px;
 }
 
 .header-menu-separator {
@@ -5774,9 +5832,20 @@ height: 100% !important;
   .domain-button.active,
   .tabs a.active,
   .header-secondary-action[aria-pressed="true"],
+  .header-menu-button.activo,
   .visor-fuente-boton[aria-pressed="true"] {
     outline: 2px solid Highlight;
     outline-offset: -2px;
+  }
+
+  /* El interruptor de «Letra grande» es todo fondo: sin esto desaparece. */
+  .header-menu-conmutador::before {
+    border: 1px solid CanvasText;
+  }
+
+  .header-menu-conmutador[aria-pressed="true"]::after {
+    forced-color-adjust: none;
+    background: Highlight;
   }
 
   /* El chip de guardado dice su estado por color; el borde lo mantiene. */
@@ -5891,22 +5960,67 @@ height: 100% !important;
 }
 
 .modo-taller-donde {
+  display: flex;
   flex: 1;
+  align-items: center;
+  gap: 0.6em;
   min-width: 0;
-  overflow: hidden;
   font-size: 0.95em;
   white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .modo-taller-donde strong {
-  margin-right: 0.35em;
   font-size: 1.08em;
 }
 
-.modo-taller-donde span,
+/* El cliente es lo unico que puede ser largo: se corta el, no el dominio. */
+.modo-taller-donde > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modo-taller-donde > span,
 .modo-taller-posicion {
   color: rgba(255, 255, 255, 0.82);
+}
+
+/* Con la forma de «Salir», para que se lea como algo que se pulsa. La flecha
+   va dibujada porque la del sistema sale negra sobre la banda oscura. */
+.modo-taller-dominio select {
+  min-height: 2.3em;
+  padding: 0 2.1em 0 0.9em;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: var(--r-pill);
+  background:
+    linear-gradient(45deg, transparent 50%, currentColor 50%) right 1.05em top 52% / 0.4em 0.4em no-repeat,
+    linear-gradient(135deg, currentColor 50%, transparent 50%) right 0.7em top 52% / 0.4em 0.4em no-repeat;
+  color: var(--cabecera-claro);
+  font: inherit;
+  font-weight: var(--fw-medium);
+  appearance: none;
+  cursor: pointer;
+  /* Del ancho de lo elegido y no de la opcion mas larga, donde se entiende.
+     Donde no, mide lo de la mas larga, que tambien cabe. */
+  field-sizing: content;
+}
+
+.modo-taller-dominio select:hover {
+  border-color: var(--green);
+  background-color: rgba(134, 188, 37, 0.18);
+}
+
+.modo-taller-dominio select:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* La lista que se despliega es del sistema y sale clara: sin esto heredaba el
+   texto blanco de la banda y no se leia. */
+.modo-taller-dominio option,
+.modo-taller-dominio optgroup {
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .modo-taller-posicion {
@@ -6241,6 +6355,11 @@ height: 100% !important;
   border-radius: var(--r-sm);
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* Ver apartarElChipDelPie() en app/taller.js. */
+.en-modo-taller .save-status {
+  bottom: calc(var(--pie-del-taller, 0px) + 6px);
 }
 
 .modo-taller-pie {

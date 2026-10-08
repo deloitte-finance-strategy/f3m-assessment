@@ -10,10 +10,10 @@
  * decia "no se pudo cargar el JSON de datos" con los otros ocho perfectos.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=26";
-import { normalizarItemCargado } from "../core/escenario.js?v=26";
-import { normalizeDomainTargets } from "../core/objetivos.js?v=26";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=26";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=27";
+import { normalizarItemCargado } from "../core/escenario.js?v=27";
+import { normalizeDomainTargets } from "../core/objetivos.js?v=27";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=27";
 
 import {
   CASOS_DE_IA,
@@ -27,11 +27,11 @@ import {
   expandedHeatmapCapabilities,
   state,
   syncActiveDomainState,
-} from "./estado.js?v=26";
+} from "./estado.js?v=27";
 
-import { comportamientoDeDesplazamiento } from "./preferencias.js?v=26";
-import { repintarTodo } from "./repintado.js?v=26";
-import { populateCapacityFilter } from "./filtros.js?v=26";
+import { comportamientoDeDesplazamiento } from "./preferencias.js?v=27";
+import { repintarTodo } from "./repintado.js?v=27";
+import { populateCapacityFilter } from "./filtros.js?v=27";
 
 
 /**
@@ -420,6 +420,17 @@ function updateActiveDomainUi() {
  * los objetivos son los del dominio activo y darian gaps equivocados para los
  * demas.
  */
+export function avanceDeDominio(domainId) {
+  const items = state.domains[domainId]?.items || [];
+
+  return {
+    puntuadas: items.filter((item) => LEVERS.some((lever) => Number.isFinite(item.scores[lever.key]))).length,
+    total: items.length,
+  };
+}
+
+
+/** Los contadores «12/40» del conmutador, y lo que leen los lectores de pantalla. */
 export function actualizarAvanceDeDominios() {
   Object.entries(DOMAINS).forEach(([domainId]) => {
     const boton = document.querySelector(`[data-domain-id="${CSS.escape(domainId)}"]`);
@@ -429,11 +440,7 @@ export function actualizarAvanceDeDominios() {
       return;
     }
 
-    const total = dominio.items.length;
-
-    const puntuadas = dominio.items.filter((item) =>
-      LEVERS.some((lever) => Number.isFinite(item.scores[lever.key])),
-    ).length;
+    const { puntuadas, total } = avanceDeDominio(domainId);
 
     let contador = boton.querySelector(".domain-progress");
 

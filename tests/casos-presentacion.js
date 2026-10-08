@@ -11,13 +11,14 @@
 
 import {
   cuandoFue,
+  diaLegible,
   escapeAttr,
   escapeHtml,
   fechaLegible,
   fechaParaArchivo,
   formatMedia,
   formatNumber,
-} from "../core/presentacion.js?v=26";
+} from "../core/presentacion.js?v=27";
 
 
 export const casos = [
@@ -94,6 +95,7 @@ export const casos = [
       t.igual(fechaLegible(new Date(2026, 9, 4, 9, 5, 44)), "4 de octubre de 2026, 09:05");
       t.igual(fechaLegible(new Date(2026, 0, 31, 23, 0)), "31 de enero de 2026, 23:00", "enero es el mes 0");
       t.igual(fechaLegible(new Date(2026, 11, 1, 0, 7)), "1 de diciembre de 2026, 00:07", "y diciembre el 11");
+      t.igual(diaLegible(new Date(2026, 9, 8, 23, 59)), "8 de octubre de 2026", "el acta lleva solo el día");
     },
   },
   {

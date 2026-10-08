@@ -6,18 +6,19 @@
  * son valores simples.
  */
 
-import { casos as casosDeCalculo } from "./casos-calculo.js?v=26";
-import { casos as casosDeEscenario } from "./casos-escenario.js?v=26";
-import { casos as casosDeReglas } from "./casos-reglas.js?v=26";
-import { casos as casosDePresentacion } from "./casos-presentacion.js?v=26";
-import { casos as casosDeGraficos } from "./casos-graficos.js?v=26";
-import { casos as casosDeObjetivos } from "./casos-objetivos.js?v=26";
-import { casos as casosDeCoincidencias } from "./casos-coincidencias.js?v=26";
-import { casos as casosDeExportacion } from "./casos-exportacion.js?v=26";
-import { casos as casosDeInforme } from "./casos-informe.js?v=26";
-import { casos as casosDeBiblioteca } from "./casos-biblioteca.js?v=26";
-import { casos as casosDeBusqueda } from "./casos-busqueda.js?v=26";
-import { casos as casosDePreparacion } from "./casos-preparacion.js?v=26";
+import { casos as casosDeCalculo } from "./casos-calculo.js?v=27";
+import { casos as casosDeEscenario } from "./casos-escenario.js?v=27";
+import { casos as casosDeReglas } from "./casos-reglas.js?v=27";
+import { casos as casosDePresentacion } from "./casos-presentacion.js?v=27";
+import { casos as casosDeGraficos } from "./casos-graficos.js?v=27";
+import { casos as casosDeObjetivos } from "./casos-objetivos.js?v=27";
+import { casos as casosDeCoincidencias } from "./casos-coincidencias.js?v=27";
+import { casos as casosDeExportacion } from "./casos-exportacion.js?v=27";
+import { casos as casosDeInforme } from "./casos-informe.js?v=27";
+import { casos as casosDeBiblioteca } from "./casos-biblioteca.js?v=27";
+import { casos as casosDeBusqueda } from "./casos-busqueda.js?v=27";
+import { casos as casosDePreparacion } from "./casos-preparacion.js?v=27";
+import { casos as casosDeActa } from "./casos-acta.js?v=27";
 
 
 /** Todos los casos, en el orden en que se quieren leer. */
@@ -32,6 +33,7 @@ export const casos = [
   ...casosDeGraficos,
   ...casosDeInforme,
   ...casosDePreparacion,
+  ...casosDeActa,
   ...casosDeBiblioteca,
   ...casosDeBusqueda,
 ];

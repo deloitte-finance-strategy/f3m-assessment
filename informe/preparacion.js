@@ -16,9 +16,9 @@
  * documento entero, sin scripts, por lo mismo que el informe.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=26";
-import { COLOR_DE_PALANCA, escapeHtml } from "../core/presentacion.js?v=26";
-import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=26";
+import { PALANCAS } from "../core/calculo.js?v=27";
+import { COLOR_DE_PALANCA, escapeHtml } from "../core/presentacion.js?v=27";
+import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=27";
 
 
 /**
@@ -123,7 +123,7 @@ export function documentoDePreparacion(datos) {
     <html lang="es">
       <head>
         <meta charset="utf-8">
-        <title>${escapeHtml(tituloDelDocumento(datos))}</title>
+        <title>${escapeHtml(tituloDelDocumento("Preparación del taller F3M", datos))}</title>
         <style>${estilos()}</style>
       </head>
       <body>
@@ -262,18 +262,25 @@ function subcapacidad(item) {
 /**
  * El nombre que propone el dialogo de guardar: con el cliente delante, como el
  * informe, y sin los caracteres que Windows no admite en un nombre de archivo.
+ * Lo comparte el acta del taller, con su propio tipo de documento.
  */
-function tituloDelDocumento(datos) {
+export function tituloDelDocumento(tipo, datos) {
   const partes = [datos.cliente, datos.domainLabel]
     .filter(Boolean)
     .map((parte) => String(parte).replace(/[<>:"/\\|?*]+/g, " ").trim())
     .join(" - ");
 
-  return ["Preparación del taller F3M", partes, datos.fechaDeArchivo].filter(Boolean).join(" - ");
+  return [tipo, partes, datos.fechaDeArchivo].filter(Boolean).join(" - ");
 }
 
 
-function estilos() {
+/**
+ * La hoja comun de los documentos A4 que se envian al cliente: la preparacion,
+ * antes del taller, y el acta, despues. Son el antes y el despues de la misma
+ * sesion y tienen que parecer de la misma familia; con dos copias de la hoja,
+ * la primera que se tocara dejaria de parecerlo.
+ */
+export function estilosDelDocumento() {
   return `
     /* El numero de pagina va en el margen, que es donde el navegador lo sabe:
        el documento fluye y no hay forma de saber desde aqui en que pagina cae
@@ -393,41 +400,22 @@ function estilos() {
       font-size: 11pt;
     }
 
-    .rubrica {
-      width: 100%;
-      margin-bottom: 4pt;
-      border-collapse: collapse;
-      font-size: 9pt;
-      break-inside: avoid;
+    h3 {
+      margin: 0 0 2pt;
+      font-size: 11pt;
     }
 
-    .rubrica th {
-      padding: 3pt 6pt;
-      border-bottom: 1pt solid ${PALETA.lineaFuerte};
+    h4 {
+      margin: 0 0 3pt;
       color: ${PALETA.tintaSuave};
       font-size: 7.5pt;
-      letter-spacing: 0.06em;
-      text-align: left;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
     }
 
-    .rubrica th i {
-      display: inline-block;
-      width: 7pt;
-      height: 7pt;
-      margin-right: 4pt;
-      border-radius: 50%;
-    }
-
-    .rubrica td {
-      padding: 4pt 6pt;
-      border-bottom: 0.5pt solid ${PALETA.linea};
-      vertical-align: middle;
-    }
-
-    .rubrica td:first-child {
-      font-weight: 700;
-      white-space: nowrap;
+    .nota {
+      color: ${PALETA.tintaSuave};
+      font-size: 9pt;
     }
 
     .nivel {
@@ -438,68 +426,6 @@ function estilos() {
       height: 15pt;
       margin-right: 6pt;
       border-radius: 3pt;
-    }
-
-    .indice {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .indice li {
-      display: flex;
-      justify-content: space-between;
-      gap: 12pt;
-      padding: 3pt 0;
-      border-bottom: 0.5pt dotted ${PALETA.lineaFuerte};
-    }
-
-    .indice li span:last-child {
-      color: ${PALETA.tintaSuave};
-      white-space: nowrap;
-    }
-
-    .bloque {
-      break-inside: avoid;
-    }
-
-    .capacidad {
-      margin-top: 12pt;
-    }
-
-    .subcapacidad {
-      padding: 8pt 0 9pt;
-      border-bottom: 0.75pt solid ${PALETA.linea};
-      break-inside: avoid;
-    }
-
-    h3 {
-      margin: 0 0 2pt;
-      font-size: 11pt;
-    }
-
-    .objetivo,
-    .nota {
-      color: ${PALETA.tintaSuave};
-      font-size: 9pt;
-    }
-
-    .objetivo {
-      margin-bottom: 6pt;
-    }
-
-    .columnas {
-      display: grid;
-      grid-template-columns: 1.15fr 1fr;
-      gap: 16pt;
-    }
-
-    h4 {
-      margin: 0 0 3pt;
-      color: ${PALETA.tintaSuave};
-      font-size: 7.5pt;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
     }
 
     ul {
@@ -539,6 +465,94 @@ function estilos() {
     .renglones div {
       height: 20pt;
       border-bottom: 0.75pt solid ${PALETA.lineaFuerte};
+    }
+  `;
+}
+
+
+function estilos() {
+  return `${estilosDelDocumento()}
+
+    .rubrica {
+      width: 100%;
+      margin-bottom: 4pt;
+      border-collapse: collapse;
+      font-size: 9pt;
+      break-inside: avoid;
+    }
+
+    .rubrica th {
+      padding: 3pt 6pt;
+      border-bottom: 1pt solid ${PALETA.lineaFuerte};
+      color: ${PALETA.tintaSuave};
+      font-size: 7.5pt;
+      letter-spacing: 0.06em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .rubrica th i {
+      display: inline-block;
+      width: 7pt;
+      height: 7pt;
+      margin-right: 4pt;
+      border-radius: 50%;
+    }
+
+    .rubrica td {
+      padding: 4pt 6pt;
+      border-bottom: 0.5pt solid ${PALETA.linea};
+      vertical-align: middle;
+    }
+
+    .rubrica td:first-child {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .indice {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .indice li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12pt;
+      padding: 3pt 0;
+      border-bottom: 0.5pt dotted ${PALETA.lineaFuerte};
+    }
+
+    .indice li span:last-child {
+      color: ${PALETA.tintaSuave};
+      white-space: nowrap;
+    }
+
+    .bloque {
+      break-inside: avoid;
+    }
+
+    .capacidad {
+      margin-top: 12pt;
+    }
+
+    .subcapacidad {
+      padding: 8pt 0 9pt;
+      border-bottom: 0.75pt solid ${PALETA.linea};
+      break-inside: avoid;
+    }
+
+    .objetivo {
+      margin-bottom: 6pt;
+      color: ${PALETA.tintaSuave};
+      font-size: 9pt;
+    }
+
+    .columnas {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 16pt;
     }
   `;
 }
