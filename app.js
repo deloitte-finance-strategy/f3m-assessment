@@ -279,6 +279,9 @@ import {
   pintarAvisoDeCopia,
 } from "./app/copias.js?v=24";
 
+// Ctrl+K: ir a cualquier subcapacidad de los nueve dominios.
+import { setupBuscador } from "./app/buscador.js?v=24";
+
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -669,6 +672,7 @@ function bindGlobalEvents() {
   setupFilasDelOverview();
   setupFilasDelDashboard();
   setupLoMasUrgente();
+  setupBuscador({ alElegir: abrirTarjetaEnSuDominio });
   setupSiguientePendiente();
   setupSiguienteSinPuntuar();
   setupAltoDePestanas();
@@ -897,37 +901,47 @@ function setupFilasDelOverview() {
  * que nadie lo toque cambia despues KPIs, roadmap, CSV y PDF.
  */
 function setupLoMasUrgente() {
-  els.overviewUrgentes?.addEventListener("click", async (event) => {
+  els.overviewUrgentes?.addEventListener("click", (event) => {
     const boton = event.target.closest("button.urgente");
 
-    if (!boton) {
-      return;
+    if (boton) {
+      abrirTarjetaEnSuDominio(boton.dataset.dominio, boton.dataset.id);
     }
-
-    try {
-      await switchDomain(boton.dataset.dominio);
-    } catch (error) {
-      showNotice(`No se ha podido abrir el dominio ${DOMAINS[boton.dataset.dominio]?.label || boton.dataset.dominio}. Recarga la página e inténtalo de nuevo.`, "error");
-      console.error(error);
-      return;
-    }
-
-    mostrarVista("assessment");
-
-    const tarjeta = els.assessmentList.querySelector(
-      `.assessment-card[data-id="${CSS.escape(boton.dataset.id)}"]`,
-    );
-
-    if (tarjeta) {
-      llevarALasTarjetas([tarjeta]);
-      return;
-    }
-
-    showNotice(
-      "Esa subcapacidad no se ve con los filtros activos del Assessment. Quítalos para llegar a ella.",
-      "aviso",
-    );
   });
+}
+
+
+/**
+ * Una subcapacidad de cualquier dominio, en su tarjeta del Assessment. Lo usan
+ * «Lo más urgente» y el buscador.
+ *
+ * Sin tocar los filtros, como los radares: si uno la esconde, se dice, en vez
+ * de quitarlo y cambiar con el KPIs, roadmap, CSV y PDF sin que se note.
+ */
+async function abrirTarjetaEnSuDominio(domainId, itemId) {
+  try {
+    await switchDomain(domainId);
+  } catch (error) {
+    showNotice(`No se ha podido abrir el dominio ${DOMAINS[domainId]?.label || domainId}. Recarga la página e inténtalo de nuevo.`, "error");
+    console.error(error);
+    return;
+  }
+
+  mostrarVista("assessment");
+
+  const tarjeta = els.assessmentList.querySelector(
+    `.assessment-card[data-id="${CSS.escape(itemId)}"]`,
+  );
+
+  if (tarjeta) {
+    llevarALasTarjetas([tarjeta]);
+    return;
+  }
+
+  showNotice(
+    "Esa subcapacidad no se ve con los filtros activos del Assessment. Quítalos para llegar a ella.",
+    "aviso",
+  );
 }
 
 

@@ -107,6 +107,7 @@
     <link rel="modulepreload" href="app/almacenamiento.js?v=24">
     <link rel="modulepreload" href="app/avisos.js?v=24">
     <link rel="modulepreload" href="app/biblioteca.js?v=24">
+    <link rel="modulepreload" href="app/buscador.js?v=24">
     <link rel="modulepreload" href="app/celdas.js?v=24">
     <link rel="modulepreload" href="app/copias.js?v=24">
     <link rel="modulepreload" href="app/dominios.js?v=24">
@@ -132,6 +133,7 @@
     <link rel="modulepreload" href="app/vistas/overview.js?v=24">
     <link rel="modulepreload" href="app/vistas/roadmap.js?v=24">
     <link rel="modulepreload" href="core/biblioteca.js?v=24">
+    <link rel="modulepreload" href="core/busqueda.js?v=24">
     <link rel="modulepreload" href="core/calculo.js?v=24">
     <link rel="modulepreload" href="core/coincidencias.js?v=24">
     <link rel="modulepreload" href="core/escenario.js?v=24">
@@ -383,6 +385,27 @@
           <span class="tabs-siguiente-largo">Siguiente sin puntuar</span>
           <span class="tabs-siguiente-corto">Sin puntuar</span>
           <span class="tab-badge siguiente-pendiente-cuenta" aria-hidden="true"></span>
+        </button>
+        <!--
+          Ir a cualquier subcapacidad de los nueve dominios escribiendo un trozo
+          de su nombre. Al final de la barra, en todas las vistas: no depende
+          del dominio abierto. Lo abre tambien Ctrl+K; ver app/buscador.js.
+        -->
+        <button
+          class="tabs-buscar"
+          id="buscadorButton"
+          type="button"
+          aria-haspopup="dialog"
+          aria-keyshortcuts="Control+K"
+          aria-label="Buscar una subcapacidad"
+          title="Buscar una subcapacidad en los nueve dominios"
+        >
+          <svg class="tabs-buscar-icono" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <circle cx="7" cy="7" r="4.6"></circle>
+            <path d="M10.4 10.4 14 14"></path>
+          </svg>
+          <span class="tabs-buscar-texto">Buscar</span>
+          <kbd class="tabs-buscar-atajo" aria-hidden="true">Ctrl K</kbd>
         </button>
       </nav>
 
@@ -1157,6 +1180,34 @@
       modulos corren en el orden en que estan en el documento—, asi que Chart
       sigue existiendo cuando app.js lo busca.
     -->
+    <!--
+      El buscador. Un <dialog> nativo, fuera de .app-shell como los modales:
+      showModal() deja inerte todo lo demas por su cuenta.
+    -->
+    <dialog class="buscador" id="buscador" aria-label="Buscar una subcapacidad">
+      <div class="buscador-campo">
+        <svg class="buscador-lupa" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <circle cx="7" cy="7" r="4.6"></circle>
+          <path d="M10.4 10.4 14 14"></path>
+        </svg>
+        <input
+          id="buscadorCampo"
+          type="text"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="buscadorResultados"
+          aria-autocomplete="list"
+          aria-describedby="buscadorPie"
+          placeholder="Busca una subcapacidad en los nueve dominios"
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <kbd class="buscador-esc" aria-hidden="true">Esc</kbd>
+      </div>
+      <ul class="buscador-resultados" id="buscadorResultados" role="listbox" aria-label="Subcapacidades" hidden></ul>
+      <p class="buscador-pie" id="buscadorPie" aria-live="polite"></p>
+    </dialog>
+
     <script src="vendor/chart.umd.min.js?v=4.5.0" defer></script>
     <!--
       El ?v= no es decoracion: index.html y app.js dejaron de ser
