@@ -542,12 +542,15 @@ h4 {
   white-space: nowrap;
 }
 
+/* --cabecera-claro y no --surface: la cabecera es negra en los dos temas, y en
+   oscuro --surface es casi negro. «Escenario» abierto, o cualquiera de estos
+   con el raton encima, se quedaba sin texto legible. */
 .header-secondary-action:hover,
 .header-menu-button:hover,
 .header-menu-button[aria-expanded="true"] {
   border-color: rgba(255, 255, 255, 0.55);
   background: rgba(255, 255, 255, 0.1);
-  color: var(--surface);
+  color: var(--cabecera-claro);
 }
 
 /* Un conmutador activo tiene que verse activo aunque el raton este en otra
@@ -565,6 +568,22 @@ h4 {
   color: var(--sobre-marca);
 }
 
+/* Cambios de hace mas de un dia sin ninguna copia guardada, en modo local.
+   Un punto ambar y no un rotulo: tiene que verlo quien trabaja, pero delante
+   del cliente no puede parecer una alarma. Lo explica el propio menu. */
+.header-menu-button.con-aviso-de-copia::after {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  content: "";
+}
+
+.header-menu-item.con-aviso-de-copia > span:last-child {
+  color: var(--aviso-fg);
+  font-weight: var(--fw-medium);
+}
+
 .header-menu-caret::before {
   content: "▾";
   font-size: var(--fs-3xs);
@@ -575,7 +594,9 @@ h4 {
   position: absolute;
   right: 0;
   top: calc(100% + 7px);
-  z-index: 70;
+  /* Por encima del aviso (90), que cae justo a esta altura: lo que se acaba de
+     abrir va delante. Con 70, un aviso reciente tapaba la primera opcion. */
+  z-index: 95;
   width: 292px;
   padding: 7px;
   border: 1px solid var(--line);
@@ -586,6 +607,23 @@ h4 {
 
 .header-menu-panel[hidden] {
   display: none;
+}
+
+/* El del PDF es el primer boton de la fila: alineado a la derecha, como el de
+   Escenario, se saldria de la pantalla por la izquierda cuando la cabecera
+   pasa a dos filas y los botones empiezan en el borde. */
+.header-menu-panel-izquierda {
+  right: auto;
+  left: 0;
+}
+
+.header-menu-item:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.header-menu-item:disabled:hover {
+  background: transparent;
 }
 
 .header-menu-title {
@@ -757,6 +795,13 @@ h4 {
 .primary-button {
   background: var(--green);
   color: var(--sobre-marca);
+}
+
+/* Exportar PDF abre un menu, y lleva su flecha como Escenario. */
+.header-menu > .primary-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
 
 
@@ -4984,6 +5029,42 @@ height: 100% !important;
 
 .capability-target-row:hover {
   background: var(--fila-realce);
+}
+
+/* La fila «Todas las capacidades» va separada de las demas con una raya mas
+   gruesa: es un mando sobre las de abajo, no una capacidad mas. */
+.capability-target-row-todas {
+  border-bottom: 2px solid var(--line-fuerte);
+}
+
+.objetivos-a-los-nueve {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--green-dark);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.objetivos-a-los-nueve:hover {
+  color: var(--ink);
+}
+
+.objetivos-a-los-nueve:disabled {
+  color: var(--muted);
+  text-decoration: none;
+  cursor: default;
+}
+
+.objetivos-a-los-nueve:focus-visible {
+  border-radius: 2px;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .capability-target-name {

@@ -26,7 +26,7 @@ import {
   LIMITE_DE_CLIENTE,
   LIMITE_DE_META,
   LIMITES_DE_TEXTO,
-} from "../core/escenario.js?v=23";
+} from "../core/escenario.js?v=24";
 
 
 const RAIZ = new URL("../", import.meta.url);

@@ -33,47 +33,48 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.017 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.194 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.498 |
-| `app/estado.js` | El estado compartido y las constantes que lo describen | 180 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.824 |
+| `app/estado.js` | El estado compartido y las constantes que lo describen | 183 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 341 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 253 |
-| `app/graficos.js` | Los seis radares de Chart.js, y a dónde lleva pulsar sus ejes | 686 |
+| `app/graficos.js` | Los seis radares de Chart.js, y a dónde lleva pulsar sus ejes | 718 |
 | `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 185 |
-| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 450 |
+| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 479 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
 | `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 88 |
-| `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 395 |
-| `app/firebase.js` | La conexión: configuración, referencia y límite de espera | 137 |
-| `app/identidad.js` | La sesión anónima y el nombre de quien edita | 234 |
+| `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 403 |
+| `app/firebase.js` | La conexión: configuración, referencia y límite de espera | 220 |
+| `app/identidad.js` | La sesión anónima y el nombre de quien edita | 249 |
+| `app/copias.js` | **Si el trabajo local tiene copia.** Cuándo fue la última y el punto del aviso | 143 |
 | `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 140 |
-| `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 766 |
+| `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 873 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
-| `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 140 |
-| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 231 |
+| `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 137 |
+| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 317 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
-| `app/informe.js` | Lo que la aplicación le pasa al informe: datos, radares y tema | 487 |
+| `app/informe.js` | Lo que la aplicación le pasa al informe: datos, radares y tema | 606 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 417 |
-| `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 318 |
-| `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 221 |
-| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 638 |
-| `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 221 |
-| `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 408 |
-| `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 607 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 4.899 |
-| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 510 |
+| `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
+| `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 224 |
+| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.218 |
+| `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 172 |
+| `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
+| `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 5.611 |
+| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
-| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 509 |
+| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 536 |
 | `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
-| `core/presentacion.js` | Escapado, formato de números y colores de marca | 105 |
-| `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 411 |
-| `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 369 |
-| `informe/secciones.js` | Una función por diapositiva | 830 |
-| `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 302 |
-| `informe/estilos.js` | La paleta del informe y su hoja de estilos | 970 |
+| `core/presentacion.js` | Escapado, formato de números y fechas, y colores de marca | 203 |
+| `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 510 |
+| `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 480 |
+| `informe/secciones.js` | Una función por diapositiva | 1.052 |
+| `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 307 |
+| `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.016 |
 | `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 112 |
 | `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
@@ -132,10 +133,10 @@ Dependencias de terceros, sin bundler:
 
 ### `app/` es el reparto de `app.js`
 
-`app.js` es la raíz de composición; todo lo demás vive en `app/`: los dieciséis módulos de
+`app.js` es la raíz de composición; todo lo demás vive en `app/`: los diecisiete módulos de
 infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, métricas, dominios,
-filtros, subcapacidad, escenario, Firebase, identidad, indicador, persistencia, repintado y
-edición—, las
+filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
+repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`
 y `app/biblioteca.js`. Lo nuevo nace ya en `app/`, no en `app.js`. Mover código entre módulos se
 verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
@@ -319,6 +320,24 @@ después entra al dominio activo. Eso significa que el PDF hereda la excepción 
 parte global no aplica los filtros y la de dominio sí.** El informe lo dice en pantalla, igual que
 la aplicación, para que el descuadre no se lea como un fallo.
 
+**Hay dos informes**, y «Exportar PDF» abre un menú para elegir. Es un menú y no un diálogo a
+propósito: `window.open()` tiene que ir en el mismo clic que lo pide, o el navegador lo bloquea como
+ventana emergente.
+
+- **El del dominio** es el de siempre: la parte global y el dominio abierto, con los filtros activos.
+- **El de todo el proyecto** lleva, tras la parte global, un **capítulo por cada dominio con algo
+  puntuado** (`dominiosDelProyecto()` en `app/informe.js`), en el orden del Overview y **sin
+  filtros**: son del dominio abierto —el de capacidad ni existe en los demás—, y aplicar solo los
+  que sí existen daría capítulos filtrados y otros enteros sin que se notara. Cada capítulo son las
+  mismas diapositivas que el informe de un dominio, sin el separador de «Hacia dónde», y su pie dice
+  de qué dominio es. El índice pasa a ser **por partes**, con el rango de cada sección, porque una
+  línea por sección no cabe con nueve dominios. Los radares de cada dominio se pintan uno detrás de
+  otro en los canvas del Dashboard y se capturan; al acabar se repinta el Dashboard.
+
+Las cifras de un capítulo salen de `datosDeDominio()`, que recibe el dominio en vez de leer el
+abierto: el informe de un dominio usa la misma función, así que los dos no pueden decir cosas
+distintas del mismo dominio.
+
 El reparto de `informe/`:
 
 - `pdf.js` decide **qué diapositivas y en qué orden**. El plan se arma entero antes de dibujar nada,
@@ -368,6 +387,13 @@ La fuente de verdad es `core/calculo.js`, y está cubierta por las pruebas. El R
 **Objetivo de madurez**: configurable **por capacidad y por palanca**, vía `getCapabilityTargets()`
 en `app/metricas.js`. `DEFAULT_TARGET_MATURITY = 4` es solo el valor por defecto cuando una capacidad no
 tiene objetivo propio, no una constante fija del modelo.
+
+El panel de objetivos lleva arriba una fila **«Todas las capacidades»**: cambiar ahí una palanca la
+pone igual en todas las capacidades del dominio, y si no coinciden dice «Varios». **«Usar estos
+objetivos en los nueve dominios»** copia, tras confirmar, las palancas que coinciden a todos los
+dominios cargados; las que dicen «Varios» no se tocan, y el diálogo lo enumera. Va en una sola
+escritura, `persistTargetsDeDominios()`, para que en un escenario compartido no queden unos
+dominios cambiados y otros no.
 
 **Cálculo** (`calcularMetricas()` en `core/calculo.js`):
 
@@ -424,6 +450,13 @@ recalcula. No hay que acordarse de vaciar nada al tocar el estado.
   clave única, abrir el escenario de un cliente y después el de otro dejaba los datos del primero en
   pantalla cuando la lectura remota del segundo fallaba. El nombre de quien edita va aparte, en
   `f3m-nombre-editor`.
+
+  En modo local el trabajo solo vive en ese navegador, así que `app/copias.js` lleva la cuenta de
+  si tiene copia fuera: `f3m-ultima-copia` (cuándo se guardó o se abrió la última) y
+  `f3m-cambios-sin-copia-desde` (el primer cambio después). «Guardar una copia» dice cuándo fue la
+  última, y con cambios de **más de un día** sin copia, el botón «Escenario» lleva un punto ámbar.
+  Un día y no antes: durante el taller el trabajo está a salvo, y un aviso que salta delante del
+  cliente a los cinco minutos acaba ignorado. En un escenario compartido no se dice nada.
 - **Compartido**: parámetro de URL `?scenario=<id>`. Lee y escribe en `scenarios/<id>` de la
   Realtime Database. El id se valida contra `/^[a-zA-Z0-9_-]{20,120}$/` en `getScenarioIdFromUrl()`.
 
@@ -689,15 +722,23 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    fondo» activado** —sin eso las portadas y el heatmap salen en blanco—, y comprobar que **ninguna
    diapositiva desborda** a una segunda página. Para eso, abrir con `?comprobar=desbordes` y volver
    a exportar: el aviso dice si alguna se recorta y cuál va más justa. Hacerlo también sobre
-   **Controlling**, que con 24 subcapacidades es el dominio que aprieta.
+   **Controlling**, que con 24 subcapacidades es el dominio que aprieta. Y el **de todo el
+   proyecto**, con los nueve dominios puntuados: un capítulo por dominio, cada uno con sus tres
+   radares, el índice por partes y ninguna diapositiva recortada. Al terminar, el Dashboard
+   tiene que seguir enseñando los radares del dominio abierto.
 8. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
-   la fila de Fiscal.
+   la fila de Fiscal. En la fila «Todas las capacidades», cambiar una palanca la pone igual en
+   todas y cambiar después una sola la deja en «Varios»; «Usar estos objetivos en los nueve
+   dominios» mueve las nueve filas del Overview y no toca las palancas en «Varios».
 9. **Los radares se pulsan.** En el Overview, pulsar el nombre de un dominio abre su Dashboard. En el
    Dashboard, pulsar el nombre de una capacidad abre el Assessment en su primera tarjeta, con todas
    las de esa capacidad resaltadas y el foco en su primer score, **sin tocar los filtros**. Lo
    mismo al pulsar una fila de cada tabla resumen. El cursor cambia a mano solo encima de un nombre o de un vértice.
 10. Cambiar de dominio y confirmar que los datos se recargan.
-11. Recargar la página y confirmar que el escenario persiste.
+11. Recargar la página y confirmar que el escenario persiste. En modo local, «Escenario → Guardar
+   una copia» dice cuándo fue la última; para ver el punto ámbar sin esperar un día, poner
+   `f3m-cambios-sin-copia-desde` a una fecha de anteayer en `localStorage` y recargar. Guardar
+   una copia lo quita.
 12. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
    uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
    guardado se pone **rojo**.

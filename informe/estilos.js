@@ -10,7 +10,7 @@
  * todavia, asi que escribe los suyos literales y tienen que ser los mismos.
  */
 
-import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=23";
+import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=24";
 
 
 /**
@@ -402,6 +402,42 @@ function estilosDePortada() {
       font-weight: 700;
       white-space: nowrap;
       color: ${PALETA.tintaSuave};
+    }
+
+    /* El indice del informe de todo el proyecto: un bloque por parte, con
+       sus secciones debajo en pequeño. */
+    .indice-por-partes {
+      grid-template-columns: 1fr;
+      gap: 5mm;
+    }
+
+    .indice-por-partes.indice-dos-columnas {
+      grid-template-columns: repeat(2, 1fr);
+      grid-auto-flow: column;
+      gap: 4mm 16mm;
+    }
+
+    .indice-fila-parte {
+      font-size: 11pt;
+      font-weight: 700;
+    }
+
+    .indice-detalle {
+      margin: 1.2mm 0 0;
+      font-size: 7.6pt;
+      line-height: 1.5;
+      color: ${PALETA.tintaSuave};
+    }
+
+    /* Una seccion y su numero no se separan: «Oportunidades de IA 22–» al
+       final de una linea y «25» al principio de la siguiente no se lee. */
+    .indice-entrada {
+      white-space: nowrap;
+    }
+
+    .indice-detalle b {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
     }
   `;
 }
