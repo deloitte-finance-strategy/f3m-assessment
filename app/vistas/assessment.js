@@ -817,11 +817,16 @@ function handleScoreChange(event) {
  * Pulsar la opcion que ya estaba elegida la quita. Un radio no avisa de eso con
  * "change", porque para el no ha cambiado nada, asi que se mira en el clic
  * comparando con el estado: si coinciden, es que ya estaba puesta.
+ *
+ * El segundo clic de un doble clic no cuenta (event.detail lleva la cuenta de
+ * clics seguidos). Sin esto, quien hace doble clic por costumbre ponia el 3 y
+ * lo quitaba en el mismo gesto, y la palanca se quedaba sin puntuar sin que
+ * nadie lo notara. Para quitar un score basta un clic suelto, o Suprimir.
  */
 function handleScoreClick(event) {
   const radio = event.target;
 
-  if (!radio.classList?.contains("score-radio")) {
+  if (!radio.classList?.contains("score-radio") || event.detail > 1) {
     return;
   }
 
