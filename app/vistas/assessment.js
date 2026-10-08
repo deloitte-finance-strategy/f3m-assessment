@@ -17,17 +17,17 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=24";
-import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=24";
-import { createDefaultTargets } from "../../core/objetivos.js?v=24";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=24";
-import { abrirDialogo, showNotice } from "../avisos.js?v=24";
+} from "../../core/calculo.js?v=25";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=25";
+import { createDefaultTargets } from "../../core/objetivos.js?v=25";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=25";
+import { abrirDialogo, showNotice } from "../avisos.js?v=25";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=24";
+} from "../celdas.js?v=25";
 import {
   DOMAINS,
   LEVERS,
@@ -35,27 +35,27 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=24";
+} from "../estado.js?v=25";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "../edicion.js?v=24";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=24";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=24";
+} from "../edicion.js?v=25";
+import { describirObjetivos, getVisibleItems } from "../filtros.js?v=25";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=25";
 import {
   persistItemChange,
   persistTargetsDeDominios,
   persistTargetsDelDominioActivo,
-} from "../persistencia.js?v=24";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=24";
-import { repintarTodo } from "../repintado.js?v=24";
+} from "../persistencia.js?v=25";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=25";
+import { repintarTodo } from "../repintado.js?v=25";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=24";
+} from "../subcapacidad.js?v=25";
 
 
 export function renderCapabilityTargets() {

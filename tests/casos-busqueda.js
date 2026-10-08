@@ -5,7 +5,7 @@
  * taller se teclea deprisa y sin tildes.
  */
 
-import { buscarSubcapacidades, trozosResaltados } from "../core/busqueda.js?v=24";
+import { buscarSubcapacidades, trozosResaltados } from "../core/busqueda.js?v=25";
 
 
 const DOMINIOS = [

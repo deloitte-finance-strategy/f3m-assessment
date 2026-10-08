@@ -12,8 +12,8 @@
  * hayGuardadosPendientes() para frenar el cierre.
  */
 
-import { LIMITES_DE_TEXTO, recortarAlLimite } from "../core/escenario.js?v=24";
-import { persistItemChange } from "./persistencia.js?v=24";
+import { LIMITES_DE_TEXTO, recortarAlLimite } from "../core/escenario.js?v=25";
+import { persistItemChange } from "./persistencia.js?v=25";
 
 
 const GUARDADO_DIFERIDO_MS = 600;

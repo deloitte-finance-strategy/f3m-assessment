@@ -14,16 +14,16 @@
  * estos filtros son del dominio abierto.
  */
 
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=24";
-import { unique } from "../core/calculo.js?v=24";
-import { LEVERS, els, state } from "./estado.js?v=24";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=25";
+import { unique } from "../core/calculo.js?v=25";
+import { LEVERS, els, state } from "./estado.js?v=25";
 import {
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "./subcapacidad.js?v=24";
-import { calculate, getCapabilityTargets } from "./metricas.js?v=24";
-import { repintarTodo } from "./repintado.js?v=24";
+} from "./subcapacidad.js?v=25";
+import { calculate, getCapabilityTargets } from "./metricas.js?v=25";
+import { repintarTodo } from "./repintado.js?v=25";
 
 
 
