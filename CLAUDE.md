@@ -56,6 +56,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 317 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe: datos, radares y tema | 606 |
+| `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 417 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 224 |
@@ -70,6 +71,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 536 |
 | `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
 | `core/presentacion.js` | Escapado, formato de números y fechas, y colores de marca | 203 |
+| `core/busqueda.js` | Qué subcapacidades casan con lo que se escribe, y qué resaltar | 152 |
 | `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 510 |
 | `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 480 |
 | `informe/secciones.js` | Una función por diapositiva | 1.052 |
@@ -137,8 +139,8 @@ Dependencias de terceros, sin bundler:
 infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, métricas, dominios,
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
-vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`
-y `app/biblioteca.js`. Lo nuevo nace ya en `app/`, no en `app.js`. Mover código entre módulos se
+vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
+`app/biblioteca.js` y `app/buscador.js`. Lo nuevo nace ya en `app/`, no en `app.js`. Mover código entre módulos se
 verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
 
@@ -291,6 +293,14 @@ prioridad alta con más gap de los nueve dominios, con `masUrgentes()` de `core/
 misma función alimenta las diapositivas del mismo nombre en la parte global del informe, para que
 pantalla y deck digan las mismas diez. Cada una lleva a su tarjeta en el Assessment de su dominio,
 sin tocar los filtros: si un filtro la esconde, un aviso lo dice.
+
+**El buscador** (la lupa al final de la barra de pestañas, o **Ctrl+K** desde cualquier sitio)
+tampoco usa el ámbito: busca en los nueve dominios, sin tildes y con las palabras en cualquier
+orden, y pesa más lo que está en el nombre de la subcapacidad que en su capacidad o su dominio
+(`buscarSubcapacidades()` en `core/busqueda.js`). Elegir un resultado hace lo mismo que «Lo más
+urgente», con la misma función, `abrirTarjetaEnSuDominio()` en `app.js`: su tarjeta, sin tocar
+los filtros. Es un `<dialog>` nativo y no uno de los modales: `showModal()` ya deja el fondo
+inerte, atrapa el foco y cierra con Escape.
 
 ### Los objetivos se resuelven por dominio
 
@@ -649,7 +659,7 @@ de cada caso y que los 9 JSON coinciden con sus Excel. Código de salida `1` si 
 Se prueban en `tests/`, sin dependencias, todos los módulos que no necesitan navegador: las reglas
 de negocio, los objetivos, la coincidencia de subcapacidades, el contrato de escenario y su espejo
 con `database.rules.json`, el formato de presentación, la exportación a CSV, la biblioteca de IA
-—que una fuente rota no llegue a la pantalla— y el informe —el deck que arma `informe/pdf.js`, las
+—que una fuente rota no llegue a la pantalla—, el buscador y el informe —el deck que arma `informe/pdf.js`, las
 primitivas SVG y la lectura de las medidas de desborde.
 
 - **En el navegador**: con el servidor en marcha, abrir `http://localhost:8000/tests/`. Es la forma
@@ -734,7 +744,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    Dashboard, pulsar el nombre de una capacidad abre el Assessment en su primera tarjeta, con todas
    las de esa capacidad resaltadas y el foco en su primer score, **sin tocar los filtros**. Lo
    mismo al pulsar una fila de cada tabla resumen. El cursor cambia a mano solo encima de un nombre o de un vértice.
-10. Cambiar de dominio y confirmar que los datos se recargan.
+10. Cambiar de dominio y confirmar que los datos se recargan. Con **Ctrl+K**, escribir
+   «conciliacion» sin tilde: salen las de varios dominios, las flechas mueven la selección e Intro
+   abre su tarjeta en su dominio, con el foco en su primer score. Escape cierra y devuelve el foco.
 11. Recargar la página y confirmar que el escenario persiste. En modo local, «Escenario → Guardar
    una copia» dice cuándo fue la última; para ver el punto ámbar sin esperar un día, poner
    `f3m-cambios-sin-copia-desde` a una fecha de anteayer en `localStorage` y recargar. Guardar

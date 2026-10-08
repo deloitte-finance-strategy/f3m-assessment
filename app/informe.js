@@ -13,28 +13,28 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=24";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=24";
-import { filasDeResumen } from "../core/exportacion.js?v=24";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=24";
-import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=24";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=24";
-import { showNotice } from "./avisos.js?v=24";
-import { getActiveDomainConfig } from "./dominios.js?v=24";
-import { DOMAINS, els, state } from "./estado.js?v=24";
-import { getVisibleItems } from "./filtros.js?v=24";
-import { getScenarioShortLabel } from "./firebase.js?v=24";
+} from "../core/calculo.js?v=25";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=25";
+import { filasDeResumen } from "../core/exportacion.js?v=25";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=25";
+import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=25";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=25";
+import { showNotice } from "./avisos.js?v=25";
+import { getActiveDomainConfig } from "./dominios.js?v=25";
+import { DOMAINS, els, state } from "./estado.js?v=25";
+import { getVisibleItems } from "./filtros.js?v=25";
+import { getScenarioShortLabel } from "./firebase.js?v=25";
 import {
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
   renderCapabilityRadar,
-} from "./graficos.js?v=24";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=24";
-import { getAiDataForItem } from "./subcapacidad.js?v=24";
-import { renderDashboard } from "./vistas/dashboard.js?v=24";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=24";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=24";
+} from "./graficos.js?v=25";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=25";
+import { getAiDataForItem } from "./subcapacidad.js?v=25";
+import { renderDashboard } from "./vistas/dashboard.js?v=25";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=25";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=25";
 
 
 /**

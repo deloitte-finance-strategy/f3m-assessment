@@ -970,6 +970,215 @@ transform: translateY(-1px);
   outline-offset: 2px;
 }
 
+/*
+  El buscador, al final de la barra. Del mismo tono callado que «Siguiente sin
+  puntuar»: esta para quien lo busca, no para competir con las pestanas. En el
+  Overview y la IA no hay «Dominio X» que lo empuje a la derecha, asi que se
+  empuja solo.
+*/
+.tabs-buscar {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: calc(var(--control-h) - 8px);
+  padding: 0 6px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink-3);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.tabs[data-vista="overview"] .tabs-buscar,
+.tabs[data-vista="ia"] .tabs-buscar {
+  margin-left: auto;
+}
+
+.tabs-buscar[hidden] {
+  display: none;
+}
+
+.tabs-buscar-icono,
+.buscador-lupa {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  flex: none;
+}
+
+.tabs-buscar-atajo,
+.buscador-esc {
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: var(--fs-3xs);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+}
+
+.tabs-buscar:hover {
+  border-color: rgba(134, 188, 37, 0.65);
+  background: var(--surface-realce);
+  color: var(--green-dark);
+}
+
+.tabs-buscar:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Donde «Siguiente sin puntuar» se acorta, el buscador se queda en la lupa:
+   el nombre sigue en el aria-label y el atajo en el title. */
+@media (max-width: 1200px) {
+  .tabs-buscar {
+    padding: 0 10px;
+  }
+
+  .tabs-buscar-texto,
+  .tabs-buscar-atajo {
+    display: none;
+  }
+}
+
+/*
+  El cuadro del buscador: arriba y no en el centro, donde los resultados
+  crecen hacia abajo sin mover el campo en el que se esta escribiendo.
+*/
+.buscador {
+  width: min(640px, calc(100% - 32px));
+  max-height: min(560px, calc(100vh - 120px));
+  margin: 12vh auto auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}
+
+.buscador[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.buscador::backdrop {
+  background: rgba(10, 14, 12, 0.42);
+}
+
+.buscador-campo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.buscador-campo .buscador-lupa {
+  width: 18px;
+  height: 18px;
+}
+
+.buscador-campo input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-md);
+}
+
+.buscador-campo input::placeholder {
+  color: var(--muted-2);
+}
+
+.buscador-campo input:focus {
+  outline: none;
+}
+
+.buscador-resultados {
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.buscador-resultados[hidden] {
+  display: none;
+}
+
+.buscador-opcion {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 16px;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+
+.buscador-opcion[aria-selected="true"] {
+  background: var(--surface-realce);
+  box-shadow: inset 3px 0 0 var(--green);
+}
+
+.buscador-titulo {
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+
+.buscador-donde {
+  grid-column: 1;
+  color: var(--muted);
+  font-size: var(--fs-3xs);
+}
+
+.buscador-opcion mark {
+  background: none;
+  color: var(--green-dark);
+  font-weight: var(--fw-bold);
+}
+
+.buscador-estado {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--muted);
+  font-size: var(--fs-3xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.buscador-estado-pendiente {
+  color: var(--aviso-fg);
+  font-weight: var(--fw-medium);
+}
+
+.buscador-pie {
+  margin: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line-tenue);
+  background: var(--surface-hundida);
+  color: var(--muted);
+  font-size: var(--fs-3xs);
+}
+
 
 .tabs a {
   display: inline-flex;
