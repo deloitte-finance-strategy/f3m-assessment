@@ -22,8 +22,9 @@
 
 import { getMaturityLevel } from "../core/calculo.js?v=26";
 import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=26";
-import { escapeHtml, formatMedia } from "../core/presentacion.js?v=26";
+import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=26";
 import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=26";
+import { nombreDeMasInformacion } from "./biblioteca.js?v=26";
 import { priorityBadge } from "./celdas.js?v=26";
 import { getActiveDomainConfig } from "./dominios.js?v=26";
 import {
@@ -35,7 +36,7 @@ import { LEVERS, state } from "./estado.js?v=26";
 import { getVisibleItems } from "./filtros.js?v=26";
 import { calculate, getCapabilityTargets } from "./metricas.js?v=26";
 import { repintarTodo } from "./repintado.js?v=26";
-import { getItemObjective, getItemQuestions } from "./subcapacidad.js?v=26";
+import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=26";
 import {
   conectarPuntuacion,
   enfocarPalanca,
@@ -241,6 +242,7 @@ function pintar() {
 
   const objetivos = getCapabilityTargets(item.capacidad);
   const dominio = getActiveDomainConfig();
+  const casos = getAiDataForItem(item)?.casos || [];
 
   donde.textContent = [dominio.label, state.cliente].filter(Boolean).join(" · ");
 
@@ -276,7 +278,7 @@ function pintar() {
       ).join("")}
     </div>
 
-    <div class="modo-taller-apoyo">
+    <div class="modo-taller-apoyo${casos.length ? " con-ia" : ""}">
       <section>
         <h4>Preguntas clave</h4>
         <ul>${getItemQuestions(item).map((pregunta) => `<li>${escapeHtml(pregunta)}</li>`).join("")}</ul>
@@ -291,6 +293,8 @@ function pintar() {
           placeholder="Por qué esta puntuación, qué evidencias se han visto…"
         ></textarea>
       </section>
+
+      ${columnaDeIa(casos)}
     </div>
   `;
 
@@ -314,6 +318,56 @@ function pintar() {
 
   // Con el foco en la primera palanca, las teclas 1 a 5 ya puntuan.
   enfocarPalanca(cuerpo.querySelector(".score-segmentos"), { preventScroll: true });
+}
+
+
+/**
+ * Los casos de IA de la subcapacidad, en una tercera columna junto a las
+ * preguntas y las notas: la conversacion de «y esto, ¿como lo haria la IA?»
+ * sale sola al puntuar, y asi se contesta sin salir de la pantalla.
+ *
+ * Va el titulo y nada mas, y el titulo es el boton que abre su documento en
+ * el visor, encima del modo taller (Escape cierra solo el visor). Las fichas
+ * del Assessment no caben: con sus etiquetas y su pie, en una franja aparte,
+ * los niveles se quedaban con la mitad de su alto y la pantalla se desplazaba
+ * en una de cada tres subcapacidades. La frase de que hace el caso y sus dos
+ * etiquetas quedan en el title, para quien pase el raton.
+ */
+function columnaDeIa(casos) {
+  if (!casos.length) {
+    return "";
+  }
+
+  return `
+    <section class="modo-taller-ia">
+      <h4>Casos de IA</h4>
+      <ul>${casos.map(casoDeIa).join("")}</ul>
+    </section>
+  `;
+}
+
+
+function casoDeIa(caso) {
+  const resumen = [caso.descripcion, [caso.tipoValor, caso.tipoIa].filter(Boolean).join(" · ")]
+    .filter(Boolean)
+    .join("\n");
+  const titulo = resumen ? ` title="${escapeAttr(resumen)}"` : "";
+  const nombre = nombreDeMasInformacion(caso);
+
+  if (!nombre) {
+    return `<li${titulo}>${escapeHtml(caso.titulo)}</li>`;
+  }
+
+  return `
+    <li${titulo}>
+      <button
+        class="modo-taller-caso"
+        type="button"
+        data-mas-informacion="${escapeAttr(caso.id)}"
+        aria-label="${escapeAttr(nombre)}"
+      >${escapeHtml(caso.titulo)}</button>
+    </li>
+  `;
 }
 
 

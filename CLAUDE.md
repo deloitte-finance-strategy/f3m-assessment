@@ -57,15 +57,15 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe y a la preparación del taller | 674 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 417 |
-| `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 417 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 471 |
+| `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 224 |
 | `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.249 |
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 172 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.285 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.325 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -306,7 +306,7 @@ inerte, atrapa el foco y cierra con Escape.
 
 **El modo taller** (**Sesión → Modo taller**, en la cabecera) proyecta una subcapacidad a pantalla
 completa: los cinco niveles en columnas, con las palancas y el objetivo marcados encima, la escala
-para puntuar, las preguntas clave y las notas del taller. **Sí usa el ámbito**: recorre las tarjetas
+para puntuar, las preguntas clave, las notas del taller y los casos de IA. **Sí usa el ámbito**: recorre las tarjetas
 que enseña el Assessment, con sus filtros, y la lista se fija al abrir, para que puntuar una que el
 filtro de prioridad deja fuera no la saque del recorrido a mitad de sesión. Puntúa y guarda con lo
 mismo que las tarjetas —`conectarPuntuacion()` y `app/edicion.js`—, y `renderAll()` lo pone al día
@@ -318,6 +318,13 @@ Es un `.modal-backdrop` y no un `<dialog>`, al revés que el buscador y a propó
 de `showModal()` taparía el chip de guardado y los avisos, y en un taller tienen que seguir a la
 vista. Sus radios llevan el prefijo `taller` en el `name` porque los grupos de radios son de todo el
 documento: con el mismo nombre que la tarjeta, puntuar en uno desmarcaba el otro.
+
+Los casos de IA van en una tercera columna junto a las preguntas y las notas, **solo con su
+título**, que es el botón que abre su documento en el visor, encima del modo taller. Las fichas del
+Assessment, con sus etiquetas y su pie, se probaron en una franja aparte y no caben: los niveles se
+quedaban con la mitad de su alto y una de cada tres subcapacidades se desplazaba. La frase y las
+etiquetas de cada caso van en su `title`. El nombre accesible del botón lo da
+`nombreDeMasInformacion()`, el mismo que el del pie de las fichas.
 
 El menú de la cabecera se llamaba «Escenario» y ahora es **«Sesión»**: agrupa lo de la sesión con el
 cliente, del modo taller a las copias. El modo taller estuvo primero en la barra de pestañas, pero
@@ -752,7 +759,8 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      notas son las mismas del detalle. «Siguiente» y Av Pág recorren solo lo que dejan los filtros
      («1 de 4» con una capacidad elegida). Tab no sale del modo taller, Ctrl+K no abre el buscador
      encima, y Escape vuelve a la tarjeta en la que se estaba, con el foco en su primer score.
-     Probarlo en los cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades
+     Pulsar un caso de IA abre su documento encima: el primer Escape cierra solo el visor y deja
+     el foco en el caso, y el segundo sale del modo taller. Probarlo en los cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades
      necesita desplazarse.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.

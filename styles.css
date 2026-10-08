@@ -6203,6 +6203,46 @@ height: 100% !important;
   outline-offset: 0;
 }
 
+/* Con casos de IA, tres columnas: preguntas, notas y casos. Cada caso es una
+   linea con su titulo, que abre el documento; las fichas enteras no cabian. */
+.modo-taller-apoyo.con-ia {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.modo-taller-ia ul {
+  padding: 0;
+  list-style: none;
+}
+
+.modo-taller-ia li + li {
+  margin-top: 0.15em;
+}
+
+.modo-taller-caso {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--green-dark);
+  font: inherit;
+  font-weight: var(--fw-medium);
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.modo-taller-caso:hover {
+  text-decoration-thickness: 2px;
+}
+
+.modo-taller-caso:focus-visible {
+  border-radius: var(--r-sm);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .modo-taller-pie {
   display: flex;
   align-items: center;
