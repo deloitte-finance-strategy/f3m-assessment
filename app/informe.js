@@ -13,34 +13,35 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=26";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=26";
-import { filasDeResumen } from "../core/exportacion.js?v=26";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=26";
-import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=26";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=26";
-import { documentoDePreparacion } from "../informe/preparacion.js?v=26";
-import { showNotice } from "./avisos.js?v=26";
-import { getActiveDomainConfig } from "./dominios.js?v=26";
-import { DOMAINS, els, state } from "./estado.js?v=26";
-import { getVisibleItems } from "./filtros.js?v=26";
-import { getScenarioShortLabel } from "./firebase.js?v=26";
+} from "../core/calculo.js?v=27";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=27";
+import { filasDeResumen } from "../core/exportacion.js?v=27";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=27";
+import { diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=27";
+import { documentoDeActa } from "../informe/acta.js?v=27";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=27";
+import { documentoDePreparacion } from "../informe/preparacion.js?v=27";
+import { showNotice } from "./avisos.js?v=27";
+import { getActiveDomainConfig } from "./dominios.js?v=27";
+import { DOMAINS, els, state } from "./estado.js?v=27";
+import { getVisibleItems } from "./filtros.js?v=27";
+import { getScenarioShortLabel } from "./firebase.js?v=27";
 import {
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
   renderCapabilityRadar,
-} from "./graficos.js?v=26";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=26";
+} from "./graficos.js?v=27";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=27";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "./subcapacidad.js?v=26";
-import { renderDashboard } from "./vistas/dashboard.js?v=26";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=26";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=26";
+} from "./subcapacidad.js?v=27";
+import { renderDashboard } from "./vistas/dashboard.js?v=27";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=27";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=27";
 
 
 /**
@@ -172,6 +173,81 @@ export function exportarPreparacion() {
     `Documento de preparación generado. ${alcance}En el diálogo de impresión, elige «Guardar como PDF» `
       + "y activa «Gráficos de fondo» para que salgan los colores.",
     alcance ? "aviso" : "info",
+  );
+
+  setTimeout(() => {
+    ventana.focus();
+    ventana.print();
+  }, 300);
+}
+
+
+/**
+ * El acta del taller, para enviar al cliente despues: lo puntuado, las notas y
+ * lo que quedo pendiente.
+ *
+ * Con el mismo alcance que la preparacion y el modo taller, los filtros del
+ * Assessment, para que el acta de un taller de una capacidad sea de esa
+ * capacidad. Sin nada puntuado no hay acta que hacer: un documento con todas
+ * las cifras en blanco no le sirve a nadie y parece un fallo.
+ */
+export function exportarActa() {
+  const items = getVisibleItems();
+  const puntuadas = items.filter((item) => !calculate(item).isPending).length;
+
+  if (!puntuadas) {
+    showNotice(
+      items.length < state.items.length
+        ? "Con los filtros puestos no queda ninguna subcapacidad puntuada para el acta."
+        : "Todavía no hay ninguna subcapacidad puntuada en este dominio: el acta recoge lo que se puntúa en el taller.",
+      "aviso",
+    );
+    return;
+  }
+
+  // En el mismo gesto del clic, como el informe, y por lo mismo.
+  const ventana = window.open("", "_blank");
+
+  if (!ventana) {
+    showNotice("El navegador ha bloqueado la ventana del acta. Permite las ventanas emergentes de esta página y vuelve a pedirla.", "aviso");
+    return;
+  }
+
+  ventana.opener = null;
+
+  const dominio = getActiveDomainConfig();
+  const ahora = new Date();
+
+  ventana.document.open();
+  ventana.document.write(documentoDeActa({
+    cliente: state.cliente,
+    domainLabel: dominio.label,
+    domainTitle: dominio.title,
+    fecha: diaLegible(ahora),
+    fechaDeArchivo: fechaParaArchivo(ahora),
+    subcapacidades: items.map((item) => ({
+      capacidad: item.capacidad,
+      subcapacidad: item.subcapacidad,
+      scores: item.scores,
+      comentario: item.comentario,
+      evidencias: getItemEvidenceText(item),
+      metricas: calculate(item),
+    })),
+  }));
+  ventana.document.close();
+
+  const total = state.items.length;
+  const alcance = items.length < total
+    ? `Lleva ${items.length} de las ${total} subcapacidades de ${dominio.label}: las que dejan los filtros. `
+    : "";
+
+  // Las notas salen tal cual se escribieron, y el acta va al cliente.
+  const conNotas = items.some((item) => String(item.comentario || "").trim());
+
+  showNotice(
+    `Acta del taller generada. ${alcance}${conNotas ? "Lleva las notas del taller tal cual: revísalas antes de enviarla. " : ""}`
+      + "En el diálogo de impresión, elige «Guardar como PDF» y activa «Gráficos de fondo» para que salgan los colores.",
+    alcance || conNotas ? "aviso" : "info",
   );
 
   setTimeout(() => {

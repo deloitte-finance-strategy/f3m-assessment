@@ -33,9 +33,9 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.306 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.316 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.871 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.897 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 183 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 341 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
@@ -55,7 +55,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 137 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 317 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
-| `app/informe.js` | Lo que la aplicación le pasa al informe y a la preparación del taller | 674 |
+| `app/informe.js` | Lo que la aplicación le pasa al informe, a la preparación y al acta del taller | 750 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
 | `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 471 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
@@ -71,7 +71,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 536 |
 | `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
-| `core/presentacion.js` | Escapado, formato de números y fechas, y colores de marca | 203 |
+| `core/presentacion.js` | Escapado, formato de números y fechas, y colores de marca | 210 |
 | `core/busqueda.js` | Qué subcapacidades casan con lo que se escribe, y qué resaltar | 152 |
 | `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 510 |
 | `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 480 |
@@ -79,7 +79,8 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 307 |
 | `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.016 |
 | `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 112 |
-| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 544 |
+| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 558 |
+| `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 679 |
 | `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
@@ -364,8 +365,8 @@ la aplicación, para que el descuadre no se lea como un fallo.
 
 **Hay dos informes**, y «Exportar PDF» abre un menú para elegir. Es un menú y no un diálogo a
 propósito: `window.open()` tiene que ir en el mismo clic que lo pide, o el navegador lo bloquea como
-ventana emergente. El mismo menú lleva además la **preparación del taller**, que no es un informe
-(ver abajo).
+ventana emergente. El mismo menú lleva además la **preparación** y el **acta del taller**, que no
+son informes (ver abajo).
 
 - **El del dominio** es el de siempre: la parte global y el dominio abierto, con los filtros activos.
 - **El de todo el proyecto** lleva, tras la parte global, un **capítulo por cada dominio con algo
@@ -386,6 +387,21 @@ entre dos páginas y el número de página va en el margen con `@page`. Lleva lo
 como el modo taller —un taller de una sola capacidad tiene su preparación—, y como va al cliente, el
 menú y el aviso dicen cuántas quedan fuera. La rúbrica es una copia de la del modal «Criterios F3M»
 de `index.html`, y `tests/casos-preparacion.js` compara las dos.
+
+**El acta del taller** (`informe/acta.js`) es el después: lo que se envía al cliente al terminar la
+sesión. Una portada con una frase de lo que salió, las cuatro cifras del Dashboard, la media de
+cada palanca frente a su objetivo y las cinco subcapacidades más lejos de él; después lo acordado,
+capacidad a capacidad, con los scores, el nivel, el gap, la prioridad y **las notas del taller tal
+cual**; lo que quedó sin puntuar, con la documentación que ayudaría a puntuarlo, y una tabla de
+próximos pasos en blanco. Las cifras salen de `resumenGlobal()` y `agregarPorDominio()`, las mismas
+del Dashboard y del Overview, así que el acta no puede contradecir lo que se proyectó. Lleva el
+mismo alcance que la preparación —los filtros— y **sin nada puntuado no se puede pedir**: el menú
+lo dice y el botón se apaga. Como las notas son del equipo y salen tal cual, el aviso pide
+revisarlas antes de enviarla. Comparte con la preparación la hoja de estilos
+(`estilosDelDocumento()`), el título de archivo y la agrupación por capacidad: son el antes y el
+después de la misma sesión y tienen que parecer de la misma familia. Una capacidad sí se parte
+entre dos páginas, por subcapacidades y con la cabecera repetida; entera, dejaba media hoja en
+blanco cada vez que no cabía.
 
 Las cifras de un capítulo salen de `datosDeDominio()`, que recibe el dominio en vez de leer el
 abierto: el informe de un dominio usa la misma función, así que los dos no pueden decir cosas
@@ -703,8 +719,8 @@ Se prueban en `tests/`, sin dependencias, todos los módulos que no necesitan na
 de negocio, los objetivos, la coincidencia de subcapacidades, el contrato de escenario y su espejo
 con `database.rules.json`, el formato de presentación, la exportación a CSV, la biblioteca de IA
 —que una fuente rota no llegue a la pantalla—, el buscador, el informe —el deck que arma `informe/pdf.js`, las
-primitivas SVG y la lectura de las medidas de desborde— y la preparación del taller, con su rúbrica
-comparada con la de `index.html`.
+primitivas SVG y la lectura de las medidas de desborde—, la preparación del taller, con su rúbrica
+comparada con la de `index.html`, y el acta, con sus cifras comparadas con las del Dashboard.
 
 - **En el navegador**: con el servidor en marcha, abrir `http://localhost:8000/tests/`. Es la forma
   que funciona en cualquier equipo, sin instalar nada.
@@ -792,6 +808,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    **La preparación del taller**, del mismo menú: vertical, sin una puntuación, cada subcapacidad
    entera en su página y el índice entero en la primera. Con un filtro de capacidad, el menú y el
    aviso dicen cuántas lleva, y el número de su capacidad es el suyo («3», no «1»).
+   **El acta del taller**, del mismo menú: sus cuatro cifras son las del Dashboard, las notas del
+   taller salen debajo de su subcapacidad y lo sin puntuar va a «Quedó pendiente» con sus casillas.
+   En un dominio sin nada puntuado, el botón está apagado y lo dice.
 8. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
    la fila de Fiscal. En la fila «Todas las capacidades», cambiar una palanca la pone igual en
    todas y cambiar después una sola la deja en «Varios»; «Usar estos objetivos en los nueve
