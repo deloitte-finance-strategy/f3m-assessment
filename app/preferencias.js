@@ -16,10 +16,10 @@
  * hoistean las funciones es una trampa para quien lo toque manana.
  */
 
-import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=26";
-import { MODO_PRESENTACION_KEY, TEMA_KEY, els } from "./estado.js?v=26";
-import { escribirAlmacenamiento, leerAlmacenamiento } from "./almacenamiento.js?v=26";
-import { repintarTodo } from "./repintado.js?v=26";
+import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=27";
+import { MODO_PRESENTACION_KEY, TEMA_KEY, els } from "./estado.js?v=27";
+import { escribirAlmacenamiento, leerAlmacenamiento } from "./almacenamiento.js?v=27";
+import { repintarTodo } from "./repintado.js?v=27";
 
 
 

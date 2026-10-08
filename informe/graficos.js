@@ -22,8 +22,8 @@
  * para lo que es geometria de verdad.
  */
 
-import { escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=26";
-import { PALETA, colorDeCalor } from "./estilos.js?v=26";
+import { escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=27";
+import { PALETA, colorDeCalor } from "./estilos.js?v=27";
 
 
 /** Coordenada legible: 2 decimales bastan y evitan cadenas de 17 cifras. */

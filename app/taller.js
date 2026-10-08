@@ -20,30 +20,30 @@
  * guardado diferido de edicion.js. Lo unico propio es como se enseña.
  */
 
-import { getMaturityLevel } from "../core/calculo.js?v=26";
-import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=26";
-import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=26";
-import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=26";
-import { nombreDeMasInformacion } from "./biblioteca.js?v=26";
-import { priorityBadge } from "./celdas.js?v=26";
-import { getActiveDomainConfig } from "./dominios.js?v=26";
+import { getMaturityLevel } from "../core/calculo.js?v=27";
+import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=27";
+import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=27";
+import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=27";
+import { nombreDeMasInformacion } from "./biblioteca.js?v=27";
+import { priorityBadge } from "./celdas.js?v=27";
+import { getActiveDomainConfig } from "./dominios.js?v=27";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "./edicion.js?v=26";
-import { LEVERS, state } from "./estado.js?v=26";
-import { getVisibleItems } from "./filtros.js?v=26";
-import { calculate, getCapabilityTargets } from "./metricas.js?v=26";
-import { repintarTodo } from "./repintado.js?v=26";
-import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=26";
+} from "./edicion.js?v=27";
+import { LEVERS, state } from "./estado.js?v=27";
+import { getVisibleItems } from "./filtros.js?v=27";
+import { calculate, getCapabilityTargets } from "./metricas.js?v=27";
+import { repintarTodo } from "./repintado.js?v=27";
+import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=27";
 import {
   conectarPuntuacion,
   enfocarPalanca,
   idDeLaTarjetaEnCurso,
   llevarALasTarjetas,
   scoreControl,
-} from "./vistas/assessment.js?v=26";
+} from "./vistas/assessment.js?v=27";
 
 
 let panel = null;

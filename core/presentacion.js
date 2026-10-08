@@ -149,9 +149,16 @@ const dosCifras = (numero) => String(numero).padStart(2, "0");
  * el informe diria la fecha de una forma u otra segun el portatil de la sala.
  */
 export function fechaLegible(fecha) {
-  const dia = `${fecha.getDate()} de ${MESES[fecha.getMonth()]} de ${fecha.getFullYear()}`;
+  return `${diaLegible(fecha)}, ${dosCifras(fecha.getHours())}:${dosCifras(fecha.getMinutes())}`;
+}
 
-  return `${dia}, ${dosCifras(fecha.getHours())}:${dosCifras(fecha.getMinutes())}`;
+
+/**
+ * Solo el dia, "8 de octubre de 2026": lo que lleva el acta del taller, donde
+ * la hora a la que se genero no le dice nada al cliente.
+ */
+export function diaLegible(fecha) {
+  return `${fecha.getDate()} de ${MESES[fecha.getMonth()]} de ${fecha.getFullYear()}`;
 }
 
 

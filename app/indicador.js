@@ -12,9 +12,9 @@
  * herramienta.
  */
 
-import { els } from "./estado.js?v=26";
-import { showNotice } from "./avisos.js?v=26";
-import { enEscenarioCompartido } from "./firebase.js?v=26";
+import { els } from "./estado.js?v=27";
+import { showNotice } from "./avisos.js?v=27";
+import { enEscenarioCompartido } from "./firebase.js?v=27";
 
 
 // Para retirar el chip de guardado cuando el estado ya no pide nada.
