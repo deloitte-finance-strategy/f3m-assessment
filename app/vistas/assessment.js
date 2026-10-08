@@ -17,17 +17,17 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=23";
-import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=23";
-import { createDefaultTargets } from "../../core/objetivos.js?v=23";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=23";
-import { abrirDialogo, showNotice } from "../avisos.js?v=23";
+} from "../../core/calculo.js?v=24";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=24";
+import { createDefaultTargets } from "../../core/objetivos.js?v=24";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=24";
+import { abrirDialogo, showNotice } from "../avisos.js?v=24";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=23";
+} from "../celdas.js?v=24";
 import {
   DOMAINS,
   LEVERS,
@@ -35,23 +35,27 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=23";
+} from "../estado.js?v=24";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "../edicion.js?v=23";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=23";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=23";
-import { persistItemChange, persistTargetsDelDominioActivo } from "../persistencia.js?v=23";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=23";
-import { repintarTodo } from "../repintado.js?v=23";
+} from "../edicion.js?v=24";
+import { describirObjetivos, getVisibleItems } from "../filtros.js?v=24";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=24";
+import {
+  persistItemChange,
+  persistTargetsDeDominios,
+  persistTargetsDelDominioActivo,
+} from "../persistencia.js?v=24";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=24";
+import { repintarTodo } from "../repintado.js?v=24";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=23";
+} from "../subcapacidad.js?v=24";
 
 
 export function renderCapabilityTargets() {
@@ -152,6 +156,7 @@ export function renderCapabilityTargets() {
       </div>
 
       <div class="capability-targets-rows">
+        ${filaParaTodas(capabilities)}
         ${rows}
       </div>
     </div>
@@ -169,6 +174,16 @@ export function renderCapabilityTargets() {
     });
 
   els.capabilityTargetsPanel
+    .querySelectorAll("[data-objetivo-para-todas]")
+    .forEach((select) => {
+      select.addEventListener("change", handleObjetivoParaTodas);
+    });
+
+  els.capabilityTargetsPanel
+    .querySelector("[data-objetivos-a-los-nueve]")
+    ?.addEventListener("click", aplicarObjetivosALosNueve);
+
+  els.capabilityTargetsPanel
     .querySelector("[data-reset-capability-targets]")
     ?.addEventListener(
       "click",
@@ -176,6 +191,236 @@ export function renderCapabilityTargets() {
     );
 
   restaurarFocoDeObjetivos(foco);
+}
+
+
+/**
+ * El objetivo de una palanca si es el mismo en todas las capacidades del
+ * dominio, o null si hay varios.
+ */
+function objetivoComun(capabilities, leverKey) {
+  const valores = unique(
+    capabilities.map((capability) => getCapabilityTargets(capability)[leverKey]),
+  );
+
+  return valores.length === 1 ? valores[0] : null;
+}
+
+
+/**
+ * La primera fila del panel: un objetivo por palanca para todas las capacidades
+ * del dominio a la vez.
+ *
+ * La ambicion se suele acordar con el cliente por palanca ("en Tecnologia nos
+ * conformamos con un 3"), no capacidad a capacidad, y hasta ahora eso eran
+ * entre 9 y 18 desplegables por dominio. Cuando las capacidades ya tienen
+ * objetivos distintos en una palanca, su desplegable dice «Varios» en vez de
+ * enseñar uno cualquiera: elegir ahi un numero los iguala todos, y eso tiene
+ * que verse antes de hacerlo.
+ */
+function filaParaTodas(capabilities) {
+  const dominio = DOMAINS[state.activeDomainId]?.label || "este dominio";
+
+  const comunes = LEVERS.map((lever) => objetivoComun(capabilities, lever.key));
+
+  const controles = LEVERS.map((lever, indice) => {
+    const actual = comunes[indice];
+
+    const opciones = [1, 2, 3, 4, 5]
+      .map(
+        (value) => `<option value="${value}" ${actual === value ? "selected" : ""}>${value}</option>`,
+      )
+      .join("");
+
+    return `
+      <label class="capability-target-field">
+        <span class="capability-target-mobile-label">
+          ${escapeHtml(lever.label)}
+        </span>
+
+        <select
+          class="capability-target-select target-${lever.key} objetivo-para-todas"
+          data-objetivo-para-todas="${escapeAttr(lever.key)}"
+          aria-label="${escapeAttr(
+            `Objetivo de ${lever.label} para todas las capacidades de ${dominio}`,
+          )}"
+        >
+          ${actual === null ? '<option value="" selected disabled>Varios</option>' : ""}
+          ${opciones}
+        </select>
+      </label>
+    `;
+  }).join("");
+
+  // Copiar a los nueve solo tiene sentido con alguna palanca que tenga un
+  // objetivo unico: si las tres dicen «Varios», no hay nada que copiar.
+  const hayAlgoQueCopiar = comunes.some((valor) => valor !== null);
+
+  return `
+    <div class="capability-target-row capability-target-row-todas">
+      <div class="capability-target-name">
+        <strong>Todas las capacidades</strong>
+
+        <span>
+          Cambia una palanca en todo ${escapeHtml(dominio)} de una vez
+        </span>
+
+        <button
+          class="objetivos-a-los-nueve"
+          type="button"
+          data-objetivos-a-los-nueve
+          ${hayAlgoQueCopiar ? "" : "disabled"}
+        >
+          Usar estos objetivos en los nueve dominios
+        </button>
+      </div>
+
+      ${controles}
+    </div>
+  `;
+}
+
+
+/**
+ * Asegura que el dominio tiene una entrada de objetivos para cada una de sus
+ * capacidades, con el objetivo base del dominio en las que no la tuvieran.
+ */
+function objetivosCompletos(dominio) {
+  const base = normalizeTargetValue(dominio.meta?.targetMaturity, DEFAULT_TARGET_MATURITY);
+  const objetivos = dominio.targets || {};
+
+  Object.entries(createDefaultTargets(dominio.items || [], base)).forEach(
+    ([capability, porDefecto]) => {
+      if (!objetivos[capability]) {
+        objetivos[capability] = porDefecto;
+      }
+    },
+  );
+
+  return objetivos;
+}
+
+
+function handleObjetivoParaTodas(event) {
+  const select = event.currentTarget;
+  const leverKey = select.dataset.objetivoParaTodas;
+  const activeDomain = state.domains[state.activeDomainId];
+
+  if (!leverKey || !activeDomain || select.value === "") {
+    return;
+  }
+
+  syncActiveDomainState();
+
+  const targetValue = normalizeTargetValue(select.value, DEFAULT_TARGET_MATURITY);
+
+  activeDomain.targets = objetivosCompletos(activeDomain);
+
+  const capacidades = Object.keys(activeDomain.targets);
+
+  capacidades.forEach((capability) => {
+    activeDomain.targets[capability][leverKey] = targetValue;
+  });
+
+  state.targets = activeDomain.targets;
+
+  syncActiveDomainState();
+
+  repintarTodo();
+  persistTargetsDelDominioActivo();
+
+  const palanca = LEVERS.find((lever) => lever.key === leverKey)?.label || leverKey;
+  const dominio = DOMAINS[state.activeDomainId]?.label || "este dominio";
+
+  showNotice(
+    `${palanca}: objetivo ${targetValue} en las ${capacidades.length} capacidades de ${dominio}.`,
+    "exito",
+  );
+}
+
+
+/**
+ * Copia a los nueve dominios el objetivo de cada palanca que en el dominio
+ * abierto es el mismo para todas sus capacidades. Las palancas que dicen
+ * «Varios» no se tocan en ningun dominio, y el dialogo lo dice antes de
+ * confirmar: pisar objetivos de dominios que no estan a la vista sin avisar
+ * es el tipo de cambio que nadie nota hasta que el gap ya no cuadra.
+ */
+async function aplicarObjetivosALosNueve() {
+  const capabilities = unique(state.items.map((item) => item.capacidad));
+
+  const aCopiar = LEVERS
+    .map((lever) => ({ lever, valor: objetivoComun(capabilities, lever.key) }))
+    .filter(({ valor }) => valor !== null);
+
+  if (!aCopiar.length) {
+    return;
+  }
+
+  const sinCopiar = LEVERS.filter(
+    (lever) => !aCopiar.some(({ lever: copiada }) => copiada.key === lever.key),
+  );
+
+  const dominio = DOMAINS[state.activeDomainId]?.label || "este dominio";
+  const dominiosCargados = Object.keys(state.domains).filter(
+    (id) => state.domains[id]?.items?.length,
+  );
+
+  const parrafos = [
+    `${aCopiar.map(({ lever, valor }) => `${lever.label} ${valor}`).join(", ")}, en todas las capacidades de ${
+      dominiosCargados.length === 9 ? "los nueve dominios" : `los ${dominiosCargados.length} dominios cargados`
+    }. Sustituye los objetivos que tuvieran.`,
+  ];
+
+  if (sinCopiar.length) {
+    parrafos.push(
+      `${sinCopiar.map((lever) => lever.label).join(" y ")} no se ${
+        sinCopiar.length === 1 ? "toca" : "tocan"
+      }: en ${dominio} ${sinCopiar.length === 1 ? "tiene" : "tienen"} objetivos distintos según la capacidad.`,
+    );
+  }
+
+  parrafos.push(
+    "Cambia los gaps, las prioridades y las oleadas. Si el escenario es compartido, lo verá todo el equipo.",
+  );
+
+  const confirmado = await abrirDialogo({
+    eyebrow: "Ambición de madurez",
+    titulo: "Usar estos objetivos en los nueve dominios",
+    parrafos,
+    tono: "peligro",
+    confirmar: "Aplicar a todos",
+  });
+
+  if (!confirmado) {
+    return;
+  }
+
+  syncActiveDomainState();
+
+  dominiosCargados.forEach((id) => {
+    const dominioDeDatos = state.domains[id];
+
+    dominioDeDatos.targets = objetivosCompletos(dominioDeDatos);
+
+    Object.values(dominioDeDatos.targets).forEach((objetivos) => {
+      aCopiar.forEach(({ lever, valor }) => {
+        objetivos[lever.key] = valor;
+      });
+    });
+  });
+
+  state.targets = state.domains[state.activeDomainId]?.targets || state.targets;
+
+  syncActiveDomainState();
+
+  repintarTodo();
+  persistTargetsDeDominios(dominiosCargados);
+
+  showNotice(
+    `Objetivos aplicados en ${dominiosCargados.length === 9 ? "los nueve dominios" : `${dominiosCargados.length} dominios`}.`,
+    "exito",
+  );
 }
 
 
@@ -201,6 +446,14 @@ function capturarFocoDeObjetivos() {
     return null;
   }
 
+  if (activo.matches("[data-objetivos-a-los-nueve]")) {
+    return { aLosNueve: true };
+  }
+
+  if (activo.dataset.objetivoParaTodas) {
+    return { paraTodas: activo.dataset.objetivoParaTodas };
+  }
+
   if (!activo.classList.contains("capability-target-select")) {
     return null;
   }
@@ -213,6 +466,23 @@ function capturarFocoDeObjetivos() {
 
 
 function restaurarFocoDeObjetivos(foco) {
+  if (foco?.aLosNueve) {
+    // Si tras aplicar el boton queda desactivado, el foco iria al <body>: se
+    // lleva a la fila, que es donde se estaba trabajando.
+    const boton = els.capabilityTargetsPanel.querySelector("[data-objetivos-a-los-nueve]");
+    (boton && !boton.disabled
+      ? boton
+      : els.capabilityTargetsPanel.querySelector("[data-objetivo-para-todas]"))?.focus();
+    return;
+  }
+
+  if (foco?.paraTodas) {
+    els.capabilityTargetsPanel
+      .querySelector(`[data-objetivo-para-todas="${CSS.escape(foco.paraTodas)}"]`)
+      ?.focus();
+    return;
+  }
+
   if (!foco?.capacidad || !foco?.palanca) {
     return;
   }

@@ -14,21 +14,22 @@
  * rama intacta en vez de desaparecer para todo el equipo.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=23";
-import { serializeTargetsForFirebase } from "../core/objetivos.js?v=23";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=24";
+import { serializeTargetsForFirebase } from "../core/objetivos.js?v=24";
 
-import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=23";
-import { escribirAlmacenamiento } from "./almacenamiento.js?v=23";
-import { ocultarAviso, showNotice } from "./avisos.js?v=23";
+import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=24";
+import { escribirAlmacenamiento } from "./almacenamiento.js?v=24";
+import { ocultarAviso, showNotice } from "./avisos.js?v=24";
 import {
   conLimiteDeEspera,
   conectarFirebase,
   enEscenarioCompartido,
   getConexion,
-} from "./firebase.js?v=23";
-import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=23";
-import { repintarTodo } from "./repintado.js?v=23";
-import { populateCapacityFilter } from "./filtros.js?v=23";
+} from "./firebase.js?v=24";
+import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=24";
+import { repintarTodo } from "./repintado.js?v=24";
+import { populateCapacityFilter } from "./filtros.js?v=24";
+import { anotarCambioLocal } from "./copias.js?v=24";
 
 import {
   hayCanalDeVuelta,
@@ -36,14 +37,14 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./indicador.js?v=23";
+} from "./indicador.js?v=24";
 
 import {
   applyScenarioPayload,
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./escenario.js?v=23";
+} from "./escenario.js?v=24";
 
 
 
@@ -650,6 +651,7 @@ function persistGranularChange(rutas) {
 
   if (!enEscenarioCompartido) {
     updateSaveStatus("saved", "Guardado local ✓");
+    anotarCambioLocal();
     return;
   }
 
@@ -745,22 +747,44 @@ export function persistItemChange(itemId, campo, valor) {
  * en una ruta. Aun así el alcance es mucho menor que reescribir todo el escenario.
  */
 export function persistTargetsDelDominioActivo() {
-  const activeDomain = state.domains[state.activeDomainId];
+  persistTargetsDeDominios([state.activeDomainId]);
+}
 
-  if (!activeDomain) {
+
+/**
+ * Los objetivos de varios dominios en una sola escritura.
+ *
+ * Una sola y no una por dominio: «Usar estos objetivos en los nueve dominios»
+ * es un cambio, y si fueran nueve escrituras podria fallar la quinta y dejar
+ * el escenario compartido con la mitad de los dominios cambiados.
+ */
+export function persistTargetsDeDominios(ids) {
+  syncActiveDomainState();
+
+  const rutas = {};
+
+  ids.forEach((id) => {
+    const dominio = state.domains[id];
+
+    if (!dominio) {
+      return;
+    }
+
+    rutas[`domains/${id}/targets`] = serializeTargetsForFirebase(
+      dominio.items,
+      dominio.targets,
+      normalizeTargetValue(
+        dominio.meta?.targetMaturity,
+        DEFAULT_TARGET_MATURITY,
+      ),
+    );
+  });
+
+  if (!Object.keys(rutas).length) {
     return;
   }
 
-  persistGranularChange({
-    [`domains/${state.activeDomainId}/targets`]: serializeTargetsForFirebase(
-      activeDomain.items,
-      activeDomain.targets,
-      normalizeTargetValue(
-        activeDomain.meta?.targetMaturity,
-        DEFAULT_TARGET_MATURITY,
-      ),
-    ),
-  });
+  persistGranularChange(rutas);
 }
 
 
@@ -782,6 +806,7 @@ export function persistScenario() {
       "Guardado local ✓",
     );
 
+    anotarCambioLocal();
     return;
   }
 

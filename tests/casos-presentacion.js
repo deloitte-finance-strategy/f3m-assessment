@@ -9,7 +9,15 @@
  * el navegador, o node tests/ejecutar.mjs desde la linea de comandos.
  */
 
-import { escapeAttr, escapeHtml, fechaLegible, fechaParaArchivo, formatMedia, formatNumber } from "../core/presentacion.js?v=23";
+import {
+  cuandoFue,
+  escapeAttr,
+  escapeHtml,
+  fechaLegible,
+  fechaParaArchivo,
+  formatMedia,
+  formatNumber,
+} from "../core/presentacion.js?v=24";
 
 
 export const casos = [
@@ -94,6 +102,22 @@ export const casos = [
     ejecutar: (t) => {
       t.igual(fechaParaArchivo(new Date(2026, 0, 5, 0, 30)), "2026-01-05", "la medianoche y media sigue siendo ese dia");
       t.igual(fechaParaArchivo(new Date(2026, 11, 31, 23, 59)), "2026-12-31");
+    },
+  },
+  {
+    grupo: "Fechas del informe",
+    nombre: "cuándo fue la última copia se cuenta desde ahora",
+    ejecutar: (t) => {
+      const ahora = new Date(2026, 9, 8, 10, 30);
+
+      t.igual(cuandoFue(new Date(2026, 9, 8, 10, 29, 40), ahora), "ahora mismo", "menos de un minuto");
+      t.igual(cuandoFue(new Date(2026, 9, 8, 10, 29), ahora), "hace 1 minuto", "en singular");
+      t.igual(cuandoFue(new Date(2026, 9, 8, 9, 45), ahora), "hace 45 minutos");
+      t.igual(cuandoFue(new Date(2026, 9, 8, 0, 5), ahora), "hoy a las 00:05", "esta madrugada sigue siendo hoy");
+      t.igual(cuandoFue(new Date(2026, 9, 7, 23, 50), ahora), "ayer a las 23:50", "anoche ya es ayer, aunque fuera hace menos de un día");
+      t.igual(cuandoFue(new Date(2026, 9, 6, 18, 0), ahora), "el 6 de octubre");
+      t.igual(cuandoFue(new Date(2025, 11, 30, 18, 0), ahora), "el 30 de diciembre de 2025", "de otro año, con el año");
+      t.igual(cuandoFue(new Date(2026, 9, 1, 8, 0), new Date(2026, 9, 2, 0, 30)), "ayer a las 08:00", "el cambio de mes no confunde a ayer");
     },
   },
 

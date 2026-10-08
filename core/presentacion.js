@@ -156,6 +156,43 @@ export function fechaLegible(fecha) {
 
 
 /**
+ * Cuándo pasó algo, contado desde ahora: "hace 5 minutos", "hoy a las 10:42",
+ * "ayer a las 18:05", "el 6 de octubre".
+ *
+ * Es para el menú de Escenario, que dice cuándo se guardó la última copia: ahí
+ * lo que importa es si fue esta mañana o hace una semana, no la fecha exacta.
+ * Compuesto a mano por lo mismo que fechaLegible().
+ */
+export function cuandoFue(fecha, ahora) {
+  const minutos = Math.floor((ahora - fecha) / 60000);
+  const hora = `${dosCifras(fecha.getHours())}:${dosCifras(fecha.getMinutes())}`;
+
+  if (minutos < 1) {
+    return "ahora mismo";
+  }
+
+  if (minutos < 60) {
+    return minutos === 1 ? "hace 1 minuto" : `hace ${minutos} minutos`;
+  }
+
+  const inicioDeHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+  const inicioDeAyer = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - 1);
+
+  if (fecha >= inicioDeHoy) {
+    return `hoy a las ${hora}`;
+  }
+
+  if (fecha >= inicioDeAyer) {
+    return `ayer a las ${hora}`;
+  }
+
+  const dia = `el ${fecha.getDate()} de ${MESES[fecha.getMonth()]}`;
+
+  return fecha.getFullYear() === ahora.getFullYear() ? dia : `${dia} de ${fecha.getFullYear()}`;
+}
+
+
+/**
  * La misma fecha para el nombre de un archivo: "2026-10-04".
  *
  * Asi ordenan bien en una carpeta y dos informes de dias distintos no se pisan.

@@ -21,9 +21,9 @@
  * reescalar, que es lo mas cerca de una ppt sin generar una ppt.
  */
 
-import { escapeHtml } from "../core/presentacion.js?v=23";
+import { escapeHtml } from "../core/presentacion.js?v=24";
 
-import { getEnhancedPdfReportStyles } from "./estilos.js?v=23";
+import { getEnhancedPdfReportStyles } from "./estilos.js?v=24";
 
 import {
   POR_DIAPOSITIVA,
@@ -47,7 +47,7 @@ import {
   resumenPorCapacidad,
   roadmap,
   separador,
-} from "./secciones.js?v=23";
+} from "./secciones.js?v=24";
 
 
 const PARTE_GLOBAL = "La función financiera";
@@ -102,15 +102,23 @@ function planDelDeck(data) {
     parte: "Apertura",
     titulo: "Contenidos",
     enIndice: false,
-    cuerpo: (plan) => indice(plan),
+    // Con un capitulo por dominio, una linea por seccion no cabe: son unas
+    // diez por dominio. El indice pasa a ser de partes, con su rango.
+    cuerpo: (plan) => indice(plan, { porPartes: Boolean(data.dominios) }),
   });
 
   if (data.global) {
     secciones.push(...parteGlobal(data));
   }
 
-  secciones.push(...parteDelDominio(data));
-  secciones.push(...parteDeAccion(data));
+  if (data.dominios) {
+    data.dominios.forEach((dominio, indiceDeDominio) => {
+      secciones.push(...capituloDelDominio({ ...data, ...dominio }, indiceDeDominio + (data.global ? 2 : 1)));
+    });
+  } else {
+    secciones.push(...parteDelDominio(data));
+    secciones.push(...parteDeAccion(data));
+  }
 
   secciones.push({
     clase: "cierre slide-oscura",
@@ -181,37 +189,70 @@ function parteGlobal(data) {
 }
 
 
-function parteDelDominio(data) {
+/**
+ * Un dominio en el informe de todo el proyecto: su diagnostico y su
+ * «hacia donde» seguidos, bajo una sola parte con el nombre del dominio.
+ *
+ * Son las mismas diapositivas que el informe de un dominio, con dos cambios:
+ * la cabecera de cada una dice de que dominio es —en un deck de cien
+ * diapositivas, «El dominio» no orienta— y no hay un separador aparte para
+ * la accion, que con nueve dominios serian nueve diapositivas de relleno.
+ */
+function capituloDelDominio(data, numeroDeParte) {
+  const comun = {
+    parte: data.domainLabel,
+    tituloDeParte: data.domainTitle || data.domainLabel,
+    dominio: data.domainLabel,
+  };
+
+  return [
+    ...parteDelDominio(data, {
+      ...comun,
+      numero: `Parte ${numeroDeParte}`,
+      texto:
+        "Diagnóstico del dominio y hacia dónde: capacidades, brechas, roadmap y oportunidades de "
+        + "inteligencia artificial, con todas sus subcapacidades.",
+    }),
+    ...parteDeAccion(data, { ...comun, sinSeparador: true }),
+  ];
+}
+
+
+function parteDelDominio(data, opciones = {}) {
+  const parte = opciones.parte || PARTE_DOMINIO;
+  const numero = opciones.numero || "Parte 2";
+
   const secciones = [
     {
       clase: "separador slide-oscura",
-      parte: PARTE_DOMINIO,
-      titulo: "Parte 2",
+      parte,
+      titulo: numero,
       enIndice: false,
       cuerpo: () =>
         separador({
-          numero: "Parte 2",
+          numero,
           titulo: data.domainTitle || data.domainLabel,
           texto:
-            "Diagnóstico del dominio: capacidades, subcapacidades y brechas frente al objetivo, "
-            + "con los filtros que estaban activos al generar el informe.",
+            opciones.texto
+            || "Diagnóstico del dominio: capacidades, subcapacidades y brechas frente al objetivo, "
+              + "con los filtros que estaban activos al generar el informe.",
         }),
     },
     {
-      parte: PARTE_DOMINIO,
+      parte,
       titulo: "Resumen ejecutivo",
       entradilla: `Lectura de ${data.domainLabel} en cuatro cifras y una frase.`,
       cuerpo: () => resumenDelDominio(data),
     },
     {
-      parte: PARTE_DOMINIO,
+      parte,
       titulo: "Perfil por palanca",
       entradilla:
         "Madurez media de Procesos, Tecnología y Organización frente a su objetivo, y reparto por prioridad.",
       cuerpo: () => perfilPorPalanca(data),
     },
     {
-      parte: PARTE_DOMINIO,
+      parte,
       titulo: "Radar por capacidad",
       entradilla: "Las capacidades del dominio en las tres palancas, contra el objetivo de cada una.",
       cuerpo: () => radarPorCapacidad(data),
@@ -220,7 +261,7 @@ function parteDelDominio(data) {
 
   paginar(data.summaryRows, POR_DIAPOSITIVA.capacidades).forEach((tanda, indiceDeTanda, tandas) => {
     secciones.push({
-      parte: PARTE_DOMINIO,
+      parte,
       titulo: "Resumen por capacidad",
       subtitulo: deTantas(indiceDeTanda, tandas.length),
       entradilla:
@@ -233,7 +274,7 @@ function parteDelDominio(data) {
 
   paginar(data.metrics, POR_DIAPOSITIVA.calor).forEach((tanda, indiceDeTanda, tandas) => {
     secciones.push({
-      parte: PARTE_DOMINIO,
+      parte,
       titulo: "Heatmap por subcapacidad",
       subtitulo: deTantas(indiceDeTanda, tandas.length),
       entradilla:
@@ -246,7 +287,7 @@ function parteDelDominio(data) {
 
   paginar(data.topPriorities, POR_DIAPOSITIVA.brechas).forEach((tanda, indiceDeTanda, tandas) => {
     secciones.push({
-      parte: PARTE_DOMINIO,
+      parte,
       titulo: "Principales brechas",
       subtitulo: deTantas(indiceDeTanda, tandas.length),
       entradilla:
@@ -257,31 +298,35 @@ function parteDelDominio(data) {
     });
   });
 
-  return secciones;
+  return secciones.map((seccion) => ({ ...seccion, ...marcaDeParte(opciones) }));
 }
 
 
-function parteDeAccion(data) {
-  const secciones = [
-    {
-      clase: "separador slide-oscura",
-      parte: PARTE_ACCION,
-      titulo: "Parte 3",
-      enIndice: false,
-      cuerpo: () =>
-        separador({
-          numero: "Parte 3",
-          titulo: PARTE_ACCION,
-          texto:
-            "Las iniciativas que cierran las brechas, repartidas en oleadas, y las oportunidades "
-            + "de inteligencia artificial que aplican a este dominio.",
-        }),
-    },
-  ];
+function parteDeAccion(data, opciones = {}) {
+  const parte = opciones.parte || PARTE_ACCION;
+
+  const secciones = opciones.sinSeparador
+    ? []
+    : [
+        {
+          clase: "separador slide-oscura",
+          parte,
+          titulo: "Parte 3",
+          enIndice: false,
+          cuerpo: () =>
+            separador({
+              numero: "Parte 3",
+              titulo: PARTE_ACCION,
+              texto:
+                "Las iniciativas que cierran las brechas, repartidas en oleadas, y las oportunidades "
+                + "de inteligencia artificial que aplican a este dominio.",
+            }),
+        },
+      ];
 
   paginar(data.roadmapItems, POR_DIAPOSITIVA.roadmap).forEach((tanda, indiceDeTanda, tandas) => {
     secciones.push({
-      parte: PARTE_ACCION,
+      parte,
       titulo: "Roadmap e iniciativas",
       subtitulo: deTantas(indiceDeTanda, tandas.length),
       entradilla:
@@ -297,7 +342,7 @@ function parteDeAccion(data) {
   // distinguir "este dominio no tiene casos" de "el catalogo no cargo".
   if (data.ia?.total) {
     secciones.push({
-      parte: PARTE_ACCION,
+      parte,
       titulo: "Panorama de IA",
       entradilla: `Los casos de uso de inteligencia artificial que aplican a ${data.domainLabel}, por tipo de valor y por tipo de IA.`,
       cuerpo: () => panoramaDeIa(data.ia, data),
@@ -305,7 +350,7 @@ function parteDeAccion(data) {
 
     paginar(data.ia.casos, POR_DIAPOSITIVA.casosDeIa).forEach((tanda, indiceDeTanda, tandas) => {
       secciones.push({
-        parte: PARTE_ACCION,
+        parte,
         titulo: "Oportunidades de IA",
         subtitulo: deTantas(indiceDeTanda, tandas.length),
         entradilla:
@@ -327,7 +372,7 @@ function parteDeAccion(data) {
     }
 
     secciones.push({
-      parte: PARTE_ACCION,
+      parte,
       titulo: "Comentarios y hallazgos",
       subtitulo: deTantas(indiceDeTanda, tandas.length),
       entradilla: indiceDeTanda === 0 ? "Lo anotado durante las sesiones de scoring." : "",
@@ -335,7 +380,27 @@ function parteDeAccion(data) {
     });
   });
 
-  return secciones;
+  return secciones.map((seccion) => ({ ...seccion, ...marcaDeParte(opciones) }));
+}
+
+
+/**
+ * Lo que una seccion necesita saber del capitulo al que pertenece: el titulo
+ * largo para el indice por partes y el dominio para el pie. En el informe de
+ * un dominio no lleva nada, y el pie dice el dominio de siempre.
+ */
+function marcaDeParte(opciones) {
+  const marca = {};
+
+  if (opciones.tituloDeParte) {
+    marca.tituloDeParte = opciones.tituloDeParte;
+  }
+
+  if (opciones.dominio) {
+    marca.dominio = opciones.dominio;
+  }
+
+  return marca;
 }
 
 
@@ -348,7 +413,7 @@ function tituloDelDocumento(data) {
   // Con el cliente delante, que es como se busca un informe en la carpeta. Sin
   // los caracteres que Windows no admite en un nombre: un cliente "A/B" haria
   // que el dialogo de guardar propusiera una carpeta que no existe.
-  const partes = [data.cliente, data.domainLabel]
+  const partes = [data.cliente, data.proyecto ? "Proyecto" : data.domainLabel]
     .filter(Boolean)
     .map((parte) => String(parte).replace(/[<>:"/\\|?*]+/g, " ").trim())
     .join(" - ");
@@ -407,7 +472,7 @@ function cabecera(seccion) {
 function pie(seccion, plan, data) {
   return `
     <footer class="slide-pie">
-      <span><strong>F3M Assessment</strong>${data.cliente ? ` · ${escapeHtml(data.cliente)}` : ""} · ${escapeHtml(data.domainLabel)}</span>
+      <span><strong>F3M Assessment</strong>${data.cliente ? ` · ${escapeHtml(data.cliente)}` : ""} · ${escapeHtml(seccion.dominio || data.domainLabel)}</span>
       <span>${escapeHtml(data.generatedAt)}</span>
       <span class="slide-pie-numero">${seccion.numero} / ${plan.length}</span>
     </footer>

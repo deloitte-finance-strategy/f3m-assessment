@@ -12,7 +12,7 @@
  * quien conoce el deck entero. Cada seccion solo sabe pintar su cuerpo.
  */
 
-import { average } from "../core/calculo.js?v=23";
+import { average } from "../core/calculo.js?v=24";
 
 import {
   COLOR_DE_PALANCA,
@@ -21,9 +21,9 @@ import {
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=23";
+} from "../core/presentacion.js?v=24";
 
-import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=23";
+import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=24";
 
 
 /**
@@ -84,6 +84,10 @@ function deTantas(indice, total) {
 // ============================================================ apertura y cierre
 
 export function portada(data) {
+  if (data.dominios) {
+    return portadaDelProyecto(data);
+  }
+
   return `
     <p class="portada-antetitulo">Finance Strategy · F3M Assessment</p>
     <h1>Informe preliminar de madurez<b>${escapeHtml(data.domainLabel)}</b></h1>
@@ -105,6 +109,50 @@ export function portada(data) {
 
 
 /**
+ * La portada del informe de todo el proyecto: los dominios que recorre, en
+ * vez de uno, y que no lleva filtros.
+ */
+function portadaDelProyecto(data) {
+  const nombres = enumerar(data.dominios.map((dominio) => dominio.domainLabel));
+
+  // Hasta tres nombres caben en el titulo. Con mas, el titulo dice cuantos y
+  // los nombres bajan a la entradilla: nueve en letra de portada eran cuatro
+  // lineas y empujaban los datos fuera de la diapositiva.
+  const enElTitulo = data.dominios.length <= 3;
+  const cuantos = ["", "", "", "", "Cuatro", "Cinco", "Seis", "Siete", "Ocho", "Los nueve"][data.dominios.length]
+    || String(data.dominios.length);
+
+  return `
+    <p class="portada-antetitulo">Finance Strategy · F3M Assessment</p>
+    <h1>Informe preliminar de madurez<b>${escapeHtml(enElTitulo ? nombres : `${cuantos} dominios`)}</b></h1>
+    ${data.cliente ? `<p class="portada-cliente">${escapeHtml(data.cliente)}</p>` : ""}
+    <p class="portada-bajada">
+      ${enElTitulo ? "" : `${escapeHtml(nombres)}. `}Lectura de la función financiera y un capítulo por
+      cada dominio evaluado: diagnóstico, brechas frente a objetivo, roadmap de iniciativas y
+      oportunidades de inteligencia artificial.
+    </p>
+
+    <div class="portada-datos">
+      <div><span>Dominios analizados</span><strong>${data.dominios.length} de ${escapeHtml(String(data.global?.dominiosTotales || 9))}</strong></div>
+      <div><span>Origen de los datos</span><strong>${escapeHtml(data.scenarioLabel)}</strong></div>
+      <div><span>Filtros aplicados</span><strong>Ninguno</strong></div>
+      <div><span>Fecha de generación</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
+    </div>
+  `;
+}
+
+
+/** "FP&A", "FP&A y Tesorería", "FP&A, Tesorería y Fiscal". */
+function enumerar(nombres) {
+  if (nombres.length <= 1) {
+    return nombres.join("");
+  }
+
+  return `${nombres.slice(0, -1).join(", ")} y ${nombres[nombres.length - 1]}`;
+}
+
+
+/**
  * El indice, una linea por seccion y no por diapositiva.
  *
  * Una seccion que paginar() reparte en varias diapositivas llega como varias
@@ -112,7 +160,11 @@ export function portada(data) {
  * "Roadmap e iniciativas" tres veces, con tres numeros, y parecian tres
  * apartados distintos. Juntas son una linea con su rango: "16–18".
  */
-export function indice(plan) {
+export function indice(plan, { porPartes = false } = {}) {
+  if (porPartes) {
+    return indicePorPartes(plan);
+  }
+
   const partes = [];
 
   plan
@@ -153,6 +205,81 @@ export function indice(plan) {
 }
 
 
+/**
+ * El indice del informe de todo el proyecto: un bloque por parte.
+ *
+ * Con un capitulo por dominio, una linea por seccion eran unas diez por
+ * dominio, y con cinco dominios el indice ya no cabia en su diapositiva. Aqui
+ * cada parte es una linea con su rango —que es lo que se busca en un deck
+ * largo: donde empieza el dominio que interesa— y debajo, en pequeño, sus
+ * secciones con su numero. Hasta cinco partes van en una columna; con mas, en
+ * dos, llenando primero la de la izquierda para que se lean en orden.
+ */
+function indicePorPartes(plan) {
+  const partes = [];
+
+  plan
+    .filter((seccion) => seccion.parte !== "Apertura" && seccion.parte !== "Cierre")
+    .forEach((seccion) => {
+      let parte = partes[partes.length - 1];
+
+      if (!parte || parte.parte !== seccion.parte) {
+        parte = {
+          parte: seccion.parte,
+          titulo: seccion.tituloDeParte || seccion.parte,
+          desde: seccion.numero,
+          hasta: seccion.numero,
+          filas: [],
+        };
+
+        partes.push(parte);
+      }
+
+      parte.hasta = seccion.numero;
+
+      if (seccion.enIndice === false) {
+        return;
+      }
+
+      const anterior = parte.filas[parte.filas.length - 1];
+
+      if (anterior && anterior.titulo === seccion.titulo && anterior.hasta === seccion.numero - 1) {
+        anterior.hasta = seccion.numero;
+      } else {
+        parte.filas.push({ titulo: seccion.titulo, desde: seccion.numero, hasta: seccion.numero });
+      }
+    });
+
+  const rango = ({ desde, hasta }) => (desde === hasta ? `${desde}` : `${desde}–${hasta}`);
+
+  const bloques = partes
+    .map((parte, numero) => `
+      <div class="indice-bloque">
+        <div class="indice-fila indice-fila-parte">
+          <span>Parte ${numero + 1} · ${escapeHtml(parte.titulo)}</span>
+          <i></i>
+          <b>${rango(parte)}</b>
+        </div>
+        <p class="indice-detalle">
+          ${parte.filas
+            .map((fila) => `<span class="indice-entrada">${escapeHtml(fila.titulo)} <b>${rango(fila)}</b></span>`)
+            .join(" · ")}
+        </p>
+      </div>
+    `)
+    .join("");
+
+  const filasPorColumna = partes.length > 5 ? Math.ceil(partes.length / 2) : partes.length;
+
+  return `
+    <div
+      class="indice indice-por-partes${partes.length > 5 ? " indice-dos-columnas" : ""}"
+      style="grid-template-rows: repeat(${filasPorColumna}, auto);"
+    >${bloques}</div>
+  `;
+}
+
+
 export function separador({ numero, titulo, texto }) {
   return `
     <p class="separador-numero">${escapeHtml(numero)}</p>
@@ -163,18 +290,15 @@ export function separador({ numero, titulo, texto }) {
 
 
 export function cierre(data) {
-  const alcanceGlobal = data.global
-    ? `La parte global recorre ${data.global.subcapacidades} subcapacidades de ${data.global.dominios} dominios`
-      + (data.global.dominios < data.global.dominiosTotales
-        ? `, de los ${data.global.dominiosTotales} del modelo.`
-        : ", los nueve del modelo.")
-    : "Este informe no incluye la parte global: no había dominios cargados al exportarlo.";
+  if (data.dominios) {
+    return cierreDelProyecto(data);
+  }
 
   return `
     <p class="separador-numero">Alcance de este informe</p>
     <h2>Cómo leer estas cifras</h2>
     <p>
-      ${escapeHtml(alcanceGlobal)}
+      ${escapeHtml(textoDeAlcanceGlobal(data))}
       La parte de dominio recorre ${data.visibleItems.length} subcapacidades de
       ${escapeHtml(data.domainLabel)}, de las que ${data.scored.length} están puntuadas.
     </p>
@@ -182,6 +306,39 @@ export function cierre(data) {
       <div><span>Filtros aplicados</span><strong>${escapeHtml(data.filters)}</strong></div>
       <div><span>Origen de los datos</span><strong>${escapeHtml(data.scenarioLabel)}</strong></div>
       <div><span>Archivo de origen</span><strong>${escapeHtml(data.sourceFile)}</strong></div>
+      <div><span>Fecha de generación</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
+    </div>
+  `;
+}
+
+
+function textoDeAlcanceGlobal(data) {
+  return data.global
+    ? `La parte global recorre ${data.global.subcapacidades} subcapacidades de ${data.global.dominios} dominios`
+      + (data.global.dominios < data.global.dominiosTotales
+        ? `, de los ${data.global.dominiosTotales} del modelo.`
+        : ", los nueve del modelo.")
+    : "Este informe no incluye la parte global: no había dominios cargados al exportarlo.";
+}
+
+
+function cierreDelProyecto(data) {
+  const porDominio = data.dominios
+    .map((dominio) => `${dominio.domainLabel}, ${dominio.scored.length} de ${dominio.visibleItems.length} puntuadas`)
+    .join("; ");
+
+  return `
+    <p class="separador-numero">Alcance de este informe</p>
+    <h2>Cómo leer estas cifras</h2>
+    <p>
+      ${escapeHtml(textoDeAlcanceGlobal(data))}
+      Después, un capítulo por cada dominio con alguna subcapacidad puntuada (${escapeHtml(porDominio)}).
+      Los dominios sin empezar no tienen capítulo. Ninguna parte aplica los filtros de la herramienta.
+    </p>
+    <div class="portada-datos">
+      <div><span>Filtros aplicados</span><strong>Ninguno</strong></div>
+      <div><span>Origen de los datos</span><strong>${escapeHtml(data.scenarioLabel)}</strong></div>
+      <div><span>Dominios con capítulo</span><strong>${data.dominios.length}</strong></div>
       <div><span>Fecha de generación</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
     </div>
   `;

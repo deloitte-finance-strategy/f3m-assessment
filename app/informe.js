@@ -13,29 +13,35 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=23";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=23";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=23";
-import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=23";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=23";
-import { showNotice } from "./avisos.js?v=23";
-import { getActiveDomainConfig } from "./dominios.js?v=23";
-import { DOMAINS, els, state } from "./estado.js?v=23";
-import { getVisibleItems } from "./filtros.js?v=23";
-import { getScenarioShortLabel } from "./firebase.js?v=23";
+} from "../core/calculo.js?v=24";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=24";
+import { filasDeResumen } from "../core/exportacion.js?v=24";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=24";
+import { fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=24";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=24";
+import { showNotice } from "./avisos.js?v=24";
+import { getActiveDomainConfig } from "./dominios.js?v=24";
+import { DOMAINS, els, state } from "./estado.js?v=24";
+import { getVisibleItems } from "./filtros.js?v=24";
+import { getScenarioShortLabel } from "./firebase.js?v=24";
 import {
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
-} from "./graficos.js?v=23";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=23";
-import { getAiDataForItem } from "./subcapacidad.js?v=23";
-import { renderDashboard } from "./vistas/dashboard.js?v=23";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=23";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=23";
+  renderCapabilityRadar,
+} from "./graficos.js?v=24";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=24";
+import { getAiDataForItem } from "./subcapacidad.js?v=24";
+import { renderDashboard } from "./vistas/dashboard.js?v=24";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=24";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=24";
 
 
-export function exportPdfReport() {
+/**
+ * Abre el informe. Del dominio abierto, como siempre, o con proyecto: true de
+ * todos los dominios que tienen algo puntuado, en un solo deck.
+ */
+export function exportPdfReport({ proyecto = false } = {}) {
   // La ventana se abre en el mismo gesto del clic: si se abriera despues, el
   // navegador la bloquearia por emergente.
   const reportWindow = window.open("", "_blank");
@@ -56,7 +62,9 @@ export function exportPdfReport() {
     return;
   }
 
-  const reportData = conLasVistasDelInformeVisibles(buildEnhancedPdfReportData);
+  const reportData = conLasVistasDelInformeVisibles(
+    proyecto ? datosDelProyecto : buildEnhancedPdfReportData,
+  );
   const reportHtml = buildEnhancedPdfReportHtml(reportData);
 
   reportWindow.document.open();
@@ -215,56 +223,123 @@ const PDF_MAX_ROADMAP = 15;
 
 
 function buildEnhancedPdfReportData() {
-  const visibleItems = getVisibleItems();
-  const metrics = visibleItems.map((item) => ({ item, metrics: calculate(item) }));
-  const scored = metrics.filter((entry) => !entry.metrics.isPending);
-
-  const summaryRows = buildPdfSummaryRowsFromItems(visibleItems);
-
-  // El informe es ejecutivo: una tabla de 152 filas no se lee. Pero la poda
-  // tiene que verse, porque el titulo decia "Roadmap e iniciativas sugeridas" y
-  // parecia el roadmap entero.
-  const evaluadasOrdenadas = ordenarPorPrioridadYGap(
-    metrics.filter((entry) => !entry.metrics.isPending),
-  );
-
-  const topPriorities = evaluadasOrdenadas.slice(0, PDF_MAX_PRIORIDADES);
-
-  const roadmapOrdenado = ordenarPorPrioridadYGap(metrics);
-
-  const roadmapItems = roadmapOrdenado.slice(0, PDF_MAX_ROADMAP);
-
-  const commentItems = visibleItems.filter((item) => item.comentario?.trim());
   const activeDomain = getActiveDomainConfig();
+
+  return {
+    ...datosComunes(),
+    filters: getPdfActiveFiltersLabel(),
+    ...datosDeDominio(activeDomain.id, getVisibleItems(), getRadarImagesForPdf()),
+  };
+}
+
+
+/**
+ * Los dominios que entran en el informe de todo el proyecto: los que tienen
+ * al menos una subcapacidad puntuada, en el orden del Overview.
+ *
+ * Los que no se han empezado se quedan fuera. Casi ningun proyecto evalua los
+ * nueve, y un capitulo entero de «Pendiente» por cada uno que no se ha tocado
+ * haria de un deck de cuarenta diapositivas uno de ciento cincuenta.
+ */
+export function dominiosDelProyecto() {
+  return getDominiosDelOverview().filter((dominio) =>
+    dominio.items.some((item) =>
+      Object.values(item.scores || {}).some((score) => score !== null && score !== undefined),
+    ),
+  );
+}
+
+
+/**
+ * Un solo deck con la parte global y un capitulo por cada dominio evaluado.
+ *
+ * Sin filtros, a proposito: los filtros son del dominio abierto —el de
+ * capacidad ni siquiera existe en los demas—, y aplicar solo los que si
+ * existen daria un capitulo filtrado y otros enteros sin que se notara. El
+ * informe lo dice en la portada y en el cierre.
+ *
+ * Los radares de cada dominio se pintan uno detras de otro en los canvas del
+ * Dashboard y se capturan, como los del dominio abierto. Chart.js va sin
+ * animacion, asi que lo que se captura es el radar terminado. Al acabar se
+ * vuelve a pintar el Dashboard, o se quedaria con los radares del ultimo.
+ */
+function datosDelProyecto() {
+  const dominios = dominiosDelProyecto().map((dominio) => {
+    renderCapabilityRadar(filasDeResumen(agregarPorCapacidad(dominio.items, dominio.id)));
+
+    return datosDeDominio(dominio.id, dominio.items, getRadarImagesForPdf());
+  });
+
+  renderDashboard();
+
+  return {
+    ...datosComunes(),
+    proyecto: true,
+    filters: "Ninguno: el informe del proyecto incluye todas las subcapacidades",
+    domainLabel: "Proyecto completo",
+    domainTitle: dominios.map((dominio) => dominio.domainLabel).join(" · "),
+    dominios,
+  };
+}
+
+
+/** Lo que es igual en cualquier informe: para quien, cuando y de donde. */
+function datosComunes() {
   const ahora = new Date();
 
   return {
-    domainId: activeDomain.id,
-    domainLabel: activeDomain.label,
-    domainTitle: activeDomain.title,
     cliente: state.cliente,
     generatedAt: fechaLegible(ahora),
     fechaDeArchivo: fechaParaArchivo(ahora),
     // Nunca el identificador completo: este informe se envía al cliente.
     scenarioLabel: getScenarioShortLabel(),
-    sourceFile: state.meta?.sourceFile || "-",
-    targetMaturity: state.meta?.targetMaturity || "-",
-    filters: getPdfActiveFiltersLabel(),
-    visibleItems,
+    global: construirBloqueGlobalParaInforme(),
+  };
+}
+
+
+/**
+ * Las cifras de un dominio para su parte del informe.
+ *
+ * Recibe el dominio en vez de leer el abierto: el informe del proyecto la
+ * llama una vez por dominio, y calculate() sin dominio usaria los objetivos
+ * del abierto para todos, que es justo el error que la resolucion por dominio
+ * existe para evitar.
+ */
+function datosDeDominio(domainId, items, radarImages) {
+  const config = DOMAINS[domainId] || getActiveDomainConfig();
+  const meta = (domainId === state.activeDomainId ? state.meta : state.domains[domainId]?.meta) || {};
+  const total = state.domains[domainId]?.items?.length ?? items.length;
+
+  const metrics = items.map((item) => ({ item, metrics: calculate(item, domainId) }));
+  const scored = metrics.filter((entry) => !entry.metrics.isPending);
+
+  // El informe es ejecutivo: una tabla de 152 filas no se lee. Pero la poda
+  // tiene que verse, porque el titulo decia "Roadmap e iniciativas sugeridas" y
+  // parecia el roadmap entero.
+  const evaluadasOrdenadas = ordenarPorPrioridadYGap(scored);
+  const roadmapOrdenado = ordenarPorPrioridadYGap(metrics);
+
+  return {
+    domainId,
+    domainLabel: config.label,
+    domainTitle: config.title,
+    sourceFile: meta.sourceFile || "-",
+    targetMaturity: meta.targetMaturity || "-",
+    visibleItems: items,
     metrics,
     scored,
-    summaryRows,
-    topPriorities,
+    summaryRows: buildPdfSummaryRowsFromItems(items, domainId),
+    topPriorities: evaluadasOrdenadas.slice(0, PDF_MAX_PRIORIDADES),
     topPrioritiesTotal: evaluadasOrdenadas.length,
-    roadmapItems,
+    roadmapItems: roadmapOrdenado.slice(0, PDF_MAX_ROADMAP),
     roadmapTotal: roadmapOrdenado.length,
-    commentItems,
+    commentItems: items.filter((item) => item.comentario?.trim()),
     ...cifrasDeCabecera(metrics),
-    radarImages: getRadarImagesForPdf(),
+    radarImages,
 
-    titulares: construirTitularesDelDominio(visibleItems, metrics),
-    global: construirBloqueGlobalParaInforme(),
-    ia: construirCasosDeIaParaInforme(visibleItems),
+    titulares: construirTitularesDelDominio(items, metrics, total),
+    ia: construirCasosDeIaParaInforme(items, domainId),
   };
 }
 
@@ -277,11 +352,11 @@ function buildEnhancedPdfReportData() {
  * lo primero cuando pasa lo segundo es afirmar algo falso delante del cliente,
  * porque el trabajo esta hecho, solo que fuera del filtro.
  */
-function construirTitularesDelDominio(items, metrics) {
+function construirTitularesDelDominio(items, metrics, total) {
   if (!items.length) {
     return {
       aviso:
-        `Ninguna de las ${state.items.length} subcapacidades de este dominio pasa los filtros `
+        `Ninguna de las ${total} subcapacidades de este dominio pasa los filtros `
         + "activos al generar el informe.",
     };
   }
@@ -390,7 +465,7 @@ function construirBloqueGlobalParaInforme() {
  * seccion vacia no distingue "este dominio no tiene casos" de "el catalogo no
  * llego".
  */
-function construirCasosDeIaParaInforme(items) {
+function construirCasosDeIaParaInforme(items, domainId) {
   const porTitulo = new Map();
 
   // Donde aparece cada caso, con su subcapacidad: lo que necesita el orden por
@@ -452,7 +527,7 @@ function construirCasosDeIaParaInforme(items) {
   let orden = "aplicacion";
 
   if (getOrdenDeCasosDeIa() === "prioridad") {
-    const brechas = brechasDeCasos(apariciones, (aparicion) => calculate(aparicion.item));
+    const brechas = brechasDeCasos(apariciones, (aparicion) => calculate(aparicion.item, domainId));
 
     if ([...brechas.values()].some((brecha) => brecha.altas || brecha.medias)) {
       casos = ordenarPorBrechas(casos, brechas);
@@ -490,8 +565,8 @@ function cifrasDeCabecera(entradas) {
 }
 
 
-function buildPdfSummaryRowsFromItems(items) {
-  return agregarPorCapacidad(items).map((capacidad) => ({
+function buildPdfSummaryRowsFromItems(items, domainId) {
+  return agregarPorCapacidad(items, domainId).map((capacidad) => ({
     capacidad: capacidad.capacidad,
     procesos: capacidad.procesos,
     objetivoProcesos: capacidad.objetivos.procesos,

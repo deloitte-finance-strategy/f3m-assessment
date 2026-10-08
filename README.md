@@ -42,12 +42,20 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
   documentos de los que salen. **«Más información»**, en cualquier ficha de caso, abre su documento
   de origen dentro de la herramienta, en la página o diapositiva donde aparece.
 - Guardar una copia del trabajo en un archivo y volver a abrirla más adelante, desde el menú
-  **Escenario** de la cabecera.
+  **Escenario** de la cabecera. Sin escenario compartido, el menú dice cuándo se guardó la
+  última, y si hay cambios de hace más de un día que no están en ninguna, el botón lleva un punto
+  ámbar.
+- Ajustar los objetivos de madurez capacidad a capacidad, o los de **todas las capacidades** de
+  un dominio de una vez, y llevarlos a **los nueve dominios** con un clic.
 - Exportar resumen y roadmap en CSV.
 - Exportar **el informe**: un PDF con forma de presentación, en página 16:9, que abre con la lectura
   de la función financiera completa, sigue con el diagnóstico del dominio —escala de madurez,
   perfil por palanca, radares, heatmap y brechas— y cierra con el roadmap por oleadas y las
   oportunidades de inteligencia artificial que aplican al dominio.
+
+  **Exportar PDF** ofrece dos: el **del dominio** abierto, con los filtros activos, y el **de todo
+  el proyecto**, que tras la parte global lleva un capítulo entero por cada dominio con algo
+  puntuado, sin filtros, en un solo archivo.
 
   Al imprimir, elegir **«Guardar como PDF»** y activar **«Gráficos de fondo»**: las portadas van a
   sangre y la escala de color del heatmap es información, no adorno, y sin eso salen en blanco. El

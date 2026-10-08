@@ -13,9 +13,9 @@
  *   que escribe el usuario llega sin escapar.
  */
 
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=23";
-import { deTantas, paginar } from "../informe/secciones.js?v=23";
-import { resumenDeDesbordes } from "../informe/desbordes.js?v=23";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=24";
+import { deTantas, paginar } from "../informe/secciones.js?v=24";
+import { resumenDeDesbordes } from "../informe/desbordes.js?v=24";
 
 
 /** Una subcapacidad y sus metricas, lo minimo que el informe necesita. */
@@ -313,6 +313,64 @@ export const casos = [
       const html = buildEnhancedPdfReportHtml(datos({ domainLabel: "FP&A", fechaDeArchivo: "2026-10-04" }));
 
       t.igual(html.includes("<title>Informe F3M - FP&amp;A - 2026-10-04</title>"), true);
+    },
+  },
+
+  // ------------------------------------------------------ todo el proyecto
+  {
+    grupo: "Informe de todo el proyecto",
+    nombre: "un capitulo por dominio, cada uno con su diagnostico y su roadmap",
+    ejecutar: (t) => {
+      const uno = buildEnhancedPdfReportHtml(datos());
+      const proyecto = buildEnhancedPdfReportHtml(
+        datos({
+          proyecto: true,
+          domainLabel: "Proyecto completo",
+          dominios: [
+            datos({ domainId: "fpa", domainLabel: "FP&A", domainTitle: "Planificación / FP&A" }),
+            datos({ domainId: "tesoreria", domainLabel: "Tesorería", domainTitle: "Tesorería" }),
+          ],
+        }),
+      );
+
+      // El de un dominio lleva portada, indice, separador de dominio, sus
+      // diapositivas, separador de accion, las suyas y cierre. Cada capitulo
+      // del proyecto es lo mismo menos el separador de accion.
+      const porCapitulo = cuentaDeDiapositivas(uno) - 4;
+
+      t.igual(cuentaDeDiapositivas(proyecto), 3 + 2 * porCapitulo, "portada, indice, cierre y dos capitulos");
+      t.igual(proyecto.includes("Planificación / FP&amp;A"), true, "el separador del primero");
+      t.igual((proyecto.match(/<h2>Roadmap e iniciativas/g) || []).length, 2, "un roadmap por dominio");
+      t.igual(proyecto.includes("Hacia dónde"), false, "sin separador de accion en cada capitulo");
+      t.igual(proyecto.includes("Informe preliminar de madurez<b>FP&amp;A y Tesorería</b>"), true, "la portada nombra los dos");
+    },
+  },
+  {
+    grupo: "Informe de todo el proyecto",
+    nombre: "el indice es de partes, con el rango de cada dominio, y el pie dice de cual es cada diapositiva",
+    ejecutar: (t) => {
+      const html = buildEnhancedPdfReportHtml(
+        datos({
+          proyecto: true,
+          domainLabel: "Proyecto completo",
+          fechaDeArchivo: "2026-10-08",
+          cliente: "Acme",
+          dominios: [
+            datos({ domainId: "fpa", domainLabel: "FP&A", domainTitle: "Planificación / FP&A" }),
+            datos({ domainId: "tesoreria", domainLabel: "Tesorería", domainTitle: "Tesorería" }),
+          ],
+        }),
+      );
+
+      const filas = [...html.matchAll(/<span>Parte (\d+) · ([^<]+)<\/span>\s*<i><\/i>\s*<b>(\d+)–(\d+)<\/b>/g)];
+
+      t.igual(filas.length, 2, "una fila por dominio");
+      t.igual(filas[0][2], "Planificación / FP&amp;A", "con el titulo largo");
+      t.igual(Number(filas[1][3]), Number(filas[0][4]) + 1, "el segundo empieza justo despues del primero");
+      t.igual(Number(filas[1][4]), cuentaDeDiapositivas(html) - 1, "y acaba antes del cierre");
+      t.igual(html.includes("<strong>F3M Assessment</strong> · Acme · Tesorería</span>"), true, "el pie de su capitulo dice Tesorería");
+      t.igual(html.includes("<strong>F3M Assessment</strong> · Acme · Proyecto completo</span>"), true, "y el de la parte global, el proyecto");
+      t.igual(html.includes("<title>Informe F3M - Acme - Proyecto - 2026-10-08</title>"), true, "el nombre del PDF");
     },
   },
 

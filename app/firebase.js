@@ -20,8 +20,8 @@
  * comprimidos que no se usaban.
  */
 
-import { scenarioId } from "./estado.js?v=23";
-import { borrarDeAlmacenamiento } from "./almacenamiento.js?v=23";
+import { scenarioId } from "./estado.js?v=24";
+import { borrarDeAlmacenamiento } from "./almacenamiento.js?v=24";
 
 
 const SDK = "https://www.gstatic.com/firebasejs/12.15.0";
