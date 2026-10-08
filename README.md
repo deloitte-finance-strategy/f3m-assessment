@@ -25,7 +25,8 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
 ## Qué permite hacer
 
 - Editar scores de Procesos, Tecnología y Organización para cada subcapacidad, y apuntar las
-  **notas del taller** en su detalle. «Siguiente sin puntuar» lleva a la próxima pendiente.
+  **notas del taller** en su detalle. «Siguiente sin puntuar», junto al dominio en la barra de
+  pestañas, lleva a la próxima pendiente.
 - Calcular automáticamente score medio, nivel resultante, gap vs objetivo y prioridad.
 - Consultar resumen ejecutivo por dominio y por capacidad.
 - Ver en **Overview** los nueve dominios agregados en una sola lectura: score global, gap medio,

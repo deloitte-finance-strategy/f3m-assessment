@@ -855,8 +855,66 @@ transform: translateY(-1px);
 }
 
 .tabs[data-vista="overview"] .tabs-dominio,
-.tabs[data-vista="ia"] .tabs-dominio {
+.tabs[data-vista="ia"] .tabs-dominio,
+.tabs[data-vista="overview"] .tabs-siguiente,
+.tabs[data-vista="ia"] .tabs-siguiente {
   display: none;
+}
+
+/*
+  «Siguiente sin puntuar», pegado al dominio porque cuenta lo que le falta a
+  ese dominio. Mas bajo y mas callado que una pestana: sin relleno de color y
+  con el texto en gris, para que no compita con ellas ni con el dominio. Al
+  pasar por encima responde como una pestana, que es lo que dice que se pulsa.
+*/
+.tabs-siguiente {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: calc(var(--control-h) - 8px);
+  padding: 0 6px 0 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink-3);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.tabs-siguiente[hidden],
+.tabs-siguiente-corto {
+  display: none;
+}
+
+/* En una tableta apaisada (1180 px) el texto entero mandaba la barra a dos
+   pisos, y es la que se queda fija arriba. «Sin puntuar» y la cifra dicen lo
+   mismo; el nombre completo sigue en el aria-label y en el title. */
+@media (max-width: 1200px) {
+  .tabs-siguiente-largo {
+    display: none;
+  }
+
+  .tabs-siguiente-corto {
+    display: inline;
+  }
+}
+
+.tabs-siguiente:hover {
+  border-color: rgba(134, 188, 37, 0.65);
+  background: var(--surface-realce);
+  color: var(--green-dark);
+}
+
+.tabs-siguiente:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 
@@ -4711,53 +4769,6 @@ height: 100% !important;
   line-height: 1;
 }
 
-/* En el centro, entre «Volver arriba» y el chip de guardado, que ya ocupan las
-   dos esquinas. Verde lleno, como el boton principal y con su texto: es la
-   accion que se repite en un taller, no una ayuda como la de la izquierda. */
-.siguiente-pendiente-button {
-  position: fixed;
-  left: 50%;
-  bottom: 18px;
-  z-index: 60;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: var(--control-h);
-  padding: 0 16px;
-  border: 1px solid var(--green);
-  border-radius: var(--r-pill);
-  background: var(--green);
-  color: var(--sobre-marca);
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-bold);
-  white-space: nowrap;
-  box-shadow: 0 10px 24px rgba(22, 26, 24, 0.18);
-  transform: translateX(-50%);
-  transition:
-    background-color 150ms ease,
-    box-shadow 150ms ease;
-}
-
-.siguiente-pendiente-button[hidden] {
-  display: none;
-}
-
-.siguiente-pendiente-button:hover {
-  border-color: var(--green-claro);
-  background: var(--green-claro);
-  box-shadow: 0 12px 28px rgba(22, 26, 24, 0.22);
-}
-
-.siguiente-pendiente-button:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 3px;
-}
-
-.siguiente-pendiente-cuenta {
-  padding-left: 8px;
-  border-left: 1px solid currentColor;
-  font-weight: var(--fw-normal);
-}
 
 
 
@@ -5288,12 +5299,6 @@ height: 100% !important;
 
   .urgentes-lista {
     grid-template-columns: 1fr;
-  }
-
-  /* Sin sitio entre las dos esquinas: sube un piso y deja libre el chip de
-     guardado, que es el que avisa de un fallo. */
-  .siguiente-pendiente-button {
-    bottom: 64px;
   }
 
   .capability-targets-header {

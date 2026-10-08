@@ -247,7 +247,9 @@ import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=2
 
 // El Assessment: puntuar cada subcapacidad en las tres palancas.
 import {
+  irASiguientePendiente,
   llevarALasTarjetas,
+  pintarSiguientePendiente,
   renderAssessments,
   renderCapabilityTargets,
   setupSiguientePendiente,
@@ -651,6 +653,7 @@ function bindGlobalEvents() {
   setupFilasDelDashboard();
   setupLoMasUrgente();
   setupSiguientePendiente();
+  setupSiguienteSinPuntuar();
   setupAltoDePestanas();
   setupCajaDelRoadmap();
   setupBackToTopButton();
@@ -912,6 +915,23 @@ function setupLoMasUrgente() {
 
 
 /**
+ * «Siguiente sin puntuar», en la barra de pestanas: desde cualquier vista del
+ * dominio lleva al Assessment y alli a la proxima subcapacidad pendiente, con
+ * el foco en su primer score. Vive aqui y no en la vista porque cambiar de
+ * pestana es cosa del orquestador.
+ */
+function setupSiguienteSinPuntuar() {
+  els.siguientePendienteButton?.addEventListener("click", () => {
+    if (vistaActiva !== "assessment") {
+      mostrarVista("assessment");
+    }
+
+    irASiguientePendiente();
+  });
+}
+
+
+/**
  * La tabla «Resumen por capacidad» del Dashboard lleva al mismo sitio que el
  * eje del radar: las subcapacidades de esa capacidad en el Assessment. Es la
  * pareja de la tabla del Overview, y se resuelve igual.
@@ -1155,6 +1175,10 @@ function renderAll(opciones = {}) {
   if (vistaActiva === "ia") {
     renderIa();
   }
+
+  // Su boton esta en la barra de pestanas, a la vista desde cualquier pestana
+  // del dominio, asi que se cuenta en cada repintado y no solo en el Assessment.
+  pintarSiguientePendiente();
 
   if (!state.items.length) {
     return;

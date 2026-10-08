@@ -335,6 +335,22 @@
         </a>
         <a href="#ia">IA</a>
         <span class="tabs-dominio" aria-hidden="true">Dominio <strong id="tabsDominio"></strong></span>
+        <!--
+          Junto al dominio porque es suyo: cuenta y recorre lo que queda por
+          puntuar en el dominio abierto. En la barra sigue a la vista a cualquier
+          altura de la lista y desde cualquier vista del dominio, sin tapar nada.
+          Lo pinta app/vistas/assessment.js y lo engancha app.js.
+        -->
+        <button
+          class="tabs-siguiente"
+          id="siguientePendienteButton"
+          type="button"
+          hidden
+        >
+          <span class="tabs-siguiente-largo">Siguiente sin puntuar</span>
+          <span class="tabs-siguiente-corto">Sin puntuar</span>
+          <span class="tab-badge siguiente-pendiente-cuenta" aria-hidden="true"></span>
+        </button>
       </nav>
 
       <!--
@@ -583,20 +599,6 @@
 
     <div class="assessment-list" id="assessmentList"></div>
 
-    <!--
-      Flotante y dentro de la seccion: se ve solo en el Assessment, sin que
-      nadie tenga que esconderlo al cambiar de vista, y queda a mano a cualquier
-      altura de la lista. Lo pinta y lo esconde app/vistas/assessment.js.
-    -->
-    <button
-      class="siguiente-pendiente-button"
-      id="siguientePendienteButton"
-      type="button"
-      hidden
-    >
-      Siguiente sin puntuar
-      <span class="siguiente-pendiente-cuenta"></span>
-    </button>
 </section>
 
 

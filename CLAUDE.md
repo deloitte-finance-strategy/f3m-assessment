@@ -660,8 +660,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      de casos de IA trae de 2 a 4 fichas, cada una con sus dos etiquetas y su frase: un título
      suelto, sin etiquetas, es un cruce roto. Las «Notas del taller» del detalle son el mismo
      comentario que el Roadmap: lo escrito en uno aparece en el otro y en el informe. «Siguiente
-     sin puntuar · quedan N» lleva a la próxima tarjeta sin ninguna palanca puntuada, con el foco en
-     su primer score, y sin filtros su N cuadra con la pestaña.
+     sin puntuar», en la barra de pestañas junto al dominio, lleva desde cualquier vista del
+     dominio a la próxima tarjeta sin ninguna palanca puntuada, con el foco en su primer score, y
+     sin filtros su cifra cuadra con la de la pestaña Assessment.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
      Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final.

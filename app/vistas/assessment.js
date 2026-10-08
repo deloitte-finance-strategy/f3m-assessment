@@ -358,7 +358,6 @@ export function renderAssessments() {
 
   if (!items.length) {
     els.assessmentList.innerHTML = buildFilteredEmptyState();
-    pintarSiguientePendiente();
     return;
   }
 
@@ -454,7 +453,6 @@ export function renderAssessments() {
   });
 
   restaurarFocoDeAssessment(foco);
-  pintarSiguientePendiente();
 }
 
 
@@ -489,17 +487,18 @@ export function llevarALasTarjetas(tarjetas) {
 
 
 /**
- * «Siguiente sin puntuar · quedan N».
+ * «Siguiente sin puntuar», en la barra de pestanas junto al dominio.
  *
  * Lo que falta se buscaba recorriendo las tarjetas o con el filtro «Pendiente»,
  * y ese filtro cambia tambien KPIs, roadmap, CSV y PDF si se olvida quitarlo.
  * El boton no toca los filtros: cuenta y recorre lo que hay en pantalla.
  *
  * "Sin puntuar" es lo mismo que en la pestana Assessment y en la etiqueta
- * Pendiente: ninguna palanca puntuada. Sin filtros, quedan N y la pestana
- * cuadran.
+ * Pendiente: ninguna palanca puntuada. Sin filtros, su cifra y la de la
+ * pestana cuadran. Lo llama renderAll() en cualquier vista, porque el boton se
+ * ve en todas las del dominio y no solo en el Assessment.
  */
-function pintarSiguientePendiente() {
+export function pintarSiguientePendiente() {
   const boton = els.siguientePendienteButton;
 
   if (!boton) {
@@ -513,8 +512,14 @@ function pintarSiguientePendiente() {
   const cuenta = boton.querySelector(".siguiente-pendiente-cuenta");
 
   if (cuenta) {
-    cuenta.textContent = quedan === 1 ? "queda 1" : `quedan ${quedan}`;
+    cuenta.textContent = String(quedan);
   }
+
+  const texto =
+    `Ir a la siguiente subcapacidad sin puntuar · ${quedan === 1 ? "queda 1" : `quedan ${quedan}`}`;
+
+  boton.setAttribute("aria-label", texto);
+  boton.title = texto;
 }
 
 
@@ -522,12 +527,11 @@ function pintarSiguientePendiente() {
 let ultimaTarjetaTocada = null;
 
 
+/** Recuerda la ultima tarjeta tocada. El clic del boton lo engancha app.js. */
 export function setupSiguientePendiente() {
   els.assessmentList?.addEventListener("focusin", (event) => {
     ultimaTarjetaTocada = event.target.closest(".assessment-card")?.dataset.id || null;
   });
-
-  els.siguientePendienteButton?.addEventListener("click", irASiguientePendiente);
 }
 
 
@@ -536,7 +540,7 @@ export function setupSiguientePendiente() {
  * tarjeta tocada si sigue en pantalla, y si no desde la primera que se ve. Al
  * llegar al final vuelve a empezar por arriba, como un buscador.
  */
-function irASiguientePendiente() {
+export function irASiguientePendiente() {
   const tarjetas = [...els.assessmentList.querySelectorAll(".assessment-card")];
   const porId = new Map(state.items.map((item) => [item.id, item]));
   const pendiente = (tarjeta) => {
@@ -775,7 +779,6 @@ function handleScoreChange(event) {
 
   if (mismaLista) {
     actualizarTarjetaDeAssessment(item);
-    pintarSiguientePendiente();
   }
 
   persistItemChange(item.id, `scores/${leverKey}`, score);
