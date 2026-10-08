@@ -1024,6 +1024,7 @@ function pintarCliente() {
 
   if (els.headerCliente) {
     els.headerCliente.textContent = cliente;
+    els.headerCliente.title = cliente;
     els.headerCliente.hidden = !cliente;
   }
 

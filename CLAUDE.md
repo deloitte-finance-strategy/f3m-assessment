@@ -647,9 +647,10 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 3. **Los dos temas y las dos densidades.** El conmutador «Oscuro» y el de «Presentación» son
    independientes y se combinan: probar las cuatro combinaciones al menos en Overview y Heatmap,
    que son las que codifican datos en color y en tamaño. Sin elección guardada, cambiar el tema del
-   sistema con la pestaña abierta tiene que arrastrar la herramienta. En Presentación, los scores y
-   los campos del Roadmap y de las notas se ven como texto, sin caja ni flecha, y se pueden seguir
-   editando: la caja vuelve con el ratón encima o con el foco.
+   sistema con la pestaña abierta tiene que arrastrar la herramienta. En Presentación, los campos
+   del Roadmap y de las notas se ven como texto, sin caja ni flecha, y los scores como la escala
+   «1 2 3 4 5» con el elegido en su color; todo se sigue pudiendo editar, y la caja vuelve con el
+   ratón encima o con el foco.
 4. Recorrer las seis vistas:
    - **Overview**: los 4 KPIs, el titular, las barras, la tabla por dominio, los 3 radares de 9
      ejes y «Lo más urgente», cuyas fichas abren su tarjeta en el Assessment de su dominio.
@@ -658,7 +659,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    - **Assessment**: cambiar un score y comprobar que se recalculan nivel, gap, prioridad y oleada,
      **sin perder el foco ni cerrar los paneles de detalle abiertos**. En «Ver detalle», el bloque
      de casos de IA trae de 2 a 4 fichas, cada una con sus dos etiquetas y su frase: un título
-     suelto, sin etiquetas, es un cruce roto. Las «Notas del taller» del detalle son el mismo
+     suelto, sin etiquetas, es un cruce roto. Puntuar también con teclado: Tab llega a cada
+     palanca, las teclas 1 a 5 y las flechas puntúan, y Suprimir la deja sin puntuar; pulsar
+     otra vez el número elegido también. Las «Notas del taller» del detalle son el mismo
      comentario que el Roadmap: lo escrito en uno aparece en el otro y en el informe. «Siguiente
      sin puntuar», en la barra de pestañas junto al dominio, lleva desde cualquier vista del
      dominio a la próxima tarjeta sin ninguna palanca puntuada, con el foco en su primer score, y
