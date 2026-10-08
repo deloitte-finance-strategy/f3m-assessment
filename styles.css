@@ -914,13 +914,19 @@ transform: translateY(-1px);
   display: none;
 }
 
+/* El modo taller recorre las tarjetas del Assessment: solo se ofrece ahi. */
+.tabs:not([data-vista="assessment"]) .tabs-taller {
+  display: none;
+}
+
 /*
   «Siguiente sin puntuar», pegado al dominio porque cuenta lo que le falta a
   ese dominio. Mas bajo y mas callado que una pestana: sin relleno de color y
   con el texto en gris, para que no compita con ellas ni con el dominio. Al
   pasar por encima responde como una pestana, que es lo que dice que se pulsa.
 */
-.tabs-siguiente {
+.tabs-siguiente,
+.tabs-taller {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -959,15 +965,94 @@ transform: translateY(-1px);
   }
 }
 
-.tabs-siguiente:hover {
+.tabs-siguiente:hover,
+.tabs-taller:hover {
   border-color: rgba(134, 188, 37, 0.65);
   background: var(--surface-realce);
   color: var(--green-dark);
 }
 
-.tabs-siguiente:focus-visible {
+.tabs-siguiente:focus-visible,
+.tabs-taller:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+.tabs-taller {
+  padding: 0 11px;
+}
+
+.tabs-taller[hidden] {
+  display: none;
+}
+
+.tabs-taller-icono {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+/*
+  «Modo taller» no cabia sin pagar: a 1366 px, con «Siguiente sin puntuar» a la
+  vista, mandaba el buscador a un segundo piso de la barra, que es la que se
+  queda fija arriba. Medido en los nueve dominios con la barra de
+  desplazamiento de Windows, el peor es Relacion con Inversores.
+
+  Por debajo de 1500, y siempre en Presentacion, la barra de un dominio se
+  compacta: «Taller», «Sin puntuar» y el buscador sin el «Ctrl K». Asi el
+  modo taller conserva su nombre en el portatil de la sala, que es donde se
+  usa, y la barra no queda peor que antes en ningun ancho. Los nombres enteros
+  siguen en el aria-label y el atajo en el title. Se compacta en las cuatro
+  vistas de dominio y no solo en el Assessment, para que al cambiar de pestana
+  no cambie de tamano lo que ya estaba.
+*/
+.tabs-taller-corto {
+  display: none;
+}
+
+@media (max-width: 1500px) {
+  .tabs-taller-largo {
+    display: none;
+  }
+
+  .tabs-taller-corto {
+    display: inline;
+  }
+
+  .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-siguiente-largo,
+  .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-buscar-atajo {
+    display: none;
+  }
+
+  .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-siguiente-corto {
+    display: inline;
+  }
+}
+
+:root[data-densidad="presentacion"] .tabs-taller-largo,
+:root[data-densidad="presentacion"] .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-siguiente-largo,
+:root[data-densidad="presentacion"] .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-buscar-atajo {
+  display: none;
+}
+
+:root[data-densidad="presentacion"] .tabs-taller-corto,
+:root[data-densidad="presentacion"] .tabs:not([data-vista="overview"]):not([data-vista="ia"]) .tabs-siguiente-corto {
+  display: inline;
+}
+
+/* Por debajo de 1200 el buscador ya se queda en la lupa, y aun asi el taller
+   no cabia en una tableta apaisada (1180 px): ahi va en el icono y el dominio
+   pierde el «Dominio», que el nombre en negrita ya dice. */
+@media (max-width: 1200px) {
+  .tabs-taller-corto,
+  .tabs-dominio-prefijo {
+    display: none;
+  }
 }
 
 /*
@@ -5016,18 +5101,30 @@ height: 100% !important;
 
 
 
+/*
+  Un circulo con la flecha, abajo a la derecha. Era una pildora con el texto
+  «Volver arriba» abajo a la izquierda, y a 1366 px el margen de la pagina es
+  de 24: tapaba la primera columna del Roadmap y del Heatmap y el principio de
+  cada tarjeta. A la derecha cae sobre lo que menos se lee y, en circulo, tapa
+  la tercera parte.
+
+  Comparte esquina con el chip de guardado, que manda: cuando el chip esta a
+  la vista, el boton sube por encima de el. --alto-del-chip lo mantiene
+  app/indicador.js, que es quien ensena y retira el chip.
+*/
 .back-to-top-button {
   position: fixed;
-  left: 18px;
-  bottom: 18px;
+  right: 18px;
+  bottom: calc(18px + var(--alto-del-chip, 0px));
   z-index: 60;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  min-height: var(--control-h);
-  padding: 0 14px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: 1px solid rgba(134, 188, 37, 0.55);
-  border-radius: var(--r-pill);
+  border-radius: 50%;
   background: var(--surface-translucida-alta);
   color: var(--green-dark);
   font-size: var(--fs-2xs);
@@ -5036,9 +5133,20 @@ height: 100% !important;
   transition:
     background-color 150ms ease,
     border-color 150ms ease,
+    bottom 150ms ease,
     box-shadow 150ms ease,
     opacity 150ms ease,
     transform 150ms ease;
+}
+
+/* El texto queda para los lectores de pantalla; a la vista, solo la flecha. */
+.back-to-top-button > span:last-child {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .back-to-top-button[hidden] {
@@ -5619,14 +5727,10 @@ height: 100% !important;
   }
 
   .back-to-top-button {
-    left: 14px;
-    bottom: 14px;
-    min-width: 40px;
-    padding: 0 12px;
-  }
-
-  .back-to-top-button > span:last-child {
-    display: none;
+    right: 14px;
+    bottom: calc(14px + var(--alto-del-chip, 0px));
+    width: 40px;
+    height: 40px;
   }
 
   .urgentes-lista {
@@ -5817,4 +5921,450 @@ height: 100% !important;
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+
+/* ==================================================
+   MODO TALLER
+   Una subcapacidad a pantalla completa, para proyectarla. Lo pinta
+   app/taller.js.
+
+   Todo va en em sobre un tamaño que sigue al ancho de la pantalla: lo mismo
+   tiene que caber en el portatil de 1366×768 de la sala y leerse en un
+   proyector a 1920. Por eso no usa los tokens de densidad: este modo ya es la
+   presentacion, con «Presentacion» puesta o sin ella.
+   ================================================== */
+
+/* Por debajo del chip de guardado (80) y de los avisos (90), y no a 100 como
+   los otros modales: ocupa la pantalla entera, y lo que tapara un fallo de
+   guardado en mitad de un taller no se veria hasta salir. */
+.modal-backdrop.modo-taller {
+  z-index: 75;
+  display: block;
+  padding: 0;
+  background: var(--bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  font-size: clamp(14px, 1.12vw, 20px);
+}
+
+.modal-backdrop.modo-taller[hidden] {
+  display: none;
+}
+
+.modo-taller-marco {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.modo-taller-barra {
+  display: flex;
+  align-items: center;
+  gap: 1.5em;
+  padding: 0.55em 2em;
+  border-bottom: 4px solid var(--green);
+  background: var(--cabecera-bg);
+  color: var(--cabecera-claro);
+  /* Sobre la banda oscura, el anillo de foco es el verde claro, como en la
+     cabecera de la herramienta. */
+  --focus-ring: var(--green);
+}
+
+.modo-taller-barra p {
+  margin: 0;
+}
+
+.modo-taller-donde {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.95em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.modo-taller-donde strong {
+  margin-right: 0.35em;
+  font-size: 1.08em;
+}
+
+.modo-taller-donde span,
+.modo-taller-posicion {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.modo-taller-posicion {
+  font-size: 0.92em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.modo-taller-salir {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 2.3em;
+  padding: 0 0.9em;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--cabecera-claro);
+  font-size: 0.9em;
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+
+.modo-taller-salir kbd {
+  padding: 0.15em 0.4em;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.8em;
+}
+
+.modo-taller-salir:hover {
+  border-color: var(--green);
+  background: rgba(134, 188, 37, 0.18);
+}
+
+.modo-taller-salir:focus-visible,
+.modo-taller-paso:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.modo-taller-cuerpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.85em;
+  min-height: 0;
+  padding: 1.1em 2em 0.6em;
+  overflow: auto;
+}
+
+.modo-taller-cabecera .capability-chip {
+  min-height: 0;
+  padding: 0.2em 0.75em;
+  font-size: 0.85em;
+}
+
+.modo-taller-cabecera h2 {
+  margin: 0.3em 0 0.1em;
+  font-size: 1.9em;
+  line-height: 1.15;
+}
+
+.modo-taller-cabecera p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1em;
+}
+
+/* Los cinco niveles, uno junto a otro: es lo que se lee con el cliente. */
+.modo-taller-niveles {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75em;
+  min-height: 11em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modo-taller-nivel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* Donde hay una palanca, el borde se marca: se ve de lejos en que niveles
+   esta la subcapacidad aunque no se lean las etiquetas. */
+.modo-taller-nivel.tiene-palancas {
+  border-color: var(--line-fuerte);
+  box-shadow: 0 0 0 1px var(--line-fuerte);
+}
+
+.modo-taller-nivel h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35em;
+  margin: 0;
+  padding: 0.55em 0.85em;
+  font-size: 1.02em;
+}
+
+.modo-taller-nivel h3 span {
+  font-size: 1.3em;
+}
+
+.modo-taller-nivel-1 h3 { background: var(--score-1); color: var(--score-1-fg); }
+.modo-taller-nivel-2 h3 { background: var(--score-2); color: var(--score-2-fg); }
+.modo-taller-nivel-3 h3 { background: var(--score-3); color: var(--score-3-fg); }
+.modo-taller-nivel-4 h3 { background: var(--score-4); color: var(--score-4-fg); }
+.modo-taller-nivel-5 h3 { background: var(--score-5); color: var(--score-5-fg); }
+
+.modo-taller-marcas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em;
+  min-height: 2.35em;
+  padding: 0.6em 0.85em 0;
+}
+
+.modo-taller-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  height: 1.75em;
+  padding: 0 0.65em;
+  border-radius: var(--r-pill);
+  background: var(--surface-muted);
+  color: var(--ink);
+  font-size: 0.82em;
+  font-weight: var(--fw-bold);
+  white-space: nowrap;
+}
+
+.modo-taller-marca-objetivo {
+  border: 1.5px dashed var(--green-dark);
+  background: transparent;
+  color: var(--green-dark);
+}
+
+.modo-taller-nivel p {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0.5em 0.85em 0.8em;
+  overflow: auto;
+  font-size: 1em;
+  line-height: 1.42;
+}
+
+.modo-taller-punto {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  flex: none;
+}
+
+.modo-taller-punto-procesos { background: var(--lever-procesos); }
+.modo-taller-punto-tecnologia { background: var(--lever-tecnologia); }
+.modo-taller-punto-organizacion { background: var(--lever-organizacion); }
+
+/* El azul de Organizacion es identidad y no cambia con el tema, pero sobre una
+   tarjeta oscura un punto de ese azul no se ve: lleva un aro claro. */
+:root[data-tema="oscuro"] .modo-taller-punto-organizacion {
+  box-shadow: 0 0 0 1.5px var(--line-fuerte);
+}
+
+/* Las tres palancas para puntuar, con los mismos radios que la lista. */
+.modo-taller-palancas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7em 2.2em;
+  padding: 0.7em 1em;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.modo-taller-palanca {
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+}
+
+.modo-taller-palanca .score-field {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.modo-taller-palanca .score-field-label {
+  color: var(--ink);
+  font-size: 1em;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Tres clases para ganar a la regla de Presentacion, que quita la caja a los
+   scores: aqui la escala tiene que verse como botones, haya densidad o no. */
+.modo-taller .modo-taller-palanca .score-segmentos {
+  grid-template-columns: repeat(5, 2.55em);
+  min-height: 2.55em;
+  border-color: var(--line);
+  background: var(--surface);
+}
+
+.modo-taller .modo-taller-palanca .score-opcion {
+  border-left-color: var(--line);
+}
+
+.modo-taller .modo-taller-palanca .score-opcion:first-child {
+  border-left: 0;
+}
+
+.modo-taller-palanca .score-opcion span {
+  font-size: 1.15em;
+}
+
+/* El objetivo de la palanca, recuadrado en su escala: a donde hay que llegar,
+   en la misma linea en la que se puntua. */
+.modo-taller-palanca .score-opcion.es-objetivo span {
+  outline: 2px dashed var(--green-dark);
+  outline-offset: -5px;
+}
+
+/* El recuadro del objetivo usa el contorno, igual que el foco: con foco, manda
+   el foco, o quien puntua con teclado no veria donde esta. */
+.modo-taller-palanca .score-opcion.es-objetivo .score-radio:focus-visible + span {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+
+.modo-taller-apoyo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.75em;
+}
+
+.modo-taller-apoyo section {
+  min-width: 0;
+  padding: 0.65em 1em 0.75em;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.modo-taller-apoyo h4 {
+  margin: 0 0 0.35em;
+  color: var(--muted);
+  font-size: 0.72em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.modo-taller-apoyo ul {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: 0.92em;
+  line-height: 1.45;
+}
+
+.modo-taller-notas-bloque {
+  display: flex;
+  flex-direction: column;
+}
+
+.modo-taller-notas {
+  flex: 1;
+  width: 100%;
+  min-height: 3.6em;
+  padding: 0.4em 0.6em;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-hundida);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92em;
+  line-height: 1.45;
+  resize: none;
+}
+
+.modo-taller-notas:focus {
+  border-color: var(--green);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 0;
+}
+
+.modo-taller-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 0.6em 2em 0.9em;
+}
+
+.modo-taller-paso {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-height: 2.5em;
+  padding: 0 1.2em;
+  border: 1.5px solid var(--green);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--green-dark);
+  font-size: 0.95em;
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+}
+
+.modo-taller-paso:hover:not(:disabled) {
+  background: var(--surface-realce);
+}
+
+.modo-taller-paso:disabled {
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: default;
+}
+
+.modo-taller-resultado {
+  display: flex;
+  align-items: center;
+  gap: 1.1em;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95em;
+}
+
+.modo-taller-resultado strong {
+  color: var(--ink);
+  font-size: 1.15em;
+  font-variant-numeric: tabular-nums;
+}
+
+.modo-taller-resultado .priority-badge {
+  margin-left: 0.3em;
+  font-size: 0.85em;
+}
+
+.modo-taller-sin-puntuar {
+  font-weight: var(--fw-bold);
+}
+
+/* En pantallas estrechas los niveles no caben en fila: van uno debajo de
+   otro y el cuerpo se desplaza. En una sala no deberia pasar. */
+@media (max-width: 900px) {
+  .modal-backdrop.modo-taller {
+    font-size: 15px;
+  }
+
+  .modo-taller-niveles,
+  .modo-taller-apoyo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .modo-taller-cuerpo,
+  .modo-taller-pie,
+  .modo-taller-barra {
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+
+  .modo-taller-posicion {
+    display: none;
+  }
 }

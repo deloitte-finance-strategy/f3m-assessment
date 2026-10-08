@@ -33,9 +33,9 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.194 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.298 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.824 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.847 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 183 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 341 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
@@ -49,7 +49,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/firebase.js` | La conexión: configuración, referencia y límite de espera | 220 |
 | `app/identidad.js` | La sesión anónima y el nombre de quien edita | 249 |
 | `app/copias.js` | **Si el trabajo local tiene copia.** Cuándo fue la última y el punto del aviso | 143 |
-| `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 140 |
+| `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 155 |
 | `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 873 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
 | `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 137 |
@@ -57,14 +57,15 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe: datos, radares y tema | 606 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 399 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 417 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 224 |
-| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.218 |
+| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.249 |
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 172 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 5.611 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.370 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -140,8 +141,8 @@ infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, mét
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
-`app/biblioteca.js` y `app/buscador.js`. Lo nuevo nace ya en `app/`, no en `app.js`. Mover código entre módulos se
-verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
+`app/biblioteca.js`, `app/buscador.js` y `app/taller.js`. Lo nuevo nace ya en `app/`, no en
+`app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
 
 Dos reglas que han salido del propio reparto y conviene respetar:
@@ -301,6 +302,29 @@ orden, y pesa más lo que está en el nombre de la subcapacidad que en su capaci
 urgente», con la misma función, `abrirTarjetaEnSuDominio()` en `app.js`: su tarjeta, sin tocar
 los filtros. Es un `<dialog>` nativo y no uno de los modales: `showModal()` ya deja el fondo
 inerte, atrapa el foco y cierra con Escape.
+
+**El modo taller** (el botón «Taller» de la barra de pestañas, que solo sale en el Assessment)
+proyecta una subcapacidad a pantalla completa: los cinco niveles en columnas, con las palancas y
+el objetivo marcados encima, la escala para puntuar, las preguntas clave y las notas del taller.
+**Sí usa el ámbito**: recorre las tarjetas que enseña el Assessment, con sus filtros, y la lista se
+fija al abrir, para que puntuar una que el filtro de prioridad deja fuera no la saque del recorrido
+a mitad de sesión. Puntúa y guarda con lo mismo que las tarjetas —`conectarPuntuacion()` y
+`app/edicion.js`—, y `renderAll()` lo pone al día con `refrescarModoTaller()`.
+
+Es un `.modal-backdrop` y no un `<dialog>`, al revés que el buscador y a propósito: la capa superior
+de `showModal()` taparía el chip de guardado y los avisos, y en un taller tienen que seguir a la
+vista. Sus radios llevan el prefijo `taller` en el `name` porque los grupos de radios son de todo el
+documento: con el mismo nombre que la tarjeta, puntuar en uno desmarcaba el otro.
+
+La barra de pestañas no tenía sitio para un botón más. Por debajo de 1500 px, y siempre en
+Presentación, la barra de un dominio se compacta —«Taller», «Sin puntuar», el buscador sin «Ctrl
+K»—, y por debajo de 1200 el taller se queda en el icono. Medido en los nueve dominios contra
+`main`: en ningún ancho salta a dos pisos donde antes no lo hacía. **Relación con Inversores**,
+con el nombre más largo, es el que aprieta.
+
+«Volver arriba» flota abajo a la derecha, en un círculo, y sube por encima del chip de guardado
+mientras este se ve (`apartarDelChip()` en `app/indicador.js`). A la izquierda tapaba la primera
+columna del Roadmap y del Heatmap.
 
 ### Los objetivos se resuelven por dominio
 
@@ -709,6 +733,15 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      sin puntuar», en la barra de pestañas junto al dominio, lleva desde cualquier vista del
      dominio a la próxima tarjeta sin ninguna palanca puntuada, con el foco en su primer score, y
      sin filtros su cifra cuadra con la de la pestaña Assessment.
+   - **Modo taller**: «Taller», en la barra, abre a pantalla completa la tarjeta en la que se
+     está trabajando, la última tocada o la primera que se ve. Puntuar ahí se ve en la tarjeta al
+     salir y el chip de guardado sigue a la vista; las notas son las mismas del detalle.
+     «Siguiente» y Av Pág recorren solo lo que dejan los filtros («1 de 4» con una capacidad
+     elegida). Tab no sale del modo taller, Ctrl+K no abre el buscador encima, y Escape vuelve a
+     la tarjeta en la que se estaba, con el foco en su primer score. Probarlo en los cuatro modos
+     de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita desplazarse. Y con
+     «Siguiente sin puntuar» a la vista, la barra de pestañas cabe en una fila a 1366 px en los
+     nueve dominios.
    - **Heatmap**: desplegar y plegar capacidades.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
      Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final.
