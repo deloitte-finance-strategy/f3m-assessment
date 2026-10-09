@@ -9,7 +9,7 @@
  * getDominiosDelOverview() y la consulta, y salen los resultados.
  */
 
-import { normalizarTextoDeBusqueda } from "./biblioteca.js?v=30";
+import { normalizarTextoDeBusqueda } from "./biblioteca.js?v=31";
 
 
 export const MAXIMO_DE_RESULTADOS = 8;

@@ -8,7 +8,7 @@
  * escapado.
  */
 
-import { average, calcularMetricas, resumenGlobal } from "../core/calculo.js?v=30";
+import { average, calcularMetricas, resumenGlobal } from "../core/calculo.js?v=31";
 import {
   BRECHAS_EN_EL_CORREO,
   BRECHAS_EN_LA_PORTADA,
@@ -16,7 +16,7 @@ import {
   fraseDelActa,
   resumenDelActa,
   textoDelCorreo,
-} from "../informe/acta.js?v=30";
+} from "../informe/acta.js?v=31";
 
 
 const OBJETIVO_4 = { procesos: 4, tecnologia: 4, organizacion: 4 };

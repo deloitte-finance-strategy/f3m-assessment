@@ -15,12 +15,12 @@
  * Solo pinta. Que pantalla toca y que pasa al pulsar lo decide app/taller.js.
  */
 
-import { BRECHAS_EN_EL_CORREO, fraseDelActa, resumenDelActa } from "../informe/acta.js?v=30";
-import { NIVELES_DE_LA_RUBRICA } from "../informe/preparacion.js?v=30";
-import { getMaturityLevelNumber } from "../core/calculo.js?v=30";
-import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=30";
-import { priorityBadge } from "./celdas.js?v=30";
-import { aCero, contarTextos, entrar, sinMovimiento, textoConNumero } from "./movimiento.js?v=30";
+import { BRECHAS_EN_EL_CORREO, fraseDelActa, resumenDelActa } from "../informe/acta.js?v=31";
+import { NIVELES_DE_LA_RUBRICA } from "../informe/preparacion.js?v=31";
+import { getMaturityLevelNumber } from "../core/calculo.js?v=31";
+import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=31";
+import { priorityBadge } from "./celdas.js?v=31";
+import { aCero, contarTextos, entrar, sinMovimiento, textoConNumero } from "./movimiento.js?v=31";
 
 
 /** Cuantas pendientes se nombran; del resto se dice cuantas son. */

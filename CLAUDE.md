@@ -33,17 +33,17 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.428 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.458 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
 | `sw.js` | **El service worker**: guarda la herramienta en el navegador para abrirla sin red | 172 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.984 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 2.018 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 189 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 355 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 257 |
 | `app/graficos.js` | Los seis radares de Chart.js, a dónde lleva pulsar sus ejes y el del resumen | 823 |
 | `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 185 |
-| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 577 |
+| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 494 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
 | `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 88 |
 | `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 409 |
@@ -68,11 +68,11 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 396 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 228 |
-| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.249 |
+| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.302 |
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad, que lleva a su tarjeta | 314 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.379 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.410 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -431,6 +431,14 @@ del menú se queda en verde, como cuando era un conmutador suelto. El menú de a
 modo taller estuvo primero en la barra de pestañas, que a 1366 px no tenía sitio, y después en
 «Sesión».
 
+Debajo, plegado, **«Para el equipo»**: la preparación, el acta y el texto del correo, los mismos
+tres de «Exportar PDF» y del menú del modo taller, para tenerlos a mano al preparar y al cerrar la
+sesión sin buscar en el menú del informe. Son gemelos y no copias: cada botón lleva
+`data-igual-que` con el id del original y hace `click()` sobre él (`setupParaElEquipo()` en
+`app.js`), así que se abren con la misma función y en el mismo clic, que es lo que pide
+`window.open()`. Al abrir el menú, `pintarParaElEquipo()` copia del original el texto y si está
+apagado: el acta sin nada puntuado lo dice igual en los dos sitios.
+
 «Volver arriba» flota abajo a la derecha, en un círculo, y sube por encima del chip de guardado
 mientras este se ve (`apartarDelChip()` en `app/indicador.js`). A la izquierda tapaba la primera
 columna del Roadmap y del Heatmap.
@@ -470,9 +478,14 @@ dónde viene la marca del dominio— va en `app/movimiento.js`, que pregunta `si
 - **El Heatmap**: las subcapacidades de una capacidad entran en cascada al desplegarla y se funden
   al plegarla (una tabla no anima su alto), y una celda que cambia de nivel funde su color. Al
   cambiar de tema no: cambian todas a la vez y eso no es una celda que se mueve.
-- **El conmutador de dominio**: la marca verde viaja del botón de antes al nuevo mientras se cargan
-  sus datos (`deslizarLaMarcaDeDominio()` en `app/dominios.js`). Es una pieza aparte encima de los
-  botones, porque cruza de un grupo a otro, y mientras viaja ningún botón se pinta en verde.
+- **La tarjeta del Assessment, al puntuar** (`moverElResultado()` en `app/vistas/assessment.js`):
+  el número elegido da un pequeño salto, el score medio, el objetivo y el gap cuentan hasta el
+  nuevo, la prioridad late si cambia y el nivel actual funde su color. Al puntuar la primera
+  palanca o quitar la última, el resumen entra en vez de contar desde «Pendiente». Antes nada se
+  movía ahí, porque lo que contaba era el Dashboard, y el Dashboard no se ve mientras se puntúa.
+- **Al cambiar de dominio** la vista abierta entra con el mismo fundido que al cambiar de pestaña
+  y los radares crecen. La marca verde no viaja: se probó una pieza que cruzaba del botón de antes
+  al nuevo y tapaba los nombres por el camino; no convenció.
 
 ### Los objetivos se resuelven por dominio
 
@@ -1024,7 +1037,8 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    guardado se pone **rojo**.
 13. **El movimiento.** Al arrancar y al entrar en el Overview o el Dashboard, los radares crecen
    desde el centro; puntuar en el Assessment y volver al Dashboard hace contar los KPIs y deslizarse
-   las barras. Cambiar de dominio desliza la marca verde. Los menús, el buscador y los modales
+   las barras, y en la propia tarjeta el número salta y el score medio y el gap cuentan. Cambiar
+   de dominio funde la vista. Los menús, el buscador y los modales
    aparecen suaves, el aviso baja y se va fundiéndose, y el chip dibuja su check. «Ver detalle» se
    despliega y se pliega sin saltos. Exportar el informe justo al entrar en el Dashboard da los
    radares enteros. Con «reducir movimiento» en el sistema, nada de esto se mueve.

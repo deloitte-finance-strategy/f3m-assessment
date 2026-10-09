@@ -12,8 +12,8 @@
  * quien conoce el deck entero. Cada seccion solo sabe pintar su cuerpo.
  */
 
-import { average } from "../core/calculo.js?v=30";
-import { normalizarLogo } from "../core/escenario.js?v=30";
+import { average } from "../core/calculo.js?v=31";
+import { normalizarLogo } from "../core/escenario.js?v=31";
 
 import {
   COLOR_DE_PALANCA,
@@ -22,9 +22,9 @@ import {
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=30";
+} from "../core/presentacion.js?v=31";
 
-import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=30";
+import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=31";
 
 
 /**

@@ -15,37 +15,37 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=30";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=30";
-import { filasDeResumen } from "../core/exportacion.js?v=30";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=30";
-import { diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=30";
-import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=30";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=30";
-import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=30";
-import { documentoDePreparacion } from "../informe/preparacion.js?v=30";
-import { showNotice } from "./avisos.js?v=30";
-import { getActiveDomainConfig } from "./dominios.js?v=30";
-import { DOMAINS, els, state } from "./estado.js?v=30";
-import { getVisibleItems } from "./filtros.js?v=30";
-import { getScenarioShortLabel } from "./firebase.js?v=30";
+} from "../core/calculo.js?v=31";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=31";
+import { filasDeResumen } from "../core/exportacion.js?v=31";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=31";
+import { diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=31";
+import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=31";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=31";
+import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=31";
+import { documentoDePreparacion } from "../informe/preparacion.js?v=31";
+import { showNotice } from "./avisos.js?v=31";
+import { getActiveDomainConfig } from "./dominios.js?v=31";
+import { DOMAINS, els, state } from "./estado.js?v=31";
+import { getVisibleItems } from "./filtros.js?v=31";
+import { getScenarioShortLabel } from "./firebase.js?v=31";
 import {
   capturarRadarDelResumen,
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
   renderCapabilityRadar,
-} from "./graficos.js?v=30";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=30";
+} from "./graficos.js?v=31";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=31";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "./subcapacidad.js?v=30";
-import { renderDashboard } from "./vistas/dashboard.js?v=30";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=30";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=30";
+} from "./subcapacidad.js?v=31";
+import { renderDashboard } from "./vistas/dashboard.js?v=31";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=31";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=31";
 
 
 /**
