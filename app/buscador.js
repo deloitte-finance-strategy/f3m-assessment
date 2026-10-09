@@ -11,11 +11,11 @@
  * cosa del orquestador, que lo inyecta. Importarlo cerraria un ciclo con el.
  */
 
-import { buscarSubcapacidades, trozosResaltados } from "../core/busqueda.js?v=31";
-import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=31";
-import { SELECTOR_DE_MODAL_ABIERTO } from "./avisos.js?v=31";
-import { calculate } from "./metricas.js?v=31";
-import { getDominiosDelOverview } from "./vistas/overview.js?v=31";
+import { buscarSubcapacidades, trozosResaltados } from "../core/busqueda.js?v=32";
+import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=32";
+import { SELECTOR_DE_MODAL_ABIERTO } from "./avisos.js?v=32";
+import { calculate } from "./metricas.js?v=32";
+import { getDominiosDelOverview } from "./vistas/overview.js?v=32";
 
 
 let dialogo = null;

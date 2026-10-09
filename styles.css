@@ -625,7 +625,7 @@ h4 {
   display: none;
 }
 
-/* «Para el equipo», plegado dentro de «Presentación». La cabecera se lee
+/* «Para el equipo», plegado dentro de «Exportar PDF». La cabecera se lee
    como las opciones del menú, con su flecha a la derecha. */
 .header-menu-grupo > summary {
   display: flex;

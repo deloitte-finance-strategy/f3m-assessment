@@ -9,8 +9,8 @@
  * texto o como lista: toList() acepta las dos formas y devuelve siempre una.
  */
 
-import { titulosDeCasos } from "../core/biblioteca.js?v=31";
-import { CASOS_DE_IA } from "./estado.js?v=31";
+import { titulosDeCasos } from "../core/biblioteca.js?v=32";
+import { CASOS_DE_IA } from "./estado.js?v=32";
 
 
 
