@@ -60,6 +60,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
 | `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 801 |
 | `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
+| `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 282 |
 | `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 174 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
@@ -146,7 +147,8 @@ infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, mét
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
-`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/taller.js`, `app/apertura.js` y `app/cierre.js`. Lo nuevo nace ya en `app/`, no en
+`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/taller.js`, `app/apertura.js`, `app/cierre.js` y
+`app/proximos-pasos.js`. Lo nuevo nace ya en `app/`, no en
 `app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
 
@@ -353,6 +355,17 @@ con el menú abierto Escape cierra el menú, no el modo taller. Es la posición 
 una más allá de la última; «Anterior» y Re Pág vuelven. «En esta sesión» cuenta las subcapacidades
 cuyos scores han cambiado desde que se abrió el modo taller, por dominio e id.
 
+**Y detrás del cierre, los próximos pasos acordados** (`app/proximos-pasos.js`), en
+`recorrido.length + 1`: una fila por paso, con qué se va a hacer, quién y cuándo, que se escriben en
+la sala, proyectados. Salen rellenos en el acta y en el correo, con filas en blanco detrás. Son del
+dominio (`state.proximosPasos[domainId]`), como el acta, y **diez como mucho** (`MAXIMO_DE_PASOS`),
+que es lo que cabe sin desplazarse; las reglas no pueden contar hijos, así que el límite vive en
+`core/escenario.js`. La fecha es texto libre: en la sala se acuerda «antes de fin de mes». Se
+guardan con el mismo guardado diferido de las notas (`programarGuardadoDe()` en `app/edicion.js`),
+que cuenta para el freno de cierre, y mientras se escribe manda la pantalla: un repintado con el
+foco dentro no la toca. Intro pasa al paso siguiente y en el último abre otro. Al llegar, el foco
+va al título y no al primer campo, porque con el cursor en un campo Re Pág no vuelve atrás.
+
 Con el modo taller abierto, **el chip de guardado sube por encima del pie** (`apartarElChipDelPie()`):
 sale al puntuar, justo cuando se va a pulsar «Siguiente», y en su sitio de siempre se llevaba el clic.
 
@@ -436,14 +449,14 @@ de `index.html`, y `tests/casos-preparacion.js` compara las dos.
 sesión. Una portada con una frase de lo que salió, las cuatro cifras del Dashboard, la media de
 cada palanca frente a su objetivo y las cinco subcapacidades más lejos de él; después lo acordado,
 capacidad a capacidad, con los scores, el nivel, el gap, la prioridad y **las notas del taller tal
-cual**; lo que quedó sin puntuar, con la documentación que ayudaría a puntuarlo, y una tabla de
-próximos pasos en blanco. Las cifras salen de `resumenGlobal()` y `agregarPorDominio()`, las mismas
+cual**; lo que quedó sin puntuar, con la documentación que ayudaría a puntuarlo, y los próximos
+pasos: los que se apuntaron en el modo taller, con filas en blanco detrás para lo que falte. Las cifras salen de `resumenGlobal()` y `agregarPorDominio()`, las mismas
 del Dashboard y del Overview, así que el acta no puede contradecir lo que se proyectó. Lleva el
 mismo alcance que la preparación —los filtros— y **sin nada puntuado no se puede pedir**: el menú
 lo dice y el botón se apaga. Como las notas son del equipo y salen tal cual, el aviso pide
 revisarlas antes de enviarla. **«Copiar el texto del correo»**, en el mismo menú, deja en el portapapeles el correo que acompaña al
-acta: asunto, la misma frase de su portada y sus tres primeras brechas, en texto llano
-(`textoDelCorreo()`). Sin `navigator.clipboard`, que solo existe en un origen seguro, copia con
+acta: asunto, la misma frase de su portada, sus tres primeras brechas y los próximos pasos
+acordados, en texto llano (`textoDelCorreo()`). Sin `navigator.clipboard`, que solo existe en un origen seguro, copia con
 `execCommand`. Comparte con la preparación la hoja de estilos
 (`estilosDelDocumento()`), el título de archivo y la agrupación por capacidad: son el antes y el
 después de la misma sesión y tienen que parecer de la misma familia. Una capacidad sí se parte
@@ -842,7 +855,10 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      Puntuar y pulsar enseguida «Siguiente»: el chip de guardado no lo tapa. Tras la última, «Cierre
      del taller»: sin desplazarse en los cuatro modos, sus cifras son las del acta que sale de
      «Para el equipo», en la barra; «Copiar el texto del correo», ahí mismo, deja el correo en el
-     portapapeles, y cada una de las tres brechas vuelve a su subcapacidad. Probarlo en los
+     portapapeles, y cada una de las tres brechas vuelve a su subcapacidad. «Próximos pasos →»,
+     desde el cierre: escribir tres con Tab e Intro, quitar uno con ×, y llenar hasta diez sin que
+     la pantalla se desplace; salen en el acta, en el correo y en el índice («Próximos pasos · 3»),
+     y siguen tras recargar. Probarlo en los
      cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita
      desplazarse.
    - **Heatmap**: desplegar y plegar capacidades.

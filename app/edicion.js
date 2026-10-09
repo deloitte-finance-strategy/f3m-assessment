@@ -77,6 +77,36 @@ function guardarCampo(item, campo, valor) {
 }
 
 
+/**
+ * El mismo guardado diferido para lo que no es un campo de una subcapacidad,
+ * como los proximos pasos del taller. Va en la misma cuenta para que el freno
+ * de cierre tambien lo vea.
+ */
+export function programarGuardadoDe(clave, guardar) {
+  window.clearTimeout(guardadosPendientes.get(clave));
+
+  guardadosPendientes.set(
+    clave,
+    window.setTimeout(() => {
+      guardadosPendientes.delete(clave);
+      guardar();
+    }, GUARDADO_DIFERIDO_MS),
+  );
+}
+
+
+/** Lo que estuviera esperando de `clave` se guarda ya. Si no esperaba nada, no hace nada. */
+export function guardarYaLoPendienteDe(clave, guardar) {
+  if (!guardadosPendientes.has(clave)) {
+    return;
+  }
+
+  window.clearTimeout(guardadosPendientes.get(clave));
+  guardadosPendientes.delete(clave);
+  guardar();
+}
+
+
 /** Si queda algo escrito y sin guardar. Lo consulta el freno de cierre. */
 export function hayGuardadosPendientes() {
   return guardadosPendientes.size > 0;

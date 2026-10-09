@@ -252,4 +252,63 @@ export const casos = [
       t.igual(correo.includes("más lejos del objetivo"), false, "sin brechas, sin lista");
     },
   },
+  {
+    grupo: "Acta del taller",
+    nombre: "sin próximos pasos apuntados, la tabla sale en blanco para rellenar",
+    ejecutar(t) {
+      const html = documentoDeActa({ domainLabel: "FP&A", subcapacidades: DOMINIO });
+      const tabla = html.slice(html.indexOf("<h2>Próximos pasos</h2>"));
+
+      t.igual(cuantasVeces(tabla, "<tr><td></td><td></td><td></td></tr>"), 6);
+      t.igual(textoDelCorreo({ domainLabel: "FP&A", subcapacidades: DOMINIO }).includes("os agradeceremos que nos confirméis responsables y fechas"), true);
+    },
+  },
+  {
+    grupo: "Acta del taller",
+    nombre: "los próximos pasos del modo taller salen en el acta, escapados, con sitio para más",
+    ejecutar(t) {
+      const proximosPasos = [
+        { accion: "Formalizar el RACI del forecast", responsable: "Control de gestión", fecha: "30 oct" },
+        { accion: "Enviar <b>informes</b> & actas", responsable: "", fecha: "16 oct" },
+        { accion: "", responsable: "", fecha: "" },
+      ];
+      const html = documentoDeActa({ domainLabel: "FP&A", subcapacidades: DOMINIO, proximosPasos });
+      const tabla = html.slice(html.indexOf("<h2>Próximos pasos</h2>"));
+
+      t.igual(tabla.includes("<td>Formalizar el RACI del forecast</td>"), true);
+      t.igual(tabla.includes("<td>Control de gestión</td>"), true);
+      t.igual(tabla.includes("Enviar &lt;b&gt;informes&lt;/b&gt; &amp; actas"), true, "lo escrito en la sala llega escapado");
+      t.igual(tabla.includes("<b>informes</b>"), false);
+      t.igual(cuantasVeces(tabla, "<tr><td></td><td></td><td></td></tr>"), 4, "la fila vacía no cuenta, y quedan filas hasta seis");
+
+      const muchos = Array.from({ length: 9 }, (_, posicion) => ({ accion: `Paso ${posicion + 1}`, responsable: "", fecha: "" }));
+      const lleno = documentoDeActa({ domainLabel: "FP&A", subcapacidades: DOMINIO, proximosPasos: muchos });
+
+      t.igual(cuantasVeces(lleno.slice(lleno.indexOf("<h2>Próximos pasos</h2>")), "<tr><td></td><td></td><td></td></tr>"), 2, "siempre queda sitio para dos más");
+    },
+  },
+  {
+    grupo: "Acta del taller",
+    nombre: "el correo lista los próximos pasos con su responsable y su fecha",
+    ejecutar(t) {
+      const correo = textoDelCorreo({
+        domainLabel: "FP&A",
+        subcapacidades: DOMINIO,
+        proximosPasos: [
+          { accion: "Formalizar el RACI del forecast.", responsable: "Control de gestión", fecha: "30 oct" },
+          { accion: "Enviar los informes & actas", responsable: "", fecha: "" },
+          { accion: "", responsable: "Dirección financiera", fecha: "" },
+        ],
+      });
+      const lineas = correo.split("\n");
+      const desde = lineas.indexOf("Próximos pasos acordados:");
+
+      t.igual(desde > 0, true, "con su encabezado");
+      t.igual(lineas[desde + 1], "- Formalizar el RACI del forecast (Control de gestión, 30 oct).", "sin el punto doble");
+      t.igual(lineas[desde + 2], "- Enviar los informes & actas.", "sin paréntesis vacío ni escapar");
+      t.igual(lineas[desde + 3], "- Paso sin describir (Dirección financiera).");
+      t.igual(correo.includes("os agradeceremos que nos confirméis responsables y fechas"), false, "ya están puestos");
+      t.igual(correo.includes("Si algún responsable o fecha no es correcto"), true);
+    },
+  },
 ];

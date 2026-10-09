@@ -28,6 +28,13 @@ import { nombreDeMasInformacion } from "./biblioteca.js?v=28";
 import { priorityBadge } from "./celdas.js?v=28";
 import { htmlDeLaApertura } from "./apertura.js?v=28";
 import { htmlDelCierre } from "./cierre.js?v=28";
+import {
+  conectarLosPasos,
+  guardarLosPasosPendientes,
+  htmlDeLosPasos,
+  pasosDelDominio,
+  seEstaEscribiendoUnPaso,
+} from "./proximos-pasos.js?v=28";
 import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=28";
 import {
   actualizarContadorDeComentario,
@@ -62,7 +69,7 @@ let menuDelEquipo = null;
 let menuDelIndice = null;
 
 // Antes de la primera subcapacidad va la apertura, y despues de la ultima, el
-// cierre: el indice va de APERTURA a recorrido.length.
+// cierre y los proximos pasos: el indice va de APERTURA a recorrido.length + 1.
 const APERTURA = -1;
 
 // Las subcapacidades del recorrido, fijadas al abrir. Si se recalculara en cada
@@ -90,6 +97,11 @@ const itemActual = () => state.items.find((item) => item.id === recorrido[indice
 const enCierre = () => recorrido.length > 0 && indice === recorrido.length;
 
 const enApertura = () => indice === APERTURA;
+
+// Y despues del cierre, los proximos pasos acordados.
+const enPasos = () => recorrido.length > 0 && indice === recorrido.length + 1;
+
+const ultimaPosicion = () => recorrido.length + 1;
 
 const itemsDelRecorrido = () =>
   recorrido.map((id) => state.items.find((item) => item.id === id)).filter(Boolean);
@@ -205,17 +217,12 @@ export function cerrarModoTaller({ volver = true } = {}) {
     return;
   }
 
-  // Lo que quedaba por guardar de las notas se guarda ya, y la lista se
-  // repinta para que la tarjeta enseñe lo escrito aqui.
-  const notas = cuerpo.querySelector(".modo-taller-notas");
-  const item = itemActual();
+  // Lo que quedaba por guardar se guarda ya, y la lista se repinta para que
+  // la tarjeta enseñe lo escrito aqui.
+  guardarLoQueQueda();
 
-  if (notas && item) {
-    guardarCampoAhora(item, "comentario", notas);
-  }
-
-  // Desde el cierre se vuelve a la ultima subcapacidad, y desde la apertura,
-  // a la primera.
+  // Desde el cierre y los pasos se vuelve a la ultima subcapacidad, y desde
+  // la apertura, a la primera.
   const ultimo = recorrido[Math.min(Math.max(indice, 0), recorrido.length - 1)];
 
   cerrarMenusDeLaBarra();
@@ -253,9 +260,13 @@ export function refrescarModoTaller() {
   }
 
   // Con un cambio de otra persona del escenario compartido, la apertura y el
-  // cierre se repintan enteros: no tienen nada que se este escribiendo.
-  if (enApertura() || enCierre()) {
-    pintar({ enfocar: false });
+  // cierre se repintan enteros: no tienen nada que se este escribiendo. Los
+  // pasos si, y mientras se escriben manda la pantalla.
+  if (enApertura() || enCierre() || enPasos()) {
+    if (!enPasos() || !seEstaEscribiendoUnPaso()) {
+      pintar({ enfocar: false });
+    }
+
     pintarAvanceDeDominios();
     return;
   }
@@ -301,12 +312,7 @@ async function cambiarDeDominio(domainId) {
     return;
   }
 
-  const notas = cuerpo.querySelector(".modo-taller-notas");
-  const item = itemActual();
-
-  if (notas && item) {
-    guardarCampoAhora(item, "comentario", notas);
-  }
+  guardarLoQueQueda();
 
   cambiandoDeDominio = true;
   cerrarMenusDeLaBarra();
@@ -361,12 +367,21 @@ function cambiadasEnEstaSesion() {
 }
 
 
-// De la apertura al cierre, que es recorrido.length.
+// De la apertura a los proximos pasos, que van detras del cierre.
 function irA(nuevo) {
-  if (nuevo < APERTURA || nuevo > recorrido.length || nuevo === indice) {
+  if (nuevo < APERTURA || nuevo > ultimaPosicion() || nuevo === indice) {
     return;
   }
 
+  guardarLoQueQueda();
+
+  indice = nuevo;
+  pintar();
+}
+
+
+/** Las notas de la subcapacidad o los pasos a medio escribir, antes de dejar la pantalla. */
+function guardarLoQueQueda() {
   const notas = cuerpo.querySelector(".modo-taller-notas");
   const item = itemActual();
 
@@ -374,8 +389,9 @@ function irA(nuevo) {
     guardarCampoAhora(item, "comentario", notas);
   }
 
-  indice = nuevo;
-  pintar();
+  if (enPasos()) {
+    guardarLosPasosPendientes();
+  }
 }
 
 
@@ -389,6 +405,11 @@ function pintar({ enfocar = true } = {}) {
 
   if (enCierre()) {
     pintarCierre({ enfocar });
+    return;
+  }
+
+  if (enPasos()) {
+    pintarPasos({ enfocar });
     return;
   }
 
@@ -542,10 +563,11 @@ function objetivosMedios(items) {
 
 
 /**
- * La ultima pantalla: lo que ha salido de la sesion, con las mismas cifras que
- * el acta. Ver app/cierre.js. En el pie, «Anterior» vuelve a las
- * subcapacidades. El acta y el correo no estan aqui sino en «Para el equipo»,
- * en la barra de arriba: se proyecta para el cliente y son de uso interno.
+ * Lo que ha salido de la sesion, con las mismas cifras que el acta. Ver
+ * app/cierre.js. En el pie, «Anterior» vuelve a las subcapacidades y
+ * «Siguiente» lleva a los proximos pasos. El acta y el correo no estan aqui
+ * sino en «Para el equipo», en la barra de arriba: se proyecta para el cliente
+ * y son de uso interno.
  */
 function pintarCierre({ enfocar = true } = {}) {
   const datos = datosDelActa(itemsDelRecorrido());
@@ -560,10 +582,42 @@ function pintarCierre({ enfocar = true } = {}) {
   anterior.hidden = false;
   anterior.disabled = false;
   anterior.innerHTML = `<span aria-hidden="true">←</span> Volver a las subcapacidades`;
-  siguiente.hidden = true;
+  siguiente.hidden = false;
+  siguiente.innerHTML = `Próximos pasos <span aria-hidden="true">→</span>`;
 
   // Al titulo y no a un boton: lo primero que se oye es de que va la pantalla,
   // y con el raton no se ve ningun anillo de foco.
+  if (enfocar) {
+    cuerpo.querySelector("#modoTallerTitulo")?.focus({ preventScroll: true });
+  }
+}
+
+
+/**
+ * La ultima pantalla: los proximos pasos acordados, que salen en el acta y en
+ * el correo. Ver app/proximos-pasos.js.
+ */
+function pintarPasos({ enfocar = true } = {}) {
+  const domainId = state.activeDomainId;
+
+  donde.textContent = state.cliente || "";
+  pintarSelectorDeDominio();
+
+  cuerpo.innerHTML = htmlDeLosPasos({
+    pasos: pasosDelDominio(domainId),
+    dominio: getActiveDomainConfig()?.label || "",
+  });
+  conectarLosPasos(cuerpo, domainId);
+  resultado.innerHTML = "";
+
+  posicion.textContent = "Próximos pasos";
+  anterior.hidden = false;
+  anterior.disabled = false;
+  anterior.innerHTML = `<span aria-hidden="true">←</span> Cierre del taller`;
+  siguiente.hidden = true;
+
+  // Al titulo, como en el cierre, y no al primer campo: con el cursor en un
+  // campo, Re Pág no vuelve atrás, y es la tecla del mando de presentación.
   if (enfocar) {
     cuerpo.querySelector("#modoTallerTitulo")?.focus({ preventScroll: true });
   }
@@ -739,8 +793,17 @@ function pintarIndice() {
       )
       .join("")}
     ${parada(recorrido.length, "Cierre del taller")}
+    ${parada(ultimaPosicion(), textoDeLosPasos())}
     <p class="modo-taller-indice-pie">${puntuadas} de ${items.length} puntuadas</p>
   `;
+}
+
+
+/** Con cuantos hay apuntados: desde el indice se ve si ya se han acordado. */
+function textoDeLosPasos() {
+  const cuantos = pasosDelDominio(state.activeDomainId).length;
+
+  return cuantos ? `Próximos pasos · ${cuantos}` : "Próximos pasos";
 }
 
 

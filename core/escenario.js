@@ -115,7 +115,7 @@ export function normalizarLogo(valor) {
  * Los proximos pasos acordados al cerrar un taller, por dominio: que se va a
  * hacer, quien y cuando. Salen en el acta y en el correo.
  *
- * Doce como mucho por dominio, que es lo que cabe en la pantalla del taller
+ * Diez como mucho por dominio, que es lo que cabe en la pantalla del taller
  * sin desplazarse; las reglas no pueden contar hijos, asi que el limite vive
  * aqui. La fecha es texto libre a proposito: en la sala se acuerda «antes de
  * fin de mes» tanto como «el 30».
@@ -126,7 +126,7 @@ export const LIMITES_DE_PASO = {
   fecha: 40,
 };
 
-export const MAXIMO_DE_PASOS = 12;
+export const MAXIMO_DE_PASOS = 10;
 
 
 /** Un paso limpio, o null si no dice nada: una fila en blanco no se guarda. */

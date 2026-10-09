@@ -6,7 +6,8 @@
  * cifras de la pantalla. Esto saca ese resumen de la herramienta: una portada
  * con lo que salio de la sesion, lo acordado capacidad a capacidad con las
  * notas del taller, lo que quedo pendiente con la documentacion que ayudaria a
- * puntuarlo, y una tabla de proximos pasos para rellenar.
+ * puntuarlo, y los proximos pasos: los que se acordaron en el modo taller, y
+ * filas en blanco para lo que falte.
  *
  * Las cifras salen de las mismas funciones que el Dashboard (resumenGlobal) y
  * que el Overview (agregarPorDominio), asi que el acta no puede decir del
@@ -46,7 +47,13 @@ import {
 /** Cuantas subcapacidades lleva la portada en «Dónde está la mayor distancia». */
 export const BRECHAS_EN_LA_PORTADA = 5;
 
+/**
+ * Sin pasos apuntados, seis filas en blanco para rellenar a mano. Con pasos,
+ * las que falten hasta seis, y al menos dos: siempre queda sitio para lo que
+ * añada el cliente al leerla.
+ */
 const PASOS_EN_BLANCO = 6;
+const PASOS_EN_BLANCO_COMO_MINIMO = 2;
 
 /**
  * Anchos fijos para las tablas de las capacidades: cada una media sus columnas
@@ -163,10 +170,7 @@ export function documentoDeActa(datos) {
 
           <div class="pasos">
             <h2>Próximos pasos</h2>
-            <table class="tabla">
-              <thead><tr><th>Acción</th><th>Responsable</th><th>Fecha</th></tr></thead>
-              <tbody>${"<tr><td></td><td></td><td></td></tr>".repeat(PASOS_EN_BLANCO)}</tbody>
-            </table>
+            ${tablaDePasos(datos.proximosPasos)}
 
             <p class="cierre">Las puntuaciones de esta acta son las acordadas en la sesión y tienen carácter preliminar. El diagnóstico completo, con el roadmap de iniciativas y las oportunidades de IA, llega en el informe.</p>
           </div>
@@ -271,14 +275,67 @@ export function textoDelCorreo(datos) {
     );
   }
 
+  const pasos = pasosAcordados(datos.proximosPasos);
+
+  if (pasos.length) {
+    lineas.push(
+      "",
+      "Próximos pasos acordados:",
+      ...pasos.map((paso) => {
+        // Sin el punto final que traiga la accion: el que cierra la linea va despues del responsable.
+        const accion = (paso.accion || "Paso sin describir").replace(/[.\s]+$/, "");
+        const quienYCuando = [paso.responsable, paso.fecha].filter(Boolean).join(", ");
+
+        return `- ${accion}${quienYCuando ? ` (${quienYCuando})` : ""}.`;
+      }),
+    );
+  }
+
   lineas.push(
     "",
-    "Las puntuaciones son las acordadas en la sesión y tienen carácter preliminar. El acta deja espacio para los próximos pasos; os agradeceremos que nos confirméis responsables y fechas.",
+    pasos.length
+      ? "Las puntuaciones son las acordadas en la sesión y tienen carácter preliminar. Si algún responsable o fecha no es correcto, decídnoslo y lo corregimos."
+      : "Las puntuaciones son las acordadas en la sesión y tienen carácter preliminar. El acta deja espacio para los próximos pasos; os agradeceremos que nos confirméis responsables y fechas.",
     "",
     "Un saludo,",
   );
 
   return lineas.join("\n");
+}
+
+
+/** Los que dicen algo: una fila en blanco no es un paso. */
+function pasosAcordados(pasos) {
+  return (Array.isArray(pasos) ? pasos : []).filter((paso) => paso && (paso.accion || paso.responsable || paso.fecha));
+}
+
+
+/** Los pasos acordados y despues las filas en blanco. */
+function tablaDePasos(pasos) {
+  const acordados = pasosAcordados(pasos);
+  const enBlanco = acordados.length
+    ? Math.max(PASOS_EN_BLANCO_COMO_MINIMO, PASOS_EN_BLANCO - acordados.length)
+    : PASOS_EN_BLANCO;
+
+  return `
+    <table class="tabla">
+      <thead><tr><th>Acción</th><th>Responsable</th><th>Fecha</th></tr></thead>
+      <tbody>
+        ${acordados
+          .map(
+            (paso) => `
+              <tr>
+                <td>${escapeHtml(paso.accion || "")}</td>
+                <td>${escapeHtml(paso.responsable || "")}</td>
+                <td>${escapeHtml(paso.fecha || "")}</td>
+              </tr>
+            `,
+          )
+          .join("")}
+        ${"<tr><td></td><td></td><td></td></tr>".repeat(enBlanco)}
+      </tbody>
+    </table>
+  `;
 }
 
 

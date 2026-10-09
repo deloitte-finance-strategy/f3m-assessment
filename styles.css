@@ -6540,8 +6540,8 @@ height: 100% !important;
   cursor: pointer;
 }
 
-/* En el cierre no hay siguiente, pero el hueco se guarda: sin el, el acta y el
-   correo se iban a la derecha en vez de quedarse en el centro. */
+/* En la apertura no hay anterior y en los proximos pasos no hay siguiente,
+   pero el hueco se guarda: sin el, lo del centro se iba a un lado. */
 .modo-taller-paso[hidden] {
   visibility: hidden;
 }
@@ -6970,6 +6970,131 @@ height: 100% !important;
   line-height: 1.45;
 }
 
+/* Los proximos pasos: una fila por paso, que es como se dicta en la sala.
+   Las cajas se ven siempre, tambien en Presentacion: aqui se escribe delante
+   de todos, y sin caja no se ve donde va lo siguiente. */
+.modo-taller-pasos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45em;
+  max-width: 72em;
+}
+
+.modo-taller-pasos-cabeza,
+.modo-taller-pasos-fila {
+  display: grid;
+  grid-template-columns: 1.6em minmax(0, 2.4fr) minmax(0, 1.1fr) minmax(0, 0.6fr) 2.2em;
+  gap: 0.55em;
+  align-items: center;
+}
+
+.modo-taller-pasos-cabeza {
+  color: var(--muted);
+  font-size: 0.72em;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.modo-taller-pasos-cabeza span:nth-child(2) {
+  padding-left: 0.2em;
+}
+
+.modo-taller-pasos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modo-taller-pasos-numero {
+  color: var(--green-dark);
+  font-weight: var(--fw-bold);
+  text-align: center;
+}
+
+.modo-taller-pasos-fila input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.45em 0.7em;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 8px);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95em;
+}
+
+.modo-taller-pasos-fila input::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.modo-taller-pasos-fila input:focus {
+  border-color: var(--green);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 0;
+}
+
+.modo-taller-pasos-quitar {
+  width: 1.9em;
+  height: 1.9em;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 1.05em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modo-taller-pasos-quitar:hover {
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+.modo-taller-pasos-pie {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  margin: 0.2em 0 0 2.15em;
+}
+
+.modo-taller-pasos-anadir {
+  padding: 0.4em 0.95em;
+  border: 1px dashed var(--line-fuerte);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.modo-taller-pasos-anadir:hover {
+  border-color: var(--green);
+  background: var(--surface-realce);
+}
+
+.modo-taller-pasos-anadir[hidden] {
+  display: none;
+}
+
+.modo-taller-pasos-tope {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.modo-taller-pasos-quitar:focus-visible,
+.modo-taller-pasos-anadir:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 /* En pantallas estrechas los niveles no caben en fila: van uno debajo de
    otro y el cuerpo se desplaza. En una sala no deberia pasar. */
 @media (max-width: 900px) {
@@ -7000,5 +7125,17 @@ height: 100% !important;
 
   .modo-taller-indice {
     display: none;
+  }
+
+  .modo-taller-pasos-cabeza {
+    display: none;
+  }
+
+  .modo-taller-pasos-fila {
+    grid-template-columns: 1.6em minmax(0, 1fr) minmax(0, 1fr) 2.2em;
+  }
+
+  .modo-taller-pasos-accion {
+    grid-column: 2 / 4;
   }
 }

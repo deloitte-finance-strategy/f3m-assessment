@@ -285,6 +285,8 @@ export function datosDelActa(items) {
     domainTitle: dominio.title,
     fecha: diaLegible(ahora),
     fechaDeArchivo: fechaParaArchivo(ahora),
+    // Los que se apuntaron en el modo taller, despues del cierre.
+    proximosPasos: state.proximosPasos?.[state.activeDomainId] || [],
     subcapacidades: items.map((item) => ({
       id: item.id,
       capacidad: item.capacidad,
