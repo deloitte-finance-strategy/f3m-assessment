@@ -135,7 +135,7 @@ function notaDelObjetivo(palancas, objetivos) {
   const comun = valores.length && valores.every((valor) => valor === valores[0]) && Number.isInteger(valores[0])
     ? valores[0]
     : null;
-  const despues = "Al terminar, el cierre del taller resume lo que ha salido y lo que queda para la próxima sesión.";
+  const despues = "Al terminar, el cierre del taller resume lo que ha salido, y apuntamos juntos los próximos pasos.";
 
   if (comun) {
     return `El objetivo es el nivel ${comun}, <strong>${escapeHtml(NIVELES_DE_LA_RUBRICA[comun - 1] || "")}</strong>. ${despues}`;
