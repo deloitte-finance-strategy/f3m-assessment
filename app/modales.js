@@ -6,13 +6,13 @@
  * recorrer la pagina entera para volver a donde estaba.
  */
 
-import { getMaturityLevelNumber } from "../core/calculo.js?v=28";
-import { escapeHtml } from "../core/presentacion.js?v=28";
-import { atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=28";
-import { els, state } from "./estado.js?v=28";
-import { calculate } from "./metricas.js?v=28";
-import { getAiDataForItem } from "./subcapacidad.js?v=28";
-import { aiCaseCards, pintarContadorDeCasos } from "./celdas.js?v=28";
+import { getMaturityLevelNumber } from "../core/calculo.js?v=29";
+import { escapeHtml } from "../core/presentacion.js?v=29";
+import { atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=29";
+import { els, state } from "./estado.js?v=29";
+import { calculate } from "./metricas.js?v=29";
+import { getAiDataForItem } from "./subcapacidad.js?v=29";
+import { aiCaseCards, pintarContadorDeCasos } from "./celdas.js?v=29";
 
 
 let scoringCriteriaTrigger = null;

@@ -12,8 +12,8 @@
  * quien conoce el deck entero. Cada seccion solo sabe pintar su cuerpo.
  */
 
-import { average } from "../core/calculo.js?v=28";
-import { normalizarLogo } from "../core/escenario.js?v=28";
+import { average } from "../core/calculo.js?v=29";
+import { normalizarLogo } from "../core/escenario.js?v=29";
 
 import {
   COLOR_DE_PALANCA,
@@ -22,9 +22,9 @@ import {
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=28";
+} from "../core/presentacion.js?v=29";
 
-import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=28";
+import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=29";
 
 
 /**
@@ -376,7 +376,7 @@ function kpi({ etiqueta, valor, nota, alerta = false }) {
 }
 
 
-function rejillaDeKpis(tarjetas) {
+export function rejillaDeKpis(tarjetas) {
   return `<div class="rejilla-kpi">${tarjetas.map(kpi).join("")}</div>`;
 }
 
@@ -388,7 +388,7 @@ function rejillaDeKpis(tarjetas) {
  * de 9pt se leen bien. Proyectados a 13pt en una diapositiva no: se leen como
  * una lista sin verbo. Aqui se redactan como frases.
  */
-function titularHtml(titulares, sujeto) {
+export function titularHtml(titulares, sujeto) {
   if (!titulares) {
     return "";
   }
@@ -474,36 +474,45 @@ function radaresHtml(radarImages, { sufijo }) {
 
 // ================================================= parte 1 · funcion financiera
 
+/**
+ * Las cuatro cifras de la funcion financiera. Las comparten el panorama del
+ * informe y el resumen de una pagina, para que no puedan decir cosas distintas.
+ */
+export function kpisDeLaFuncionFinanciera(global) {
+  return [
+    {
+      etiqueta: "Score global F3M",
+      valor: formatMedia(global.scoreGlobal),
+      nota: "Promedio de las subcapacidades puntuadas de todos los dominios",
+    },
+    {
+      etiqueta: "Gap medio vs objetivo",
+      valor: formatMedia(global.gapMedio),
+      nota: "Contra los objetivos definidos por capacidad y palanca",
+    },
+    {
+      etiqueta: "Subcapacidades puntuadas",
+      valor: `${global.evaluadas}/${global.subcapacidades}`,
+      nota: global.subcapacidades
+        ? `${Math.round((global.evaluadas / global.subcapacidades) * 100)}% de avance`
+        : "Sin subcapacidades cargadas",
+    },
+    {
+      etiqueta: "Prioridad alta",
+      valor: String(global.highCount),
+      nota: "Subcapacidades con gap igual o superior a 2",
+      alerta: global.highCount > 0,
+    },
+  ];
+}
+
+
 export function panoramaGlobal(data) {
   const global = data.global;
 
   return `
     <div class="pila">
-    ${rejillaDeKpis([
-      {
-        etiqueta: "Score global F3M",
-        valor: formatMedia(global.scoreGlobal),
-        nota: "Promedio de las subcapacidades puntuadas de todos los dominios",
-      },
-      {
-        etiqueta: "Gap medio vs objetivo",
-        valor: formatMedia(global.gapMedio),
-        nota: "Contra los objetivos definidos por capacidad y palanca",
-      },
-      {
-        etiqueta: "Subcapacidades puntuadas",
-        valor: `${global.evaluadas}/${global.subcapacidades}`,
-        nota: global.subcapacidades
-          ? `${Math.round((global.evaluadas / global.subcapacidades) * 100)}% de avance`
-          : "Sin subcapacidades cargadas",
-      },
-      {
-        etiqueta: "Prioridad alta",
-        valor: String(global.highCount),
-        nota: "Subcapacidades con gap igual o superior a 2",
-        alerta: global.highCount > 0,
-      },
-    ])}
+    ${rejillaDeKpis(kpisDeLaFuncionFinanciera(global))}
 
     <div class="rejilla-panorama crece">
       ${escalaHtml({

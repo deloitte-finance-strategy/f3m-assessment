@@ -8,40 +8,44 @@
  */
 
 import {
+  PALANCAS,
+  average,
   masUrgentes,
   ordenarPorPrioridadYGap,
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=28";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=28";
-import { filasDeResumen } from "../core/exportacion.js?v=28";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=28";
-import { diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=28";
-import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=28";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=28";
-import { documentoDePreparacion } from "../informe/preparacion.js?v=28";
-import { showNotice } from "./avisos.js?v=28";
-import { getActiveDomainConfig } from "./dominios.js?v=28";
-import { DOMAINS, els, state } from "./estado.js?v=28";
-import { getVisibleItems } from "./filtros.js?v=28";
-import { getScenarioShortLabel } from "./firebase.js?v=28";
+} from "../core/calculo.js?v=29";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=29";
+import { filasDeResumen } from "../core/exportacion.js?v=29";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=29";
+import { diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=29";
+import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=29";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=29";
+import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=29";
+import { documentoDePreparacion } from "../informe/preparacion.js?v=29";
+import { showNotice } from "./avisos.js?v=29";
+import { getActiveDomainConfig } from "./dominios.js?v=29";
+import { DOMAINS, els, state } from "./estado.js?v=29";
+import { getVisibleItems } from "./filtros.js?v=29";
+import { getScenarioShortLabel } from "./firebase.js?v=29";
 import {
+  capturarRadarDelResumen,
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
   renderCapabilityRadar,
-} from "./graficos.js?v=28";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=28";
+} from "./graficos.js?v=29";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=29";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "./subcapacidad.js?v=28";
-import { renderDashboard } from "./vistas/dashboard.js?v=28";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=28";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=28";
+} from "./subcapacidad.js?v=29";
+import { renderDashboard } from "./vistas/dashboard.js?v=29";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=29";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=29";
 
 
 /**
@@ -49,6 +53,44 @@ import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=2
  * todos los dominios que tienen algo puntuado, en un solo deck.
  */
 export function exportPdfReport({ proyecto = false } = {}) {
+  abrirElDeck(
+    proyecto ? datosDelProyecto : buildEnhancedPdfReportData,
+    buildEnhancedPdfReportHtml,
+    "Informe generado. En el diálogo de impresión, elige «Guardar como PDF» y activa "
+      + "«Gráficos de fondo»: sin eso las portadas y el heatmap salen en blanco.",
+  );
+}
+
+
+/**
+ * El resumen de una pagina, para el comite de direccion: la funcion financiera
+ * entera en una diapositiva. Sin filtros, como la parte global del informe,
+ * porque es esa misma parte resumida. Ver informe/resumen.js.
+ *
+ * Sin nada puntuado no se pide: el menu ya lo dice y apaga el boton.
+ */
+export function exportarResumen() {
+  if (!dominiosDelProyecto().length) {
+    showNotice("Todavía no hay nada puntuado en ningún dominio: el resumen recoge lo que se puntúa.", "aviso");
+    return;
+  }
+
+  abrirElDeck(
+    datosDelResumen,
+    documentoDelResumen,
+    "Resumen generado. En el diálogo de impresión, elige «Guardar como PDF» y activa «Gráficos de fondo» "
+      + "para que salgan los colores.",
+  );
+}
+
+
+/**
+ * Abre una ventana, escribe en ella lo que salga de dibujar(construir()) y la
+ * manda a imprimir cuando han cargado las imagenes. La comparten el informe y
+ * el resumen: los dos llevan radares capturados y los dos se miden con
+ * ?comprobar=desbordes.
+ */
+function abrirElDeck(construir, dibujar, aviso) {
   // La ventana se abre en el mismo gesto del clic: si se abriera despues, el
   // navegador la bloquearia por emergente.
   const reportWindow = window.open("", "_blank");
@@ -69,10 +111,8 @@ export function exportPdfReport({ proyecto = false } = {}) {
     return;
   }
 
-  const reportData = conLasVistasDelInformeVisibles(
-    proyecto ? datosDelProyecto : buildEnhancedPdfReportData,
-  );
-  const reportHtml = buildEnhancedPdfReportHtml(reportData);
+  const reportData = conLasVistasDelInformeVisibles(construir);
+  const reportHtml = dibujar(reportData);
 
   reportWindow.document.open();
   reportWindow.document.write(reportHtml);
@@ -82,11 +122,7 @@ export function exportPdfReport({ proyecto = false } = {}) {
   // es informacion, no adorno. Sin "Graficos de fondo" el navegador los deja en
   // blanco y el PDF que se entrega pierde justo lo que lo hace legible. El
   // aviso se queda en la aplicacion, no en el informe: dentro saldria impreso.
-  showNotice(
-    "Informe generado. En el diálogo de impresión, elige «Guardar como PDF» y activa "
-      + "«Gráficos de fondo»: sin eso las portadas y el heatmap salen en blanco.",
-    "info",
-  );
+  showNotice(aviso, "info");
 
   setTimeout(() => {
     // Antes de imprimir, porque el dialogo de impresion bloquea el hilo y
@@ -511,6 +547,30 @@ function datosDelProyecto() {
 }
 
 
+/**
+ * Lo que lleva el resumen de una pagina: la parte global del informe, con sus
+ * mismas cifras, mas las brechas mayores y los proximos pasos de todos los
+ * dominios.
+ *
+ * El radar se dibuja aparte (capturarRadarDelResumen()): los tres del
+ * Overview, reducidos a un tercio de media hoja, dejaban los nombres de los
+ * dominios ilegibles.
+ */
+function datosDelResumen() {
+  const comunes = datosComunes();
+  const dominios = getDominiosDelOverview();
+  const nombreDe = new Map(dominios.map((dominio) => [dominio.id, dominio.label]));
+
+  return {
+    ...comunes,
+    radar: comunes.global ? capturarRadarDelResumen(comunes.global.filas) : "",
+    pasos: dominios.flatMap((dominio) =>
+      (state.proximosPasos?.[dominio.id] || []).map((paso) => ({ ...paso, dominio: nombreDe.get(dominio.id) })),
+    ),
+  };
+}
+
+
 /** Lo que es igual en cualquier informe: para quien, cuando y de donde. */
 function datosComunes() {
   const ahora = new Date();
@@ -649,8 +709,35 @@ function construirBloqueGlobalParaInforme() {
   const urgentes = masUrgentes(entradas, 10);
   const nombreDe = new Map(filas.map((fila) => [fila.id, fila.label]));
 
+  // Las mayores brechas con el criterio del acta: lo puntuado que no llega a su
+  // objetivo, por prioridad y gap. Las primeras coinciden con «Lo mas urgente»
+  // mientras haya cinco de prioridad alta.
+  const brechas = ordenarPorPrioridadYGap(evaluadas.filter((entrada) => entrada.metrics.gap > 0));
+
+  // Cada palanca frente a su objetivo, como en el acta: la media de los
+  // scores puntuados y la de los objetivos de todas las subcapacidades.
+  const palancasFrenteAlObjetivo = PALANCAS.map((palanca) => ({
+    key: palanca.key,
+    label: palanca.label,
+    media: average(entradas.map((entrada) => entrada.item.scores?.[palanca.key]).filter(Number.isFinite)),
+    objetivo: average(entradas.map((entrada) => entrada.metrics.targets?.[palanca.key]).filter(Number.isFinite)),
+  }));
+
   return {
     filas,
+    palancas: palancasFrenteAlObjetivo,
+    brechas: {
+      total: brechas.length,
+      lista: brechas.slice(0, BRECHAS_EN_EL_RESUMEN).map(({ item, domainId, metrics }) => ({
+        dominio: nombreDe.get(domainId) || domainId,
+        capacidad: item.capacidad,
+        subcapacidad: item.subcapacidad,
+        scoreMedio: metrics.scoreMedio,
+        targetMedio: metrics.targetMedio,
+        gap: metrics.gap,
+        prioridad: metrics.prioridad,
+      })),
+    },
     urgentes: {
       total: urgentes.total,
       lista: urgentes.lista.map(({ item, domainId, metrics }) => ({

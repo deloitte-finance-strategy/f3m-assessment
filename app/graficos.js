@@ -14,10 +14,10 @@
  * eso ataba el dibujo al estado.
  */
 
-import { formatMedia } from "../core/presentacion.js?v=28";
-import { els } from "./estado.js?v=28";
-import { showNotice } from "./avisos.js?v=28";
-import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=28";
+import { formatMedia } from "../core/presentacion.js?v=29";
+import { els } from "./estado.js?v=29";
+import { showNotice } from "./avisos.js?v=29";
+import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=29";
 
 
 
@@ -171,6 +171,10 @@ function renderSingleCapabilityRadar({
 
   // Que hacer al pulsar el eje de indice i: abrir esa capacidad o ese dominio.
   alElegirEje = null,
+
+  // Para una imagen pequena: sin leyenda —la explica quien la coloca— y al
+  // doble de pixeles, que se imprime.
+  compacto = false,
 }) {
   if (!canvas) {
     return;
@@ -181,6 +185,9 @@ function renderSingleCapabilityRadar({
   // item— y tenerlos escritos dos veces era pedir que se descuadraran.
   const paleta = paletaDeRadar();
   const colorDelObjetivo = paleta.objetivo;
+
+  // En la imagen pequena, la letra un punto mayor: se reduce al colocarla.
+  const tamanoDeLetra = compacto ? 12 : tamanoDeLetraDeGrafico();
   const colorDelTextoDeLeyenda = paleta.leyenda;
 
   const chartData = {
@@ -242,6 +249,7 @@ function renderSingleCapabilityRadar({
     responsive: true,
     maintainAspectRatio: false,
     animation: false,
+    ...(compacto ? { devicePixelRatio: 2 } : {}),
 
     layout: {
       padding: 4,
@@ -266,7 +274,7 @@ function renderSingleCapabilityRadar({
 
     plugins: {
       legend: {
-        display: true,
+        display: !compacto,
         position: "bottom",
 
         labels: {
@@ -277,7 +285,7 @@ function renderSingleCapabilityRadar({
           color: colorDelTextoDeLeyenda,
 
           font: {
-            size: tamanoDeLetraDeGrafico(),
+            size: tamanoDeLetra,
             weight: "700",
           },
 
@@ -332,7 +340,7 @@ function renderSingleCapabilityRadar({
           color: paleta.marcas,
 
           font: {
-            size: tamanoDeLetraDeGrafico(),
+            size: tamanoDeLetra,
             weight: "700",
           },
         },
@@ -342,7 +350,7 @@ function renderSingleCapabilityRadar({
           padding: 8,
 
           font: {
-            size: tamanoDeLetraDeGrafico(),
+            size: tamanoDeLetra,
             weight: "800",
           },
         },
@@ -698,6 +706,69 @@ export function getOverviewRadarImagesForPdf() {
     tecnologia: getCanvasImageDataUrl("tecnologia", els.overviewRadarTechnologyChart, overviewRadarCharts),
     organizacion: getCanvasImageDataUrl("organizacion", els.overviewRadarOrganizationChart, overviewRadarCharts),
   };
+}
+
+
+/**
+ * El radar del resumen de una pagina: la madurez media de cada dominio frente
+ * a su objetivo, en uno solo.
+ *
+ * Los tres del Overview, uno por palanca, no caben ahi: a un tercio de media
+ * hoja los nombres de los dominios salian a 4 puntos, ilegibles. Uno solo a
+ * buen tamano se lee, y las palancas las cuenta el resumen al lado.
+ *
+ * El valor es el score medio del dominio, el mismo de la tabla del Overview, y
+ * el objetivo la media de sus tres objetivos por palanca, que cuentan tambien
+ * lo pendiente, como la linea de los radares del Overview: el objetivo es
+ * configuracion, no medicion.
+ *
+ * En gris y negro, y no en verde: los tres colores de palanca solo significan
+ * palanca, y el verde de marca es el mismo que el de Procesos.
+ *
+ * Se dibuja fuera de la pantalla, y no oculto: un canvas oculto no tiene
+ * tamano. Al terminar se destruye, y el Overview no se entera.
+ */
+export function capturarRadarDelResumen(filas, { ancho = 400, alto = 310 } = {}) {
+  if (!filas?.length || !hayLibreriaDeGraficos()) {
+    return "";
+  }
+
+  const caja = document.createElement("div");
+  const canvas = document.createElement("canvas");
+  const registro = { media: null };
+  const radarData = buildOverviewRadarData(filas);
+  const objetivoDe = (fila) => {
+    const objetivos = [fila.objetivoProcesos, fila.objetivoTecnologia, fila.objetivoOrganizacion]
+      .map(toRadarNumber)
+      .filter((valor) => valor !== null);
+
+    return objetivos.length ? objetivos.reduce((suma, valor) => suma + valor, 0) / objetivos.length : null;
+  };
+
+  caja.setAttribute("aria-hidden", "true");
+  caja.style.cssText = `position:fixed; left:-10000px; top:0; width:${ancho}px; height:${alto}px; pointer-events:none;`;
+  caja.appendChild(canvas);
+  document.body.appendChild(caja);
+
+  try {
+    renderSingleCapabilityRadar({
+      key: "media",
+      canvas,
+      label: "Madurez media",
+      values: filas.map((fila) => toRadarNumber(fila.scoreMedio)),
+      targetValues: filas.map(objetivoDe),
+      color: "#1C211D",
+      backgroundColor: "rgba(28, 33, 29, 0.12)",
+      radarData,
+      registro,
+      compacto: true,
+    });
+
+    return getCanvasImageDataUrl("media", canvas, registro);
+  } finally {
+    registro.media?.destroy();
+    caja.remove();
+  }
 }
 
 
