@@ -504,4 +504,17 @@ export const casos = [
       t.igual(html.includes('<section class="slide cierre'), true, "y llega al cierre");
     },
   },
+  {
+    grupo: "Informe · logo del cliente",
+    nombre: "la portada lleva el logo valido, y uno que no lo es no llega a pintarse",
+    ejecutar: (t) => {
+      const conLogo = buildEnhancedPdfReportHtml(datos({ cliente: "Acme", logo: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" }));
+      t.igual(conLogo.includes('class="portada-logo"'), true, "con logo, en la portada");
+      t.igual(conLogo.includes('alt="Logo de Acme"'), true, "con su texto alternativo");
+
+      const roto = buildEnhancedPdfReportHtml(datos({ logo: 'data:image/png;base64,AA" onerror="x' }));
+      t.igual(roto.includes('class="portada-logo"'), false, "uno roto no se pinta");
+      t.igual(roto.includes("onerror"), false, "ni se cuela en el HTML");
+    },
+  },
 ];

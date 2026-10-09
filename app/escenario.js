@@ -19,6 +19,8 @@ import {
   normalizarCliente,
   normalizarEscenarioParaFirebase,
   normalizarEstado,
+  normalizarLogo,
+  normalizarProximosPasos,
   recortarAlLimite,
 } from "../core/escenario.js?v=28";
 
@@ -236,6 +238,8 @@ export function applyScenarioPayload(payload, { seguirDominioDelEscenario = fals
   // el nombre del que habia antes. En la portada de un informe ese error se
   // envia por correo.
   state.cliente = normalizarCliente(payload.cliente);
+  state.logo = normalizarLogo(payload.logo);
+  state.proximosPasos = normalizarProximosPasos(payload.proximosPasos);
 
   if (payload.domains) {
     Object.keys(payload.domains).forEach((domainId) => {
@@ -386,6 +390,8 @@ export function buildScenarioPayload() {
     activeDomainId: state.activeDomainId,
     updatedAt: new Date().toISOString(),
     ...(state.cliente ? { cliente: state.cliente } : {}),
+    ...(state.logo ? { logo: state.logo } : {}),
+    ...(Object.keys(state.proximosPasos).length ? { proximosPasos: state.proximosPasos } : {}),
     domains: domainsPayload,
   };
 }

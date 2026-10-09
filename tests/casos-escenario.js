@@ -14,11 +14,16 @@ import {
   CAMPOS_DE_AUTORIA,
   ESTADOS_VALIDOS,
   LIMITE_DE_CLIENTE,
+  LIMITE_DE_LOGO,
+  LIMITES_DE_PASO,
   LIMITES_DE_TEXTO,
+  MAXIMO_DE_PASOS,
   normalizarAutoria,
   normalizarCliente,
   normalizarEscenarioParaFirebase,
   normalizarEstado,
+  normalizarLogo,
+  normalizarProximosPasos,
   recortarAlLimite,
   revisarEscenario,
 } from "../core/escenario.js?v=28";
@@ -443,6 +448,85 @@ export const casos = [
 
       t.igual(revision.valido, true);
       t.igual(revision.problemas.length, 0, "cliente es un campo de la herramienta");
+    },
+  },
+
+  // ---------------------------------------------------------------- logo
+  {
+    grupo: "El logo del cliente",
+    nombre: "solo pasa una imagen PNG, JPEG o WebP en base64",
+    ejecutar: (t) => {
+      const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
+      t.igual(normalizarLogo(png), png, "un PNG pasa tal cual");
+      t.igual(normalizarLogo("data:image/jpeg;base64,/9j/4AAQ"), "data:image/jpeg;base64,/9j/4AAQ", "y un JPEG");
+      t.igual(normalizarLogo("data:image/svg+xml;base64,PHN2Zz4="), "", "un SVG no: puede llevar codigo");
+      t.igual(normalizarLogo('data:image/png;base64,AAAA" onerror="alert(1)'), "", "ni nada con que salirse del atributo");
+      t.igual(normalizarLogo("javascript:alert(1)"), "", "ni otra cosa");
+      t.igual(normalizarLogo(`data:image/png;base64,${"A".repeat(LIMITE_DE_LOGO)}`), "", "ni uno por encima del limite");
+      t.igual(normalizarLogo(42), "", "lo que no es texto se queda en vacio");
+    },
+  },
+  {
+    grupo: "El logo del cliente",
+    nombre: "viaja si es valido, y un archivo con uno roto lo dice",
+    ejecutar: (t) => {
+      const conLogo = escenarioSano();
+      conLogo.logo = "data:image/webp;base64,UklGRg==";
+      t.igual(normalizar(conLogo).logo, conLogo.logo, "el logo valido viaja");
+      t.igual("logo" in normalizar(escenarioSano()), false, "sin logo no viaja");
+
+      const roto = escenarioSano();
+      roto.logo = "data:text/html;base64,PGgxPg==";
+      t.igual("logo" in normalizar(roto), false, "uno roto no viaja");
+
+      const revision = revisarEscenario(roto);
+      t.igual(revision.valido, true, "el resto del archivo se puede abrir");
+      t.igual(revision.problemas.some((problema) => problema.includes("logo")), true, "y el aviso lo cuenta");
+      t.igual(revisarEscenario(conLogo).problemas.length, 0, "uno bueno no da avisos");
+    },
+  },
+
+  // ------------------------------------------------------ proximos pasos
+  {
+    grupo: "Los proximos pasos",
+    nombre: "se guardan limpios, por dominio, y sin filas en blanco",
+    ejecutar: (t) => {
+      const pasos = normalizarProximosPasos({
+        fpa: [
+          { accion: "  Formalizar   el RACI ", responsable: "Control de gestión", fecha: "30 oct" },
+          { accion: "", responsable: " ", fecha: "" },
+          { accion: "Enviar los informes", responsable: "", fecha: "", extra: "fuera" },
+        ],
+        inventado: [{ accion: "No es un dominio" }],
+        fiscal: [],
+      });
+
+      t.igual(Object.keys(pasos).join(", "), "fpa", "solo los dominios que existen y tienen algo");
+      t.igual(pasos.fpa.length, 2, "la fila en blanco no se guarda");
+      t.igual(pasos.fpa[0].accion, "Formalizar el RACI", "espacios sobrantes fuera");
+      t.igual(Object.keys(pasos.fpa[1]).join(", "), Object.keys(LIMITES_DE_PASO).join(", "), "solo los campos de las reglas");
+    },
+  },
+  {
+    grupo: "Los proximos pasos",
+    nombre: "se leen igual de una lista que del objeto en que la guarda Firebase",
+    ejecutar: (t) => {
+      const comoObjeto = normalizarProximosPasos({ fpa: { 0: { accion: "Uno" }, 1: { accion: "Dos" } } });
+      t.igual(comoObjeto.fpa.map((paso) => paso.accion).join(", "), "Uno, Dos");
+
+      const muchos = normalizarProximosPasos({
+        fpa: Array.from({ length: MAXIMO_DE_PASOS + 5 }, (_, posicion) => ({ accion: `Paso ${posicion}` })),
+      });
+      t.igual(muchos.fpa.length, MAXIMO_DE_PASOS, "con un maximo");
+
+      const largo = normalizarProximosPasos({ fpa: [{ accion: "x".repeat(LIMITES_DE_PASO.accion + 50) }] });
+      t.igual(largo.fpa[0].accion.length, LIMITES_DE_PASO.accion, "cada texto dentro de su limite");
+
+      const conPasos = escenarioSano();
+      conPasos.proximosPasos = { fpa: [{ accion: "Uno" }] };
+      t.igual(normalizar(conPasos).proximosPasos.fpa[0].accion, "Uno", "viajan con el escenario");
+      t.igual(revisarEscenario(conPasos).problemas.length, 0, "y un archivo con ellos no da avisos");
     },
   },
 ];

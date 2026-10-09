@@ -13,6 +13,7 @@
  */
 
 import { average } from "../core/calculo.js?v=28";
+import { normalizarLogo } from "../core/escenario.js?v=28";
 
 import {
   COLOR_DE_PALANCA,
@@ -89,6 +90,7 @@ export function portada(data) {
   }
 
   return `
+    ${logoDeLaPortada(data)}
     <p class="portada-antetitulo">Finance Strategy · F3M Assessment</p>
     <h1>Informe preliminar de madurez<b>${escapeHtml(data.domainLabel)}</b></h1>
     ${data.cliente ? `<p class="portada-cliente">${escapeHtml(data.cliente)}</p>` : ""}
@@ -109,6 +111,21 @@ export function portada(data) {
 
 
 /**
+ * El logo del cliente, arriba a la derecha y sobre blanco: casi todos estan
+ * pensados para fondo claro, y la portada es negra. Se vuelve a comprobar aqui
+ * aunque la aplicacion ya lo haga: lo que llega al src de una imagen de un
+ * entregable no puede depender de que nadie se acuerde de validarlo antes.
+ */
+function logoDeLaPortada(data) {
+  const logo = normalizarLogo(data.logo);
+
+  return logo
+    ? `<img class="portada-logo" src="${escapeAttr(logo)}" alt="${escapeAttr(data.cliente ? `Logo de ${data.cliente}` : "Logo del cliente")}">`
+    : "";
+}
+
+
+/**
  * La portada del informe de todo el proyecto: los dominios que recorre, en
  * vez de uno, y que no lleva filtros.
  */
@@ -123,6 +140,7 @@ function portadaDelProyecto(data) {
     || String(data.dominios.length);
 
   return `
+    ${logoDeLaPortada(data)}
     <p class="portada-antetitulo">Finance Strategy · F3M Assessment</p>
     <h1>Informe preliminar de madurez<b>${escapeHtml(enElTitulo ? nombres : `${cuantos} dominios`)}</b></h1>
     ${data.cliente ? `<p class="portada-cliente">${escapeHtml(data.cliente)}</p>` : ""}

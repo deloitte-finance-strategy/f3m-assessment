@@ -159,6 +159,14 @@ export async function initializeSharedScenario() {
         if (state.cliente) {
           persistCliente();
         }
+
+        if (state.logo) {
+          persistLogo();
+        }
+
+        if (Object.keys(state.proximosPasos).length) {
+          persistProximosPasos();
+        }
       } catch (error) {
         console.warn(
           "El escenario se ha guardado localmente, pero no se ha podido crear en Firebase.",
@@ -561,8 +569,9 @@ function hayIdentidadParaEscribir() {
  * Con un update() multi-ruta, cada dominio cargado se reemplaza entero —que es
  * lo que se quiere al importar o al restaurar— y la rama de un dominio ausente
  * se queda intacta. Las claves raiz son las que admiten las reglas, que
- * rechazan cualquier otra con `$otroCampoRaiz: false`, menos el cliente, que
- * va por su cuenta en persistCliente().
+ * rechazan cualquier otra con `$otroCampoRaiz: false`, menos el cliente, el
+ * logo y los proximos pasos, que van cada uno por su cuenta (persistCliente()
+ * y compañia).
  */
 function rutasDeEscrituraCompleta(sanitizado) {
   const rutas = {
@@ -597,6 +606,27 @@ function rutasDeEscrituraCompleta(sanitizado) {
  */
 export function persistCliente() {
   persistGranularChange({ cliente: state.cliente || null });
+}
+
+
+/**
+ * El logo y los proximos pasos van igual que el cliente, y por el mismo
+ * motivo: son aun mas nuevos en las reglas. Cada uno en su escritura, para que
+ * si las publicadas no conocen uno, no se lleve por delante a los otros.
+ */
+export function persistLogo() {
+  persistGranularChange({ logo: state.logo || null });
+}
+
+
+/** Los de un dominio, o con `domainId` vacio los de todos, como tras una escritura completa. */
+export function persistProximosPasos(domainId = null) {
+  if (domainId) {
+    persistGranularChange({ [`proximosPasos/${domainId}`]: state.proximosPasos[domainId]?.length ? state.proximosPasos[domainId] : null });
+    return;
+  }
+
+  persistGranularChange({ proximosPasos: Object.keys(state.proximosPasos).length ? state.proximosPasos : null });
 }
 
 
@@ -832,6 +862,8 @@ export function persistScenario() {
     .then(() => {
       marcarEscrituraCorrecta();
       persistCliente();
+      persistLogo();
+      persistProximosPasos();
     })
     .catch((error) => {
       console.warn(

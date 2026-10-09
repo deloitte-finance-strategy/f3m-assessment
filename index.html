@@ -129,6 +129,7 @@
     <link rel="modulepreload" href="app/taller.js?v=28">
     <link rel="modulepreload" href="app/cierre.js?v=28">
     <link rel="modulepreload" href="app/apertura.js?v=28">
+    <link rel="modulepreload" href="app/logo.js?v=28">
     <link rel="modulepreload" href="app/vistas/assessment.js?v=28">
     <link rel="modulepreload" href="app/vistas/dashboard.js?v=28">
     <link rel="modulepreload" href="app/vistas/heatmap.js?v=28">
@@ -334,6 +335,25 @@
                 <span id="clienteLabel">Poner el nombre del cliente</span>
                 <span>Sale en la portada del informe y en los archivos</span>
               </button>
+
+              <!--
+                El logo se elige con un archivo y se guarda reducido dentro del
+                escenario. Ver app/logo.js.
+              -->
+              <button class="header-menu-item" id="logoButton" type="button">
+                <span class="header-menu-item-con-miniatura">
+                  <span id="logoLabel">Poner el logo del cliente</span>
+                  <img id="logoMiniatura" alt="" hidden>
+                </span>
+                <span>Sale en las portadas del informe, la preparación y el acta, y en la apertura del taller</span>
+              </button>
+
+              <button class="header-menu-item" id="logoQuitarButton" type="button" hidden>
+                Quitar el logo
+                <span>Las portadas vuelven a llevar solo el nombre del cliente</span>
+              </button>
+
+              <input id="logoInput" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" hidden>
 
               <hr class="header-menu-separator">
 

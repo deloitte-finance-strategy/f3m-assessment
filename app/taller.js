@@ -504,6 +504,7 @@ function pintarApertura({ enfocar = true } = {}) {
   cuerpo.innerHTML = htmlDeLaApertura({
     cliente: state.cliente,
     dominio: getActiveDomainConfig()?.label || "",
+    logo: state.logo,
     items: items.map((item) => ({ ...item, puntuada: !calculate(item).isPending })),
     objetivos: objetivosMedios(items),
     palancas: LEVERS,

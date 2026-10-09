@@ -53,6 +53,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 873 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
 | `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 137 |
+| `app/logo.js` | **El logo del cliente**: elegirlo, reducirlo a lo que admiten las reglas y enseñarlo | 176 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 317 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe, a la preparación y al acta del taller | 830 |
@@ -145,7 +146,7 @@ infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, mét
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
-`app/biblioteca.js`, `app/buscador.js`, `app/taller.js`, `app/apertura.js` y `app/cierre.js`. Lo nuevo nace ya en `app/`, no en
+`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/taller.js`, `app/apertura.js` y `app/cierre.js`. Lo nuevo nace ya en `app/`, no en
 `app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
 
@@ -591,6 +592,16 @@ Al tocar el flujo de guardado, tener en cuenta:
   escritura, `persistCliente()`, y nunca dentro de una completa. Es el campo más nuevo de las
   reglas: si las publicadas en la consola aún no lo conocen, una escritura completa que lo llevara
   se rechazaría entera, puntuaciones incluidas. Separado, lo peor es que no se comparta el nombre.
+- El **logo del cliente** (`logo`) y los **próximos pasos** (`proximosPasos`, por dominio) siguen
+  la misma regla y por el mismo motivo: `persistLogo()` y `persistProximosPasos()`, cada uno en su
+  escritura, y se reenvían por separado después de cada escritura completa. Sin las reglas nuevas
+  publicadas en la consola funcionan en local y no se comparten; nada más deja de guardarse.
+- El logo viaja **dentro del escenario, como data URL**, y no como archivo aparte: así va en las
+  copias y en el escenario compartido sin otro almacenamiento. Por eso `reducirLogo()` lo deja en
+  640×240 como mucho y por debajo de `LIMITE_DE_LOGO`. Solo PNG, JPEG o WebP: **un SVG se acepta
+  pero se guarda ya dibujado en PNG**, porque un SVG puede llevar código y lo que se guarda lo puede
+  escribir cualquiera con el enlace. Se lee con `FileReader` y no con `URL.createObjectURL()`: la
+  CSP solo admite imágenes de la propia web y `data:`, y un `blob:` se bloquea.
 - El indicador de guardado tiene un estado `error` real. **Ningún `catch` puede terminar en un
   mensaje de éxito**: es el fallo que más caro sale en una sesión con cliente.
 
@@ -883,6 +894,10 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    una copia» dice cuándo fue la última; para ver el punto ámbar sin esperar un día, poner
    `f3m-cambios-sin-copia-desde` a una fecha de anteayer en `localStorage` y recargar. Guardar
    una copia lo quita.
+   «Sesión → Poner el logo del cliente», con un PNG y con un SVG: el menú enseña la miniatura, y
+   el logo sale en la portada de los dos informes, en la preparación, en el acta y en la apertura
+   del taller; sigue tras recargar y «Quitar el logo» lo quita de todos. Un archivo que no es una
+   imagen da un aviso, no un error en la consola.
 12. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
    uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
    guardado se pone **rojo**.

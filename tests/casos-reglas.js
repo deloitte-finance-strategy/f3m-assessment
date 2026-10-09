@@ -22,9 +22,13 @@ import {
   CAMPOS_DE_DOMINIO,
   CAMPOS_DE_ITEM,
   CAMPOS_RAIZ,
+  DOMINIOS_ADMITIDOS,
   ESTADOS_VALIDOS,
+  FORMATOS_DE_LOGO,
   LIMITE_DE_CLIENTE,
+  LIMITE_DE_LOGO,
   LIMITE_DE_META,
+  LIMITES_DE_PASO,
   LIMITES_DE_TEXTO,
 } from "../core/escenario.js?v=28";
 
@@ -65,6 +69,8 @@ const ESCENARIO = reglas?.rules?.scenarios?.$scenarioId;
 const DOMINIO = ESCENARIO?.domains?.$domainId;
 const ITEM = DOMINIO?.items?.$indice;
 const TARGET = DOMINIO?.targets?.$indiceTarget;
+const PASOS = ESCENARIO?.proximosPasos?.$dominioDePasos;
+const PASO = PASOS?.$paso;
 
 
 /** El numero de un ".validate" del tipo "... length <= N". */
@@ -121,6 +127,7 @@ export const casos = [
       t.igual(Boolean(TARGET), true, "targets/$indiceTarget");
       t.igual(Boolean(ITEM?.scores), true, "items/$indice/scores");
       t.igual(Boolean(ITEM?.lastEditedBy), true, "items/$indice/lastEditedBy");
+      t.igual(Boolean(PASO), true, "proximosPasos/$dominioDePasos/$paso");
     },
   },
 
@@ -159,6 +166,28 @@ export const casos = [
     nombre: "LIMITE_DE_CLIENTE coincide con las reglas",
     ejecutar: (t) => {
       t.igual(limiteDe(ESCENARIO?.cliente), LIMITE_DE_CLIENTE, "cliente");
+    },
+  },
+  {
+    grupo: "Espejo de las reglas · longitudes",
+    nombre: "LIMITE_DE_LOGO y los formatos del logo coinciden con las reglas",
+    ejecutar: (t) => {
+      t.igual(limiteDe(ESCENARIO?.logo), LIMITE_DE_LOGO, "logo");
+
+      const formatos = [...(ESCENARIO?.logo?.[".validate"] ?? "").matchAll(/beginsWith\('data:image\/(\w+);base64,'\)/g)]
+        .map((encontrado) => encontrado[1]);
+
+      t.igual(enOrden(formatos), enOrden(FORMATOS_DE_LOGO), "formatos del logo");
+    },
+  },
+  {
+    grupo: "Espejo de las reglas · longitudes",
+    nombre: "LIMITES_DE_PASO coincide campo a campo con las reglas",
+    ejecutar: (t) => {
+      Object.entries(LIMITES_DE_PASO).forEach(([campo, limite]) => {
+        t.igual(limiteDe(PASO?.[campo]), limite, `proximosPasos/${campo}`);
+      });
+      t.igual(camposDe(PASO), enOrden(Object.keys(LIMITES_DE_PASO)), "campos de un paso");
     },
   },
   {
@@ -224,6 +253,7 @@ export const casos = [
         [ITEM?.scores, "$otroScore"],
         [ITEM?.lastEditedBy, "$otroCampoAutoria"],
         [TARGET, "$otroTarget"],
+        [PASO, "$otroCampoPaso"],
       ];
 
       cerrojos.forEach(([nodo, comodin]) => {
@@ -250,6 +280,8 @@ export const casos = [
       const delCatalogo = (catalogo?.domains ?? []).map((dominio) => dominio.id);
 
       t.igual(alternativasDe(DOMINIO), enOrden(delCatalogo), "$domainId");
+      t.igual(alternativasDe(PASOS), enOrden(delCatalogo), "proximosPasos/$dominioDePasos");
+      t.igual(enOrden(DOMINIOS_ADMITIDOS), enOrden(delCatalogo), "DOMINIOS_ADMITIDOS");
     },
   },
 

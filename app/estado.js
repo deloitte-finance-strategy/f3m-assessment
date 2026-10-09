@@ -85,6 +85,12 @@ export const state = {
   // Para quien es el trabajo. Es del escenario, no de un dominio: sale en la
   // cabecera, en la portada del informe y en el nombre de los archivos.
   cliente: "",
+  // Su logo, ya reducido, en data URL: sale en las portadas y en la apertura
+  // del taller. Vacio si no hay.
+  logo: "",
+  // Lo acordado al cerrar cada taller, por dominio: { fpa: [{ accion,
+  // responsable, fecha }] }. Sale en el acta y en el correo.
+  proximosPasos: {},
   domains: {},
   meta: null,
   items: [],

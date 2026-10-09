@@ -290,6 +290,7 @@ import { setupBuscador } from "./app/buscador.js?v=28";
 
 // Una subcapacidad a pantalla completa, para proyectarla en el taller.
 import { refrescarModoTaller, setupModoTaller } from "./app/taller.js?v=28";
+import { pintarLogoEnElMenu, setupLogoDelCliente } from "./app/logo.js?v=28";
 
 
 document.addEventListener("DOMContentLoaded", init);
@@ -705,6 +706,7 @@ function bindGlobalEvents() {
       }
     },
   });
+  setupLogoDelCliente({ alCambiarElLogo: () => renderAll() });
   setupAltoDePestanas();
   setupCajaDelRoadmap();
   setupBackToTopButton();
@@ -1317,8 +1319,10 @@ function updateNavigationBadges() {
 
 function renderAll(opciones = {}) {
   // Antes que nada: el nombre llega tambien con los cambios de otras personas
-  // del escenario, y no depende de la vista ni del dominio abierto.
+  // del escenario, y no depende de la vista ni del dominio abierto. El logo,
+  // igual.
   pintarCliente();
+  pintarLogoEnElMenu();
 
   // El Overview agrega state.domains y no state.items: es la unica vista que
   // sigue teniendo algo que ensenar cuando el dominio abierto se queda sin

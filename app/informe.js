@@ -151,6 +151,7 @@ export function exportarPreparacion() {
   ventana.document.open();
   ventana.document.write(documentoDePreparacion({
     cliente: state.cliente,
+    logo: state.logo,
     domainLabel: dominio.label,
     domainTitle: dominio.title,
     fechaDeArchivo: fechaParaArchivo(new Date()),
@@ -279,6 +280,7 @@ export function datosDelActa(items) {
 
   return {
     cliente: state.cliente,
+    logo: state.logo,
     domainLabel: dominio.label,
     domainTitle: dominio.title,
     fecha: diaLegible(ahora),
@@ -513,6 +515,7 @@ function datosComunes() {
 
   return {
     cliente: state.cliente,
+    logo: state.logo,
     generatedAt: fechaLegible(ahora),
     fechaDeArchivo: fechaParaArchivo(ahora),
     // Nunca el identificador completo: este informe se envía al cliente.

@@ -266,6 +266,18 @@ function estilosDePortada() {
       background: ${PALETA.marca};
     }
 
+    .portada-logo {
+      position: absolute;
+      top: 16mm;
+      right: 20mm;
+      max-width: 62mm;
+      max-height: 22mm;
+      padding: 3mm 5mm;
+      border-radius: 3mm;
+      background: #FFFFFF;
+      object-fit: contain;
+    }
+
     .portada-antetitulo {
       margin: 0 0 9mm;
       font-size: 9pt;

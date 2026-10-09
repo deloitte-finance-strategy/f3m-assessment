@@ -38,6 +38,7 @@ import {
   NIVELES_DE_LA_RUBRICA,
   capacidadesDePreparacion,
   estilosDelDocumento,
+  logoDelDocumento,
   tituloDelDocumento,
 } from "./preparacion.js?v=28";
 
@@ -130,6 +131,7 @@ export function documentoDeActa(datos) {
           <span>Acta del taller · ${dominio}</span>
         </div>
 
+        ${logoDelDocumento(datos)}
         <h1>Acta del taller de ${escapeHtml(datos.domainTitle || datos.domainLabel || "")}</h1>
         <p class="bajada">Diagnóstico de madurez de la función financiera · Deloitte Finance Strategy</p>
 
