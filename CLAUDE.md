@@ -33,11 +33,12 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.383 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.417 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.920 |
-| `app/estado.js` | El estado compartido y las constantes que lo describen | 183 |
-| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 341 |
+| `sw.js` | **El service worker**: guarda la herramienta en el navegador para abrirla sin red | 172 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.928 |
+| `app/estado.js` | El estado compartido y las constantes que lo describen | 189 |
+| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 352 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 257 |
 | `app/graficos.js` | Los seis radares de Chart.js, y a dónde lleva pulsar sus ejes | 718 |
@@ -45,20 +46,21 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 486 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
 | `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 88 |
-| `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 403 |
+| `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 409 |
 | `app/firebase.js` | La conexión: configuración, referencia y límite de espera | 220 |
 | `app/identidad.js` | La sesión anónima y el nombre de quien edita | 249 |
 | `app/copias.js` | **Si el trabajo local tiene copia.** Cuándo fue la última y el punto del aviso | 143 |
 | `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 155 |
-| `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 873 |
+| `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 905 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
-| `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 137 |
+| `app/sin-conexion.js` | Registra `sw.js` y avisa cuando se va la red, diciendo qué sigue funcionando | 89 |
+| `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 167 |
 | `app/logo.js` | **El logo del cliente**: elegirlo, reducirlo a lo que admiten las reglas y enseñarlo | 176 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 317 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
-| `app/informe.js` | Lo que la aplicación le pasa al informe, a la preparación y al acta del taller | 830 |
+| `app/informe.js` | Lo que la aplicación le pasa al informe, a la preparación y al acta del taller | 835 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 801 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.083 |
 | `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
 | `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 282 |
 | `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 174 |
@@ -69,22 +71,22 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 172 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.728 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.141 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
-| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 536 |
+| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 660 |
 | `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
 | `core/presentacion.js` | Escapado, formato de números y fechas, y colores de marca | 210 |
 | `core/busqueda.js` | Qué subcapacidades casan con lo que se escribe, y qué resaltar | 152 |
 | `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 510 |
 | `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 480 |
-| `informe/secciones.js` | Una función por diapositiva | 1.052 |
+| `informe/secciones.js` | Una función por diapositiva | 1.070 |
 | `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 307 |
-| `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.016 |
+| `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.028 |
 | `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 112 |
-| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 558 |
-| `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 736 |
+| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 582 |
+| `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 795 |
 | `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
@@ -147,7 +149,7 @@ infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, mét
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
-`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/taller.js`, `app/apertura.js`, `app/cierre.js` y
+`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/sin-conexion.js`, `app/taller.js`, `app/apertura.js`, `app/cierre.js` y
 `app/proximos-pasos.js`. Lo nuevo nace ya en `app/`, no en
 `app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
@@ -189,8 +191,8 @@ un importmap en línea está sujeto a `script-src`, y la CSP **no lleva `'unsafe
 bloquea. Y un importmap externo depende de soporte reciente, que no se puede dar por hecho en el
 portátil que haya en la sala.
 
-Al desplegar hay que subir el número **en `index.html` y en todos los imports**. Olvidarlo es un CI
-rojo, no un fallo silencioso en casa de un cliente:
+Al desplegar hay que subir el número **en `index.html`, en todos los imports y en `VERSION` de
+`sw.js`**. Olvidarlo es un CI rojo, no un fallo silencioso en casa de un cliente:
 
 ```powershell
 python scripts/check_module_version.py
@@ -213,6 +215,32 @@ la lista de dominios vive en `data/domains.json` y no se repite en el HTML.
 Chart.js lleva `defer` por lo mismo: sin él, compartiendo la línea con todo lo demás, la cabecera
 tardaba 200 ms más en pintarse. Se sigue ejecutando antes que `app.js`, porque los scripts diferidos
 y los módulos corren en el orden del documento.
+
+### Se abre sin conexión
+
+`sw.js` es un service worker: la primera vez que se abre la herramienta guarda en el navegador lo
+que hace falta para trabajar en modo local sin red —el código, los datos de los nueve dominios y
+los PDF de la biblioteca, unos 8 MB— y desde entonces se abre igual con la wifi de la sala caída.
+Lo registra `app/sin-conexion.js` **al terminar de cargar la página**, para que la descarga no
+compita con el arranque, y solo en un origen seguro (GitHub Pages, `localhost`).
+
+**Todo va primero a la red**, y solo si falla o no contesta en cuatro segundos, a lo guardado. Lo
+contrario sería más rápido para lo que lleva `?v=`, pero en local se edita un módulo y se recarga
+sin subir la versión, y con lo guardado delante el cambio no se vería. Con la red primero,
+conectado todo es como sin service worker. Los cuatro segundos son por la wifi saturada, que no
+falla: deja la petición colgada.
+
+Una versión nueva no puede quedarse atrás: `VERSION` en `sw.js` es la de `index.html`, y
+`check_module_version.py` lo comprueba. Al desplegar cambia `sw.js`, el navegador instala el
+nuevo, que guarda la versión nueva y borra la anterior. La página se guarda una sola vez, con la
+dirección de la raíz, aunque se abra con `?scenario=`: el enlace, que es la credencial, no queda en
+la caché.
+
+Solo guarda lo de esta web. Firebase y su SDK no: sin red no hay escenario compartido, y la
+aplicación ya lo dice con su aviso y con el chip en rojo. Al irse la red sale un aviso que dice qué
+sigue funcionando, distinto según la página ya esté guardada —la primera visita aún no— y según se
+trabaje en local o en un escenario compartido; al volver, se va, salvo que otro aviso lo haya
+sustituido.
 
 ### El tema y la densidad se deciden antes de pintar
 
@@ -917,6 +945,12 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 12. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
    uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
    guardado se pone **rojo**.
+13. **Sin conexión.** Abrir la herramienta una vez con red y esperar unos segundos; en las
+   herramientas de desarrollo, Application → Service workers lo enseña activo. Cortar la red
+   (Network → Offline): sale el aviso de que sigue funcionando. Recargar: se abre igual, con lo
+   puntuado, cambia de dominio y «Más información» abre su documento. Al volver la red, el aviso se
+   va. Con `?scenario=` y sin red, el chip se pone rojo y el aviso dice que el equipo no ve los
+   cambios.
 
 ### Comparación A/B, para refactorizaciones
 

@@ -292,6 +292,9 @@ import { setupBuscador } from "./app/buscador.js?v=28";
 import { refrescarModoTaller, setupModoTaller } from "./app/taller.js?v=28";
 import { pintarLogoEnElMenu, setupLogoDelCliente } from "./app/logo.js?v=28";
 
+// Que se abra sin red: el service worker y el aviso de que se ha ido.
+import { setupSinConexion } from "./app/sin-conexion.js?v=28";
+
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -707,6 +710,7 @@ function bindGlobalEvents() {
     },
   });
   setupLogoDelCliente({ alCambiarElLogo: () => renderAll() });
+  setupSinConexion();
   setupAltoDePestanas();
   setupCajaDelRoadmap();
   setupBackToTopButton();

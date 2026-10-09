@@ -165,6 +165,17 @@ export function ocultarAviso() {
 
 
 /**
+ * Lo oculta solo si sigue diciendo `mensaje`: si otro aviso lo ha sustituido
+ * —un error de guardado, por ejemplo—, ese se queda.
+ */
+export function ocultarAvisoSiDice(mensaje) {
+  if (els.loadNotice && !els.loadNotice.hidden && els.loadNoticeText?.textContent === mensaje) {
+    ocultarAviso();
+  }
+}
+
+
+/**
  * Dialogo propio, en sustitucion de window.confirm y window.prompt.
  *
  * Los dialogos nativos ensenan el origen de la pagina ("127.0.0.1:8777 dice:"),
