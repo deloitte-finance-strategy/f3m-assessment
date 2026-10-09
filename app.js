@@ -128,6 +128,7 @@ import {
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   configurarNavegacionDeRadares,
+  conRadaresAnimados,
   hayLibreriaDeGraficos,
   redimensionarRadares,
   renderCapabilityRadar,
@@ -296,6 +297,9 @@ import { pintarLogoEnElMenu, setupLogoDelCliente } from "./app/logo.js?v=29";
 // Que se abra sin red: el service worker y el aviso de que se ha ido.
 import { setupSinConexion } from "./app/sin-conexion.js?v=29";
 
+// Fundidos, cifras que cuentan y paneles que se despliegan.
+import { activarDesplieguesSuaves, fundir } from "./app/movimiento.js?v=29";
+
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -313,6 +317,7 @@ async function init() {
   setInitialLoading(true); // NUEVO: muestra estado de carga mientras se inicializa la app
   showScenarioModeNotice();
   avisarDeElementosAusentes();
+  activarDesplieguesSuaves();
 
 
   try {
@@ -419,7 +424,10 @@ async function init() {
     iniciarAvisoDeCopia({ local: !enEscenarioCompartido });
 
     populateCapacityFilter();
-    renderAll();
+
+    // El primer pintado con datos: los radares de la vista de arranque crecen
+    // desde el centro, como al entrar en ella.
+    conRadaresAnimados(renderAll);
   } catch (error) {
     // El catalogo es lo unico sin lo que no se puede empezar, y su fallo mas
     // probable sigue siendo abrir el archivo con file:// en vez de servirlo.
@@ -703,6 +711,7 @@ function bindGlobalEvents() {
   setupFilasDelOverview();
   setupFilasDelDashboard();
   setupLoMasUrgente();
+  setupFilasDelHeatmap();
   setupBuscador({ alElegir: abrirTarjetaEnSuDominio });
   setupSiguientePendiente();
   setupSiguienteSinPuntuar();
@@ -783,6 +792,8 @@ function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
     return;
   }
 
+  const esOtraVista = id !== vistaActiva;
+
   vistaActiva = id;
 
   VISTAS.forEach((vista) => {
@@ -809,7 +820,15 @@ function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
     window.history.replaceState(null, "", `#${id}`);
   }
 
-  renderAll();
+  // Al cambiar de pestana, la vista nueva entra con un fundido y sus radares
+  // crecen desde el centro. Volver a pulsar la misma pestana no anima nada:
+  // no ha cambiado lo que se ve.
+  if (esOtraVista) {
+    fundir(document.getElementById(id));
+    conRadaresAnimados(renderAll);
+  } else {
+    renderAll();
+  }
 
   if (desplazar) {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -926,6 +945,28 @@ function setupFilasDelOverview() {
     }
 
     abrirDominioEnSuDashboard(fila.dataset.abrirDominio);
+  });
+}
+
+
+/**
+ * En el Heatmap, pulsar una subcapacidad abre su tarjeta en el Assessment,
+ * resaltada y con el foco en su primer score: lo que se ve en rojo en la tabla
+ * se puntua o se revisa sin buscarlo. Como las filas del Overview, se pulsa la
+ * fila entera con raton y el nombre con teclado.
+ *
+ * Es del dominio abierto, asi que switchDomain() no hace nada y no se quita
+ * ningun filtro: el Heatmap ya ensena solo lo que dejan pasar.
+ */
+function setupFilasDelHeatmap() {
+  els.heatmapTable?.addEventListener("click", (event) => {
+    const fila = event.target.closest("tr[data-abrir-subcapacidad]");
+
+    if (!fila || String(window.getSelection?.() || "")) {
+      return;
+    }
+
+    abrirTarjetaEnSuDominio(state.activeDomainId, fila.dataset.abrirSubcapacidad);
   });
 }
 

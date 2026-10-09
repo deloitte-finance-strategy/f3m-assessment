@@ -18,6 +18,7 @@ import { formatMedia } from "../core/presentacion.js?v=29";
 import { els } from "./estado.js?v=29";
 import { showNotice } from "./avisos.js?v=29";
 import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=29";
+import { sinMovimiento } from "./movimiento.js?v=29";
 
 
 
@@ -36,6 +37,26 @@ const overviewRadarCharts = {
   tecnologia: null,
   organizacion: null,
 };
+
+
+/**
+ * Si los radares que se pinten ahora crecen desde el centro. Solo dentro de
+ * conRadaresAnimados(): al entrar en el Overview o en el Dashboard y al
+ * cambiar de dominio, que es cuando se ensenan por primera vez. Puntuar los
+ * repinta sin animar, y la captura del informe tambien: el PNG tiene que
+ * salir con el radar terminado, no a medio crecer.
+ */
+let radaresAnimados = false;
+
+export function conRadaresAnimados(pintar) {
+  radaresAnimados = true;
+
+  try {
+    return pintar();
+  } finally {
+    radaresAnimados = false;
+  }
+}
 
 
 /**
@@ -245,10 +266,12 @@ function renderSingleCapabilityRadar({
     ],
   };
 
+  const animar = radaresAnimados && !compacto && !sinMovimiento();
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: false,
+    animation: animar ? { duration: 550, easing: "easeOutQuart" } : false,
     ...(compacto ? { devicePixelRatio: 2 } : {}),
 
     layout: {
@@ -367,6 +390,17 @@ function renderSingleCapabilityRadar({
   };
 
   if (registro[key]) {
+    // Lo que estuviera creciendo se termina ya: un repintado sin animar —el de
+    // la captura del informe, sobre todo— tiene que dejar el radar entero.
+    registro[key].stop();
+
+    if (animar) {
+      // Desde el centro, como al crearlo, y no desde la forma de antes. Con
+      // los datos de antes: con los nuevos aun sin procesar, reset() no
+      // encuentra sus elementos y lanza.
+      registro[key].reset();
+    }
+
     registro[key].data = chartData;
     registro[key].options = chartOptions;
     registro[key].update();

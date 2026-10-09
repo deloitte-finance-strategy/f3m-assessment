@@ -25,6 +25,7 @@ import {
 import { pieDeFuente } from "./biblioteca.js?v=29";
 import { LEVERS, els, state } from "./estado.js?v=29";
 import { getScopedItems } from "./filtros.js?v=29";
+import { repintarConMovimiento } from "./movimiento.js?v=29";
 
 
 export function buildFilteredEmptyState() {
@@ -76,12 +77,13 @@ export function renderPriorityBars(entries, destino = els.priorityBars) {
     counts[entry.metrics.prioridad] += 1;
   });
   const max = Math.max(...Object.values(counts), 1);
-  destino.innerHTML = Object.entries(counts)
+
+  repintarBarras(destino, Object.entries(counts)
     .map(([label, count]) => {
       const width = Math.round((count / max) * 100);
       return barRow(label, count, width, priorityColor(label));
     })
-    .join("");
+    .join(""));
 }
 
 
@@ -107,7 +109,18 @@ export function renderLeverBars(items = getScopedItems(), destino = els.leverBar
     );
   });
 
-  destino.innerHTML = rows.join("");
+  repintarBarras(destino, rows.join(""));
+}
+
+
+/**
+ * Al puntuar con el Dashboard al lado, cada barra se desliza hasta su ancho
+ * nuevo y su cifra cuenta: se ve que ha movido cada respuesta.
+ */
+function repintarBarras(destino, html) {
+  repintarConMovimiento(destino, () => {
+    destino.innerHTML = html;
+  }, { selectorDeCifras: ".bar-value", selectorDeBarras: ".bar-fill" });
 }
 
 

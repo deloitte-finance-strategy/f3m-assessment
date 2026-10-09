@@ -33,45 +33,46 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.427 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.428 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
 | `sw.js` | **El service worker**: guarda la herramienta en el navegador para abrirla sin red | 172 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.943 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.984 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 189 |
-| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 352 |
+| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 355 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 257 |
-| `app/graficos.js` | Los seis radares de Chart.js, a dónde lleva pulsar sus ejes y el del resumen | 789 |
+| `app/graficos.js` | Los seis radares de Chart.js, a dónde lleva pulsar sus ejes y el del resumen | 823 |
 | `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 185 |
-| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 486 |
+| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 577 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
 | `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 88 |
 | `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 409 |
 | `app/firebase.js` | La conexión: configuración, referencia y límite de espera | 220 |
 | `app/identidad.js` | La sesión anónima y el nombre de quien edita | 249 |
 | `app/copias.js` | **Si el trabajo local tiene copia.** Cuándo fue la última y el punto del aviso | 143 |
-| `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 155 |
+| `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 158 |
 | `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 905 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
 | `app/sin-conexion.js` | Registra `sw.js` y avisa cuando se va la red, diciendo qué sigue funcionando | 89 |
+| `app/movimiento.js` | **El movimiento**: cifras que cuentan, barras que se deslizan, paneles que se despliegan | 380 |
 | `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 167 |
 | `app/logo.js` | **El logo del cliente**: elegirlo, reducirlo a lo que admiten las reglas y enseñarlo | 176 |
-| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 317 |
+| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 330 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe, al resumen, a la preparación y al acta | 922 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.223 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.220 |
 | `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
 | `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 282 |
-| `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 174 |
+| `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 224 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
-| `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
-| `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 224 |
+| `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 396 |
+| `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 228 |
 | `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.249 |
-| `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 172 |
+| `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad, que lleva a su tarjeta | 314 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.220 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.379 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -150,8 +151,8 @@ infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, mét
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
-`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/sin-conexion.js`, `app/taller.js`, `app/apertura.js`, `app/cierre.js` y
-`app/proximos-pasos.js`. Lo nuevo nace ya en `app/`, no en
+`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/sin-conexion.js`, `app/movimiento.js`, `app/taller.js`,
+`app/apertura.js`, `app/cierre.js` y `app/proximos-pasos.js`. Lo nuevo nace ya en `app/`, no en
 `app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
 
@@ -325,6 +326,10 @@ más brechas altas y medias (`brechasDeCasos()` y `ordenarPorBrechas()` en `core
 entonces sí se repinta, pero solo cuando cambia el orden o lo que dice alguna ficha. Ese orden lo
 sigue también la diapositiva «Oportunidades de IA» del informe, que lo dice en su entradilla.
 
+En el **Heatmap**, cada subcapacidad desplegada lleva a su tarjeta del Assessment con
+`abrirTarjetaEnSuDominio()`, como «Lo más urgente»: la fila entera con el ratón y el nombre, que es
+un botón, con el teclado.
+
 **«Lo más urgente de la función financiera»**, al final del Overview, son las diez subcapacidades de
 prioridad alta con más gap de los nueve dominios, con `masUrgentes()` de `core/calculo.js`. La
 misma función alimenta las diapositivas del mismo nombre en la parte global del informe, para que
@@ -429,6 +434,45 @@ modo taller estuvo primero en la barra de pestañas, que a 1366 px no tenía sit
 «Volver arriba» flota abajo a la derecha, en un círculo, y sube por encima del chip de guardado
 mientras este se ve (`apartarDelChip()` en `app/indicador.js`). A la izquierda tapaba la primera
 columna del Roadmap y del Heatmap.
+
+### El movimiento: corto, solo lo que cambia y nada con «reducir movimiento»
+
+Fuera del modo taller la herramienta también se mueve, con las mismas tres reglas: cada cosa dura
+entre 200 y 400 ms, solo se anima lo que acaba de cambiar o de aparecer, y con «reducir movimiento»
+en el sistema no se anima nada. Lo que basta con que aparezca va en CSS (el bloque «movimiento de la
+herramienta» de `styles.css`) y la regla general de `prefers-reduced-motion` lo apaga; lo que parte
+de un valor que solo se sabe al pintar —el ancho de antes de una barra, el alto de un panel, de
+dónde viene la marca del dominio— va en `app/movimiento.js`, que pregunta `sinMovimiento()` antes.
+
+- **Las pestañas** entran con un fundido de opacidad (`fundir()` en `mostrarVista()`), sin
+  desplazamiento: un `translate` en la sección soltaba el encabezado pegajoso del Roadmap.
+- **Los radares crecen desde el centro** al entrar en el Overview o el Dashboard, al arrancar y al
+  cambiar de dominio, y solo ahí: esos repintados van dentro de `conRadaresAnimados()`. Fuera de
+  ella `animation: false`, como siempre, y un repintado sin animar para lo que estuviera creciendo
+  (`stop()`), así que **la captura del informe sale con el radar entero** aunque se exporte a mitad
+  del crecimiento. Comprobado: las seis imágenes son idénticas exportando a los 50 ms o a los 1,5 s.
+- **Los KPIs y las barras** del Dashboard y del Overview cuentan y se deslizan desde lo que se vio
+  la última vez (`repintarConMovimiento()`). Como una vista oculta no se repinta, al volver al
+  Dashboard después de puntuar se mueve justo lo que han cambiado esas puntuaciones. Mientras
+  cuentan, su contenedor va `aria-busy`.
+- **El cierre del taller se revela** (`revelarElCierre()` en `app/cierre.js`): las cifras cuentan
+  desde cero, las barras de palanca crecen una detrás de otra y las brechas entran en cascada. Solo
+  al llegar; un repintado con el cierre abierto no vuelve a empezar.
+- **Menús, modales, buscador, avisos y chip de guardado** aparecen con un fundido y unos píxeles de
+  desplazamiento; el aviso y el chip **se van** fundiéndose (`ocultarConSalida()`, con la clase
+  `se-va`, que un aviso nuevo quita a mitad para no ocultarse a sí mismo). Las entradas usan
+  `translate`, no `transform`: el aviso se centra con un transform y una animación lo pisaría.
+  En verde, el chip **dibuja su check** en vez de escribir «✓»: `updateSaveStatus()` quita el
+  carácter del mensaje para que no salgan dos.
+- **Los `<details>`** —«Ver detalle», los objetivos, la leyenda de la IA— se despliegan y se
+  pliegan animando su alto (`activarDesplieguesSuaves()`, un solo oyente en el documento). Siguen
+  cambiando con `open`, así que su evento `toggle` llega igual, al terminar de plegarse.
+- **El Heatmap**: las subcapacidades de una capacidad entran en cascada al desplegarla y se funden
+  al plegarla (una tabla no anima su alto), y una celda que cambia de nivel funde su color. Al
+  cambiar de tema no: cambian todas a la vez y eso no es una celda que se mueve.
+- **El conmutador de dominio**: la marca verde viaja del botón de antes al nuevo mientras se cargan
+  sus datos (`deslizarLaMarcaDeDominio()` en `app/dominios.js`). Es una pieza aparte encima de los
+  botones, porque cruza de un grupo a otro, y mientras viaja ningún botón se pinta en verde.
 
 ### Los objetivos se resuelven por dominio
 
@@ -916,7 +960,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      nuevo. Con «reducir movimiento» activado en el sistema, nada de eso se mueve. Probarlo en los
      cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita
      desplazarse.
-   - **Heatmap**: desplegar y plegar capacidades.
+   - **Heatmap**: desplegar y plegar capacidades; las subcapacidades entran en cascada y se
+     funden al plegar. Pulsar una abre su tarjeta en el Assessment, resaltada y con el foco en su
+     primer score.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
      Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final.
      Cuando cabe a lo ancho, la tabla crece con la página y su encabezado se queda bajo las
@@ -976,7 +1022,13 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 12. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
    uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
    guardado se pone **rojo**.
-13. **Sin conexión.** Abrir la herramienta una vez con red y esperar unos segundos; en las
+13. **El movimiento.** Al arrancar y al entrar en el Overview o el Dashboard, los radares crecen
+   desde el centro; puntuar en el Assessment y volver al Dashboard hace contar los KPIs y deslizarse
+   las barras. Cambiar de dominio desliza la marca verde. Los menús, el buscador y los modales
+   aparecen suaves, el aviso baja y se va fundiéndose, y el chip dibuja su check. «Ver detalle» se
+   despliega y se pliega sin saltos. Exportar el informe justo al entrar en el Dashboard da los
+   radares enteros. Con «reducir movimiento» en el sistema, nada de esto se mueve.
+14. **Sin conexión.** Abrir la herramienta una vez con red y esperar unos segundos; en las
    herramientas de desarrollo, Application → Service workers lo enseña activo. Cortar la red
    (Network → Offline): sale el aviso de que sigue funcionando. Recargar: se abre igual, con lo
    puntuado, cambia de dominio y «Más información» abre su documento. Al volver la red, el aviso se

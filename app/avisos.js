@@ -10,6 +10,7 @@
 
 import { els } from "./estado.js?v=29";
 import { escapeHtml } from "../core/presentacion.js?v=29";
+import { ocultarConSalida } from "./movimiento.js?v=29";
 
 
 /**
@@ -116,8 +117,10 @@ export function showNotice(message, tipo = "info", persistente = null, accion = 
     return;
   }
 
+  // Se va fundiendose hacia arriba, por donde vino. Un aviso nuevo que llegue
+  // a mitad le cambia la clase y la salida ya no lo oculta.
   temporizadorDeAviso = window.setTimeout(() => {
-    els.loadNotice.hidden = true;
+    ocultarConSalida(els.loadNotice);
   }, 7000);
 }
 
@@ -160,7 +163,7 @@ function ponerAccionDeAviso(accion) {
 export function ocultarAviso() {
   window.clearTimeout(temporizadorDeAviso);
   ponerAccionDeAviso(null);
-  els.loadNotice.hidden = true;
+  ocultarConSalida(els.loadNotice);
 }
 
 

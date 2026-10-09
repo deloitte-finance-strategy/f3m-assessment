@@ -17,6 +17,7 @@ import {
   renderLeverBars,
   renderPriorityBars,
 } from "../celdas.js?v=29";
+import { repintarConMovimiento } from "../movimiento.js?v=29";
 import { els, state } from "../estado.js?v=29";
 import { getScopedItems } from "../filtros.js?v=29";
 import { renderCapabilityRadar } from "../graficos.js?v=29";
@@ -30,36 +31,39 @@ export function renderDashboard() {
   const { scoreGlobal, gapMedio, prioridadAlta: highCount } = resumenGlobal(metrics);
 
 
-els.kpiGrid.innerHTML = [
-  kpiCard(
-    "Score global dominio",
-    formatMedia(scoreGlobal),
-    scored.length
-      ? "Promedio de subcapacidades puntuadas"
-      : "Pendiente de scoring",
-    "score",
-  ),
-  kpiCard(
-    "Gap medio vs objetivo",
-    formatMedia(gapMedio),
-    "Calculado con los objetivos definidos por capacidad y palanca",
-    "gap",
-  ),
-  kpiCard(
-    "Subcapacidades puntuadas",
-    `${scored.length}/${items.length}`,
-    items.length
-      ? `${Math.round((scored.length / items.length) * 100)}% de avance`
-      : "Sin subcapacidades en la vista",
-    "progress",
-  ),
-  kpiCard(
-    "Prioridad alta",
-    String(highCount),
-    "Subcapacidades con gap igual o superior a 2",
-    highCount > 0 ? "alert" : "neutral",
-  ),
-].join("");
+  // Las cifras que han cambiado cuentan hasta su valor nuevo (app/movimiento.js).
+  repintarConMovimiento(els.kpiGrid, () => {
+    els.kpiGrid.innerHTML = [
+      kpiCard(
+        "Score global dominio",
+        formatMedia(scoreGlobal),
+        scored.length
+          ? "Promedio de subcapacidades puntuadas"
+          : "Pendiente de scoring",
+        "score",
+      ),
+      kpiCard(
+        "Gap medio vs objetivo",
+        formatMedia(gapMedio),
+        "Calculado con los objetivos definidos por capacidad y palanca",
+        "gap",
+      ),
+      kpiCard(
+        "Subcapacidades puntuadas",
+        `${scored.length}/${items.length}`,
+        items.length
+          ? `${Math.round((scored.length / items.length) * 100)}% de avance`
+          : "Sin subcapacidades en la vista",
+        "progress",
+      ),
+      kpiCard(
+        "Prioridad alta",
+        String(highCount),
+        "Subcapacidades con gap igual o superior a 2",
+        highCount > 0 ? "alert" : "neutral",
+      ),
+    ].join("");
+  }, { selectorDeCifras: ".kpi-card strong" });
 
 
   renderTitularesEjecutivos(items, metrics);

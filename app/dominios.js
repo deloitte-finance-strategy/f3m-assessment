@@ -31,6 +31,8 @@ import {
 
 import { comportamientoDeDesplazamiento } from "./preferencias.js?v=29";
 import { repintarTodo } from "./repintado.js?v=29";
+import { conRadaresAnimados } from "./graficos.js?v=29";
+import { sinMovimiento } from "./movimiento.js?v=29";
 import { populateCapacityFilter } from "./filtros.js?v=29";
 
 
@@ -339,12 +341,20 @@ export async function switchDomain(domainId) {
 
   syncActiveDomainState();
 
-  await loadDomainData(domainId);
-  setActiveDomain(domainId);
+  const llegada = deslizarLaMarcaDeDominio(state.activeDomainId, domainId);
+
+  try {
+    await loadDomainData(domainId);
+    setActiveDomain(domainId);
+  } finally {
+    llegada();
+  }
 
   populateCapacityFilter();
   resetDomainViewState();
-  repintarTodo();
+
+  // Un dominio nuevo es un radar nuevo: crece desde el centro, como al abrirlo.
+  conRadaresAnimados(repintarTodo);
 
   const domainSwitcher = document.querySelector(".domain-switcher");
 
@@ -362,6 +372,87 @@ export async function switchDomain(domainId) {
 }
 
 
+
+
+/**
+ * Al cambiar de dominio, la marca verde se desliza del boton de antes al
+ * nuevo, en vez de saltar. Deja claro que ha cambiado y cubre el instante en
+ * que se cargan sus datos.
+ *
+ * Es una pieza aparte, encima de los botones, que se mueve y se va: los
+ * botones estan repartidos en tres grupos y varias filas, y un fondo que
+ * cruzara de un grupo a otro dentro de ellos no tiene donde vivir. Mientras se
+ * mueve, ni el de antes ni el nuevo se pintan en verde, para que no haya dos
+ * marcas a la vez; al llegar, el nuevo recupera el suyo.
+ *
+ * Devuelve que hacer cuando el dominio ya esta cargado: si llega antes que la
+ * marca, la marca termina su camino igual.
+ */
+function deslizarLaMarcaDeDominio(desdeId, hastaId) {
+  const conmutador = document.querySelector(".domain-switcher");
+  const boton = (id) => document.querySelector(`.domain-groups [data-domain-id="${CSS.escape(id || "")}"]`);
+  const origen = boton(desdeId);
+  const destino = boton(hastaId);
+
+  if (!conmutador || !origen || !destino || sinMovimiento() || !conmutador.animate) {
+    return () => {};
+  }
+
+  const caja = conmutador.getBoundingClientRect();
+  const posicion = (elemento) => {
+    const rect = elemento.getBoundingClientRect();
+
+    return {
+      left: `${rect.left - caja.left}px`,
+      top: `${rect.top - caja.top}px`,
+      width: `${rect.width}px`,
+      height: `${rect.height}px`,
+    };
+  };
+
+  const marca = document.createElement("span");
+
+  marca.className = "domain-marca-que-viaja";
+  marca.setAttribute("aria-hidden", "true");
+  Object.assign(marca.style, posicion(origen));
+  conmutador.appendChild(marca);
+
+  origen.classList.add("cede-la-marca");
+  destino.classList.add("espera-la-marca");
+
+  const viaje = marca.animate([posicion(origen), posicion(destino)], {
+    duration: 360,
+    easing: "cubic-bezier(0.22, 0.61, 0.36, 1)",
+    fill: "forwards",
+  });
+
+  let cargado = false;
+  let llegado = false;
+
+  const terminar = () => {
+    if (!cargado || !llegado) {
+      return;
+    }
+
+    document.querySelectorAll(".cede-la-marca, .espera-la-marca").forEach((elemento) => {
+      elemento.classList.remove("cede-la-marca", "espera-la-marca");
+    });
+
+    marca.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: "forwards" }).onfinish = () => marca.remove();
+  };
+
+  viaje.onfinish = () => {
+    llegado = true;
+    terminar();
+  };
+
+  viaje.oncancel = viaje.onfinish;
+
+  return () => {
+    cargado = true;
+    terminar();
+  };
+}
 
 
 function updateActiveDomainUi() {

@@ -27,7 +27,8 @@ import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenStat
 import { nombreDeMasInformacion } from "./biblioteca.js?v=29";
 import { priorityBadge } from "./celdas.js?v=29";
 import { htmlDeLaApertura } from "./apertura.js?v=29";
-import { htmlDelCierre } from "./cierre.js?v=29";
+import { htmlDelCierre, revelarElCierre } from "./cierre.js?v=29";
+import { sinMovimiento } from "./movimiento.js?v=29";
 import {
   conectarLosPasos,
   guardarLosPasosPendientes,
@@ -394,14 +395,6 @@ const CLASES_DE_ENTRADA = ["entra-adelante", "entra-atras", "entra"];
 
 
 /**
- * Si el equipo ha pedido al sistema menos movimiento, no se anima nada. El CSS
- * ya apaga sus animaciones con prefers-reduced-motion; esto es para las que se
- * mueven desde aqui, como las cifras.
- */
-const sinMovimiento = () => Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
-
-
-/**
  * Un fundido corto al cambiar de pantalla, que llega del lado hacia el que se
  * va: hacia delante entra por la derecha, hacia atras por la izquierda, y al
  * abrir o al cambiar de dominio solo funde. Sin el, «Siguiente» cambiaba la
@@ -422,6 +415,10 @@ function animarLaEntrada(sentido) {
   // poner la clase; sin esto, dos «Siguiente» seguidos no se animaban.
   void cuerpo.offsetWidth;
   cuerpo.classList.add(sentido > 0 ? "entra-adelante" : sentido < 0 ? "entra-atras" : "entra");
+
+  if (enCierre()) {
+    revelarElCierre(cuerpo);
+  }
 }
 
 
