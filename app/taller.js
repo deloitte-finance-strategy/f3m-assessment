@@ -26,7 +26,7 @@ import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=2
 import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=28";
 import { nombreDeMasInformacion } from "./biblioteca.js?v=28";
 import { priorityBadge } from "./celdas.js?v=28";
-import { accionesDelCierre, htmlDelCierre } from "./cierre.js?v=28";
+import { htmlDelCierre } from "./cierre.js?v=28";
 import { avanceDeDominio, switchDomain } from "./dominios.js?v=28";
 import {
   actualizarContadorDeComentario,
@@ -56,6 +56,8 @@ let resultado = null;
 let anterior = null;
 let siguiente = null;
 let selectorDeDominio = null;
+let botonDelEquipo = null;
+let menuDelEquipo = null;
 
 // Las subcapacidades del recorrido, fijadas al abrir. Si se recalculara en cada
 // paso, con un filtro de prioridad puesto, puntuar una podria sacarla de la
@@ -104,6 +106,8 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   anterior = document.getElementById("modoTallerAnterior");
   siguiente = document.getElementById("modoTallerSiguiente");
   selectorDeDominio = document.getElementById("modoTallerDominio");
+  botonDelEquipo = document.getElementById("modoTallerEquipoBoton");
+  menuDelEquipo = document.getElementById("modoTallerEquipo");
 
   const boton = document.getElementById("modoTallerButton");
 
@@ -123,8 +127,8 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   document.getElementById("modoTallerSalir")?.addEventListener("click", () => cerrarModoTaller());
   anterior?.addEventListener("click", () => irA(indice - 1));
   siguiente?.addEventListener("click", () => irA(indice + 1));
-  resultado?.addEventListener("click", alPulsarEnElCierre);
   cuerpo.addEventListener("click", alPulsarEnElCierre);
+  setupMenuDelEquipo();
   selectorDeDominio?.addEventListener("change", () => cambiarDeDominio(selectorDeDominio.value));
 
   document.addEventListener("keydown", alPulsarTecla);
@@ -203,6 +207,7 @@ export function cerrarModoTaller({ volver = true } = {}) {
   // Desde el cierre, se vuelve a la ultima subcapacidad del recorrido.
   const ultimo = recorrido[Math.min(indice, recorrido.length - 1)];
 
+  abrirMenuDelEquipo(false);
   panel.hidden = true;
   cuerpo.innerHTML = "";
   updateModalOpenState();
@@ -464,7 +469,8 @@ function pintar({ enfocar = true } = {}) {
 /**
  * La ultima pantalla: lo que ha salido de la sesion, con las mismas cifras que
  * el acta. Ver app/cierre.js. En el pie, «Anterior» vuelve a las
- * subcapacidades y el centro lleva el acta y el correo.
+ * subcapacidades. El acta y el correo no estan aqui sino en «Para el equipo»,
+ * en la barra de arriba: se proyecta para el cliente y son de uso interno.
  */
 function pintarCierre({ enfocar = true } = {}) {
   const datos = datosDelActa(itemsDelRecorrido());
@@ -473,7 +479,7 @@ function pintarCierre({ enfocar = true } = {}) {
   pintarSelectorDeDominio();
 
   cuerpo.innerHTML = htmlDelCierre(datos, { cambiadasHoy: cambiadasEnEstaSesion() });
-  resultado.innerHTML = accionesDelCierre(datos);
+  resultado.innerHTML = "";
 
   posicion.textContent = "Cierre del taller";
   anterior.disabled = false;
@@ -494,27 +500,88 @@ function alPulsarEnElCierre(event) {
   }
 
   const ir = event.target.closest("[data-ir]");
+  const destino = ir ? recorrido.indexOf(ir.dataset.ir) : -1;
 
-  if (ir) {
-    const destino = recorrido.indexOf(ir.dataset.ir);
+  if (destino >= 0) {
+    irA(destino);
+  }
+}
 
-    if (destino >= 0) {
-      irA(destino);
-    }
 
+/**
+ * «Para el equipo», en la barra: el acta y el correo. Estaban en el pie del
+ * cierre, como los dos botones mas llamativos de la pantalla que se proyecta,
+ * y son de uso interno. Aqui se ven solo si se buscan, y sirven desde
+ * cualquier subcapacidad, no solo al terminar.
+ *
+ * No usa el menu de la cabecera de app.js: Escape tiene que cerrar el menu y
+ * no el modo taller, y eso lo decide alPulsarTecla().
+ */
+function setupMenuDelEquipo() {
+  if (!botonDelEquipo || !menuDelEquipo) {
     return;
   }
 
-  const accion = event.target.closest("[data-cierre]")?.dataset.cierre;
+  botonDelEquipo.addEventListener("click", (event) => {
+    event.stopPropagation();
+    abrirMenuDelEquipo(menuDelEquipo.hidden);
+  });
 
-  // El mismo recorrido que la pantalla, y no los filtros de ahora: el acta y el
-  // correo tienen que decir lo que se acaba de proyectar.
-  if (accion === "acta") {
-    exportarActa({ items: itemsDelRecorrido() });
-  } else if (accion === "correo") {
-    copiarTextoDelCorreo({ items: itemsDelRecorrido() });
-  }
+  menuDelEquipo.addEventListener("click", (event) => {
+    const accion = event.target.closest("[data-equipo]:not(:disabled)")?.dataset.equipo;
+
+    if (!accion) {
+      return;
+    }
+
+    abrirMenuDelEquipo(false);
+
+    // El mismo recorrido que la pantalla, y no los filtros de ahora: el acta y
+    // el correo tienen que decir lo que se acaba de proyectar.
+    if (accion === "acta") {
+      exportarActa({ items: itemsDelRecorrido() });
+    } else if (accion === "correo") {
+      copiarTextoDelCorreo({ items: itemsDelRecorrido() });
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!menuDelEquipo.hidden && !menuDelEquipo.parentElement.contains(event.target)) {
+      abrirMenuDelEquipo(false);
+    }
+  });
 }
+
+
+function abrirMenuDelEquipo(abrir) {
+  if (!botonDelEquipo || !menuDelEquipo) {
+    return;
+  }
+
+  // Lo que dice se decide al abrirlo: sin nada puntuado en el recorrido no hay
+  // acta que pedir, igual que en el menu del PDF.
+  if (abrir) {
+    const hayPuntuadas = itemsDelRecorrido().some((item) => !calculate(item).isPending);
+
+    menuDelEquipo.querySelectorAll("[data-equipo]").forEach((opcion) => {
+      opcion.disabled = !hayPuntuadas;
+    });
+    menuDelEquipo.querySelectorAll("[data-equipo-nota]").forEach((nota, posicionDeLaNota) => {
+      nota.textContent = hayPuntuadas
+        ? NOTAS_DEL_EQUIPO[posicionDeLaNota]
+        : "Todavía no hay nada puntuado en este recorrido";
+    });
+  }
+
+  menuDelEquipo.hidden = !abrir;
+  botonDelEquipo.setAttribute("aria-expanded", String(abrir));
+}
+
+
+const NOTAS_DEL_EQUIPO = [
+  "Lo puntuado en este recorrido y sus notas, para enviar al cliente",
+  "El resumen del acta, listo para pegar en el correo",
+];
 
 
 /**
@@ -708,7 +775,12 @@ function alPulsarTecla(event) {
   const escribiendo = event.target.closest?.("textarea, select, input:not(.score-radio)");
   const enPalanca = event.target.classList?.contains("score-radio");
 
-  if (event.key === "Escape") {
+  if (event.key === "Escape" && menuDelEquipo && !menuDelEquipo.hidden) {
+    // Con el menu del equipo abierto, Escape cierra el menu y no el modo taller.
+    event.preventDefault();
+    abrirMenuDelEquipo(false);
+    botonDelEquipo.focus();
+  } else if (event.key === "Escape") {
     event.preventDefault();
     cerrarModoTaller();
   } else if (event.key === "PageDown" && !escribiendo) {

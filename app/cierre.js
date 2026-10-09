@@ -9,7 +9,8 @@
  *
  * Dice lo mismo que el acta, con las mismas funciones (fraseDelActa y
  * resumenDelActa): el cliente recibe despues por escrito la pantalla que acaba
- * de ver. Por eso, desde aqui mismo se genera el acta y se copia el correo.
+ * de ver. El acta y el correo se piden desde «Para el equipo», en la barra
+ * del modo taller: son de uso interno y no van en la pantalla que se proyecta.
  *
  * Solo pinta. Que pantalla toca y que pasa al pulsar lo decide app/taller.js.
  */
@@ -74,17 +75,6 @@ export function htmlDelCierre(datos, { cambiadasHoy = 0 } = {}) {
         ${pendientes(cifras.pendientes)}
       </section>
     </div>
-  `;
-}
-
-
-/** Los dos botones del pie del cierre: lo que se hace justo despues de la sesion. */
-export function accionesDelCierre(datos) {
-  const apagado = resumenDelActa(datos.subcapacidades).resumen.evaluadas ? "" : " disabled";
-
-  return `
-    <button class="modo-taller-accion" type="button" data-cierre="acta"${apagado}>Acta del taller</button>
-    <button class="modo-taller-accion" type="button" data-cierre="correo"${apagado}>Copiar el texto del correo</button>
   `;
 }
 

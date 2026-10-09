@@ -1258,6 +1258,28 @@
         <span id="modoTallerDonde"></span>
       </div>
       <p class="modo-taller-posicion" id="modoTallerPosicion" aria-live="polite"></p>
+      <!--
+        El acta y el correo son del equipo, no del cliente: van aqui, en un
+        boton de texto que en la sala no se lee como parte de lo proyectado, y
+        no en el pie del cierre, donde eran lo mas visible de la pantalla.
+        Sirven desde cualquier subcapacidad, no solo al terminar.
+      -->
+      <div class="modo-taller-equipo">
+        <button class="modo-taller-equipo-boton" id="modoTallerEquipoBoton" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="modoTallerEquipo">
+          Para el equipo <span class="header-menu-caret" aria-hidden="true"></span>
+        </button>
+        <div class="header-menu-panel modo-taller-equipo-panel" id="modoTallerEquipo" hidden>
+          <p class="header-menu-title">Uso interno</p>
+          <button class="header-menu-item" type="button" data-equipo="acta">
+            Acta del taller
+            <span data-equipo-nota>Lo puntuado en este recorrido y sus notas, para enviar al cliente</span>
+          </button>
+          <button class="header-menu-item" type="button" data-equipo="correo">
+            Copiar el texto del correo
+            <span data-equipo-nota>El resumen del acta, listo para pegar en el correo</span>
+          </button>
+        </div>
+      </div>
       <button class="modo-taller-salir" id="modoTallerSalir" type="button">
         Salir <kbd aria-hidden="true">Esc</kbd>
       </button>

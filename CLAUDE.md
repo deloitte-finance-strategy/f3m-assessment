@@ -33,7 +33,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.361 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.383 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
 | `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.920 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 183 |
@@ -57,8 +57,8 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe, a la preparación y al acta del taller | 830 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 729 |
-| `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 184 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 801 |
+| `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 174 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 224 |
@@ -66,7 +66,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 172 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.725 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.728 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -328,8 +328,11 @@ a decir «Cierre del taller» y lleva a una pantalla para proyectar al terminar 
 lo que ha salido, las cuatro cifras, las tres subcapacidades más lejos del objetivo —cada una vuelve
 a la suya—, cada palanca frente a su objetivo y lo que queda para la próxima sesión. Son las cifras
 del acta, con las mismas funciones (`fraseDelActa()` y `resumenDelActa()` de `informe/acta.js`), y
-desde el pie se genera el acta y se copia el correo **del mismo recorrido**, no de los filtros de
-ese momento: el cliente recibe por escrito lo que acaba de ver. Es la posición `recorrido.length`,
+el acta y el correo se piden **del mismo recorrido**, no de los filtros de ese momento: el cliente
+recibe por escrito lo que acaba de ver. No van en el cierre sino en **«Para el equipo»**, un botón
+de texto apagado en la barra de arriba, junto a «Salir»: son de uso interno, y en el pie del cierre
+eran lo más llamativo de la pantalla que se proyecta. Desde ahí sirven en cualquier subcapacidad, y
+con el menú abierto Escape cierra el menú, no el modo taller. Es la posición `recorrido.length`,
 una más allá de la última; «Anterior» y Re Pág vuelven. «En esta sesión» cuenta las subcapacidades
 cuyos scores han cambiado desde que se abrió el modo taller, por dominio e id.
 
@@ -806,9 +809,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      el foco en el caso, y el segundo sale del modo taller. Cambiar de dominio en el desplegable
      de arriba lleva a «1 de N» del nuevo sin salir, y al salir el Assessment está en ese dominio.
      Puntuar y pulsar enseguida «Siguiente»: el chip de guardado no lo tapa. Tras la última, «Cierre
-     del taller»: sin desplazarse en los cuatro modos, sus cifras son las del acta que genera su
-     botón, «Copiar el texto del correo» deja el correo en el portapapeles y cada una de las tres
-     brechas vuelve a su subcapacidad. Probarlo en los
+     del taller»: sin desplazarse en los cuatro modos, sus cifras son las del acta que sale de
+     «Para el equipo», en la barra; «Copiar el texto del correo», ahí mismo, deja el correo en el
+     portapapeles, y cada una de las tres brechas vuelve a su subcapacidad. Probarlo en los
      cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita
      desplazarse.
    - **Heatmap**: desplegar y plegar capacidades.

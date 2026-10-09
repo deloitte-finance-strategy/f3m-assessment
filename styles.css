@@ -6057,7 +6057,40 @@ height: 100% !important;
   background: rgba(134, 188, 37, 0.18);
 }
 
+/* «Para el equipo»: texto suelto, sin caja y apagado. En la sala no se lee
+   como parte de lo proyectado, y quien lo busca lo encuentra junto a «Salir». */
+.modo-taller-equipo {
+  position: relative;
+}
+
+.modo-taller-equipo-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-height: 2.3em;
+  padding: 0 0.4em;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.82em;
+  cursor: pointer;
+}
+
+.modo-taller-equipo-boton:hover,
+.modo-taller-equipo-boton[aria-expanded="true"] {
+  color: var(--cabecera-claro);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* El menu es el de la cabecera, con su tamaño: el modo taller agranda la
+   letra para proyectar, y esto no se proyecta. */
+.modo-taller-equipo-panel {
+  font-size: 1rem;
+}
+
 .modo-taller-salir:focus-visible,
+.modo-taller-equipo-boton:focus-visible,
 .modo-taller-paso:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
@@ -6549,8 +6582,7 @@ height: 100% !important;
 }
 
 .modo-taller-cierre-brechas button:focus-visible,
-.modo-taller-cierre-pendientes button:focus-visible,
-.modo-taller-accion:focus-visible {
+.modo-taller-cierre-pendientes button:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
@@ -6664,35 +6696,6 @@ height: 100% !important;
 .modo-taller-cierre-mas {
   padding-left: 0.5em;
   color: var(--muted);
-}
-
-/* En el pie del cierre: lo que se hace justo al terminar la sesion. */
-.modo-taller-accion {
-  min-height: 2.5em;
-  padding: 0 1.2em;
-  border: 1.5px solid var(--green);
-  border-radius: var(--r-pill);
-  background: var(--green);
-  color: var(--sobre-marca);
-  font-size: 0.95em;
-  font-weight: var(--fw-bold);
-  cursor: pointer;
-}
-
-.modo-taller-accion + .modo-taller-accion {
-  background: var(--surface);
-  color: var(--green-dark);
-}
-
-.modo-taller-accion:hover:not(:disabled) {
-  filter: brightness(1.06);
-}
-
-.modo-taller-accion:disabled {
-  border-color: var(--line);
-  background: var(--surface);
-  color: var(--muted);
-  cursor: default;
 }
 
 /* En pantallas estrechas los niveles no caben en fila: van uno debajo de
