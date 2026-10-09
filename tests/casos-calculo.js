@@ -27,7 +27,7 @@ import {
   round2,
   toScore,
   unique,
-} from "../core/calculo.js?v=31";
+} from "../core/calculo.js?v=32";
 
 
 // --- utilidades de los casos ------------------------------------------------

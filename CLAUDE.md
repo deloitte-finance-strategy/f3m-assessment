@@ -431,13 +431,10 @@ del menú se queda en verde, como cuando era un conmutador suelto. El menú de a
 modo taller estuvo primero en la barra de pestañas, que a 1366 px no tenía sitio, y después en
 «Sesión».
 
-Debajo, plegado, **«Para el equipo»**: la preparación, el acta y el texto del correo, los mismos
-tres de «Exportar PDF» y del menú del modo taller, para tenerlos a mano al preparar y al cerrar la
-sesión sin buscar en el menú del informe. Son gemelos y no copias: cada botón lleva
-`data-igual-que` con el id del original y hace `click()` sobre él (`setupParaElEquipo()` en
-`app.js`), así que se abren con la misma función y en el mismo clic, que es lo que pide
-`window.open()`. Al abrir el menú, `pintarParaElEquipo()` copia del original el texto y si está
-apagado: el acta sin nada puntuado lo dice igual en los dos sitios.
+**«Para el equipo»** no va en «Presentación» sino plegado dentro de «Exportar PDF», debajo de
+los tres informes: la preparación, el acta y el texto del correo. Son de uso interno, y con el menú
+abierto delante del cliente lo que se ve son los informes. Estuvo un tiempo en «Presentación», con
+botones gemelos que pulsaban los de «Exportar PDF»; aquí son los botones de siempre, sin copias.
 
 «Volver arriba» flota abajo a la derecha, en un círculo, y sube por encima del chip de guardado
 mientras este se ve (`apartarDelChip()` en `app/indicador.js`). A la izquierda tapaba la primera
@@ -517,8 +514,8 @@ la aplicación, para que el descuadre no se lea como un fallo.
 
 **Hay dos informes**, y «Exportar PDF» abre un menú para elegir. Es un menú y no un diálogo a
 propósito: `window.open()` tiene que ir en el mismo clic que lo pide, o el navegador lo bloquea como
-ventana emergente. El mismo menú lleva además el **resumen de una página**, la **preparación** y
-el **acta del taller** (ver abajo).
+ventana emergente. El mismo menú lleva además el **resumen de una página** y, plegados en «Para el
+equipo», la **preparación** y el **acta del taller** (ver abajo).
 
 - **El del dominio** es el de siempre: la parte global y el dominio abierto, con los filtros activos.
 - **El de todo el proyecto** lleva, tras la parte global, un **capítulo por cada dominio con algo
