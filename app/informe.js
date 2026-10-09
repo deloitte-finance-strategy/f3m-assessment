@@ -13,35 +13,35 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=27";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=27";
-import { filasDeResumen } from "../core/exportacion.js?v=27";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=27";
-import { diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=27";
-import { documentoDeActa } from "../informe/acta.js?v=27";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=27";
-import { documentoDePreparacion } from "../informe/preparacion.js?v=27";
-import { showNotice } from "./avisos.js?v=27";
-import { getActiveDomainConfig } from "./dominios.js?v=27";
-import { DOMAINS, els, state } from "./estado.js?v=27";
-import { getVisibleItems } from "./filtros.js?v=27";
-import { getScenarioShortLabel } from "./firebase.js?v=27";
+} from "../core/calculo.js?v=28";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=28";
+import { filasDeResumen } from "../core/exportacion.js?v=28";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=28";
+import { diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=28";
+import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=28";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=28";
+import { documentoDePreparacion } from "../informe/preparacion.js?v=28";
+import { showNotice } from "./avisos.js?v=28";
+import { getActiveDomainConfig } from "./dominios.js?v=28";
+import { DOMAINS, els, state } from "./estado.js?v=28";
+import { getVisibleItems } from "./filtros.js?v=28";
+import { getScenarioShortLabel } from "./firebase.js?v=28";
 import {
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
   renderCapabilityRadar,
-} from "./graficos.js?v=27";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=27";
+} from "./graficos.js?v=28";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=28";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "./subcapacidad.js?v=27";
-import { renderDashboard } from "./vistas/dashboard.js?v=27";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=27";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=27";
+} from "./subcapacidad.js?v=28";
+import { renderDashboard } from "./vistas/dashboard.js?v=28";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=28";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=28";
 
 
 /**
@@ -188,20 +188,13 @@ export function exportarPreparacion() {
  *
  * Con el mismo alcance que la preparacion y el modo taller, los filtros del
  * Assessment, para que el acta de un taller de una capacidad sea de esa
- * capacidad. Sin nada puntuado no hay acta que hacer: un documento con todas
- * las cifras en blanco no le sirve a nadie y parece un fallo.
+ * capacidad. El cierre del modo taller pasa su propio recorrido, que se fijo al
+ * abrirlo: asi el acta dice lo mismo que la pantalla que se acaba de proyectar.
+ * Sin nada puntuado no hay acta que hacer: un documento con todas las cifras en
+ * blanco no le sirve a nadie y parece un fallo.
  */
-export function exportarActa() {
-  const items = getVisibleItems();
-  const puntuadas = items.filter((item) => !calculate(item).isPending).length;
-
-  if (!puntuadas) {
-    showNotice(
-      items.length < state.items.length
-        ? "Con los filtros puestos no queda ninguna subcapacidad puntuada para el acta."
-        : "Todavía no hay ninguna subcapacidad puntuada en este dominio: el acta recoge lo que se puntúa en el taller.",
-      "aviso",
-    );
+export function exportarActa({ items = getVisibleItems() } = {}) {
+  if (!hayAlgoParaElActa(items)) {
     return;
   }
 
@@ -215,30 +208,15 @@ export function exportarActa() {
 
   ventana.opener = null;
 
-  const dominio = getActiveDomainConfig();
-  const ahora = new Date();
+  const datos = datosDelActa(items);
 
   ventana.document.open();
-  ventana.document.write(documentoDeActa({
-    cliente: state.cliente,
-    domainLabel: dominio.label,
-    domainTitle: dominio.title,
-    fecha: diaLegible(ahora),
-    fechaDeArchivo: fechaParaArchivo(ahora),
-    subcapacidades: items.map((item) => ({
-      capacidad: item.capacidad,
-      subcapacidad: item.subcapacidad,
-      scores: item.scores,
-      comentario: item.comentario,
-      evidencias: getItemEvidenceText(item),
-      metricas: calculate(item),
-    })),
-  }));
+  ventana.document.write(documentoDeActa(datos));
   ventana.document.close();
 
   const total = state.items.length;
   const alcance = items.length < total
-    ? `Lleva ${items.length} de las ${total} subcapacidades de ${dominio.label}: las que dejan los filtros. `
+    ? `Lleva ${items.length} de las ${total} subcapacidades de ${datos.domainLabel}: las que dejan los filtros. `
     : "";
 
   // Las notas salen tal cual se escribieron, y el acta va al cliente.
@@ -254,6 +232,108 @@ export function exportarActa() {
     ventana.focus();
     ventana.print();
   }, 300);
+}
+
+
+/**
+ * El texto del correo que acompaña al acta, al portapapeles.
+ *
+ * El mismo alcance y las mismas cifras que el acta: el correo resume el
+ * adjunto, y no puede decir otra cosa. Ver textoDelCorreo() en informe/acta.js.
+ */
+export async function copiarTextoDelCorreo({ items = getVisibleItems() } = {}) {
+  if (!hayAlgoParaElActa(items)) {
+    return;
+  }
+
+  const texto = textoDelCorreo(datosDelActa(items));
+
+  if (await copiarAlPortapapeles(texto)) {
+    showNotice("Texto del correo copiado. Pégalo en un correo nuevo y adjunta el acta: la primera línea es el asunto.", "info");
+  } else {
+    showNotice("El navegador no ha dejado copiar el texto. Prueba otra vez desde el botón, sin cambiar de ventana entre medias.", "error");
+  }
+}
+
+
+function hayAlgoParaElActa(items) {
+  if (items.some((item) => !calculate(item).isPending)) {
+    return true;
+  }
+
+  showNotice(
+    items.length < state.items.length
+      ? "Con los filtros puestos no queda ninguna subcapacidad puntuada para el acta."
+      : "Todavía no hay ninguna subcapacidad puntuada en este dominio: el acta recoge lo que se puntúa en el taller.",
+    "aviso",
+  );
+
+  return false;
+}
+
+
+/** Lo que el acta, el correo y el cierre del modo taller necesitan de cada subcapacidad. */
+export function datosDelActa(items) {
+  const dominio = getActiveDomainConfig();
+  const ahora = new Date();
+
+  return {
+    cliente: state.cliente,
+    domainLabel: dominio.label,
+    domainTitle: dominio.title,
+    fecha: diaLegible(ahora),
+    fechaDeArchivo: fechaParaArchivo(ahora),
+    subcapacidades: items.map((item) => ({
+      id: item.id,
+      capacidad: item.capacidad,
+      subcapacidad: item.subcapacidad,
+      scores: item.scores,
+      comentario: item.comentario,
+      evidencias: getItemEvidenceText(item),
+      metricas: calculate(item),
+    })),
+  };
+}
+
+
+/**
+ * La API del portapapeles solo existe en un origen seguro: en GitHub Pages y
+ * en localhost si, pero no en una IP de la red de la oficina servida por http.
+ * Ahi se copia con execCommand, que esta obsoleto pero sigue funcionando en
+ * los tres navegadores.
+ */
+async function copiarAlPortapapeles(texto) {
+  try {
+    if (navigator.clipboard?.writeText && window.isSecureContext) {
+      await navigator.clipboard.writeText(texto);
+      return true;
+    }
+  } catch {
+    // Se intenta abajo.
+  }
+
+  const campo = document.createElement("textarea");
+  const foco = document.activeElement;
+
+  campo.value = texto;
+  campo.setAttribute("readonly", "");
+  campo.style.position = "fixed";
+  campo.style.opacity = "0";
+  document.body.appendChild(campo);
+  campo.select();
+
+  let copiado = false;
+
+  try {
+    copiado = document.execCommand("copy");
+  } catch {
+    copiado = false;
+  }
+
+  campo.remove();
+  foco?.focus?.({ preventScroll: true });
+
+  return copiado;
 }
 
 

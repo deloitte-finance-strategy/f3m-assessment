@@ -8,8 +8,15 @@
  * escapado.
  */
 
-import { average, calcularMetricas, resumenGlobal } from "../core/calculo.js?v=27";
-import { BRECHAS_EN_LA_PORTADA, documentoDeActa, resumenDelActa } from "../informe/acta.js?v=27";
+import { average, calcularMetricas, resumenGlobal } from "../core/calculo.js?v=28";
+import {
+  BRECHAS_EN_EL_CORREO,
+  BRECHAS_EN_LA_PORTADA,
+  documentoDeActa,
+  fraseDelActa,
+  resumenDelActa,
+  textoDelCorreo,
+} from "../informe/acta.js?v=28";
 
 
 const OBJETIVO_4 = { procesos: 4, tecnologia: 4, organizacion: 4 };
@@ -208,6 +215,41 @@ export const casos = [
 
       t.igual(html.includes("Las notas son las que tomamos"), false);
       t.igual(html.includes("Notas del taller"), false);
+    },
+  },
+  {
+    grupo: "Acta del taller",
+    nombre: "el correo dice lo mismo que la portada del acta, en texto llano",
+    ejecutar(t) {
+      const datos = { cliente: "Grupo Ejemplo", domainLabel: "FP&A", domainTitle: "Planificación / FP&A", fecha: "9 de octubre de 2026", subcapacidades: DOMINIO };
+      const correo = textoDelCorreo(datos);
+      const frase = fraseDelActa(datos, { html: false });
+      const { brechas } = resumenDelActa(DOMINIO);
+
+      t.igual(correo.startsWith("Asunto: Acta del taller F3M · Grupo Ejemplo · FP&A · 9 de octubre de 2026\n"), true, "el asunto");
+      t.igual(correo.includes(frase), true, "la misma frase que el acta");
+      t.igual(documentoDeActa(datos).includes(fraseDelActa(datos)), true, "y el acta lleva su versión en HTML");
+      t.igual(/<[a-z]/i.test(correo), false, "sin una sola marca de HTML");
+      t.igual(correo.includes("&amp;"), false, "ni nombres escapados");
+      t.igual(frase.includes("6 de las 7 subcapacidades"), true);
+
+      const listadas = correo.split("\n").filter((linea) => linea.startsWith("- "));
+
+      t.igual(listadas.length, BRECHAS_EN_EL_CORREO, "las tres más lejos del objetivo");
+      t.igual(listadas[0].startsWith(`- ${brechas[0].item.subcapacidad} (`), true, "en el orden de la tabla del acta");
+    },
+  },
+  {
+    grupo: "Acta del taller",
+    nombre: "el correo no inventa brechas ni cliente",
+    ejecutar(t) {
+      const correo = textoDelCorreo({
+        domainLabel: "FP&A",
+        subcapacidades: [subcapacidad("Informes", "2.2 Cuadro de mando", { procesos: 5, tecnologia: 5, organizacion: 5 })],
+      });
+
+      t.igual(correo.startsWith("Asunto: Acta del taller F3M · FP&A\n"), true);
+      t.igual(correo.includes("más lejos del objetivo"), false, "sin brechas, sin lista");
     },
   },
 ];

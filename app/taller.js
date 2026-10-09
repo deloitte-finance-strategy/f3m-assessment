@@ -20,30 +20,32 @@
  * guardado diferido de edicion.js. Lo unico propio es como se enseña.
  */
 
-import { getMaturityLevel } from "../core/calculo.js?v=27";
-import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=27";
-import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=27";
-import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=27";
-import { nombreDeMasInformacion } from "./biblioteca.js?v=27";
-import { priorityBadge } from "./celdas.js?v=27";
-import { avanceDeDominio, switchDomain } from "./dominios.js?v=27";
+import { getMaturityLevel } from "../core/calculo.js?v=28";
+import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=28";
+import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=28";
+import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=28";
+import { nombreDeMasInformacion } from "./biblioteca.js?v=28";
+import { priorityBadge } from "./celdas.js?v=28";
+import { accionesDelCierre, htmlDelCierre } from "./cierre.js?v=28";
+import { avanceDeDominio, switchDomain } from "./dominios.js?v=28";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "./edicion.js?v=27";
-import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=27";
-import { getVisibleItems } from "./filtros.js?v=27";
-import { calculate, getCapabilityTargets } from "./metricas.js?v=27";
-import { repintarTodo } from "./repintado.js?v=27";
-import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=27";
+} from "./edicion.js?v=28";
+import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=28";
+import { getVisibleItems } from "./filtros.js?v=28";
+import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=28";
+import { calculate, getCapabilityTargets } from "./metricas.js?v=28";
+import { repintarTodo } from "./repintado.js?v=28";
+import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=28";
 import {
   conectarPuntuacion,
   enfocarPalanca,
   idDeLaTarjetaEnCurso,
   llevarALasTarjetas,
   scoreControl,
-} from "./vistas/assessment.js?v=27";
+} from "./vistas/assessment.js?v=28";
 
 
 let panel = null;
@@ -66,10 +68,23 @@ let disparador = null;
 // encuentra la subcapacidad de antes y cerraria el modo taller.
 let cambiandoDeDominio = false;
 
+// Las puntuaciones de cada subcapacidad cuando entro en el recorrido, para que
+// el cierre diga cuantas se han puntuado en esta sesion. Por dominio e id: los
+// ids salen del prefijo «1.1» y se repiten de un dominio a otro.
+const puntuacionesAlEmpezar = new Map();
+
 
 const abierto = () => Boolean(panel) && !panel.hidden;
 
 const itemActual = () => state.items.find((item) => item.id === recorrido[indice]) || null;
+
+// Despues de la ultima subcapacidad viene el cierre del taller: indice === recorrido.length.
+const enCierre = () => recorrido.length > 0 && indice === recorrido.length;
+
+const itemsDelRecorrido = () =>
+  recorrido.map((id) => state.items.find((item) => item.id === id)).filter(Boolean);
+
+const huellaDePuntuacion = (item) => JSON.stringify(LEVERS.map((lever) => item.scores[lever.key] ?? null));
 
 const nombreDelNivel = (nivel) => (getMaturityLevel(nivel) || "").split(" - ")[1] || "";
 
@@ -108,6 +123,8 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   document.getElementById("modoTallerSalir")?.addEventListener("click", () => cerrarModoTaller());
   anterior?.addEventListener("click", () => irA(indice - 1));
   siguiente?.addEventListener("click", () => irA(indice + 1));
+  resultado?.addEventListener("click", alPulsarEnElCierre);
+  cuerpo.addEventListener("click", alPulsarEnElCierre);
   selectorDeDominio?.addEventListener("change", () => cambiarDeDominio(selectorDeDominio.value));
 
   document.addEventListener("keydown", alPulsarTecla);
@@ -137,6 +154,8 @@ export function abrirModoTaller(desde = null) {
 
   indice = Math.max(0, recorrido.indexOf(idDeLaTarjetaEnCurso()));
   disparador = desde;
+  puntuacionesAlEmpezar.clear();
+  anotarPuntuacionesAlEmpezar();
 
   panel.hidden = false;
   updateModalOpenState();
@@ -181,7 +200,8 @@ export function cerrarModoTaller({ volver = true } = {}) {
     guardarCampoAhora(item, "comentario", notas);
   }
 
-  const ultimo = recorrido[indice];
+  // Desde el cierre, se vuelve a la ultima subcapacidad del recorrido.
+  const ultimo = recorrido[Math.min(indice, recorrido.length - 1)];
 
   panel.hidden = true;
   cuerpo.innerHTML = "";
@@ -213,6 +233,14 @@ export function cerrarModoTaller({ volver = true } = {}) {
  */
 export function refrescarModoTaller() {
   if (!abierto() || cambiandoDeDominio) {
+    return;
+  }
+
+  // Con un cambio de otra persona del escenario compartido, el cierre se
+  // repinta entero: no tiene nada que se este escribiendo.
+  if (enCierre()) {
+    pintarCierre({ enfocar: false });
+    pintarAvanceDeDominios();
     return;
   }
 
@@ -280,6 +308,7 @@ async function cambiarDeDominio(domainId) {
 
   recorrido = getVisibleItems().map((entrada) => entrada.id);
   indice = Math.max(0, recorrido.indexOf(antes));
+  anotarPuntuacionesAlEmpezar();
 
   if (!recorrido.length) {
     cerrarModoTaller({ volver: false });
@@ -292,8 +321,29 @@ async function cambiarDeDominio(domainId) {
 }
 
 
+/** La huella de las que aun no estaban, sin pisar las que ya estaban: volver a un dominio no reinicia su cuenta. */
+function anotarPuntuacionesAlEmpezar() {
+  recorrido.forEach((id) => {
+    const clave = `${state.activeDomainId}:${id}`;
+    const item = state.items.find((entrada) => entrada.id === id);
+
+    if (item && !puntuacionesAlEmpezar.has(clave)) {
+      puntuacionesAlEmpezar.set(clave, huellaDePuntuacion(item));
+    }
+  });
+}
+
+
+function cambiadasEnEstaSesion() {
+  return itemsDelRecorrido().filter(
+    (item) => puntuacionesAlEmpezar.get(`${state.activeDomainId}:${item.id}`) !== huellaDePuntuacion(item),
+  ).length;
+}
+
+
+// Hasta recorrido.length, que es el cierre.
 function irA(nuevo) {
-  if (nuevo < 0 || nuevo >= recorrido.length || nuevo === indice) {
+  if (nuevo < 0 || nuevo > recorrido.length || nuevo === indice) {
     return;
   }
 
@@ -310,6 +360,11 @@ function irA(nuevo) {
 
 
 function pintar({ enfocar = true } = {}) {
+  if (enCierre()) {
+    pintarCierre({ enfocar });
+    return;
+  }
+
   const item = itemActual();
 
   if (!item) {
@@ -391,11 +446,73 @@ function pintar({ enfocar = true } = {}) {
   pintarResultado(item);
 
   anterior.disabled = indice === 0;
-  siguiente.disabled = indice === recorrido.length - 1;
+  anterior.innerHTML = `<span aria-hidden="true">←</span> Anterior`;
+  siguiente.hidden = false;
+
+  // Despues de la ultima no se acaba el recorrido: viene el cierre.
+  siguiente.innerHTML = indice === recorrido.length - 1
+    ? `Cierre del taller <span aria-hidden="true">→</span>`
+    : `Siguiente <span aria-hidden="true">→</span>`;
 
   // Con el foco en la primera palanca, las teclas 1 a 5 ya puntuan.
   if (enfocar) {
     enfocarPalanca(cuerpo.querySelector(".score-segmentos"), { preventScroll: true });
+  }
+}
+
+
+/**
+ * La ultima pantalla: lo que ha salido de la sesion, con las mismas cifras que
+ * el acta. Ver app/cierre.js. En el pie, «Anterior» vuelve a las
+ * subcapacidades y el centro lleva el acta y el correo.
+ */
+function pintarCierre({ enfocar = true } = {}) {
+  const datos = datosDelActa(itemsDelRecorrido());
+
+  donde.textContent = state.cliente || "";
+  pintarSelectorDeDominio();
+
+  cuerpo.innerHTML = htmlDelCierre(datos, { cambiadasHoy: cambiadasEnEstaSesion() });
+  resultado.innerHTML = accionesDelCierre(datos);
+
+  posicion.textContent = "Cierre del taller";
+  anterior.disabled = false;
+  anterior.innerHTML = `<span aria-hidden="true">←</span> Volver a las subcapacidades`;
+  siguiente.hidden = true;
+
+  // Al titulo y no a un boton: lo primero que se oye es de que va la pantalla,
+  // y con el raton no se ve ningun anillo de foco.
+  if (enfocar) {
+    cuerpo.querySelector("#modoTallerTitulo")?.focus({ preventScroll: true });
+  }
+}
+
+
+function alPulsarEnElCierre(event) {
+  if (!enCierre()) {
+    return;
+  }
+
+  const ir = event.target.closest("[data-ir]");
+
+  if (ir) {
+    const destino = recorrido.indexOf(ir.dataset.ir);
+
+    if (destino >= 0) {
+      irA(destino);
+    }
+
+    return;
+  }
+
+  const accion = event.target.closest("[data-cierre]")?.dataset.cierre;
+
+  // El mismo recorrido que la pantalla, y no los filtros de ahora: el acta y el
+  // correo tienen que decir lo que se acaba de proyectar.
+  if (accion === "acta") {
+    exportarActa({ items: itemsDelRecorrido() });
+  } else if (accion === "correo") {
+    copiarTextoDelCorreo({ items: itemsDelRecorrido() });
   }
 }
 

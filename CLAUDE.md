@@ -33,9 +33,9 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.351 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.361 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.900 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.920 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 183 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 341 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
@@ -55,9 +55,10 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 137 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 317 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
-| `app/informe.js` | Lo que la aplicación le pasa al informe, a la preparación y al acta del taller | 750 |
+| `app/informe.js` | Lo que la aplicación le pasa al informe, a la preparación y al acta del taller | 830 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 612 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 729 |
+| `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 184 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 224 |
@@ -65,7 +66,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 172 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.444 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 6.725 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -80,7 +81,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.016 |
 | `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 112 |
 | `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 558 |
-| `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 679 |
+| `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 736 |
 | `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
@@ -143,7 +144,7 @@ infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, mét
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
-`app/biblioteca.js`, `app/buscador.js` y `app/taller.js`. Lo nuevo nace ya en `app/`, no en
+`app/biblioteca.js`, `app/buscador.js`, `app/taller.js` y `app/cierre.js`. Lo nuevo nace ya en `app/`, no en
 `app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
 
@@ -322,6 +323,16 @@ foco se queda en el desplegable, porque con las flechas un `<select>` cerrado ca
 cada pulsación. Mientras dura el cambio, `refrescarModoTaller()` no hace nada: el repintado no
 encontraría la subcapacidad de antes y cerraría el modo taller.
 
+**Después de la última subcapacidad viene el cierre del taller** (`app/cierre.js`): «Siguiente» pasa
+a decir «Cierre del taller» y lleva a una pantalla para proyectar al terminar la sesión. La frase de
+lo que ha salido, las cuatro cifras, las tres subcapacidades más lejos del objetivo —cada una vuelve
+a la suya—, cada palanca frente a su objetivo y lo que queda para la próxima sesión. Son las cifras
+del acta, con las mismas funciones (`fraseDelActa()` y `resumenDelActa()` de `informe/acta.js`), y
+desde el pie se genera el acta y se copia el correo **del mismo recorrido**, no de los filtros de
+ese momento: el cliente recibe por escrito lo que acaba de ver. Es la posición `recorrido.length`,
+una más allá de la última; «Anterior» y Re Pág vuelven. «En esta sesión» cuenta las subcapacidades
+cuyos scores han cambiado desde que se abrió el modo taller, por dominio e id.
+
 Con el modo taller abierto, **el chip de guardado sube por encima del pie** (`apartarElChipDelPie()`):
 sale al puntuar, justo cuando se va a pulsar «Siguiente», y en su sitio de siempre se llevaba el clic.
 
@@ -410,7 +421,10 @@ próximos pasos en blanco. Las cifras salen de `resumenGlobal()` y `agregarPorDo
 del Dashboard y del Overview, así que el acta no puede contradecir lo que se proyectó. Lleva el
 mismo alcance que la preparación —los filtros— y **sin nada puntuado no se puede pedir**: el menú
 lo dice y el botón se apaga. Como las notas son del equipo y salen tal cual, el aviso pide
-revisarlas antes de enviarla. Comparte con la preparación la hoja de estilos
+revisarlas antes de enviarla. **«Copiar el texto del correo»**, en el mismo menú, deja en el portapapeles el correo que acompaña al
+acta: asunto, la misma frase de su portada y sus tres primeras brechas, en texto llano
+(`textoDelCorreo()`). Sin `navigator.clipboard`, que solo existe en un origen seguro, copia con
+`execCommand`. Comparte con la preparación la hoja de estilos
 (`estilosDelDocumento()`), el título de archivo y la agrupación por capacidad: son el antes y el
 después de la misma sesión y tienen que parecer de la misma familia. Una capacidad sí se parte
 entre dos páginas, por subcapacidades y con la cabecera repetida; entera, dejaba media hoja en
@@ -791,7 +805,10 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      Pulsar un caso de IA abre su documento encima: el primer Escape cierra solo el visor y deja
      el foco en el caso, y el segundo sale del modo taller. Cambiar de dominio en el desplegable
      de arriba lleva a «1 de N» del nuevo sin salir, y al salir el Assessment está en ese dominio.
-     Puntuar y pulsar enseguida «Siguiente»: el chip de guardado no lo tapa. Probarlo en los
+     Puntuar y pulsar enseguida «Siguiente»: el chip de guardado no lo tapa. Tras la última, «Cierre
+     del taller»: sin desplazarse en los cuatro modos, sus cifras son las del acta que genera su
+     botón, «Copiar el texto del correo» deja el correo en el portapapeles y cada una de las tres
+     brechas vuelve a su subcapacidad. Probarlo en los
      cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita
      desplazarse.
    - **Heatmap**: desplegar y plegar capacidades.
@@ -826,7 +843,8 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    aviso dicen cuántas lleva, y el número de su capacidad es el suyo («3», no «1»).
    **El acta del taller**, del mismo menú: sus cuatro cifras son las del Dashboard, las notas del
    taller salen debajo de su subcapacidad y lo sin puntuar va a «Quedó pendiente» con sus casillas.
-   En un dominio sin nada puntuado, el botón está apagado y lo dice.
+   En un dominio sin nada puntuado, el botón está apagado y lo dice. «Copiar el texto del correo», igual, y pegado
+   en un correo dice la misma frase que la portada del acta.
 8. Cambiar el objetivo de una capacidad en Fiscal y comprobar que en el Overview **solo** se mueve
    la fila de Fiscal. En la fila «Todas las capacidades», cambiar una palanca la pone igual en
    todas y cambiar después una sola la deja en «Varios»; «Usar estos objetivos en los nueve

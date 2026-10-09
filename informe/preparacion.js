@@ -16,9 +16,9 @@
  * documento entero, sin scripts, por lo mismo que el informe.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=27";
-import { COLOR_DE_PALANCA, escapeHtml } from "../core/presentacion.js?v=27";
-import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=27";
+import { PALANCAS } from "../core/calculo.js?v=28";
+import { COLOR_DE_PALANCA, escapeHtml } from "../core/presentacion.js?v=28";
+import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=28";
 
 
 /**

@@ -14,7 +14,7 @@ import {
   capacidadesDePreparacion,
   documentoDePreparacion,
   listaDeEvidencias,
-} from "../informe/preparacion.js?v=27";
+} from "../informe/preparacion.js?v=28";
 
 
 const RAIZ = new URL("../", import.meta.url);
