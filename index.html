@@ -128,6 +128,7 @@
     <link rel="modulepreload" href="app/subcapacidad.js?v=28">
     <link rel="modulepreload" href="app/taller.js?v=28">
     <link rel="modulepreload" href="app/cierre.js?v=28">
+    <link rel="modulepreload" href="app/apertura.js?v=28">
     <link rel="modulepreload" href="app/vistas/assessment.js?v=28">
     <link rel="modulepreload" href="app/vistas/dashboard.js?v=28">
     <link rel="modulepreload" href="app/vistas/heatmap.js?v=28">
@@ -1257,7 +1258,18 @@
         </label>
         <span id="modoTallerDonde"></span>
       </div>
-      <p class="modo-taller-posicion" id="modoTallerPosicion" aria-live="polite"></p>
+      <!--
+        «3 de 20» abre el indice del recorrido: en un taller el cliente salta de
+        tema («volvamos a lo del forecast»), y pasar una a una eran cinco clics
+        delante de todos.
+      -->
+      <div class="modo-taller-indice">
+        <button class="modo-taller-posicion" id="modoTallerPosicion" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="modoTallerIndice">
+          <span id="modoTallerPosicionTexto" aria-live="polite"></span>
+          <span class="header-menu-caret" aria-hidden="true"></span>
+        </button>
+        <div class="header-menu-panel modo-taller-indice-panel" id="modoTallerIndice" hidden></div>
+      </div>
       <!--
         El acta y el correo son del equipo, no del cliente: van aqui, en un
         boton de texto que en la sala no se lee como parte de lo proyectado, y

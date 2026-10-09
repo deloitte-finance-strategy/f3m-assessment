@@ -58,6 +58,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/informe.js` | Lo que la aplicación le pasa al informe, a la preparación y al acta del taller | 830 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
 | `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 801 |
+| `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
 | `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 174 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 392 |
@@ -144,7 +145,7 @@ infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, mét
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
-`app/biblioteca.js`, `app/buscador.js`, `app/taller.js` y `app/cierre.js`. Lo nuevo nace ya en `app/`, no en
+`app/biblioteca.js`, `app/buscador.js`, `app/taller.js`, `app/apertura.js` y `app/cierre.js`. Lo nuevo nace ya en `app/`, no en
 `app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
 
@@ -316,9 +317,24 @@ con `refrescarModoTaller()`. Desde otra vista, primero abre el Assessment: empie
 la que se estaba y vuelve a ella al salir. Cambiar de vista es del orquestador, así que `app.js` se
 lo inyecta a `setupModoTaller()`.
 
+**Antes de la primera subcapacidad viene la apertura del taller** (`app/apertura.js`): el cliente y
+el dominio, las capacidades que se van a ver —cada una lleva a su primera subcapacidad—, la escala
+del 1 al 5 y las tres palancas con su objetivo. La escala es `RUBRICA_GENERAL` de
+`informe/preparacion.js`, la misma que el cliente recibió en la preparación. El objetivo es la media
+por palanca de las capacidades del recorrido, y si no es un entero común, la apertura dice que
+cambia por capacidad en vez de dar un número que no vale para todas. Es la posición `-1`
+(`APERTURA`), y el modo taller abre en ella salvo que se viniera de una tarjeta más allá de la
+primera: entonces la sesión ya estaba en marcha y se abre en esa tarjeta. Desde la primera
+subcapacidad, «← Apertura» y Re Pág vuelven a ella.
+
+**«3 de 20», en la barra, abre el índice del recorrido**: la apertura, las subcapacidades agrupadas
+por capacidad con un punto en las puntuadas, y el cierre. Un clic o Intro lleva a cualquiera. Con el
+índice o «Para el equipo» abiertos, las flechas se mueven por sus opciones y no pasan de
+subcapacidad por detrás, y Escape cierra el menú y no el modo taller (`crearMenuDeLaBarra()`).
+
 **El dominio se cambia sin salir**, con el desplegable de la banda de arriba, que dice el avance de
 cada uno («Fiscal · 3/16»). Cambia el de toda la herramienta, con `switchDomain()`, igual que el
-conmutador: se quitan los filtros y el recorrido empieza en la primera subcapacidad del nuevo. El
+conmutador: se quitan los filtros y el recorrido empieza en la apertura del nuevo. El
 foco se queda en el desplegable, porque con las flechas un `<select>` cerrado cambia de opción a
 cada pulsación. Mientras dura el cambio, `refrescarModoTaller()` no hace nada: el repintado no
 encontraría la subcapacidad de antes y cerraría el modo taller.
@@ -806,8 +822,12 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      («1 de 4» con una capacidad elegida). Tab no sale del modo taller, Ctrl+K no abre el buscador
      encima, y Escape vuelve a la tarjeta en la que se estaba, con el foco en su primer score.
      Pulsar un caso de IA abre su documento encima: el primer Escape cierra solo el visor y deja
-     el foco en el caso, y el segundo sale del modo taller. Cambiar de dominio en el desplegable
-     de arriba lleva a «1 de N» del nuevo sin salir, y al salir el Assessment está en ese dominio.
+     el foco en el caso, y el segundo sale del modo taller. Abrirlo sin haber tocado ninguna
+     tarjeta empieza en la apertura, que cabe sin desplazarse en los nueve dominios; «Empezar»
+     lleva a «1 de N» y cada capacidad de la apertura, a su primera subcapacidad. «3 de 20» abre el
+     índice con el foco en la actual: las flechas y Intro llevan a otra, y Escape cierra solo el
+     índice. Cambiar de dominio en el desplegable de arriba lleva a la apertura del nuevo sin
+     salir, y al salir el Assessment está en ese dominio.
      Puntuar y pulsar enseguida «Siguiente»: el chip de guardado no lo tapa. Tras la última, «Cierre
      del taller»: sin desplazarse en los cuatro modos, sus cifras son las del acta que sale de
      «Para el equipo», en la barra; «Copiar el texto del correo», ahí mismo, deja el correo en el

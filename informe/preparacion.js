@@ -57,7 +57,7 @@ export const RUBRICA_GENERAL = {
 export const NIVELES_DE_LA_RUBRICA = ["Inicial", "Estructurado", "Estandarizado", "Optimizado", "Avanzado"];
 
 
-const QUE_MIDE = {
+export const QUE_MIDE = {
   procesos: "cómo está definido y gobernado el trabajo",
   tecnologia: "qué herramientas y datos lo soportan",
   organizacion: "quién lo hace y con qué roles",
