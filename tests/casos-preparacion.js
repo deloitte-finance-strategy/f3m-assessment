@@ -14,7 +14,7 @@ import {
   capacidadesDePreparacion,
   documentoDePreparacion,
   listaDeEvidencias,
-} from "../informe/preparacion.js?v=27";
+} from "../informe/preparacion.js?v=28";
 
 
 const RAIZ = new URL("../", import.meta.url);
@@ -206,6 +206,20 @@ export const casos = [
           );
         });
       });
+    },
+  },
+  {
+    grupo: "Preparación del taller",
+    nombre: "lleva el logo del cliente junto al titulo si lo hay, y si no nada",
+    ejecutar: (t) => {
+      const conLogo = documentoDePreparacion({ cliente: "Acme", domainLabel: "FP&A", subcapacidades: [], logo: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" });
+      t.igual(conLogo.includes('class="logo-cliente"'), true, "con logo");
+
+      const sinLogo = documentoDePreparacion({ domainLabel: "FP&A", subcapacidades: [] });
+      t.igual(sinLogo.includes('class="logo-cliente"'), false, "sin logo");
+
+      const svg = documentoDePreparacion({ domainLabel: "FP&A", subcapacidades: [], logo: "data:image/svg+xml;base64,PHN2Zz4=" });
+      t.igual(svg.includes('class="logo-cliente"'), false, "un SVG no pasa");
     },
   },
 ];

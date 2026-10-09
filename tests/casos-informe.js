@@ -13,9 +13,9 @@
  *   que escribe el usuario llega sin escapar.
  */
 
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=27";
-import { deTantas, paginar } from "../informe/secciones.js?v=27";
-import { resumenDeDesbordes } from "../informe/desbordes.js?v=27";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=28";
+import { deTantas, paginar } from "../informe/secciones.js?v=28";
+import { resumenDeDesbordes } from "../informe/desbordes.js?v=28";
 
 
 /** Una subcapacidad y sus metricas, lo minimo que el informe necesita. */
@@ -502,6 +502,19 @@ export const casos = [
 
       t.igual(cuentaDeDiapositivas(html) > 0, true, "hay diapositivas");
       t.igual(html.includes('<section class="slide cierre'), true, "y llega al cierre");
+    },
+  },
+  {
+    grupo: "Informe · logo del cliente",
+    nombre: "la portada lleva el logo valido, y uno que no lo es no llega a pintarse",
+    ejecutar: (t) => {
+      const conLogo = buildEnhancedPdfReportHtml(datos({ cliente: "Acme", logo: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" }));
+      t.igual(conLogo.includes('class="portada-logo"'), true, "con logo, en la portada");
+      t.igual(conLogo.includes('alt="Logo de Acme"'), true, "con su texto alternativo");
+
+      const roto = buildEnhancedPdfReportHtml(datos({ logo: 'data:image/png;base64,AA" onerror="x' }));
+      t.igual(roto.includes('class="portada-logo"'), false, "uno roto no se pinta");
+      t.igual(roto.includes("onerror"), false, "ni se cuela en el HTML");
     },
   },
 ];

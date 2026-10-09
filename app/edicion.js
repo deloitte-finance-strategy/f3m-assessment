@@ -12,8 +12,8 @@
  * hayGuardadosPendientes() para frenar el cierre.
  */
 
-import { LIMITES_DE_TEXTO, recortarAlLimite } from "../core/escenario.js?v=27";
-import { persistItemChange } from "./persistencia.js?v=27";
+import { LIMITES_DE_TEXTO, recortarAlLimite } from "../core/escenario.js?v=28";
+import { persistItemChange } from "./persistencia.js?v=28";
 
 
 const GUARDADO_DIFERIDO_MS = 600;
@@ -74,6 +74,36 @@ function guardarCampo(item, campo, valor) {
   item[campo] = valor;
 
   persistItemChange(item.id, campo, valor);
+}
+
+
+/**
+ * El mismo guardado diferido para lo que no es un campo de una subcapacidad,
+ * como los proximos pasos del taller. Va en la misma cuenta para que el freno
+ * de cierre tambien lo vea.
+ */
+export function programarGuardadoDe(clave, guardar) {
+  window.clearTimeout(guardadosPendientes.get(clave));
+
+  guardadosPendientes.set(
+    clave,
+    window.setTimeout(() => {
+      guardadosPendientes.delete(clave);
+      guardar();
+    }, GUARDADO_DIFERIDO_MS),
+  );
+}
+
+
+/** Lo que estuviera esperando de `clave` se guarda ya. Si no esperaba nada, no hace nada. */
+export function guardarYaLoPendienteDe(clave, guardar) {
+  if (!guardadosPendientes.has(clave)) {
+    return;
+  }
+
+  window.clearTimeout(guardadosPendientes.get(clave));
+  guardadosPendientes.delete(clave);
+  guardar();
 }
 
 

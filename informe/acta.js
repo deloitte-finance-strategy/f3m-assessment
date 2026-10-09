@@ -6,7 +6,8 @@
  * cifras de la pantalla. Esto saca ese resumen de la herramienta: una portada
  * con lo que salio de la sesion, lo acordado capacidad a capacidad con las
  * notas del taller, lo que quedo pendiente con la documentacion que ayudaria a
- * puntuarlo, y una tabla de proximos pasos para rellenar.
+ * puntuarlo, y los proximos pasos: los que se acordaron en el modo taller, y
+ * filas en blanco para lo que falte.
  *
  * Las cifras salen de las mismas funciones que el Dashboard (resumenGlobal) y
  * que el Overview (agregarPorDominio), asi que el acta no puede decir del
@@ -25,27 +26,34 @@ import {
   normalizeTargetValue,
   ordenarPorPrioridadYGap,
   resumenGlobal,
-} from "../core/calculo.js?v=27";
+} from "../core/calculo.js?v=28";
 import {
   COLOR_DE_PALANCA,
   escapeHtml,
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=27";
-import { CALOR_SIN_DATO, PALETA, colorDeCalor } from "./estilos.js?v=27";
+} from "../core/presentacion.js?v=28";
+import { CALOR_SIN_DATO, PALETA, colorDeCalor } from "./estilos.js?v=28";
 import {
   NIVELES_DE_LA_RUBRICA,
   capacidadesDePreparacion,
   estilosDelDocumento,
+  logoDelDocumento,
   tituloDelDocumento,
-} from "./preparacion.js?v=27";
+} from "./preparacion.js?v=28";
 
 
 /** Cuantas subcapacidades lleva la portada en «Dónde está la mayor distancia». */
 export const BRECHAS_EN_LA_PORTADA = 5;
 
+/**
+ * Sin pasos apuntados, seis filas en blanco para rellenar a mano. Con pasos,
+ * las que falten hasta seis, y al menos dos: siempre queda sitio para lo que
+ * añada el cliente al leerla.
+ */
 const PASOS_EN_BLANCO = 6;
+const PASOS_EN_BLANCO_COMO_MINIMO = 2;
 
 /**
  * Anchos fijos para las tablas de las capacidades: cada una media sus columnas
@@ -116,9 +124,6 @@ export function documentoDeActa(datos) {
   const cifras = resumenDelActa(datos.subcapacidades);
   const cliente = datos.cliente ? escapeHtml(datos.cliente) : "";
   const dominio = escapeHtml(datos.domainLabel || "");
-  const ambito = capacidades.length === 1
-    ? `de ${escapeHtml(capacidades[0].nombre)}, dentro de ${dominio}`
-    : `de ${dominio}`;
 
   return `<!doctype html>
     <html lang="es">
@@ -133,6 +138,7 @@ export function documentoDeActa(datos) {
           <span>Acta del taller · ${dominio}</span>
         </div>
 
+        ${logoDelDocumento(datos)}
         <h1>Acta del taller de ${escapeHtml(datos.domainTitle || datos.domainLabel || "")}</h1>
         <p class="bajada">Diagnóstico de madurez de la función financiera · Deloitte Finance Strategy</p>
 
@@ -143,7 +149,7 @@ export function documentoDeActa(datos) {
           <div>Equipo de Deloitte</div>
         </div>
 
-        <p class="aviso">${frase(cifras, ambito)}</p>
+        <p class="aviso">${fraseDelActa(datos)}</p>
         ${kpis(cifras.resumen)}
 
         <h2>Por palanca</h2>
@@ -164,10 +170,7 @@ export function documentoDeActa(datos) {
 
           <div class="pasos">
             <h2>Próximos pasos</h2>
-            <table class="tabla">
-              <thead><tr><th>Acción</th><th>Responsable</th><th>Fecha</th></tr></thead>
-              <tbody>${"<tr><td></td><td></td><td></td></tr>".repeat(PASOS_EN_BLANCO)}</tbody>
-            </table>
+            ${tablaDePasos(datos.proximosPasos)}
 
             <p class="cierre">Las puntuaciones de esta acta son las acordadas en la sesión y tienen carácter preliminar. El diagnóstico completo, con el roadmap de iniciativas y las oportunidades de IA, llega en el informe.</p>
           </div>
@@ -181,15 +184,27 @@ export function documentoDeActa(datos) {
 /**
  * La frase de arriba, que es lo que se lee primero: cuanto se ha puntuado,
  * que palanca esta mejor y cual mas lejos de su objetivo, y cuanto queda.
+ *
+ * La dicen el acta, el cierre del modo taller y el texto del correo, y es una
+ * sola funcion para que digan lo mismo. En HTML lleva negritas y escapa los
+ * nombres; `{ html: false }` la da en texto llano, para pegarla en un correo.
  */
-function frase({ resumen, palancas, pendientes: pendientesDelActa }, ambito) {
+export function fraseDelActa(datos, { html = true } = {}) {
+  const b = html ? (texto) => `<b>${texto}</b>` : (texto) => texto;
+  const esc = html ? escapeHtml : (texto) => String(texto ?? "");
+  const capacidades = capacidadesDePreparacion(datos.subcapacidades || []);
+  const dominio = esc(datos.domainLabel || "");
+  const ambito = capacidades.length === 1
+    ? `de ${esc(capacidades[0].nombre)}, dentro de ${dominio}`
+    : `de ${dominio}`;
+  const { resumen, palancas, pendientes: pendientesDelActa } = resumenDelActa(datos.subcapacidades);
   const { evaluadas, total } = resumen;
 
   const cuantas = evaluadas === total
     ? total === 1
-      ? `Queda puntuada <b>la subcapacidad</b> ${ambito}.`
-      : `Quedan puntuadas <b>las ${total} subcapacidades</b> ${ambito}.`
-    : `Con esta sesión ${evaluadas === 1 ? "queda puntuada" : "quedan puntuadas"} <b>${evaluadas} de las ${total} subcapacidades</b> ${ambito}.`;
+      ? `Queda puntuada ${b("la subcapacidad")} ${ambito}.`
+      : `Quedan puntuadas ${b(`las ${total} subcapacidades`)} ${ambito}.`
+    : `Con esta sesión ${evaluadas === 1 ? "queda puntuada" : "quedan puntuadas"} ${b(`${evaluadas} de las ${total} subcapacidades`)} ${ambito}.`;
 
   const conMedia = palancas.filter((palanca) => Number.isFinite(palanca.media));
 
@@ -203,7 +218,7 @@ function frase({ resumen, palancas, pendientes: pendientesDelActa }, ambito) {
     .filter((palanca) => palanca.distancia > 0.005)
     .sort((a, b) => b.distancia - a.distancia)[0];
 
-  let palancasTexto = `La palanca más madura es <b>${escapeHtml(madura.label)}</b> (${formatMedia(madura.media)} de media)`;
+  let palancasTexto = `La palanca más madura es ${b(esc(madura.label))} (${formatMedia(madura.media)} de media)`;
 
   if (!lejos) {
     palancasTexto += conMedia.length === PALANCAS.length
@@ -212,7 +227,7 @@ function frase({ resumen, palancas, pendientes: pendientesDelActa }, ambito) {
   } else if (lejos.key === madura.key) {
     palancasTexto += `, y aun así es la que más lejos queda de su objetivo (${formatObjetivo(lejos.objetivo)}).`;
   } else {
-    palancasTexto += ` y la que más lejos queda de su objetivo es <b>${escapeHtml(lejos.label)}</b> (${formatMedia(lejos.media)} frente a ${formatObjetivo(lejos.objetivo)}).`;
+    palancasTexto += ` y la que más lejos queda de su objetivo es ${b(esc(lejos.label))} (${formatMedia(lejos.media)} frente a ${formatObjetivo(lejos.objetivo)}).`;
   }
 
   const quedan = pendientesDelActa.length
@@ -220,6 +235,107 @@ function frase({ resumen, palancas, pendientes: pendientesDelActa }, ambito) {
     : "";
 
   return `${cuantas} ${palancasTexto}${quedan}`;
+}
+
+
+/** Cuantas brechas lleva el correo y el cierre del modo taller: tres se leen de un vistazo. */
+export const BRECHAS_EN_EL_CORREO = 3;
+
+
+/**
+ * El texto del correo que acompaña al acta, listo para pegar.
+ *
+ * El acta salia en PDF, pero el correo con el que se envia se seguia
+ * escribiendo a mano, copiando cifras de la pantalla. Dice lo mismo que la
+ * portada del acta —la misma frase y las primeras brechas de su tabla— para
+ * que el correo y el adjunto no puedan contradecirse. Texto llano, sin
+ * formato: en Outlook se pega igual en cualquier plantilla.
+ */
+export function textoDelCorreo(datos) {
+  const lista = resumenDelActa(datos.subcapacidades).brechas.slice(0, BRECHAS_EN_EL_CORREO);
+  const asunto = ["Acta del taller F3M", datos.cliente, datos.domainLabel, datos.fecha].filter(Boolean).join(" · ");
+  const lineas = [
+    `Asunto: ${asunto}`,
+    "",
+    "Hola:",
+    "",
+    `Os enviamos adjunta el acta del taller${datos.fecha ? ` del ${datos.fecha}` : ""} sobre ${datos.domainTitle || datos.domainLabel || "el dominio"}.`,
+    "",
+    fraseDelActa(datos, { html: false }),
+  ];
+
+  if (lista.length) {
+    lineas.push(
+      "",
+      lista.length === 1
+        ? "Dónde está la mayor distancia al objetivo:"
+        : `Las ${["", "", "dos", "tres"][lista.length] || lista.length} subcapacidades más lejos del objetivo:`,
+      ...lista.map(({ item, metrics }) =>
+        `- ${item.subcapacidad} (${item.capacidad}): gap ${formatMedia(metrics.gap)}, prioridad ${String(metrics.prioridad).toLowerCase()}.`),
+    );
+  }
+
+  const pasos = pasosAcordados(datos.proximosPasos);
+
+  if (pasos.length) {
+    lineas.push(
+      "",
+      "Próximos pasos acordados:",
+      ...pasos.map((paso) => {
+        // Sin el punto final que traiga la accion: el que cierra la linea va despues del responsable.
+        const accion = (paso.accion || "Paso sin describir").replace(/[.\s]+$/, "");
+        const quienYCuando = [paso.responsable, paso.fecha].filter(Boolean).join(", ");
+
+        return `- ${accion}${quienYCuando ? ` (${quienYCuando})` : ""}.`;
+      }),
+    );
+  }
+
+  lineas.push(
+    "",
+    pasos.length
+      ? "Las puntuaciones son las acordadas en la sesión y tienen carácter preliminar. Si algún responsable o fecha no es correcto, decídnoslo y lo corregimos."
+      : "Las puntuaciones son las acordadas en la sesión y tienen carácter preliminar. El acta deja espacio para los próximos pasos; os agradeceremos que nos confirméis responsables y fechas.",
+    "",
+    "Un saludo,",
+  );
+
+  return lineas.join("\n");
+}
+
+
+/** Los que dicen algo: una fila en blanco no es un paso. */
+function pasosAcordados(pasos) {
+  return (Array.isArray(pasos) ? pasos : []).filter((paso) => paso && (paso.accion || paso.responsable || paso.fecha));
+}
+
+
+/** Los pasos acordados y despues las filas en blanco. */
+function tablaDePasos(pasos) {
+  const acordados = pasosAcordados(pasos);
+  const enBlanco = acordados.length
+    ? Math.max(PASOS_EN_BLANCO_COMO_MINIMO, PASOS_EN_BLANCO - acordados.length)
+    : PASOS_EN_BLANCO;
+
+  return `
+    <table class="tabla">
+      <thead><tr><th>Acción</th><th>Responsable</th><th>Fecha</th></tr></thead>
+      <tbody>
+        ${acordados
+          .map(
+            (paso) => `
+              <tr>
+                <td>${escapeHtml(paso.accion || "")}</td>
+                <td>${escapeHtml(paso.responsable || "")}</td>
+                <td>${escapeHtml(paso.fecha || "")}</td>
+              </tr>
+            `,
+          )
+          .join("")}
+        ${"<tr><td></td><td></td><td></td></tr>".repeat(enBlanco)}
+      </tbody>
+    </table>
+  `;
 }
 
 

@@ -10,7 +10,7 @@
  * todavia, asi que escribe los suyos literales y tienen que ser los mismos.
  */
 
-import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=27";
+import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=28";
 
 
 /**
@@ -264,6 +264,18 @@ function estilosDePortada() {
       bottom: 0;
       width: 7mm;
       background: ${PALETA.marca};
+    }
+
+    .portada-logo {
+      position: absolute;
+      top: 16mm;
+      right: 20mm;
+      max-width: 62mm;
+      max-height: 22mm;
+      padding: 3mm 5mm;
+      border-radius: 3mm;
+      background: #FFFFFF;
+      object-fit: contain;
     }
 
     .portada-antetitulo {

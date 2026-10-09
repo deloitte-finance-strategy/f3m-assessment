@@ -16,9 +16,10 @@
  * documento entero, sin scripts, por lo mismo que el informe.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=27";
-import { COLOR_DE_PALANCA, escapeHtml } from "../core/presentacion.js?v=27";
-import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=27";
+import { PALANCAS } from "../core/calculo.js?v=28";
+import { normalizarLogo } from "../core/escenario.js?v=28";
+import { COLOR_DE_PALANCA, escapeAttr, escapeHtml } from "../core/presentacion.js?v=28";
+import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=28";
 
 
 /**
@@ -57,7 +58,7 @@ export const RUBRICA_GENERAL = {
 export const NIVELES_DE_LA_RUBRICA = ["Inicial", "Estructurado", "Estandarizado", "Optimizado", "Avanzado"];
 
 
-const QUE_MIDE = {
+export const QUE_MIDE = {
   procesos: "cómo está definido y gobernado el trabajo",
   tecnologia: "qué herramientas y datos lo soportan",
   organizacion: "quién lo hace y con qué roles",
@@ -108,6 +109,20 @@ export function capacidadesDePreparacion(subcapacidades) {
 }
 
 
+/**
+ * El logo del cliente junto al titulo, en la preparacion y en el acta. Se
+ * comprueba otra vez aqui por lo mismo que en la portada del informe: acaba
+ * en el src de una imagen de algo que se envia.
+ */
+export function logoDelDocumento(datos) {
+  const logo = normalizarLogo(datos.logo);
+
+  return logo
+    ? `<img class="logo-cliente" src="${escapeAttr(logo)}" alt="${escapeAttr(datos.cliente ? `Logo de ${datos.cliente}` : "Logo del cliente")}">`
+    : "";
+}
+
+
 export function documentoDePreparacion(datos) {
   const capacidades = capacidadesDePreparacion(datos.subcapacidades || []);
   const total = capacidades.reduce((suma, capacidad) => suma + capacidad.subcapacidades.length, 0);
@@ -132,6 +147,7 @@ export function documentoDePreparacion(datos) {
           <span>Preparación del taller · ${dominio}</span>
         </div>
 
+        ${logoDelDocumento(datos)}
         <h1>Preparación del taller de ${escapeHtml(datos.domainTitle || datos.domainLabel || "")}</h1>
         <p class="bajada">Diagnóstico de madurez de la función financiera · Deloitte Finance Strategy</p>
 
@@ -344,6 +360,14 @@ export function estilosDelDocumento() {
     .marca b {
       color: ${PALETA.tinta};
       font-size: 11pt;
+    }
+
+    .logo-cliente {
+      float: right;
+      max-width: 55mm;
+      max-height: 18mm;
+      margin: 12pt 0 6pt 10mm;
+      object-fit: contain;
     }
 
     h1 {

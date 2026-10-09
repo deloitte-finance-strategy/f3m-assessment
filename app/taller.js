@@ -20,30 +20,41 @@
  * guardado diferido de edicion.js. Lo unico propio es como se enseña.
  */
 
-import { getMaturityLevel } from "../core/calculo.js?v=27";
-import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=27";
-import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=27";
-import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=27";
-import { nombreDeMasInformacion } from "./biblioteca.js?v=27";
-import { priorityBadge } from "./celdas.js?v=27";
-import { avanceDeDominio, switchDomain } from "./dominios.js?v=27";
+import { getMaturityLevel } from "../core/calculo.js?v=28";
+import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=28";
+import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=28";
+import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=28";
+import { nombreDeMasInformacion } from "./biblioteca.js?v=28";
+import { priorityBadge } from "./celdas.js?v=28";
+import { htmlDeLaApertura } from "./apertura.js?v=28";
+import { htmlDelCierre } from "./cierre.js?v=28";
+import {
+  conectarLosPasos,
+  guardarLosPasosPendientes,
+  htmlDeLosPasos,
+  pasosDelDominio,
+  seEstaEscribiendoUnPaso,
+} from "./proximos-pasos.js?v=28";
+import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=28";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "./edicion.js?v=27";
-import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=27";
-import { getVisibleItems } from "./filtros.js?v=27";
-import { calculate, getCapabilityTargets } from "./metricas.js?v=27";
-import { repintarTodo } from "./repintado.js?v=27";
-import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=27";
+} from "./edicion.js?v=28";
+import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=28";
+import { capacidadesDePreparacion } from "../informe/preparacion.js?v=28";
+import { getVisibleItems } from "./filtros.js?v=28";
+import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=28";
+import { calculate, getCapabilityTargets } from "./metricas.js?v=28";
+import { repintarTodo } from "./repintado.js?v=28";
+import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=28";
 import {
   conectarPuntuacion,
   enfocarPalanca,
   idDeLaTarjetaEnCurso,
   llevarALasTarjetas,
   scoreControl,
-} from "./vistas/assessment.js?v=27";
+} from "./vistas/assessment.js?v=28";
 
 
 let panel = null;
@@ -54,6 +65,12 @@ let resultado = null;
 let anterior = null;
 let siguiente = null;
 let selectorDeDominio = null;
+let menuDelEquipo = null;
+let menuDelIndice = null;
+
+// Antes de la primera subcapacidad va la apertura, y despues de la ultima, el
+// cierre y los proximos pasos: el indice va de APERTURA a recorrido.length + 1.
+const APERTURA = -1;
 
 // Las subcapacidades del recorrido, fijadas al abrir. Si se recalculara en cada
 // paso, con un filtro de prioridad puesto, puntuar una podria sacarla de la
@@ -66,10 +83,30 @@ let disparador = null;
 // encuentra la subcapacidad de antes y cerraria el modo taller.
 let cambiandoDeDominio = false;
 
+// Las puntuaciones de cada subcapacidad cuando entro en el recorrido, para que
+// el cierre diga cuantas se han puntuado en esta sesion. Por dominio e id: los
+// ids salen del prefijo «1.1» y se repiten de un dominio a otro.
+const puntuacionesAlEmpezar = new Map();
+
 
 const abierto = () => Boolean(panel) && !panel.hidden;
 
 const itemActual = () => state.items.find((item) => item.id === recorrido[indice]) || null;
+
+// Despues de la ultima subcapacidad viene el cierre del taller: indice === recorrido.length.
+const enCierre = () => recorrido.length > 0 && indice === recorrido.length;
+
+const enApertura = () => indice === APERTURA;
+
+// Y despues del cierre, los proximos pasos acordados.
+const enPasos = () => recorrido.length > 0 && indice === recorrido.length + 1;
+
+const ultimaPosicion = () => recorrido.length + 1;
+
+const itemsDelRecorrido = () =>
+  recorrido.map((id) => state.items.find((item) => item.id === id)).filter(Boolean);
+
+const huellaDePuntuacion = (item) => JSON.stringify(LEVERS.map((lever) => item.scores[lever.key] ?? null));
 
 const nombreDelNivel = (nivel) => (getMaturityLevel(nivel) || "").split(" - ")[1] || "";
 
@@ -84,7 +121,7 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   panel = document.getElementById("modoTaller");
   cuerpo = document.getElementById("modoTallerCuerpo");
   donde = document.getElementById("modoTallerDonde");
-  posicion = document.getElementById("modoTallerPosicion");
+  posicion = document.getElementById("modoTallerPosicionTexto");
   resultado = document.getElementById("modoTallerResultado");
   anterior = document.getElementById("modoTallerAnterior");
   siguiente = document.getElementById("modoTallerSiguiente");
@@ -108,6 +145,8 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   document.getElementById("modoTallerSalir")?.addEventListener("click", () => cerrarModoTaller());
   anterior?.addEventListener("click", () => irA(indice - 1));
   siguiente?.addEventListener("click", () => irA(indice + 1));
+  cuerpo.addEventListener("click", alPulsarEnElCuerpo);
+  setupMenusDeLaBarra();
   selectorDeDominio?.addEventListener("change", () => cambiarDeDominio(selectorDeDominio.value));
 
   document.addEventListener("keydown", alPulsarTecla);
@@ -135,8 +174,14 @@ export function abrirModoTaller(desde = null) {
     return;
   }
 
-  indice = Math.max(0, recorrido.indexOf(idDeLaTarjetaEnCurso()));
+  // Se empieza por la apertura salvo que se viniera de una tarjeta mas alla
+  // de la primera: entonces la sesion ya estaba en marcha.
+  const enCurso = recorrido.indexOf(idDeLaTarjetaEnCurso());
+
+  indice = enCurso > 0 ? enCurso : APERTURA;
   disparador = desde;
+  puntuacionesAlEmpezar.clear();
+  anotarPuntuacionesAlEmpezar();
 
   panel.hidden = false;
   updateModalOpenState();
@@ -172,17 +217,15 @@ export function cerrarModoTaller({ volver = true } = {}) {
     return;
   }
 
-  // Lo que quedaba por guardar de las notas se guarda ya, y la lista se
-  // repinta para que la tarjeta enseñe lo escrito aqui.
-  const notas = cuerpo.querySelector(".modo-taller-notas");
-  const item = itemActual();
+  // Lo que quedaba por guardar se guarda ya, y la lista se repinta para que
+  // la tarjeta enseñe lo escrito aqui.
+  guardarLoQueQueda();
 
-  if (notas && item) {
-    guardarCampoAhora(item, "comentario", notas);
-  }
+  // Desde el cierre y los pasos se vuelve a la ultima subcapacidad, y desde
+  // la apertura, a la primera.
+  const ultimo = recorrido[Math.min(Math.max(indice, 0), recorrido.length - 1)];
 
-  const ultimo = recorrido[indice];
-
+  cerrarMenusDeLaBarra();
   panel.hidden = true;
   cuerpo.innerHTML = "";
   updateModalOpenState();
@@ -216,6 +259,18 @@ export function refrescarModoTaller() {
     return;
   }
 
+  // Con un cambio de otra persona del escenario compartido, la apertura y el
+  // cierre se repintan enteros: no tienen nada que se este escribiendo. Los
+  // pasos si, y mientras se escriben manda la pantalla.
+  if (enApertura() || enCierre() || enPasos()) {
+    if (!enPasos() || !seEstaEscribiendoUnPaso()) {
+      pintar({ enfocar: false });
+    }
+
+    pintarAvanceDeDominios();
+    return;
+  }
+
   const item = itemActual();
 
   if (!item) {
@@ -246,7 +301,8 @@ export function refrescarModoTaller() {
  * conmutador, los filtros del dominio anterior se quitan —el de capacidad ni
  * existe en el nuevo—, asi que el recorrido son todas sus subcapacidades.
  *
- * Empieza por la primera y no por «la ultima tocada», que es de otro dominio.
+ * Empieza por la apertura del dominio nuevo y no por «la ultima tocada», que
+ * es de otro dominio: es otro taller, con otras capacidades.
  * El foco se queda en el selector: con las flechas del teclado, un <select>
  * cerrado cambia de opcion a cada pulsacion, y quitarle el foco al primer
  * cambio dejaba a quien recorre la lista en el dominio de al lado.
@@ -256,17 +312,16 @@ async function cambiarDeDominio(domainId) {
     return;
   }
 
-  const notas = cuerpo.querySelector(".modo-taller-notas");
-  const item = itemActual();
-
-  if (notas && item) {
-    guardarCampoAhora(item, "comentario", notas);
-  }
+  guardarLoQueQueda();
 
   cambiandoDeDominio = true;
+  cerrarMenusDeLaBarra();
+
+  let cambiado = false;
 
   try {
     await switchDomain(domainId);
+    cambiado = true;
   } catch (error) {
     console.error(error);
     showNotice("No se ha podido abrir ese dominio. Sigues en el que estabas.", "error");
@@ -274,12 +329,12 @@ async function cambiarDeDominio(domainId) {
     cambiandoDeDominio = false;
   }
 
-  // Si el cambio fallo, se sigue en la misma subcapacidad; si no, no esta en
-  // el dominio nuevo y se empieza por la primera.
-  const antes = recorrido[indice];
-
-  recorrido = getVisibleItems().map((entrada) => entrada.id);
-  indice = Math.max(0, recorrido.indexOf(antes));
+  // Si el cambio fallo, se sigue donde se estaba.
+  if (cambiado) {
+    recorrido = getVisibleItems().map((entrada) => entrada.id);
+    indice = APERTURA;
+    anotarPuntuacionesAlEmpezar();
+  }
 
   if (!recorrido.length) {
     cerrarModoTaller({ volver: false });
@@ -292,11 +347,41 @@ async function cambiarDeDominio(domainId) {
 }
 
 
+/** La huella de las que aun no estaban, sin pisar las que ya estaban: volver a un dominio no reinicia su cuenta. */
+function anotarPuntuacionesAlEmpezar() {
+  recorrido.forEach((id) => {
+    const clave = `${state.activeDomainId}:${id}`;
+    const item = state.items.find((entrada) => entrada.id === id);
+
+    if (item && !puntuacionesAlEmpezar.has(clave)) {
+      puntuacionesAlEmpezar.set(clave, huellaDePuntuacion(item));
+    }
+  });
+}
+
+
+function cambiadasEnEstaSesion() {
+  return itemsDelRecorrido().filter(
+    (item) => puntuacionesAlEmpezar.get(`${state.activeDomainId}:${item.id}`) !== huellaDePuntuacion(item),
+  ).length;
+}
+
+
+// De la apertura a los proximos pasos, que van detras del cierre.
 function irA(nuevo) {
-  if (nuevo < 0 || nuevo >= recorrido.length || nuevo === indice) {
+  if (nuevo < APERTURA || nuevo > ultimaPosicion() || nuevo === indice) {
     return;
   }
 
+  guardarLoQueQueda();
+
+  indice = nuevo;
+  pintar();
+}
+
+
+/** Las notas de la subcapacidad o los pasos a medio escribir, antes de dejar la pantalla. */
+function guardarLoQueQueda() {
   const notas = cuerpo.querySelector(".modo-taller-notas");
   const item = itemActual();
 
@@ -304,12 +389,30 @@ function irA(nuevo) {
     guardarCampoAhora(item, "comentario", notas);
   }
 
-  indice = nuevo;
-  pintar();
+  if (enPasos()) {
+    guardarLosPasosPendientes();
+  }
 }
 
 
 function pintar({ enfocar = true } = {}) {
+  pintarIndiceSiEstaAbierto();
+
+  if (enApertura()) {
+    pintarApertura({ enfocar });
+    return;
+  }
+
+  if (enCierre()) {
+    pintarCierre({ enfocar });
+    return;
+  }
+
+  if (enPasos()) {
+    pintarPasos({ enfocar });
+    return;
+  }
+
   const item = itemActual();
 
   if (!item) {
@@ -390,14 +493,369 @@ function pintar({ enfocar = true } = {}) {
   pintarMarcas(item);
   pintarResultado(item);
 
-  anterior.disabled = indice === 0;
-  siguiente.disabled = indice === recorrido.length - 1;
+  anterior.hidden = false;
+  anterior.disabled = false;
+  anterior.innerHTML = indice === 0
+    ? `<span aria-hidden="true">←</span> Apertura`
+    : `<span aria-hidden="true">←</span> Anterior`;
+  siguiente.hidden = false;
+
+  // Despues de la ultima no se acaba el recorrido: viene el cierre.
+  siguiente.innerHTML = indice === recorrido.length - 1
+    ? `Cierre del taller <span aria-hidden="true">→</span>`
+    : `Siguiente <span aria-hidden="true">→</span>`;
 
   // Con el foco en la primera palanca, las teclas 1 a 5 ya puntuan.
   if (enfocar) {
     enfocarPalanca(cuerpo.querySelector(".score-segmentos"), { preventScroll: true });
   }
 }
+
+
+/**
+ * La primera pantalla: que se va a ver, como se puntua y contra que objetivo.
+ * Ver app/apertura.js. «Empezar» lleva a la primera subcapacidad.
+ */
+function pintarApertura({ enfocar = true } = {}) {
+  const items = itemsDelRecorrido();
+
+  donde.textContent = state.cliente || "";
+  pintarSelectorDeDominio();
+
+  cuerpo.innerHTML = htmlDeLaApertura({
+    cliente: state.cliente,
+    dominio: getActiveDomainConfig()?.label || "",
+    logo: state.logo,
+    items: items.map((item) => ({ ...item, puntuada: !calculate(item).isPending })),
+    objetivos: objetivosMedios(items),
+    palancas: LEVERS,
+  });
+  resultado.innerHTML = "";
+
+  posicion.textContent = "Apertura";
+  anterior.hidden = true;
+  siguiente.hidden = false;
+  siguiente.innerHTML = `Empezar <span aria-hidden="true">→</span>`;
+
+  if (enfocar) {
+    cuerpo.querySelector("#modoTallerTitulo")?.focus({ preventScroll: true });
+  }
+}
+
+
+/**
+ * La media por palanca de los objetivos de las capacidades del recorrido. Con
+ * los de por defecto es un 4 redondo; con objetivos por capacidad, lo que la
+ * apertura dice tiene que salir de lo que se va a puntuar.
+ */
+function objetivosMedios(items) {
+  return Object.fromEntries(
+    LEVERS.map((lever) => {
+      const valores = items
+        .map((item) => Number(getCapabilityTargets(item.capacidad)[lever.key]))
+        .filter(Number.isFinite);
+      const media = valores.length ? valores.reduce((suma, valor) => suma + valor, 0) / valores.length : NaN;
+
+      return [lever.key, Math.round(media * 100) / 100];
+    }),
+  );
+}
+
+
+/**
+ * Lo que ha salido de la sesion, con las mismas cifras que el acta. Ver
+ * app/cierre.js. En el pie, «Anterior» vuelve a las subcapacidades y
+ * «Siguiente» lleva a los proximos pasos. El acta y el correo no estan aqui
+ * sino en «Para el equipo», en la barra de arriba: se proyecta para el cliente
+ * y son de uso interno.
+ */
+function pintarCierre({ enfocar = true } = {}) {
+  const datos = datosDelActa(itemsDelRecorrido());
+
+  donde.textContent = state.cliente || "";
+  pintarSelectorDeDominio();
+
+  cuerpo.innerHTML = htmlDelCierre(datos, { cambiadasHoy: cambiadasEnEstaSesion() });
+  resultado.innerHTML = "";
+
+  posicion.textContent = "Cierre del taller";
+  anterior.hidden = false;
+  anterior.disabled = false;
+  anterior.innerHTML = `<span aria-hidden="true">←</span> Volver a las subcapacidades`;
+  siguiente.hidden = false;
+  siguiente.innerHTML = `Próximos pasos <span aria-hidden="true">→</span>`;
+
+  // Al titulo y no a un boton: lo primero que se oye es de que va la pantalla,
+  // y con el raton no se ve ningun anillo de foco.
+  if (enfocar) {
+    cuerpo.querySelector("#modoTallerTitulo")?.focus({ preventScroll: true });
+  }
+}
+
+
+/**
+ * La ultima pantalla: los proximos pasos acordados, que salen en el acta y en
+ * el correo. Ver app/proximos-pasos.js.
+ */
+function pintarPasos({ enfocar = true } = {}) {
+  const domainId = state.activeDomainId;
+
+  donde.textContent = state.cliente || "";
+  pintarSelectorDeDominio();
+
+  cuerpo.innerHTML = htmlDeLosPasos({
+    pasos: pasosDelDominio(domainId),
+    dominio: getActiveDomainConfig()?.label || "",
+  });
+  conectarLosPasos(cuerpo, domainId);
+  resultado.innerHTML = "";
+
+  posicion.textContent = "Próximos pasos";
+  anterior.hidden = false;
+  anterior.disabled = false;
+  anterior.innerHTML = `<span aria-hidden="true">←</span> Cierre del taller`;
+  siguiente.hidden = true;
+
+  // Al titulo, como en el cierre, y no al primer campo: con el cursor en un
+  // campo, Re Pág no vuelve atrás, y es la tecla del mando de presentación.
+  if (enfocar) {
+    cuerpo.querySelector("#modoTallerTitulo")?.focus({ preventScroll: true });
+  }
+}
+
+
+/** En la apertura y en el cierre, cada capacidad, brecha o pendiente lleva a su subcapacidad. */
+function alPulsarEnElCuerpo(event) {
+  if (!enApertura() && !enCierre()) {
+    return;
+  }
+
+  const ir = event.target.closest("[data-ir]");
+  const destino = ir ? recorrido.indexOf(ir.dataset.ir) : -1;
+
+  if (destino >= 0) {
+    irA(destino);
+  }
+}
+
+
+/**
+ * Los dos menus de la barra: el indice («3 de 20») y «Para el equipo».
+ *
+ * No usan el menu de la cabecera de app.js: con uno abierto, Escape tiene que
+ * cerrarlo a el y no al modo taller, y las flechas tienen que moverse por sus
+ * opciones y no pasar de subcapacidad por detras. Eso lo decide alPulsarTecla().
+ */
+const menusDeLaBarra = [];
+
+
+function crearMenuDeLaBarra(boton, menu, { alAbrir = () => {}, trasAbrir = () => {} } = {}) {
+  if (!boton || !menu) {
+    return null;
+  }
+
+  const control = {
+    boton,
+    menu,
+    abierto: () => !menu.hidden,
+    abrir(abrir) {
+      if (abrir) {
+        menusDeLaBarra.filter((otro) => otro !== control).forEach((otro) => otro.abrir(false));
+        alAbrir();
+      }
+
+      menu.hidden = !abrir;
+      boton.setAttribute("aria-expanded", String(abrir));
+
+      if (abrir) {
+        trasAbrir();
+      }
+    },
+  };
+
+  boton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    control.abrir(menu.hidden);
+  });
+
+  menusDeLaBarra.push(control);
+  return control;
+}
+
+
+const menuAbierto = () => menusDeLaBarra.find((menu) => menu.abierto()) || null;
+
+function cerrarMenusDeLaBarra() {
+  menusDeLaBarra.forEach((menu) => menu.abrir(false));
+}
+
+
+function setupMenusDeLaBarra() {
+  menuDelIndice = crearMenuDeLaBarra(
+    document.getElementById("modoTallerPosicion"),
+    document.getElementById("modoTallerIndice"),
+    { alAbrir: pintarIndice, trasAbrir: enfocarLaActualDelIndice },
+  );
+
+  menuDelEquipo = crearMenuDeLaBarra(
+    document.getElementById("modoTallerEquipoBoton"),
+    document.getElementById("modoTallerEquipo"),
+    { alAbrir: pintarMenuDelEquipo },
+  );
+
+  menuDelIndice?.menu.addEventListener("click", (event) => {
+    const destino = event.target.closest("[data-posicion]");
+
+    if (destino) {
+      menuDelIndice.abrir(false);
+      irA(Number(destino.dataset.posicion));
+    }
+  });
+
+  menuDelEquipo?.menu.addEventListener("click", (event) => {
+    const accion = event.target.closest("[data-equipo]:not(:disabled)")?.dataset.equipo;
+
+    if (!accion) {
+      return;
+    }
+
+    menuDelEquipo.abrir(false);
+
+    // El mismo recorrido que la pantalla, y no los filtros de ahora: el acta y
+    // el correo tienen que decir lo que se acaba de proyectar.
+    if (accion === "acta") {
+      exportarActa({ items: itemsDelRecorrido() });
+    } else if (accion === "correo") {
+      copiarTextoDelCorreo({ items: itemsDelRecorrido() });
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    menusDeLaBarra
+      .filter((menu) => menu.abierto() && !menu.menu.parentElement.contains(event.target))
+      .forEach((menu) => menu.abrir(false));
+  });
+}
+
+
+/**
+ * El indice del recorrido, agrupado por capacidad y con un punto en las ya
+ * puntuadas: lo que hace falta para decidir a donde saltar. Con la apertura
+ * arriba y el cierre abajo, que tambien son paradas del recorrido.
+ */
+function pintarIndice() {
+  if (!menuDelIndice) {
+    return;
+  }
+
+  const items = recorrido
+    .map((id, posicionEnElRecorrido) => {
+      const item = state.items.find((entrada) => entrada.id === id);
+
+      return item ? { ...item, posicionEnElRecorrido, puntuada: !calculate(item).isPending } : null;
+    })
+    .filter(Boolean);
+  const puntuadas = items.filter((item) => item.puntuada).length;
+
+  const parada = (posicionEnElRecorrido, texto) => `
+    <button
+      class="modo-taller-indice-item modo-taller-indice-parada"
+      type="button"
+      data-posicion="${posicionEnElRecorrido}"
+      ${posicionEnElRecorrido === indice ? `aria-current="step"` : ""}
+    >${escapeHtml(texto)}</button>
+  `;
+
+  menuDelIndice.menu.innerHTML = `
+    <p class="header-menu-title">Recorrido del taller</p>
+    ${parada(APERTURA, "Apertura del taller")}
+    ${capacidadesDePreparacion(items)
+      .map(
+        (capacidad) => `
+          <p class="modo-taller-indice-capacidad">${escapeHtml(capacidad.numero)} · ${escapeHtml(capacidad.nombre)}</p>
+          ${capacidad.subcapacidades
+            .map(
+              (item) => `
+                <button
+                  class="modo-taller-indice-item"
+                  type="button"
+                  data-posicion="${item.posicionEnElRecorrido}"
+                  ${item.posicionEnElRecorrido === indice ? `aria-current="step"` : ""}
+                >
+                  <i class="${item.puntuada ? "puntuada" : ""}" aria-hidden="true"></i>
+                  <span>${escapeHtml(item.subcapacidad)}</span>
+                  <span class="solo-lectores">${item.puntuada ? ", puntuada" : ", sin puntuar"}</span>
+                </button>
+              `,
+            )
+            .join("")}
+        `,
+      )
+      .join("")}
+    ${parada(recorrido.length, "Cierre del taller")}
+    ${parada(ultimaPosicion(), textoDeLosPasos())}
+    <p class="modo-taller-indice-pie">${puntuadas} de ${items.length} puntuadas</p>
+  `;
+}
+
+
+/** Con cuantos hay apuntados: desde el indice se ve si ya se han acordado. */
+function textoDeLosPasos() {
+  const cuantos = pasosDelDominio(state.activeDomainId).length;
+
+  return cuantos ? `Próximos pasos · ${cuantos}` : "Próximos pasos";
+}
+
+
+/** Si el indice esta abierto al cambiar de pantalla, que marque la nueva. */
+function pintarIndiceSiEstaAbierto() {
+  if (menuDelIndice?.abierto()) {
+    pintarIndice();
+  }
+}
+
+
+/** Con el indice abierto, el foco va a donde se esta, y las flechas siguen desde ahi. */
+function enfocarLaActualDelIndice() {
+  const actual = menuDelIndice?.menu.querySelector("[aria-current]") || menuDelIndice?.menu.querySelector("button");
+
+  actual?.focus({ preventScroll: true });
+  actual?.scrollIntoView({ block: "center" });
+}
+
+
+/** Las flechas arriba y abajo, de opcion en opcion, sin salirse del menu. */
+function moverseEnElMenu(menu, paso) {
+  const opciones = [...menu.querySelectorAll("button:not(:disabled)")];
+  const actual = opciones.indexOf(document.activeElement);
+  const siguienteOpcion = opciones[Math.min(opciones.length - 1, Math.max(0, actual + paso))];
+
+  siguienteOpcion?.focus();
+}
+
+
+/**
+ * Lo que dice «Para el equipo» se decide al abrirlo: sin nada puntuado en el
+ * recorrido no hay acta que pedir, igual que en el menu del PDF.
+ */
+function pintarMenuDelEquipo() {
+  const hayPuntuadas = itemsDelRecorrido().some((item) => !calculate(item).isPending);
+
+  menuDelEquipo.menu.querySelectorAll("[data-equipo]").forEach((opcion) => {
+    opcion.disabled = !hayPuntuadas;
+  });
+  menuDelEquipo.menu.querySelectorAll("[data-equipo-nota]").forEach((nota, posicionDeLaNota) => {
+    nota.textContent = hayPuntuadas
+      ? NOTAS_DEL_EQUIPO[posicionDeLaNota]
+      : "Todavía no hay nada puntuado en este recorrido";
+  });
+}
+
+
+const NOTAS_DEL_EQUIPO = [
+  "Lo puntuado en este recorrido y sus notas, para enviar al cliente",
+  "El resumen del acta, listo para pegar en el correo",
+];
 
 
 /**
@@ -591,7 +1049,20 @@ function alPulsarTecla(event) {
   const escribiendo = event.target.closest?.("textarea, select, input:not(.score-radio)");
   const enPalanca = event.target.classList?.contains("score-radio");
 
-  if (event.key === "Escape") {
+  // Con un menu de la barra abierto, Escape lo cierra a el y no al modo
+  // taller, y las flechas se mueven por sus opciones.
+  const menu = menuAbierto();
+
+  if (menu && event.key === "Escape") {
+    event.preventDefault();
+    menu.abrir(false);
+    menu.boton.focus();
+  } else if (menu && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+    event.preventDefault();
+    moverseEnElMenu(menu.menu, event.key === "ArrowDown" ? 1 : -1);
+  } else if (menu && ["PageDown", "PageUp", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+    event.preventDefault();
+  } else if (event.key === "Escape") {
     event.preventDefault();
     cerrarModoTaller();
   } else if (event.key === "PageDown" && !escribiendo) {

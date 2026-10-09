@@ -113,6 +113,11 @@ Por subcapacidad: puntuaciones de las tres palancas, objetivo, responsable (`own
 **comentario libre de hasta 2.000 caracteres**, y la marca de quién hizo el último cambio (uid
 anónimo, nombre elegido por la propia persona y fecha).
 
+Por escenario, si alguien los pone: el **nombre del cliente**, su **logo** (una imagen PNG, JPEG o
+WebP de hasta 150 KB, guardada dentro del escenario; un SVG se guarda ya dibujado en PNG, porque
+un SVG puede llevar código) y los **próximos pasos acordados** en cada dominio, con su responsable
+y su fecha, que son texto libre como el comentario.
+
 Conviene decir en voz alta lo del comentario libre: es un campo de texto de 2.000 caracteres donde
 puede acabar cualquier cosa del cliente. Es el dato más sensible de la herramienta, y sale también
 en el informe PDF que se entrega.
@@ -124,10 +129,11 @@ en el informe PDF que se entrega.
 | Base de datos | Firebase Realtime Database, proyecto `fpa-assessment-mvp`, región `europe-west1` (UE) |
 | Copia local | `localStorage` del navegador, una clave por escenario |
 | Copias de borrado | `copias/` en la máquina de quien ejecute `delete_scenario.py`. Está en el `.gitignore` |
+| Caché del navegador | `sw.js` guarda el código, los datos de los dominios y los PDF de la biblioteca para abrir la herramienta sin red. Es lo mismo que publica el repositorio: **ni puntuaciones ni escenarios**, y la página se guarda sin el `?scenario=` |
 
-**No se guarda** el nombre de la organización cliente en ningún campo: los `meta` de cada dominio
-solo llevan metadatos de la metodología. La identificación del cliente vive en el enlace, en el
-nombre del archivo exportado y, si alguien lo escribe, en los comentarios libres.
+El nombre del cliente y su logo **son opcionales**: sin ellos, la identificación del cliente vive
+en el enlace, en el nombre del archivo exportado y, si alguien lo escribe, en los comentarios
+libres. Los `meta` de cada dominio solo llevan metadatos de la metodología.
 
 **No hay política de retención.** Los escenarios viven en Firebase indefinidamente hasta que alguien
 los borra a mano. Si la organización tiene una obligación de retención o de borrado para datos de

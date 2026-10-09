@@ -8,8 +8,8 @@
  * palabra antes de borrar el trabajo de nueve dominios.
  */
 
-import { els } from "./estado.js?v=27";
-import { escapeHtml } from "../core/presentacion.js?v=27";
+import { els } from "./estado.js?v=28";
+import { escapeHtml } from "../core/presentacion.js?v=28";
 
 
 /**
@@ -161,6 +161,17 @@ export function ocultarAviso() {
   window.clearTimeout(temporizadorDeAviso);
   ponerAccionDeAviso(null);
   els.loadNotice.hidden = true;
+}
+
+
+/**
+ * Lo oculta solo si sigue diciendo `mensaje`: si otro aviso lo ha sustituido
+ * —un error de guardado, por ejemplo—, ese se queda.
+ */
+export function ocultarAvisoSiDice(mensaje) {
+  if (els.loadNotice && !els.loadNotice.hidden && els.loadNoticeText?.textContent === mensaje) {
+    ocultarAviso();
+  }
 }
 
 

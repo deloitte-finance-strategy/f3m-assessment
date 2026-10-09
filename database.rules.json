@@ -10,6 +10,20 @@
         "updatedAt": { ".validate": "newData.isString() && newData.val().length <= 40" },
         "activeDomainId": { ".validate": "newData.isString() && newData.val().length <= 64" },
         "cliente": { ".validate": "newData.isString() && newData.val().length <= 120" },
+        "logo": { ".validate": "newData.isString() && newData.val().length <= 150000 && (newData.val().beginsWith('data:image/png;base64,') || newData.val().beginsWith('data:image/jpeg;base64,') || newData.val().beginsWith('data:image/webp;base64,'))" },
+
+        "proximosPasos": {
+          "$dominioDePasos": {
+            ".validate": "$dominioDePasos.matches(/^(auditoria-interna|controlling|finanzas-estrategicas|finanzas-negocio|fiscal|fpa|relacion-inversores|tesoreria|transacciones)$/)",
+
+            "$paso": {
+              "accion": { ".validate": "newData.isString() && newData.val().length <= 300" },
+              "responsable": { ".validate": "newData.isString() && newData.val().length <= 120" },
+              "fecha": { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "$otroCampoPaso": { ".validate": false }
+            }
+          }
+        },
 
         "domains": {
           "$domainId": {

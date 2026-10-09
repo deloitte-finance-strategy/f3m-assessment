@@ -21,9 +21,9 @@ import {
   DEFAULT_TARGET_MATURITY,
   normalizeTargetValue,
   toScore,
-} from "./calculo.js?v=27";
+} from "./calculo.js?v=28";
 
-import { serializeTargetsForFirebase } from "./objetivos.js?v=27";
+import { serializeTargetsForFirebase } from "./objetivos.js?v=28";
 
 
 
@@ -61,6 +61,8 @@ export const CAMPOS_RAIZ = [
   "activeDomainId",
   "updatedAt",
   "cliente",
+  "logo",
+  "proximosPasos",
   "domains",
 ];
 
@@ -83,6 +85,112 @@ export function normalizarCliente(valor) {
 
   return valor.replace(/\s+/g, " ").trim().slice(0, LIMITE_DE_CLIENTE);
 }
+
+
+/**
+ * El logo del cliente: una imagen ya reducida por la aplicacion, en data URL.
+ *
+ * Solo PNG, JPEG o WebP en base64, y nada mas: el valor acaba en el src de
+ * una imagen de la portada del informe, y un escenario compartido lo puede
+ * escribir cualquiera con el enlace. Con esta forma no cabe ni un SVG —que
+ * puede llevar codigo— ni unas comillas con las que salirse del atributo.
+ */
+export const LIMITE_DE_LOGO = 150000;
+
+export const FORMATOS_DE_LOGO = ["png", "jpeg", "webp"];
+
+const FORMA_DE_LOGO = new RegExp(`^data:image/(${FORMATOS_DE_LOGO.join("|")});base64,[A-Za-z0-9+/]+={0,2}$`);
+
+
+export function normalizarLogo(valor) {
+  if (typeof valor !== "string" || valor.length > LIMITE_DE_LOGO) {
+    return "";
+  }
+
+  return FORMA_DE_LOGO.test(valor) ? valor : "";
+}
+
+
+/**
+ * Los proximos pasos acordados al cerrar un taller, por dominio: que se va a
+ * hacer, quien y cuando. Salen en el acta y en el correo.
+ *
+ * Diez como mucho por dominio, que es lo que cabe en la pantalla del taller
+ * sin desplazarse; las reglas no pueden contar hijos, asi que el limite vive
+ * aqui. La fecha es texto libre a proposito: en la sala se acuerda «antes de
+ * fin de mes» tanto como «el 30».
+ */
+export const LIMITES_DE_PASO = {
+  accion: 300,
+  responsable: 120,
+  fecha: 40,
+};
+
+export const MAXIMO_DE_PASOS = 10;
+
+
+/** Un paso limpio, o null si no dice nada: una fila en blanco no se guarda. */
+export function normalizarPaso(paso) {
+  if (!esObjeto(paso)) {
+    return null;
+  }
+
+  const limpio = Object.fromEntries(
+    Object.entries(LIMITES_DE_PASO).map(([campo, limite]) => [
+      campo,
+      typeof paso[campo] === "string" ? paso[campo].replace(/\s+/g, " ").trim().slice(0, limite) : "",
+    ]),
+  );
+
+  return Object.values(limpio).some(Boolean) ? limpio : null;
+}
+
+
+/**
+ * Los pasos de cada dominio. Firebase devuelve una lista guardada como objeto
+ * con claves 0, 1, 2…, asi que se aceptan las dos formas. Un dominio que no
+ * existe o sin ningun paso no viaja.
+ */
+export function normalizarProximosPasos(valor) {
+  if (!esObjeto(valor)) {
+    return {};
+  }
+
+  const salida = {};
+
+  Object.entries(valor).forEach(([domainId, pasos]) => {
+    if (!FORMA_DE_DOMINIO.test(domainId)) {
+      return;
+    }
+
+    const limpios = comoLista(pasos).map(normalizarPaso).filter(Boolean).slice(0, MAXIMO_DE_PASOS);
+
+    if (limpios.length) {
+      salida[domainId] = limpios;
+    }
+  });
+
+  return salida;
+}
+
+
+/**
+ * Los nueve dominios que admiten las reglas, en domains/$domainId y en
+ * proximosPasos/$domainId. tests/casos-reglas.js comprueba que coincidan.
+ */
+export const DOMINIOS_ADMITIDOS = [
+  "auditoria-interna",
+  "controlling",
+  "finanzas-estrategicas",
+  "finanzas-negocio",
+  "fiscal",
+  "fpa",
+  "relacion-inversores",
+  "tesoreria",
+  "transacciones",
+];
+
+const FORMA_DE_DOMINIO = new RegExp(`^(${DOMINIOS_ADMITIDOS.join("|")})$`);
 
 
 /** Campos que las reglas admiten dentro de cada dominio. */
@@ -266,6 +374,10 @@ export function revisarEscenario(payload) {
     .filter((campo) => !CAMPOS_RAIZ.includes(campo))
     .forEach(() => contar("el archivo trae campos que esta herramienta no usa y se descartan"));
 
+  if (esObjeto(payload) && payload.logo !== undefined && payload.logo !== "" && !normalizarLogo(payload.logo)) {
+    contar("el logo del cliente no es una imagen que admita la herramienta y se descarta");
+  }
+
   bloques.forEach((bloque) => {
     if (bloque.extras.length) {
       contar("algun dominio trae campos que esta herramienta no usa y se descartan");
@@ -412,6 +524,18 @@ export function normalizarEscenarioParaFirebase(
 
   if (cliente) {
     escenario.cliente = cliente;
+  }
+
+  const logo = normalizarLogo(payload.logo);
+
+  if (logo) {
+    escenario.logo = logo;
+  }
+
+  const proximosPasos = normalizarProximosPasos(payload.proximosPasos);
+
+  if (Object.keys(proximosPasos).length) {
+    escenario.proximosPasos = proximosPasos;
   }
 
   Object.entries(payload.domains || {}).forEach(([domainId, dominio]) => {

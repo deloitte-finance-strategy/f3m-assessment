@@ -685,6 +685,25 @@ h4 {
   background: var(--surface-muted);
 }
 
+/* «Cambiar el logo del cliente», con el logo puesto al lado: sobre blanco en
+   los dos temas, como en la apertura del taller. */
+.header-menu-item-con-miniatura {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.header-menu-item-con-miniatura img {
+  max-width: 96px;
+  height: 28px;
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: #fff;
+  object-fit: contain;
+}
+
 .header-menu-item-danger {
   color: var(--red);
 }
@@ -5925,6 +5944,10 @@ height: 100% !important;
 .modal-backdrop.modo-taller {
   z-index: 75;
   display: block;
+  /* Sin esto hereda el place-items: center de los modales, y los Chromium
+     recientes ya centran tambien los bloques: con poco texto, el cierre del
+     taller encogia y dejaba franjas a los lados. */
+  place-items: normal;
   padding: 0;
   background: var(--bg);
   backdrop-filter: none;
@@ -6023,10 +6046,109 @@ height: 100% !important;
   color: var(--ink);
 }
 
+/* «3 de 20» abre el indice: con borde, como el selector de dominio, porque
+   se pulsa; mas fino que «Salir», porque no es la salida. */
+.modo-taller-indice {
+  position: relative;
+}
+
 .modo-taller-posicion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-height: 2.3em;
+  padding: 0 0.9em;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--r-pill);
+  background: transparent;
   font-size: 0.92em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.modo-taller-posicion:hover,
+.modo-taller-posicion[aria-expanded="true"] {
+  border-color: var(--green);
+  background: rgba(134, 188, 37, 0.18);
+  color: var(--cabecera-claro);
+}
+
+/* Debajo de «3 de 20» y con su tamaño de cabecera, como «Para el equipo»:
+   el indice no se proyecta, se usa. Alto de pantalla y desplazamiento propio,
+   que con Controlling son veinticuatro subcapacidades. */
+.modo-taller-indice-panel {
+  width: 440px;
+  max-height: calc(100vh - 5.5em);
+  overflow-y: auto;
+  font-size: 1rem;
+  white-space: normal;
+}
+
+.modo-taller-indice-capacidad {
+  margin: 10px 10px 3px;
+  color: var(--muted);
+  font-size: var(--fs-3xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.modo-taller-indice-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--fs-xs);
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+
+.modo-taller-indice-item:hover {
+  background: var(--surface-muted);
+}
+
+.modo-taller-indice-item:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+.modo-taller-indice-item[aria-current] {
+  background: var(--surface-realce);
+  box-shadow: inset 3px 0 0 var(--green);
+  font-weight: var(--fw-bold);
+}
+
+.modo-taller-indice-parada {
+  font-weight: var(--fw-medium);
+}
+
+/* El punto: lleno si ya esta puntuada, hueco si no. */
+.modo-taller-indice-item i {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+}
+
+.modo-taller-indice-item i.puntuada {
+  border-color: var(--green);
+  background: var(--green);
+}
+
+.modo-taller-indice-pie {
+  margin: 6px 10px 3px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--fs-2xs);
 }
 
 .modo-taller-salir {
@@ -6057,7 +6179,40 @@ height: 100% !important;
   background: rgba(134, 188, 37, 0.18);
 }
 
+/* «Para el equipo»: texto suelto, sin caja y apagado. En la sala no se lee
+   como parte de lo proyectado, y quien lo busca lo encuentra junto a «Salir». */
+.modo-taller-equipo {
+  position: relative;
+}
+
+.modo-taller-equipo-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-height: 2.3em;
+  padding: 0 0.4em;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.82em;
+  cursor: pointer;
+}
+
+.modo-taller-equipo-boton:hover,
+.modo-taller-equipo-boton[aria-expanded="true"] {
+  color: var(--cabecera-claro);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* El menu es el de la cabecera, con su tamaño: el modo taller agranda la
+   letra para proyectar, y esto no se proyecta. */
+.modo-taller-equipo-panel {
+  font-size: 1rem;
+}
+
 .modo-taller-salir:focus-visible,
+.modo-taller-equipo-boton:focus-visible,
 .modo-taller-paso:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
@@ -6385,6 +6540,12 @@ height: 100% !important;
   cursor: pointer;
 }
 
+/* En la apertura no hay anterior y en los proximos pasos no hay siguiente,
+   pero el hueco se guarda: sin el, lo del centro se iba a un lado. */
+.modo-taller-paso[hidden] {
+  visibility: hidden;
+}
+
 .modo-taller-paso:hover:not(:disabled) {
   background: var(--surface-realce);
 }
@@ -6419,6 +6580,521 @@ height: 100% !important;
   font-weight: var(--fw-bold);
 }
 
+/* ---------------------------------------------------------- cierre del taller
+   La ultima pantalla del modo taller. Ver app/cierre.js. Las cifras grandes,
+   como las tarjetas del Dashboard: se leen desde el fondo de la sala. */
+
+.modo-taller-cierre-cabecera p {
+  max-width: 62em;
+  color: var(--ink);
+  font-size: 1.05em;
+  line-height: 1.5;
+}
+
+.modo-taller-cierre-cabecera h2:focus {
+  outline: none;
+}
+
+.modo-taller-cierre-cifras {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75em;
+}
+
+.modo-taller-cierre-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1em;
+  padding: 0.8em 1.1em 0.9em;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--green);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.modo-taller-cierre-kpi span {
+  color: var(--muted);
+  font-size: 0.75em;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.modo-taller-cierre-kpi b {
+  font-size: 2.3em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.modo-taller-cierre-kpi b small {
+  color: var(--muted);
+  font-size: 0.5em;
+  font-weight: var(--fw-medium);
+}
+
+.modo-taller-cierre-kpi > small {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.modo-taller-cierre-columnas {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.75em;
+  min-height: 0;
+}
+
+.modo-taller-cierre-columnas section {
+  min-width: 0;
+  padding: 0.8em 1.1em 0.9em;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.modo-taller-cierre-columnas h4 {
+  margin: 0 0 0.6em;
+  color: var(--muted);
+  font-size: 0.72em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.modo-taller-cierre-brechas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: brecha;
+}
+
+/* Cada brecha vuelve a su subcapacidad: se pulsa, asi que parece pulsable. */
+.modo-taller-cierre-brechas button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.1em 0.7em;
+  width: 100%;
+  padding: 0.55em 0.75em;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 8px);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  counter-increment: brecha;
+}
+
+.modo-taller-cierre-brechas button::before {
+  grid-row: span 2;
+  align-self: center;
+  color: var(--green-dark);
+  font-size: 1.6em;
+  font-weight: var(--fw-bold);
+  content: counter(brecha);
+}
+
+.modo-taller-cierre-brechas button:hover,
+.modo-taller-cierre-pendientes button:hover {
+  border-color: var(--green);
+  background: var(--surface-realce);
+}
+
+.modo-taller-cierre-brechas button:focus-visible,
+.modo-taller-cierre-pendientes button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.modo-taller-cierre-sub {
+  font-weight: var(--fw-bold);
+  line-height: 1.3;
+}
+
+.modo-taller-cierre-meta {
+  color: var(--muted);
+  font-size: 0.88em;
+}
+
+.modo-taller-cierre-meta strong {
+  color: var(--ink);
+}
+
+.modo-taller-cierre-meta .priority-badge {
+  margin-left: 0.3em;
+  font-size: 0.9em;
+}
+
+.modo-taller-cierre-palanca {
+  display: grid;
+  grid-template-columns: 7.5em minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7em;
+  margin-bottom: 0.75em;
+  font-size: 0.95em;
+}
+
+.modo-taller-cierre-palanca-nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  font-weight: var(--fw-bold);
+}
+
+.modo-taller-cierre-pista {
+  position: relative;
+  height: 0.85em;
+  border-radius: 999px;
+  background: var(--surface-muted);
+}
+
+/* El color de la palanca lo pone la misma clase que su punto. */
+.modo-taller-cierre-valor {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+}
+
+.modo-taller-cierre-objetivo {
+  position: absolute;
+  top: -0.3em;
+  bottom: -0.3em;
+  border-left: 2px dashed var(--ink);
+}
+
+.modo-taller-cierre-cifra {
+  color: var(--muted);
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.modo-taller-cierre-cifra strong {
+  color: var(--ink);
+  font-size: 1.1em;
+}
+
+.modo-taller-cierre-nota,
+.modo-taller-cierre-vacio {
+  margin: 0.4em 0 0;
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.modo-taller-cierre-cuantas {
+  margin: 0 0 0.5em;
+}
+
+.modo-taller-cierre-cuantas strong {
+  font-size: 1.6em;
+}
+
+.modo-taller-cierre-pendientes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.92em;
+}
+
+.modo-taller-cierre-pendientes li + li {
+  margin-top: 0.3em;
+}
+
+.modo-taller-cierre-pendientes button {
+  width: 100%;
+  padding: 0.25em 0.5em;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.modo-taller-cierre-mas {
+  padding-left: 0.5em;
+  color: var(--muted);
+}
+
+/* ---- La apertura del taller: la simetrica del cierre ---- */
+.modo-taller-apertura-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2em;
+}
+
+.modo-taller-apertura-cabecera p {
+  max-width: 62em;
+  color: var(--ink);
+  font-size: 1.05em;
+  line-height: 1.5;
+}
+
+.modo-taller-apertura-cabecera h2:focus {
+  outline: none;
+}
+
+/* El logo va sobre blanco en los dos temas: casi todos estan pensados para
+   fondo claro, y sobre la tarjeta oscura uno azul marino no se veria. */
+.modo-taller-logo {
+  flex: none;
+  max-width: 15em;
+  height: 4.4em;
+  padding: 0.45em 0.8em;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+  object-fit: contain;
+}
+
+.modo-taller-apertura-capacidades,
+.modo-taller-apertura-escala {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cada capacidad lleva a su primera subcapacidad, como las brechas del cierre. */
+.modo-taller-apertura-capacidades button {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1em;
+  width: 100%;
+  padding: 0.55em 0.8em;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 8px);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.modo-taller-apertura-capacidades button:hover {
+  border-color: var(--green);
+  background: var(--surface-realce);
+}
+
+.modo-taller-apertura-capacidades button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.modo-taller-apertura-capacidades small {
+  flex: none;
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.modo-taller-apertura-escala {
+  gap: 0.4em;
+}
+
+.modo-taller-apertura-escala li {
+  display: grid;
+  grid-template-columns: 2em minmax(0, 1fr);
+  gap: 0.7em;
+  align-items: start;
+}
+
+.modo-taller-apertura-escala b {
+  display: grid;
+  place-items: center;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  font-weight: var(--fw-bold);
+}
+
+/* El nivel objetivo, en verde: es el que se busca en cada subcapacidad. */
+.modo-taller-apertura-escala li.es-objetivo b {
+  background: var(--green);
+  color: var(--sobre-marca);
+}
+
+.modo-taller-apertura-escala strong {
+  display: block;
+}
+
+.modo-taller-apertura-escala span {
+  color: var(--muted);
+  font-size: 0.86em;
+  line-height: 1.35;
+}
+
+.modo-taller-apertura-palancas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+}
+
+.modo-taller-apertura-palancas > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.6em;
+  align-items: baseline;
+}
+
+.modo-taller-apertura-palancas small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.86em;
+}
+
+.modo-taller-apertura-objetivo {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.modo-taller-apertura-objetivo b {
+  color: var(--ink);
+  font-size: 1.15em;
+}
+
+.modo-taller-apertura-nota {
+  margin: 1em 0 0;
+  padding: 0.7em 0.9em;
+  border-radius: var(--r-md, 8px);
+  background: var(--surface-muted);
+  font-size: 0.9em;
+  line-height: 1.45;
+}
+
+/* Los proximos pasos: una fila por paso, que es como se dicta en la sala.
+   Las cajas se ven siempre, tambien en Presentacion: aqui se escribe delante
+   de todos, y sin caja no se ve donde va lo siguiente. */
+.modo-taller-pasos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45em;
+  max-width: 72em;
+}
+
+.modo-taller-pasos-cabeza,
+.modo-taller-pasos-fila {
+  display: grid;
+  grid-template-columns: 1.6em minmax(0, 2.4fr) minmax(0, 1.1fr) minmax(0, 0.6fr) 2.2em;
+  gap: 0.55em;
+  align-items: center;
+}
+
+.modo-taller-pasos-cabeza {
+  color: var(--muted);
+  font-size: 0.72em;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.modo-taller-pasos-cabeza span:nth-child(2) {
+  padding-left: 0.2em;
+}
+
+.modo-taller-pasos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modo-taller-pasos-numero {
+  color: var(--green-dark);
+  font-weight: var(--fw-bold);
+  text-align: center;
+}
+
+.modo-taller-pasos-fila input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.45em 0.7em;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 8px);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95em;
+}
+
+.modo-taller-pasos-fila input::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.modo-taller-pasos-fila input:focus {
+  border-color: var(--green);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 0;
+}
+
+.modo-taller-pasos-quitar {
+  width: 1.9em;
+  height: 1.9em;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 1.05em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modo-taller-pasos-quitar:hover {
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+.modo-taller-pasos-pie {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  margin: 0.2em 0 0 2.15em;
+}
+
+.modo-taller-pasos-anadir {
+  padding: 0.4em 0.95em;
+  border: 1px dashed var(--line-fuerte);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.modo-taller-pasos-anadir:hover {
+  border-color: var(--green);
+  background: var(--surface-realce);
+}
+
+.modo-taller-pasos-anadir[hidden] {
+  display: none;
+}
+
+.modo-taller-pasos-tope {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.modo-taller-pasos-quitar:focus-visible,
+.modo-taller-pasos-anadir:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 /* En pantallas estrechas los niveles no caben en fila: van uno debajo de
    otro y el cuerpo se desplaza. En una sala no deberia pasar. */
 @media (max-width: 900px) {
@@ -6427,8 +7103,17 @@ height: 100% !important;
   }
 
   .modo-taller-niveles,
-  .modo-taller-apoyo {
+  .modo-taller-apoyo,
+  .modo-taller-cierre-columnas {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .modo-taller-apertura-cabecera {
+    flex-direction: column;
+  }
+
+  .modo-taller-cierre-cifras {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .modo-taller-cuerpo,
@@ -6438,7 +7123,19 @@ height: 100% !important;
     padding-right: 1em;
   }
 
-  .modo-taller-posicion {
+  .modo-taller-indice {
     display: none;
+  }
+
+  .modo-taller-pasos-cabeza {
+    display: none;
+  }
+
+  .modo-taller-pasos-fila {
+    grid-template-columns: 1.6em minmax(0, 1fr) minmax(0, 1fr) 2.2em;
+  }
+
+  .modo-taller-pasos-accion {
+    grid-column: 2 / 4;
   }
 }

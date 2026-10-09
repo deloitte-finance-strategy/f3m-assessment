@@ -42,6 +42,15 @@ precarga no rompe nada â€”solo carga mas tarde, que es justo lo que no se veriaâ
 y una precarga de un modulo que ya no existe es una peticion de mas. Las dos
 cosas ponen el CI en rojo, con las lineas exactas que hay que poner o quitar.
 
+Y el service worker
+-------------------
+
+sw.js guarda la herramienta en el navegador para que se abra sin conexion, en
+una cache con el nombre de la version. Al desplegar tiene que cambiar su
+VERSION: es lo que hace que el navegador instale el nuevo, guarde la version
+nueva y borre la anterior. Si no cambia, sin red se seguiria abriendo la
+version vieja. Por eso su VERSION tiene que ser la de index.html.
+
 Codigo de salida 1 si algo no cuadra.
 """
 
@@ -242,6 +251,25 @@ def main():
         sys.exit(1)
 
     print("OK    los datos precargados son los que pide el arranque.")
+
+    del_service_worker = re.search(
+        r"""^const VERSION = ["']([^"']+)["'];""",
+        (RAIZ / "sw.js").read_text(encoding="utf-8"),
+        re.MULTILINE,
+    )
+
+    if not del_service_worker or del_service_worker.group(1) != version:
+        print("")
+        print(
+            f"FALLA  sw.js dice VERSION = {del_service_worker.group(1) if del_service_worker else '(nada)'!r}"
+            f" y index.html v={version}."
+        )
+        print(f'  Poner en sw.js: const VERSION = "{version}";')
+        print("  Sin ese cambio, el navegador no instala el service worker nuevo y,")
+        print("  sin red, la herramienta se abre con la version anterior.")
+        sys.exit(1)
+
+    print("OK    el service worker guarda la misma version.")
 
 
 if __name__ == "__main__":
