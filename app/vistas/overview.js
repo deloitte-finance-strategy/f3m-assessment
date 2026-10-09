@@ -6,8 +6,8 @@
  * via getDominiosDelOverview() y no getScopedItems().
  */
 
-import { masUrgentes, rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=29";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=29";
+import { masUrgentes, rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=30";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=30";
 import {
   celdaDeAvance,
   gapClass,
@@ -16,7 +16,8 @@ import {
   priorityBadge,
   renderLeverBars,
   renderPriorityBars,
-} from "../celdas.js?v=29";
+} from "../celdas.js?v=30";
+import { repintarConMovimiento } from "../movimiento.js?v=30";
 import {
   DOMAINS,
   GRUPOS_DE_DOMINIO,
@@ -24,9 +25,9 @@ import {
   els,
   state,
   syncActiveDomainState,
-} from "../estado.js?v=29";
-import { renderOverviewRadar } from "../graficos.js?v=29";
-import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=29";
+} from "../estado.js?v=30";
+import { renderOverviewRadar } from "../graficos.js?v=30";
+import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=30";
 
 
 /**
@@ -143,38 +144,41 @@ export function renderOverview() {
     .filter(Boolean)
     .join(" · ");
 
-  els.overviewKpiGrid.innerHTML = [
-    kpiCard(
-      "Score global F3M",
-      formatMedia(resumenDelOverview.scoreGlobal),
-      evaluadas.length
-        // Se dice "subcapacidades" y no "dominios" a proposito: si no, alguien
-        // promedia a mano las nueve cifras de la tabla y no le cuadra.
-        ? "Promedio de las subcapacidades puntuadas de todos los dominios"
-        : "Pendiente de scoring",
-      "score",
-    ),
-    kpiCard(
-      "Gap medio vs objetivo",
-      formatMedia(resumenDelOverview.gapMedio),
-      "Cada dominio contra sus propios objetivos por capacidad y palanca",
-      "gap",
-    ),
-    kpiCard(
-      "Subcapacidades puntuadas",
-      `${evaluadas.length}/${entradas.length}`,
-      entradas.length
-        ? `${Math.round((evaluadas.length / entradas.length) * 100)}% de avance`
-        : "Sin subcapacidades",
-      "progress",
-    ),
-    kpiCard(
-      "Prioridad alta",
-      String(prioridadAlta),
-      "Subcapacidades con gap igual o superior a 2",
-      prioridadAlta > 0 ? "alert" : "neutral",
-    ),
-  ].join("");
+  // Las cifras que han cambiado cuentan hasta su valor nuevo (app/movimiento.js).
+  repintarConMovimiento(els.overviewKpiGrid, () => {
+    els.overviewKpiGrid.innerHTML = [
+      kpiCard(
+        "Score global F3M",
+        formatMedia(resumenDelOverview.scoreGlobal),
+        evaluadas.length
+          // Se dice "subcapacidades" y no "dominios" a proposito: si no, alguien
+          // promedia a mano las nueve cifras de la tabla y no le cuadra.
+          ? "Promedio de las subcapacidades puntuadas de todos los dominios"
+          : "Pendiente de scoring",
+        "score",
+      ),
+      kpiCard(
+        "Gap medio vs objetivo",
+        formatMedia(resumenDelOverview.gapMedio),
+        "Cada dominio contra sus propios objetivos por capacidad y palanca",
+        "gap",
+      ),
+      kpiCard(
+        "Subcapacidades puntuadas",
+        `${evaluadas.length}/${entradas.length}`,
+        entradas.length
+          ? `${Math.round((evaluadas.length / entradas.length) * 100)}% de avance`
+          : "Sin subcapacidades",
+        "progress",
+      ),
+      kpiCard(
+        "Prioridad alta",
+        String(prioridadAlta),
+        "Subcapacidades con gap igual o superior a 2",
+        prioridadAlta > 0 ? "alert" : "neutral",
+      ),
+    ].join("");
+  }, { selectorDeCifras: ".kpi-card strong" });
 
   renderOverviewHeadline(filas, entradas);
   renderPriorityBars(entradas, els.overviewPriorityBars);

@@ -16,10 +16,10 @@
  * documento entero, sin scripts, por lo mismo que el informe.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=29";
-import { normalizarLogo } from "../core/escenario.js?v=29";
-import { COLOR_DE_PALANCA, escapeAttr, escapeHtml } from "../core/presentacion.js?v=29";
-import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=29";
+import { PALANCAS } from "../core/calculo.js?v=30";
+import { normalizarLogo } from "../core/escenario.js?v=30";
+import { COLOR_DE_PALANCA, escapeAttr, escapeHtml } from "../core/presentacion.js?v=30";
+import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=30";
 
 
 /**

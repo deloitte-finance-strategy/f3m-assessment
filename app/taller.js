@@ -20,41 +20,42 @@
  * guardado diferido de edicion.js. Lo unico propio es como se enseña.
  */
 
-import { getMaturityLevel } from "../core/calculo.js?v=29";
-import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=29";
-import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=29";
-import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=29";
-import { nombreDeMasInformacion } from "./biblioteca.js?v=29";
-import { priorityBadge } from "./celdas.js?v=29";
-import { htmlDeLaApertura } from "./apertura.js?v=29";
-import { htmlDelCierre } from "./cierre.js?v=29";
+import { getMaturityLevel } from "../core/calculo.js?v=30";
+import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=30";
+import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=30";
+import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=30";
+import { nombreDeMasInformacion } from "./biblioteca.js?v=30";
+import { priorityBadge } from "./celdas.js?v=30";
+import { htmlDeLaApertura } from "./apertura.js?v=30";
+import { htmlDelCierre, revelarElCierre } from "./cierre.js?v=30";
+import { sinMovimiento } from "./movimiento.js?v=30";
 import {
   conectarLosPasos,
   guardarLosPasosPendientes,
   htmlDeLosPasos,
   pasosDelDominio,
   seEstaEscribiendoUnPaso,
-} from "./proximos-pasos.js?v=29";
-import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=29";
+} from "./proximos-pasos.js?v=30";
+import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=30";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "./edicion.js?v=29";
-import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=29";
-import { capacidadesDePreparacion } from "../informe/preparacion.js?v=29";
-import { getVisibleItems } from "./filtros.js?v=29";
-import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=29";
-import { calculate, getCapabilityTargets } from "./metricas.js?v=29";
-import { repintarTodo } from "./repintado.js?v=29";
-import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=29";
+} from "./edicion.js?v=30";
+import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=30";
+import { capacidadesDePreparacion } from "../informe/preparacion.js?v=30";
+import { getVisibleItems } from "./filtros.js?v=30";
+import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=30";
+import { calculate, getCapabilityTargets } from "./metricas.js?v=30";
+import { repintarTodo } from "./repintado.js?v=30";
+import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=30";
 import {
   conectarPuntuacion,
   enfocarPalanca,
   idDeLaTarjetaEnCurso,
   llevarALasTarjetas,
   scoreControl,
-} from "./vistas/assessment.js?v=29";
+} from "./vistas/assessment.js?v=30";
 
 
 let panel = null;
@@ -394,14 +395,6 @@ const CLASES_DE_ENTRADA = ["entra-adelante", "entra-atras", "entra"];
 
 
 /**
- * Si el equipo ha pedido al sistema menos movimiento, no se anima nada. El CSS
- * ya apaga sus animaciones con prefers-reduced-motion; esto es para las que se
- * mueven desde aqui, como las cifras.
- */
-const sinMovimiento = () => Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
-
-
-/**
  * Un fundido corto al cambiar de pantalla, que llega del lado hacia el que se
  * va: hacia delante entra por la derecha, hacia atras por la izquierda, y al
  * abrir o al cambiar de dominio solo funde. Sin el, «Siguiente» cambiaba la
@@ -422,6 +415,10 @@ function animarLaEntrada(sentido) {
   // poner la clase; sin esto, dos «Siguiente» seguidos no se animaban.
   void cuerpo.offsetWidth;
   cuerpo.classList.add(sentido > 0 ? "entra-adelante" : sentido < 0 ? "entra-atras" : "entra");
+
+  if (enCierre()) {
+    revelarElCierre(cuerpo);
+  }
 }
 
 

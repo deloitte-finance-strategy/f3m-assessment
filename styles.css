@@ -2584,13 +2584,15 @@ border-radius: var(--r-pill);
 }
 
 /*
-  Las filas del Overview abren su Dashboard, y las del Dashboard las
-  subcapacidades de su capacidad en el Assessment. El nombre es un boton para que
+  Las filas del Overview abren su Dashboard, las del Dashboard las
+  subcapacidades de su capacidad en el Assessment, y las subcapacidades del
+  Heatmap su tarjeta. El nombre es un boton para que
   llegue el teclado, pero se lee como el texto de la celda que era: en una
   tabla de datos, nueve botones con borde serian ruido.
 */
 #overviewSummaryTable tbody tr[data-abrir-dominio],
-#summaryTable tbody tr[data-abrir-capacidad] {
+#summaryTable tbody tr[data-abrir-capacidad],
+.heatmap-table tbody tr[data-abrir-subcapacidad] {
   cursor: pointer;
 }
 
@@ -2604,6 +2606,7 @@ border-radius: var(--r-pill);
 
 #overviewSummaryTable tbody tr:hover .fila-enlace,
 #summaryTable tbody tr:hover .fila-enlace,
+.heatmap-table tbody tr[data-abrir-subcapacidad]:hover .fila-enlace,
 .fila-enlace:focus-visible {
   color: var(--green-dark);
   text-decoration: underline;
@@ -6657,6 +6660,162 @@ height: 100% !important;
 
 .modo-taller-resultado.aparece {
   animation: taller-entra 260ms ease-out;
+}
+
+/* ----------------------------------------------- movimiento de la herramienta
+   Fuera del modo taller, con las mismas reglas: corto, solo en lo que acaba de
+   cambiar o de aparecer, y nada con «reducir movimiento» (la regla general de
+   prefers-reduced-motion). Lo que parte de un valor que solo se sabe al pintar
+   —el ancho de antes de una barra, el alto de un panel, de donde viene la
+   marca del dominio— se anima desde app/movimiento.js; aqui va lo que basta
+   con que el elemento aparezca.
+
+   Las animaciones de entrada usan `translate` y no `transform`: el aviso ya
+   lleva un transform para centrarse, y el chip de guardado otro al pasar el
+   raton, y una animacion de transform los pisaria mientras dura. */
+
+/* Las cifras que cuentan no bailan de ancho a cada paso. */
+.kpi-card strong,
+.bar-value,
+.modo-taller-cierre-kpi b,
+.modo-taller-cierre-cifra strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Los menus de la cabecera bajan unos pixeles hasta su sitio. */
+.header-menu-panel:not([hidden]) {
+  animation: aparece-desde-arriba 160ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Los modales: el velo se funde y la ficha sube un poco. El modo taller solo
+   se funde: ocupa la pantalla entera y su primera pantalla ya entra por su
+   cuenta (animarLaEntrada). */
+.modal-backdrop:not([hidden]) {
+  animation: aparece 180ms ease-out;
+}
+
+.modal-backdrop:not(.modo-taller):not([hidden]) > * {
+  animation: aparece-desde-abajo 220ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* El buscador es un <dialog>: entra al abrirse, con su velo. */
+.buscador[open] {
+  animation: aparece-desde-arriba 180ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.buscador[open]::backdrop {
+  animation: aparece 180ms ease-out;
+}
+
+/* El aviso baja desde arriba al llegar y se va fundiendose hacia arriba
+   (ocultarConSalida en app/movimiento.js, con la clase se-va). */
+.notice:not([hidden]) {
+  animation: aviso-llega 240ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.notice.se-va {
+  animation: aviso-se-va 220ms ease-in forwards;
+}
+
+@keyframes aviso-llega {
+  from {
+    opacity: 0;
+    translate: 0 -14px;
+  }
+}
+
+@keyframes aviso-se-va {
+  to {
+    opacity: 0;
+    translate: 0 -10px;
+  }
+}
+
+/* El chip de guardado sube al aparecer y se funde al irse. */
+.save-status:not([hidden]) {
+  animation: aparece-desde-abajo 200ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.save-status.se-va {
+  animation: chip-se-va 220ms ease-in forwards;
+}
+
+@keyframes chip-se-va {
+  to {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+
+/* «Guardado»: el punto verde pasa a ser un check que se dibuja de un trazo,
+   el corto primero y el largo despues. Es una L girada; el recorte la
+   descubre de izquierda a derecha antes del giro. */
+.save-status.saved::before {
+  width: 10px;
+  height: 5px;
+  margin: 5px 1px 0;
+  border: solid var(--green-dark);
+  border-width: 0 0 2.5px 2.5px;
+  border-radius: 1px;
+  background: transparent;
+  transform: rotate(-45deg);
+  animation: chip-check 340ms 60ms ease-out both;
+}
+
+@keyframes chip-check {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* La marca verde que viaja de un dominio a otro (app/dominios.js). Mientras
+   viaja, ni el de antes ni el nuevo se pintan en verde: una marca, no dos. */
+.domain-marca-que-viaja {
+  position: absolute;
+  z-index: 2;
+  border-radius: var(--r-sm);
+  background: var(--green);
+  box-shadow: 0 4px 10px rgba(134, 188, 37, 0.22);
+  opacity: 0.88;
+  pointer-events: none;
+}
+
+.domain-button.cede-la-marca,
+.domain-button.espera-la-marca {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.domain-button.cede-la-marca .domain-progress,
+.domain-button.espera-la-marca .domain-progress {
+  background: var(--surface-muted);
+  color: var(--muted);
+}
+
+@keyframes aparece {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes aparece-desde-arriba {
+  from {
+    opacity: 0;
+    translate: 0 -6px;
+  }
+}
+
+@keyframes aparece-desde-abajo {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
 }
 
 /* ---------------------------------------------------------- cierre del taller

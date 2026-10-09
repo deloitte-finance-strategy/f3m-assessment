@@ -30,7 +30,7 @@ import {
   titulosDeCasos,
   ubicacionDeFuente,
   urlDeDocumento,
-} from "../core/biblioteca.js?v=29";
+} from "../core/biblioteca.js?v=30";
 
 
 function dossier(extra = {}) {

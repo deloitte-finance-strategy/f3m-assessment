@@ -12,9 +12,10 @@
  * herramienta.
  */
 
-import { els } from "./estado.js?v=29";
-import { showNotice } from "./avisos.js?v=29";
-import { enEscenarioCompartido } from "./firebase.js?v=29";
+import { els } from "./estado.js?v=30";
+import { showNotice } from "./avisos.js?v=30";
+import { enEscenarioCompartido } from "./firebase.js?v=30";
+import { ocultarConSalida } from "./movimiento.js?v=30";
 
 
 // Para retirar el chip de guardado cuando el estado ya no pide nada.
@@ -44,7 +45,10 @@ export function updateSaveStatus(status, message, detalle = "") {
 
   els.saveStatus.hidden = false;
   els.saveStatus.className = `save-status ${status || ""}`.trim();
-  els.saveStatus.textContent = message;
+
+  // En verde, el check lo dibuja el CSS delante del texto, trazo a trazo: con
+  // el «✓» del mensaje salian dos. El texto de los demas estados no cambia.
+  els.saveStatus.textContent = status === "saved" ? message.replace(/\s*✓\s*$/, "") : message;
   apartarDelChip();
 
   // El detalle explica qué ha pasado, qué implica y qué puede hacer el usuario.
@@ -65,8 +69,7 @@ export function updateSaveStatus(status, message, detalle = "") {
 
   if (status === "saved") {
     temporizadorDelChip = window.setTimeout(() => {
-      els.saveStatus.hidden = true;
-      apartarDelChip();
+      ocultarConSalida(els.saveStatus, { alOcultar: apartarDelChip });
     }, 4000);
   }
 }

@@ -15,11 +15,12 @@
  * Solo pinta. Que pantalla toca y que pasa al pulsar lo decide app/taller.js.
  */
 
-import { BRECHAS_EN_EL_CORREO, fraseDelActa, resumenDelActa } from "../informe/acta.js?v=29";
-import { NIVELES_DE_LA_RUBRICA } from "../informe/preparacion.js?v=29";
-import { getMaturityLevelNumber } from "../core/calculo.js?v=29";
-import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=29";
-import { priorityBadge } from "./celdas.js?v=29";
+import { BRECHAS_EN_EL_CORREO, fraseDelActa, resumenDelActa } from "../informe/acta.js?v=30";
+import { NIVELES_DE_LA_RUBRICA } from "../informe/preparacion.js?v=30";
+import { getMaturityLevelNumber } from "../core/calculo.js?v=30";
+import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=30";
+import { priorityBadge } from "./celdas.js?v=30";
+import { aCero, contarTextos, entrar, sinMovimiento, textoConNumero } from "./movimiento.js?v=30";
 
 
 /** Cuantas pendientes se nombran; del resto se dice cuantas son. */
@@ -76,6 +77,55 @@ export function htmlDelCierre(datos, { cambiadasHoy = 0 } = {}) {
       </section>
     </div>
   `;
+}
+
+
+/**
+ * Al llegar al cierre, el resultado se construye delante de la sala: las
+ * cuatro cifras cuentan desde cero, las barras de las palancas crecen una
+ * detras de otra y las tres brechas entran en cascada. De golpe se leia como
+ * una tabla; asi se lee como el final de la sesion.
+ *
+ * Solo al llegar, y no al repintar: puntuar con el cierre abierto —o que un
+ * companero puntue en el escenario compartido— no vuelve a empezar la
+ * cuenta. Todo junto dura menos de un segundo, y nada espera a terminar
+ * para dejarse pulsar.
+ */
+export function revelarElCierre(cuerpo) {
+  if (sinMovimiento()) {
+    return;
+  }
+
+  // Solo el numero principal: en «12/16» cuenta el 12, y el 16 se queda.
+  contarTextos(
+    cuerpo.querySelector(".modo-taller-cierre-cifras") || cuerpo,
+    [...cuerpo.querySelectorAll(".modo-taller-cierre-kpi b")]
+      .map((cifra) => textoConNumero(cifra))
+      .filter((nodo) => nodo && nodo.parentElement.tagName === "B")
+      .map((nodo) => ({ nodo, desde: aCero(nodo.data) })),
+    { duracion: 520, retraso: 120 },
+  );
+
+  cuerpo.querySelectorAll(".modo-taller-cierre-palanca").forEach((palanca, indice) => {
+    const retraso = 260 + indice * 110;
+    const barra = palanca.querySelector(".modo-taller-cierre-valor");
+    const cifra = textoConNumero(palanca.querySelector(".modo-taller-cierre-cifra strong"));
+
+    barra?.animate?.([{ width: "0%" }, { width: barra.style.width }], {
+      duration: 420,
+      delay: retraso,
+      easing: "cubic-bezier(0.22, 0.61, 0.36, 1)",
+      fill: "backwards",
+    });
+
+    if (cifra) {
+      contarTextos(palanca, [{ nodo: cifra, desde: aCero(cifra.data) }], { duracion: 420, retraso });
+    }
+  });
+
+  cuerpo.querySelectorAll(".modo-taller-cierre-brechas li").forEach((brecha, indice) => {
+    entrar(brecha, { retraso: 200 + indice * 90, desplazamiento: 10 });
+  });
 }
 
 
