@@ -15,8 +15,8 @@ import {
   alcance,
   documentoDelResumen,
   tituloDelResumen,
-} from "../informe/resumen.js?v=30";
-import { kpisDeLaFuncionFinanciera, panoramaGlobal, rejillaDeKpis } from "../informe/secciones.js?v=30";
+} from "../informe/resumen.js?v=31";
+import { kpisDeLaFuncionFinanciera, panoramaGlobal, rejillaDeKpis } from "../informe/secciones.js?v=31";
 
 
 const GLOBAL = {

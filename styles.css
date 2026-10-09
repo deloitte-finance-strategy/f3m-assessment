@@ -625,6 +625,60 @@ h4 {
   display: none;
 }
 
+/* «Para el equipo», plegado dentro de «Presentación». La cabecera se lee
+   como las opciones del menú, con su flecha a la derecha. */
+.header-menu-grupo > summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+  padding: 9px 30px 9px 10px;
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  list-style: none;
+}
+
+.header-menu-grupo > summary::-webkit-details-marker {
+  display: none;
+}
+
+.header-menu-grupo > summary::after {
+  position: absolute;
+  top: 11px;
+  right: 12px;
+  color: var(--muted);
+  content: "▾";
+  font-size: var(--fs-3xs);
+  transition: transform 150ms ease;
+}
+
+.header-menu-grupo[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.header-menu-grupo > summary span {
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-normal);
+  line-height: 1.35;
+}
+
+.header-menu-grupo > summary:hover {
+  background: var(--surface-muted);
+}
+
+.header-menu-grupo > summary:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+
+.header-menu-grupo[open] > .header-menu-item {
+  margin-left: 10px;
+}
+
 /* El del PDF es el primer boton de la fila: alineado a la derecha, como el de
    Escenario, se saldria de la pantalla por la izquierda cuando la cabecera
    pasa a dos filas y los botones empiezan en el borde. */
@@ -2363,6 +2417,8 @@ display: none;
   padding: 5px 8px 5px 3px;
   border: 1px solid transparent;
   border-radius: var(--r-sm);
+  /* Al puntuar, el nivel actual cambia de fila poco a poco, no de golpe. */
+  transition: background-color 220ms ease, border-color 220ms ease;
 }
 
 .maturity-list li.is-current-level {
@@ -6676,6 +6732,7 @@ height: 100% !important;
 
 /* Las cifras que cuentan no bailan de ancho a cada paso. */
 .kpi-card strong,
+.score-summary strong,
 .bar-value,
 .modo-taller-cierre-kpi b,
 .modo-taller-cierre-cifra strong {
@@ -6770,32 +6827,6 @@ height: 100% !important;
   to {
     clip-path: inset(0 0 0 0);
   }
-}
-
-/* La marca verde que viaja de un dominio a otro (app/dominios.js). Mientras
-   viaja, ni el de antes ni el nuevo se pintan en verde: una marca, no dos. */
-.domain-marca-que-viaja {
-  position: absolute;
-  z-index: 2;
-  border-radius: var(--r-sm);
-  background: var(--green);
-  box-shadow: 0 4px 10px rgba(134, 188, 37, 0.22);
-  opacity: 0.88;
-  pointer-events: none;
-}
-
-.domain-button.cede-la-marca,
-.domain-button.espera-la-marca {
-  border-color: var(--line);
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: none;
-}
-
-.domain-button.cede-la-marca .domain-progress,
-.domain-button.espera-la-marca .domain-progress {
-  background: var(--surface-muted);
-  color: var(--muted);
 }
 
 @keyframes aparece {

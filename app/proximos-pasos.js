@@ -13,11 +13,11 @@
  * Pinta y guarda. Cuando se enseña lo decide app/taller.js.
  */
 
-import { LIMITES_DE_PASO, MAXIMO_DE_PASOS, normalizarPaso } from "../core/escenario.js?v=30";
-import { escapeAttr, escapeHtml, formatNumber } from "../core/presentacion.js?v=30";
-import { guardarYaLoPendienteDe, programarGuardadoDe } from "./edicion.js?v=30";
-import { state } from "./estado.js?v=30";
-import { persistProximosPasos } from "./persistencia.js?v=30";
+import { LIMITES_DE_PASO, MAXIMO_DE_PASOS, normalizarPaso } from "../core/escenario.js?v=31";
+import { escapeAttr, escapeHtml, formatNumber } from "../core/presentacion.js?v=31";
+import { guardarYaLoPendienteDe, programarGuardadoDe } from "./edicion.js?v=31";
+import { state } from "./estado.js?v=31";
+import { persistProximosPasos } from "./persistencia.js?v=31";
 
 
 const CAMPOS = [

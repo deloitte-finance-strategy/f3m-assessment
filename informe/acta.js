@@ -26,22 +26,22 @@ import {
   normalizeTargetValue,
   ordenarPorPrioridadYGap,
   resumenGlobal,
-} from "../core/calculo.js?v=30";
+} from "../core/calculo.js?v=31";
 import {
   COLOR_DE_PALANCA,
   escapeHtml,
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=30";
-import { CALOR_SIN_DATO, PALETA, colorDeCalor } from "./estilos.js?v=30";
+} from "../core/presentacion.js?v=31";
+import { CALOR_SIN_DATO, PALETA, colorDeCalor } from "./estilos.js?v=31";
 import {
   NIVELES_DE_LA_RUBRICA,
   capacidadesDePreparacion,
   estilosDelDocumento,
   logoDelDocumento,
   tituloDelDocumento,
-} from "./preparacion.js?v=30";
+} from "./preparacion.js?v=31";
 
 
 /** Cuantas subcapacidades lleva la portada en «Dónde está la mayor distancia». */

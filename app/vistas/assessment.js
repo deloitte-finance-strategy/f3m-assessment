@@ -17,17 +17,17 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=30";
-import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=30";
-import { createDefaultTargets } from "../../core/objetivos.js?v=30";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=30";
-import { abrirDialogo, showNotice } from "../avisos.js?v=30";
+} from "../../core/calculo.js?v=31";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=31";
+import { createDefaultTargets } from "../../core/objetivos.js?v=31";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=31";
+import { abrirDialogo, showNotice } from "../avisos.js?v=31";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=30";
+} from "../celdas.js?v=31";
 import {
   DOMAINS,
   LEVERS,
@@ -35,27 +35,28 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=30";
+} from "../estado.js?v=31";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "../edicion.js?v=30";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=30";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=30";
+} from "../edicion.js?v=31";
+import { describirObjetivos, getVisibleItems } from "../filtros.js?v=31";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=31";
 import {
   persistItemChange,
   persistTargetsDeDominios,
   persistTargetsDelDominioActivo,
-} from "../persistencia.js?v=30";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=30";
-import { repintarTodo } from "../repintado.js?v=30";
+} from "../persistencia.js?v=31";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=31";
+import { repintarTodo } from "../repintado.js?v=31";
+import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=31";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=30";
+} from "../subcapacidad.js?v=31";
 
 
 export function renderCapabilityTargets() {
@@ -1200,10 +1201,57 @@ function aplicarScore(itemId, leverKey, score) {
   repintarTodo({ saltarAssessments: mismaLista });
 
   if (mismaLista) {
-    actualizarTarjetaDeAssessment(item);
+    actualizarTarjetaDeAssessment(item, { animar: true, palanca: leverKey });
   }
 
   persistItemChange(item.id, `scores/${leverKey}`, score);
+}
+
+
+/**
+ * Al puntuar en la tarjeta se ve que ha movido la respuesta, como en el modo
+ * taller: el numero elegido entra con un pequeno salto, el score medio, el
+ * objetivo y el gap cuentan del valor de antes al nuevo, y la prioridad late
+ * si cambia. La primera palanca de una pendiente no cuenta desde la nada: el
+ * resumen aparece.
+ *
+ * Solo aqui, al puntuar: cuando la tarjeta se repinta por otro motivo —un
+ * filtro, un cambio que llega del escenario compartido— no se mueve nada.
+ */
+function moverElResultado(card, resultado, metrics, palanca) {
+  const prioridadAntes = resultado.querySelector(".priority-badge")?.textContent.trim();
+  const estabaPendiente = Boolean(resultado.querySelector(".score-summary-pending"));
+
+  repintarConMovimiento(resultado, () => {
+    resultado.innerHTML = scoreResult(metrics);
+  }, { selectorDeCifras: estabaPendiente || metrics.isPending ? "" : ".score-summary strong" });
+
+  if (sinMovimiento()) {
+    return;
+  }
+
+  const elegido = palanca
+    ? card.querySelector(`.score-segmentos[data-lever="${CSS.escape(palanca)}"] .score-radio:checked + span`)
+    : null;
+
+  elegido?.animate?.(
+    [{ scale: "0.82" }, { scale: "1.08", offset: 0.6 }, { scale: "1" }],
+    { duration: 260, easing: "ease-out" },
+  );
+
+  if (estabaPendiente !== metrics.isPending) {
+    entrar(resultado.querySelector(".score-summary"), { duracion: 240, desplazamiento: 4 });
+    return;
+  }
+
+  const insignia = resultado.querySelector(".priority-badge");
+
+  if (insignia && insignia.textContent.trim() !== prioridadAntes) {
+    insignia.animate?.(
+      [{ scale: "1" }, { scale: "1.16", offset: 0.35 }, { scale: "1" }],
+      { duration: 420, easing: "ease-out" },
+    );
+  }
 }
 
 
@@ -1214,7 +1262,7 @@ function aplicarScore(itemId, leverKey, score) {
  * foco al body: con teclado habia que volver a tabular desde el principio
  * despues de cada puntuacion.
  */
-function actualizarTarjetaDeAssessment(item) {
+function actualizarTarjetaDeAssessment(item, { animar = false, palanca = null } = {}) {
   const card = els.assessmentList.querySelector(
     `.assessment-card[data-id="${CSS.escape(item.id)}"]`,
   );
@@ -1224,8 +1272,13 @@ function actualizarTarjetaDeAssessment(item) {
   }
 
   const metrics = calculate(item);
+  const resultado = card.querySelector(".score-result");
 
-  card.querySelector(".score-result").innerHTML = scoreResult(metrics);
+  if (!animar) {
+    resultado.innerHTML = scoreResult(metrics);
+  } else {
+    moverElResultado(card, resultado, metrics, palanca);
+  }
 
   // El nivel de madurez resaltado cambia con el score medio.
   const nivelActual = getMaturityLevelNumber(metrics.scoreMedio);

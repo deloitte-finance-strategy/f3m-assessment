@@ -18,7 +18,7 @@ import {
   fechaParaArchivo,
   formatMedia,
   formatNumber,
-} from "../core/presentacion.js?v=30";
+} from "../core/presentacion.js?v=31";
 
 
 export const casos = [
