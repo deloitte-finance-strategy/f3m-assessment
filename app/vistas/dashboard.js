@@ -6,9 +6,9 @@
  * las dos vistas lo dicen en pantalla.
  */
 
-import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=28";
-import { filasDeResumen } from "../../core/exportacion.js?v=28";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=28";
+import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=29";
+import { filasDeResumen } from "../../core/exportacion.js?v=29";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=29";
 import {
   buildFilteredEmptyState,
   celdaDeAvance,
@@ -16,11 +16,11 @@ import {
   priorityBadge,
   renderLeverBars,
   renderPriorityBars,
-} from "../celdas.js?v=28";
-import { els, state } from "../estado.js?v=28";
-import { getScopedItems } from "../filtros.js?v=28";
-import { renderCapabilityRadar } from "../graficos.js?v=28";
-import { agregarPorCapacidad, calculate } from "../metricas.js?v=28";
+} from "../celdas.js?v=29";
+import { els, state } from "../estado.js?v=29";
+import { getScopedItems } from "../filtros.js?v=29";
+import { renderCapabilityRadar } from "../graficos.js?v=29";
+import { agregarPorCapacidad, calculate } from "../metricas.js?v=29";
 
 
 export function renderDashboard() {

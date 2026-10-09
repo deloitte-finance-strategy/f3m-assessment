@@ -33,15 +33,15 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.417 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.427 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
 | `sw.js` | **El service worker**: guarda la herramienta en el navegador para abrirla sin red | 172 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.928 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.943 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 189 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 352 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 257 |
-| `app/graficos.js` | Los seis radares de Chart.js, y a dónde lleva pulsar sus ejes | 718 |
+| `app/graficos.js` | Los seis radares de Chart.js, a dónde lleva pulsar sus ejes y el del resumen | 789 |
 | `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 185 |
 | `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 486 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
@@ -58,9 +58,9 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/logo.js` | **El logo del cliente**: elegirlo, reducirlo a lo que admiten las reglas y enseñarlo | 176 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 317 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
-| `app/informe.js` | Lo que la aplicación le pasa al informe, a la preparación y al acta del taller | 835 |
+| `app/informe.js` | Lo que la aplicación le pasa al informe, al resumen, a la preparación y al acta | 922 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.083 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.223 |
 | `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
 | `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 282 |
 | `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 174 |
@@ -71,7 +71,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad | 172 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.141 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.220 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -81,12 +81,13 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `core/busqueda.js` | Qué subcapacidades casan con lo que se escribe, y qué resaltar | 152 |
 | `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 510 |
 | `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 480 |
-| `informe/secciones.js` | Una función por diapositiva | 1.070 |
+| `informe/secciones.js` | Una función por diapositiva | 1.079 |
 | `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 307 |
 | `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.028 |
 | `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 112 |
 | `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 582 |
 | `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 795 |
+| `informe/resumen.js` | **El resumen de una página**: la función financiera en una diapositiva, para el comité | 565 |
 | `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
@@ -394,6 +395,15 @@ que cuenta para el freno de cierre, y mientras se escribe manda la pantalla: un 
 foco dentro no la toca. Intro pasa al paso siguiente y en el último abre otro. Al llegar, el foco
 va al título y no al primer campo, porque con el cursor en un campo Re Pág no vuelve atrás.
 
+**Las pantallas del modo taller entran con un fundido corto** (`animarLaEntrada()`, 220 ms): hacia
+delante por la derecha, hacia atrás por la izquierda, y al abrir o al cambiar de dominio solo funde.
+Al puntuar, **solo la palanca que llega a su nivel** entra con un salto, el borde del nivel cambia
+poco a poco, y el score medio y el gap **cuentan** del valor de antes al nuevo
+(`contarLasCifras()`), con la región `aria-busy` mientras cuentan para que el lector de pantalla
+anuncie solo el final. Con «reducir movimiento» en el sistema no se anima nada: el CSS lo apaga con
+la regla general de `prefers-reduced-motion` y el JavaScript lo pregunta antes de contar. El marco
+lleva `overflow-x: clip` para que lo que entra de lado no abra una barra horizontal.
+
 Con el modo taller abierto, **el chip de guardado sube por encima del pie** (`apartarElChipDelPie()`):
 sale al puntuar, justo cuando se va a pulsar «Siguiente», y en su sitio de siempre se llevaba el clic.
 
@@ -450,8 +460,8 @@ la aplicación, para que el descuadre no se lea como un fallo.
 
 **Hay dos informes**, y «Exportar PDF» abre un menú para elegir. Es un menú y no un diálogo a
 propósito: `window.open()` tiene que ir en el mismo clic que lo pide, o el navegador lo bloquea como
-ventana emergente. El mismo menú lleva además la **preparación** y el **acta del taller**, que no
-son informes (ver abajo).
+ventana emergente. El mismo menú lleva además el **resumen de una página**, la **preparación** y
+el **acta del taller** (ver abajo).
 
 - **El del dominio** es el de siempre: la parte global y el dominio abierto, con los filtros activos.
 - **El de todo el proyecto** lleva, tras la parte global, un **capítulo por cada dominio con algo
@@ -462,6 +472,20 @@ son informes (ver abajo).
   de qué dominio es. El índice pasa a ser **por partes**, con el rango de cada sección, porque una
   línea por sección no cabe con nueve dominios. Los radares de cada dominio se pintan uno detrás de
   otro en los canvas del Dashboard y se capturan; al acabar se repinta el Dashboard.
+
+**El resumen de una página** (`informe/resumen.js`) es la función financiera entera en **una sola
+diapositiva** del deck, para el comité de dirección del cliente: las cuatro cifras del panorama
+(`kpisDeLaFuncionFinanciera()`, compartida con la diapositiva del informe), su titular, un radar de
+la madurez media de cada dominio frente a su objetivo, cada palanca frente al suyo, las cinco
+mayores brechas con el criterio del acta y los próximos pasos de todos los dominios. **Sin filtros**,
+como la parte global, y sin nada puntuado no se puede pedir. El radar es **uno solo y se dibuja
+aparte** (`capturarRadarDelResumen()` en `app/graficos.js`), fuera de la pantalla y a su tamaño: los
+tres del Overview, a un tercio de media hoja, dejaban los nombres de los dominios a 4 puntos. Va en
+gris y negro, no en verde, porque el verde de marca es el mismo que el de Procesos. Caben cuatro
+pasos y cinco brechas; lo que no cabe se cuenta en el bloque («y 3 más en el acta de cada
+dominio»), y una acción de más de 100 caracteres se acorta con puntos suspensivos y lo dice. Pasa
+por `?comprobar=desbordes` como el informe: medido con nueve dominios y las cuatro acciones y sus
+responsables al largo máximo, sobran 10 px.
 
 **La preparación del taller** (`informe/preparacion.js`) es lo que se envía al cliente antes de
 la sesión: para cada subcapacidad, su objetivo, las preguntas clave y la documentación que conviene
@@ -818,7 +842,8 @@ de negocio, los objetivos, la coincidencia de subcapacidades, el contrato de esc
 con `database.rules.json`, el formato de presentación, la exportación a CSV, la biblioteca de IA
 —que una fuente rota no llegue a la pantalla—, el buscador, el informe —el deck que arma `informe/pdf.js`, las
 primitivas SVG y la lectura de las medidas de desborde—, la preparación del taller, con su rúbrica
-comparada con la de `index.html`, y el acta, con sus cifras comparadas con las del Dashboard.
+comparada con la de `index.html`, el acta, con sus cifras comparadas con las del Dashboard, y el
+resumen de una página, con las suyas comparadas con las del panorama del informe.
 
 - **En el navegador**: con el servidor en marcha, abrir `http://localhost:8000/tests/`. Es la forma
   que funciona en cualquier equipo, sin instalar nada.
@@ -886,7 +911,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      portapapeles, y cada una de las tres brechas vuelve a su subcapacidad. «Próximos pasos →»,
      desde el cierre: escribir tres con Tab e Intro, quitar uno con ×, y llenar hasta diez sin que
      la pantalla se desplace; salen en el acta, en el correo y en el índice («Próximos pasos · 3»),
-     y siguen tras recargar. Probarlo en los
+     y siguen tras recargar. «Siguiente» y «Anterior» entran con un fundido desde su lado; al
+     puntuar, solo la palanca que cambia salta a su nivel y el score medio y el gap cuentan hasta el
+     nuevo. Con «reducir movimiento» activado en el sistema, nada de eso se mueve. Probarlo en los
      cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita
      desplazarse.
    - **Heatmap**: desplegar y plegar capacidades.
@@ -916,6 +943,10 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    proyecto**, con los nueve dominios puntuados: un capítulo por dominio, cada uno con sus tres
    radares, el índice por partes y ninguna diapositiva recortada. Al terminar, el Dashboard
    tiene que seguir enseñando los radares del dominio abierto.
+   **El resumen de una página**, del mismo menú: una sola diapositiva, clara aunque se exporte en
+   oscuro y con letra grande, con las mismas cuatro cifras que el panorama del informe y un radar
+   en el que se leen los nueve dominios. Con `?comprobar=desbordes`, también cuando los pasos y sus
+   responsables son largos. Sin nada puntuado en ningún dominio, el botón está apagado.
    **La preparación del taller**, del mismo menú: vertical, sin una puntuación, cada subcapacidad
    entera en su página y el índice entero en la primera. Con un filtro de capacidad, el menú y el
    aviso dicen cuántas lleva, y el número de su capacidad es el suyo («3», no «1»).

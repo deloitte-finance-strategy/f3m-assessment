@@ -30,7 +30,7 @@
  * la red cada vez que comprueba si hay uno nuevo, sin pasar por su cache.
  */
 
-const VERSION = "28";
+const VERSION = "29";
 const CACHE = `f3m-v${VERSION}`;
 const ESPERA_DE_LA_RED_MS = 4000;
 

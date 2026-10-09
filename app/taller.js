@@ -20,41 +20,41 @@
  * guardado diferido de edicion.js. Lo unico propio es como se enseña.
  */
 
-import { getMaturityLevel } from "../core/calculo.js?v=28";
-import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=28";
-import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=28";
-import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=28";
-import { nombreDeMasInformacion } from "./biblioteca.js?v=28";
-import { priorityBadge } from "./celdas.js?v=28";
-import { htmlDeLaApertura } from "./apertura.js?v=28";
-import { htmlDelCierre } from "./cierre.js?v=28";
+import { getMaturityLevel } from "../core/calculo.js?v=29";
+import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=29";
+import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=29";
+import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=29";
+import { nombreDeMasInformacion } from "./biblioteca.js?v=29";
+import { priorityBadge } from "./celdas.js?v=29";
+import { htmlDeLaApertura } from "./apertura.js?v=29";
+import { htmlDelCierre } from "./cierre.js?v=29";
 import {
   conectarLosPasos,
   guardarLosPasosPendientes,
   htmlDeLosPasos,
   pasosDelDominio,
   seEstaEscribiendoUnPaso,
-} from "./proximos-pasos.js?v=28";
-import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=28";
+} from "./proximos-pasos.js?v=29";
+import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=29";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "./edicion.js?v=28";
-import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=28";
-import { capacidadesDePreparacion } from "../informe/preparacion.js?v=28";
-import { getVisibleItems } from "./filtros.js?v=28";
-import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=28";
-import { calculate, getCapabilityTargets } from "./metricas.js?v=28";
-import { repintarTodo } from "./repintado.js?v=28";
-import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=28";
+} from "./edicion.js?v=29";
+import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=29";
+import { capacidadesDePreparacion } from "../informe/preparacion.js?v=29";
+import { getVisibleItems } from "./filtros.js?v=29";
+import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=29";
+import { calculate, getCapabilityTargets } from "./metricas.js?v=29";
+import { repintarTodo } from "./repintado.js?v=29";
+import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=29";
 import {
   conectarPuntuacion,
   enfocarPalanca,
   idDeLaTarjetaEnCurso,
   llevarALasTarjetas,
   scoreControl,
-} from "./vistas/assessment.js?v=28";
+} from "./vistas/assessment.js?v=29";
 
 
 let panel = null;
@@ -146,6 +146,11 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   anterior?.addEventListener("click", () => irA(indice - 1));
   siguiente?.addEventListener("click", () => irA(indice + 1));
   cuerpo.addEventListener("click", alPulsarEnElCuerpo);
+  cuerpo.addEventListener("animationend", (event) => {
+    if (event.target === cuerpo) {
+      cuerpo.classList.remove(...CLASES_DE_ENTRADA);
+    }
+  });
   setupMenusDeLaBarra();
   selectorDeDominio?.addEventListener("change", () => cambiarDeDominio(selectorDeDominio.value));
 
@@ -186,6 +191,7 @@ export function abrirModoTaller(desde = null) {
   panel.hidden = false;
   updateModalOpenState();
   pintar();
+  animarLaEntrada(0);
   apartarElChipDelPie(true);
 }
 
@@ -289,8 +295,8 @@ export function refrescarModoTaller() {
     notas.value = item.comentario || "";
   }
 
-  pintarMarcas(item);
-  pintarResultado(item);
+  pintarMarcas(item, { animar: true });
+  pintarResultado(item, { animar: true });
   pintarAvanceDeDominios();
 }
 
@@ -344,6 +350,7 @@ async function cambiarDeDominio(domainId) {
   }
 
   pintar({ enfocar: false });
+  animarLaEntrada(0);
 }
 
 
@@ -375,8 +382,46 @@ function irA(nuevo) {
 
   guardarLoQueQueda();
 
+  const sentido = Math.sign(nuevo - indice);
+
   indice = nuevo;
   pintar();
+  animarLaEntrada(sentido);
+}
+
+
+const CLASES_DE_ENTRADA = ["entra-adelante", "entra-atras", "entra"];
+
+
+/**
+ * Si el equipo ha pedido al sistema menos movimiento, no se anima nada. El CSS
+ * ya apaga sus animaciones con prefers-reduced-motion; esto es para las que se
+ * mueven desde aqui, como las cifras.
+ */
+const sinMovimiento = () => Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+
+
+/**
+ * Un fundido corto al cambiar de pantalla, que llega del lado hacia el que se
+ * va: hacia delante entra por la derecha, hacia atras por la izquierda, y al
+ * abrir o al cambiar de dominio solo funde. Sin el, «Siguiente» cambiaba la
+ * pantalla de golpe y, proyectado, se leia como una web y no como una
+ * presentacion.
+ *
+ * Corto a proposito, 220 ms: el foco ya esta en la primera palanca y se puede
+ * puntuar mientras entra, sin esperar a que termine.
+ */
+function animarLaEntrada(sentido) {
+  cuerpo.classList.remove(...CLASES_DE_ENTRADA);
+
+  if (sinMovimiento()) {
+    return;
+  }
+
+  // Leer el ancho obliga al navegador a aplicar la retirada antes de volver a
+  // poner la clase; sin esto, dos «Siguiente» seguidos no se animaban.
+  void cuerpo.offsetWidth;
+  cuerpo.classList.add(sentido > 0 ? "entra-adelante" : sentido < 0 ? "entra-atras" : "entra");
 }
 
 
@@ -975,9 +1020,13 @@ function casoDeIa(caso) {
  * llegar. El nivel resaltado de «Ver detalle» es el de la media, y con
  * Procesos en 1 y Tecnologia en 3 no dice ni lo uno ni lo otro.
  */
-function pintarMarcas(item) {
+function pintarMarcas(item, { animar = false } = {}) {
   const objetivos = getCapabilityTargets(item.capacidad);
   const objetivosIguales = new Set(LEVERS.map((lever) => Math.round(objetivos[lever.key]))).size === 1;
+
+  // Las que ya estaban no se mueven: solo la palanca que acaba de llegar a su
+  // nivel entra con un salto corto, que es donde se mira al puntuar.
+  const antes = new Set([...cuerpo.querySelectorAll(".modo-taller-marca[data-marca]")].map((marca) => marca.dataset.marca));
 
   cuerpo.querySelectorAll(".modo-taller-marcas").forEach((contenedor) => {
     const nivel = Number(contenedor.dataset.nivel);
@@ -986,7 +1035,7 @@ function pintarMarcas(item) {
 
     const marcas = aqui.map(
       (lever) => `
-        <span class="modo-taller-marca">
+        <span class="modo-taller-marca" data-marca="${lever.key}:${nivel}">
           <span class="modo-taller-punto modo-taller-punto-${lever.key}" aria-hidden="true"></span>
           ${escapeHtml(lever.label)}
         </span>
@@ -996,16 +1045,27 @@ function pintarMarcas(item) {
     if (objetivoAqui.length) {
       const de = objetivosIguales ? "" : ` · ${objetivoAqui.map((lever) => lever.label).join(", ")}`;
 
-      marcas.push(`<span class="modo-taller-marca modo-taller-marca-objetivo">Objetivo${escapeHtml(de)}</span>`);
+      marcas.push(`<span class="modo-taller-marca modo-taller-marca-objetivo" data-marca="objetivo:${nivel}">Objetivo${escapeHtml(de)}</span>`);
     }
 
     contenedor.innerHTML = marcas.join("");
+
+    if (animar) {
+      contenedor.querySelectorAll(".modo-taller-marca[data-marca]").forEach((marca) => {
+        marca.classList.toggle("recien", !antes.has(marca.dataset.marca));
+      });
+    }
     contenedor.closest(".modo-taller-nivel")?.classList.toggle("tiene-palancas", aqui.length > 0);
   });
 }
 
 
-function pintarResultado(item) {
+// Lo ultimo que dijo el pie, para saber desde donde contar al puntuar.
+let ultimoResultado = null;
+let cuentaDelResultado = 0;
+
+
+function pintarResultado(item, { animar = false } = {}) {
   const metricas = calculate(item);
   const pendientes = recorrido
     .map((id) => state.items.find((entrada) => entrada.id === id))
@@ -1018,13 +1078,93 @@ function pintarResultado(item) {
     .filter(Boolean)
     .join(" · ");
 
+  const previo = ultimoResultado?.id === item.id ? ultimoResultado : null;
+
+  ultimoResultado = {
+    id: item.id,
+    isPending: metricas.isPending,
+    scoreMedio: metricas.scoreMedio,
+    gap: metricas.gap,
+    prioridad: metricas.prioridad,
+  };
+
+  window.cancelAnimationFrame(cuentaDelResultado);
+  resultado.removeAttribute("aria-busy");
+
   resultado.innerHTML = metricas.isPending
     ? `<span class="modo-taller-sin-puntuar">Sin puntuar</span>`
     : `
-      <span>Score medio <strong>${escapeHtml(formatMedia(metricas.scoreMedio))}</strong></span>
-      <span>Gap <strong>${escapeHtml(formatMedia(metricas.gap))}</strong></span>
+      <span>Score medio <strong data-cifra="scoreMedio">${escapeHtml(formatMedia(metricas.scoreMedio))}</strong></span>
+      <span>Gap <strong data-cifra="gap">${escapeHtml(formatMedia(metricas.gap))}</strong></span>
       <span>Prioridad ${priorityBadge(metricas.prioridad)}</span>
     `;
+
+  if (!animar || !previo || sinMovimiento()) {
+    return;
+  }
+
+  // Recien puntuada: el resultado aparece, no cuenta desde la nada.
+  if (previo.isPending && !metricas.isPending) {
+    resultado.classList.remove("aparece");
+    void resultado.offsetWidth;
+    resultado.classList.add("aparece");
+    return;
+  }
+
+  if (metricas.isPending) {
+    return;
+  }
+
+  if (previo.prioridad !== metricas.prioridad) {
+    resultado.querySelector(".priority-badge")?.classList.add("cambia");
+  }
+
+  contarLasCifras(previo, metricas);
+}
+
+
+/**
+ * El score medio y el gap cuentan del valor de antes al nuevo, en un tercio de
+ * segundo: el numero que cambia se ve cambiar, y desde el fondo de la sala se
+ * sabe que algo se ha movido sin leerlo. Mientras cuenta, la region se marca
+ * ocupada, para que un lector de pantalla anuncie solo el valor final.
+ */
+function contarLasCifras(desde, hasta) {
+  const cifras = ["scoreMedio", "gap"]
+    .map((clave) => ({
+      elemento: resultado.querySelector(`[data-cifra="${clave}"]`),
+      desde: desde[clave],
+      hasta: hasta[clave],
+    }))
+    .filter(({ elemento, desde: inicio, hasta: fin }) =>
+      elemento && Number.isFinite(inicio) && Number.isFinite(fin) && Math.abs(fin - inicio) >= 0.005);
+
+  if (!cifras.length) {
+    return;
+  }
+
+  const duracion = 320;
+  const inicio = performance.now();
+
+  resultado.setAttribute("aria-busy", "true");
+  cifras.forEach(({ elemento }) => elemento.classList.add("cambia"));
+
+  const paso = (ahora) => {
+    const avance = Math.min(1, (ahora - inicio) / duracion);
+    const suave = 1 - (1 - avance) ** 3;
+
+    cifras.forEach(({ elemento, desde: de, hasta: a }) => {
+      elemento.textContent = formatMedia(de + (a - de) * suave);
+    });
+
+    if (avance < 1) {
+      cuentaDelResultado = window.requestAnimationFrame(paso);
+    } else {
+      resultado.removeAttribute("aria-busy");
+    }
+  };
+
+  cuentaDelResultado = window.requestAnimationFrame(paso);
 }
 
 

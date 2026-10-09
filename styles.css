@@ -6580,6 +6580,85 @@ height: 100% !important;
   font-weight: var(--fw-bold);
 }
 
+/* ------------------------------------------------- transiciones del taller
+   Cortas y solo donde se mira: la pantalla que entra, la palanca que llega a
+   su nivel y la cifra que cambia. Ver animarLaEntrada() y contarLasCifras() en
+   app/taller.js. Con «reducir movimiento» en el sistema, la regla general de
+   prefers-reduced-motion las deja en nada. */
+
+/* Lo que entra de lado no puede abrir una barra horizontal mientras se mueve. */
+.modo-taller-marco {
+  overflow-x: clip;
+}
+
+.modo-taller-cuerpo.entra-adelante {
+  animation: taller-entra-adelante 220ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.modo-taller-cuerpo.entra-atras {
+  animation: taller-entra-atras 220ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.modo-taller-cuerpo.entra {
+  animation: taller-entra 200ms ease-out;
+}
+
+@keyframes taller-entra-adelante {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes taller-entra-atras {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+@keyframes taller-entra {
+  from {
+    opacity: 0;
+  }
+}
+
+/* El nivel que gana o pierde una palanca cambia de borde poco a poco. */
+.modo-taller-nivel {
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.modo-taller-marca.recien {
+  animation: taller-marca-llega 280ms cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+@keyframes taller-marca-llega {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.7);
+  }
+}
+
+.modo-taller-resultado strong.cambia,
+.modo-taller-resultado .priority-badge.cambia {
+  animation: taller-cifra-cambia 420ms ease-out;
+}
+
+@keyframes taller-cifra-cambia {
+  30% {
+    transform: scale(1.14);
+  }
+}
+
+/* Un transform no se aplica a un elemento en linea: la cifra necesita caja. */
+.modo-taller-resultado strong {
+  display: inline-block;
+}
+
+.modo-taller-resultado.aparece {
+  animation: taller-entra 260ms ease-out;
+}
+
 /* ---------------------------------------------------------- cierre del taller
    La ultima pantalla del modo taller. Ver app/cierre.js. Las cifras grandes,
    como las tarjetas del Dashboard: se leen desde el fondo de la sala. */
