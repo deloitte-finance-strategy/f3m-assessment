@@ -21,7 +21,7 @@
  * Sin filtros, como la parte global del informe, que es lo que resume.
  */
 
-import { normalizarLogo } from "../core/escenario.js?v=29";
+import { normalizarLogo } from "../core/escenario.js?v=30";
 import {
   COLOR_DE_PALANCA,
   escapeAttr,
@@ -29,10 +29,10 @@ import {
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=29";
-import { PALETA, getEnhancedPdfReportStyles } from "./estilos.js?v=29";
-import { svgBullet } from "./graficos.js?v=29";
-import { kpisDeLaFuncionFinanciera, rejillaDeKpis, titularHtml } from "./secciones.js?v=29";
+} from "../core/presentacion.js?v=30";
+import { PALETA, getEnhancedPdfReportStyles } from "./estilos.js?v=30";
+import { svgBullet } from "./graficos.js?v=30";
+import { kpisDeLaFuncionFinanciera, rejillaDeKpis, titularHtml } from "./secciones.js?v=30";
 
 
 /** Cinco brechas: las que caben en la columna sin apretar la letra. */

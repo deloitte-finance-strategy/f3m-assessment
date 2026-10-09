@@ -15,17 +15,17 @@
  * las pedia prestadas el modal del Roadmap; con la pestana IA ya son tres sitios.
  */
 
-import { average, getMaturityLevelNumber, priorityFromGap } from "../core/calculo.js?v=29";
+import { average, getMaturityLevelNumber, priorityFromGap } from "../core/calculo.js?v=30";
 import {
   escapeAttr,
   escapeHtml,
   formatMedia,
   priorityColor,
-} from "../core/presentacion.js?v=29";
-import { pieDeFuente } from "./biblioteca.js?v=29";
-import { LEVERS, els, state } from "./estado.js?v=29";
-import { getScopedItems } from "./filtros.js?v=29";
-import { repintarConMovimiento } from "./movimiento.js?v=29";
+} from "../core/presentacion.js?v=30";
+import { pieDeFuente } from "./biblioteca.js?v=30";
+import { LEVERS, els, state } from "./estado.js?v=30";
+import { getScopedItems } from "./filtros.js?v=30";
+import { repintarConMovimiento } from "./movimiento.js?v=30";
 
 
 export function buildFilteredEmptyState() {

@@ -13,9 +13,9 @@
  * una funcion de lectura.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=29";
-import { ESTADOS_VALIDOS } from "../core/escenario.js?v=29";
-import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=29";
+import { PALANCAS } from "../core/calculo.js?v=30";
+import { ESTADOS_VALIDOS } from "../core/escenario.js?v=30";
+import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=30";
 
 
 export const DEFAULT_DOMAIN_ID = "fpa";
