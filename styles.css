@@ -5925,6 +5925,10 @@ height: 100% !important;
 .modal-backdrop.modo-taller {
   z-index: 75;
   display: block;
+  /* Sin esto hereda el place-items: center de los modales, y los Chromium
+     recientes ya centran tambien los bloques: con poco texto, el cierre del
+     taller encogia y dejaba franjas a los lados. */
+  place-items: normal;
   padding: 0;
   background: var(--bg);
   backdrop-filter: none;
