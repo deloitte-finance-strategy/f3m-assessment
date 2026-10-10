@@ -6029,12 +6029,31 @@ height: 100% !important;
   align-items: center;
   gap: 1.5em;
   padding: 0.55em 2em;
-  border-bottom: 4px solid var(--green);
   background: var(--cabecera-bg);
   color: var(--cabecera-claro);
   /* Sobre la banda oscura, el anillo de foco es el verde claro, como en la
      cabecera de la herramienta. */
   --focus-ring: var(--green);
+}
+
+/* La raya verde de debajo de la banda era un borde, y ahora dice cuanto se ha
+   recorrido: crece de la apertura al cierre. Tiene el alto que tenia el borde,
+   asi que ninguna pantalla del modo taller pierde sitio. Lo que queda por
+   recorrer va en el mismo verde, apagado sobre el negro de la banda, para que
+   la raya se vea entera en la apertura y igual en los dos temas. */
+.modo-taller-avance {
+  flex: none;
+  height: 4px;
+  background: linear-gradient(rgba(134, 188, 37, 0.3), rgba(134, 188, 37, 0.3)), var(--cabecera-bg);
+}
+
+.modo-taller-avance span {
+  display: block;
+  height: 100%;
+  background: var(--green);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 320ms ease-out;
 }
 
 .modo-taller-barra p {

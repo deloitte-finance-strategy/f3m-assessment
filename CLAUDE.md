@@ -33,7 +33,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.458 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.447 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
 | `sw.js` | **El service worker**: guarda la herramienta en el navegador para abrirla sin red | 172 |
 | `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 2.018 |
@@ -61,7 +61,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe, al resumen, a la preparación y al acta | 922 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.220 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.240 |
 | `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
 | `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 282 |
 | `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 224 |
@@ -72,7 +72,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad, que lleva a su tarjeta | 314 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.410 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.429 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -368,6 +368,9 @@ subcapacidad, «← Apertura» y Re Pág vuelven a ella.
 por capacidad con un punto en las puntuadas, y el cierre. Un clic o Intro lleva a cualquiera. Con el
 índice o «Para el equipo» abiertos, las flechas se mueven por sus opciones y no pasan de
 subcapacidad por detrás, y Escape cierra el menú y no el modo taller (`crearMenuDeLaBarra()`).
+Debajo de la banda, **una raya verde dice cuánto se ha recorrido** (`pintarAvance()`): vacía en la
+apertura y llena en el cierre. Cuenta la posición y no lo puntuado, porque en la sala se pregunta
+cuánto queda de sesión, y ocupa el alto del borde verde que había ahí, así que no quita sitio.
 
 **El dominio se cambia sin salir**, con el desplegable de la banda de arriba, que dice el avance de
 cada uno («Fiscal · 3/16»). Cambia el de toda la herramienta, con `switchDomain()`, igual que el
@@ -959,6 +962,7 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      índice con el foco en la actual: las flechas y Intro llevan a otra, y Escape cierra solo el
      índice. Cambiar de dominio en el desplegable de arriba lleva a la apertura del nuevo sin
      salir, y al salir el Assessment está en ese dominio.
+     La raya verde de debajo de la banda crece con cada «Siguiente» y llega al final en el cierre.
      Puntuar y pulsar enseguida «Siguiente»: el chip de guardado no lo tapa. Tras la última, «Cierre
      del taller»: sin desplazarse en los cuatro modos, sus cifras son las del acta que sale de
      «Para el equipo», en la barra; «Copiar el texto del correo», ahí mismo, deja el correo en el

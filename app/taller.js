@@ -62,6 +62,7 @@ let panel = null;
 let cuerpo = null;
 let donde = null;
 let posicion = null;
+let avance = null;
 let resultado = null;
 let anterior = null;
 let siguiente = null;
@@ -123,6 +124,7 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   cuerpo = document.getElementById("modoTallerCuerpo");
   donde = document.getElementById("modoTallerDonde");
   posicion = document.getElementById("modoTallerPosicionTexto");
+  avance = document.getElementById("modoTallerAvance");
   resultado = document.getElementById("modoTallerResultado");
   anterior = document.getElementById("modoTallerAnterior");
   siguiente = document.getElementById("modoTallerSiguiente");
@@ -439,6 +441,7 @@ function guardarLoQueQueda() {
 
 function pintar({ enfocar = true } = {}) {
   pintarIndiceSiEstaAbierto();
+  pintarAvance();
 
   if (enApertura()) {
     pintarApertura({ enfocar });
@@ -551,6 +554,23 @@ function pintar({ enfocar = true } = {}) {
   if (enfocar) {
     enfocarPalanca(cuerpo.querySelector(".score-segmentos"), { preventScroll: true });
   }
+}
+
+
+/**
+ * La raya de debajo de la banda: vacia en la apertura, llena en el cierre y en
+ * los pasos. Cuenta la posicion y no lo puntuado, porque lo que se pregunta en
+ * la sala es cuanto queda de sesion. Al abrir no se anima desde el valor de la
+ * vez anterior: con el panel oculto no habia nada de lo que partir.
+ */
+function pintarAvance() {
+  if (!avance) {
+    return;
+  }
+
+  const recorridas = Math.min(Math.max(indice + 1, 0), recorrido.length);
+
+  avance.style.transform = `scaleX(${recorrido.length ? recorridas / recorrido.length : 0})`;
 }
 
 
