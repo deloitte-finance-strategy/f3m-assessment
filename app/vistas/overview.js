@@ -6,8 +6,8 @@
  * via getDominiosDelOverview() y no getScopedItems().
  */
 
-import { masUrgentes, rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=32";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=32";
+import { masUrgentes, rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=33";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=33";
 import {
   celdaDeAvance,
   gapClass,
@@ -16,8 +16,8 @@ import {
   priorityBadge,
   renderLeverBars,
   renderPriorityBars,
-} from "../celdas.js?v=32";
-import { repintarConMovimiento } from "../movimiento.js?v=32";
+} from "../celdas.js?v=33";
+import { repintarConMovimiento } from "../movimiento.js?v=33";
 import {
   DOMAINS,
   GRUPOS_DE_DOMINIO,
@@ -25,9 +25,9 @@ import {
   els,
   state,
   syncActiveDomainState,
-} from "../estado.js?v=32";
-import { renderOverviewRadar } from "../graficos.js?v=32";
-import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=32";
+} from "../estado.js?v=33";
+import { renderOverviewRadar } from "../graficos.js?v=33";
+import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=33";
 
 
 /**
