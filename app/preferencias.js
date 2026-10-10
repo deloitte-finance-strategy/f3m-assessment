@@ -100,11 +100,14 @@ export function actualizarBotonDeTema() {
 
   boton.setAttribute("aria-pressed", String(oscuro));
 
-  // El title dice de donde viene el tema, que no es lo mismo que cual es: sin
+  // El boton es un icono, asi que el title dice lo que hace al pulsarlo, y
+  // detras de donde viene el tema, que no es lo mismo que cual es: sin
   // eleccion guardada lo pone el sistema y cambia solo si el sistema cambia.
-  boton.title = leerAlmacenamiento(TEMA_KEY)
-    ? "Tema elegido a mano. Vuelve a pulsarlo para cambiarlo."
-    : "Sigue la preferencia del sistema hasta que lo pulses";
+  boton.title = `${oscuro ? "Pasar al tema claro" : "Pasar al tema oscuro"}. ${
+    leerAlmacenamiento(TEMA_KEY)
+      ? "Tema elegido a mano."
+      : "Ahora sigue la preferencia del sistema."
+  }`;
 }
 
 

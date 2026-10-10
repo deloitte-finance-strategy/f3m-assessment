@@ -438,8 +438,18 @@ export function avanceDeDominio(domainId) {
 }
 
 
+/**
+ * Si cada dominio estaba completo la ultima vez que se conto. El destello es
+ * para el momento en que se puntua la ultima subcapacidad, no para un dominio
+ * que ya lo estaba: sin esto, cada repintado volveria a celebrarlo.
+ */
+const completoAntes = new Map();
+
+
 /** Los contadores «12/40» del conmutador, y lo que leen los lectores de pantalla. */
 export function actualizarAvanceDeDominios() {
+  const recienCompletos = [];
+
   Object.entries(DOMAINS).forEach(([domainId]) => {
     const boton = document.querySelector(`[data-domain-id="${CSS.escape(domainId)}"]`);
     const dominio = state.domains[domainId];
@@ -458,9 +468,17 @@ export function actualizarAvanceDeDominios() {
       boton.appendChild(contador);
     }
 
+    const completo = puntuadas === total && total > 0;
+
+    if (completoAntes.get(domainId) === false && completo) {
+      recienCompletos.push(domainId);
+    }
+
+    completoAntes.set(domainId, completo);
+
     contador.textContent = `${puntuadas}/${total}`;
     contador.classList.toggle("sin-empezar", puntuadas === 0);
-    contador.classList.toggle("completo", puntuadas === total && total > 0);
+    contador.classList.toggle("completo", completo);
 
     const avance =
       puntuadas === 0
@@ -479,6 +497,49 @@ export function actualizarAvanceDeDominios() {
     );
 
     boton.title = puntuadas === 0 ? "Sin empezar" : avance;
+  });
+
+  // Mientras carga, los dominios pasan de vacios a lo guardado, y eso no es
+  // terminar nada. Y varios a la vez son una copia que se abre o se restaura,
+  // no un taller que acaba: solo se celebra uno.
+  const cargando = els.initialLoadingState && !els.initialLoadingState.hidden;
+
+  if (recienCompletos.length === 1 && !cargando) {
+    celebrarDominioCompleto(recienCompletos[0]);
+  }
+}
+
+
+const DURACION_DEL_DESTELLO = 2600;
+const destellosEnCurso = new Map();
+
+
+/**
+ * El dominio recien completado da un pequeño destello y su contador lleva un
+ * check mientras dura. Solo entonces: el check fijo en todos los dominios
+ * completos era ruido en una barra que se ve todo el rato.
+ *
+ * Destellan su boton del conmutador y, si es el abierto, lo que marca
+ * `data-destello-del-dominio` en index.html: el contador de la pestaña
+ * Assessment, que es lo que esta a la vista mientras se puntua, y el
+ * desplegable de dominio del modo taller. Con «reducir movimiento», la regla
+ * general de styles.css apaga el destello y el check sale y se va sin moverse.
+ */
+function celebrarDominioCompleto(domainId) {
+  const marcas = [document.querySelector(`[data-domain-id="${CSS.escape(domainId)}"]`)];
+
+  if (domainId === state.activeDomainId) {
+    marcas.push(...document.querySelectorAll("[data-destello-del-dominio]"));
+  }
+
+  marcas.filter(Boolean).forEach((marca) => {
+    clearTimeout(destellosEnCurso.get(marca));
+    marca.classList.remove("recien-completo");
+    // Leer el ancho obliga a aplicar la retirada antes de volver a poner la
+    // clase: sin esto, un segundo destello seguido no se veria.
+    void marca.offsetWidth;
+    marca.classList.add("recien-completo");
+    destellosEnCurso.set(marca, setTimeout(() => marca.classList.remove("recien-completo"), DURACION_DEL_DESTELLO));
   });
 }
 

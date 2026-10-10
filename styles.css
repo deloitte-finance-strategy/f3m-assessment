@@ -568,6 +568,46 @@ h4 {
   color: var(--sobre-marca);
 }
 
+/* El tema, en la esquina: un circulo con la luna (en claro) o el sol (en
+   oscuro). No se pone en verde al pulsarlo como «Letra grande»: el icono ya
+   dice que tema hay, y un circulo verde fijo en la esquina, en oscuro, era lo
+   mas llamativo de la cabecera. */
+.boton-de-tema {
+  justify-content: center;
+  width: var(--control-h);
+  padding: 0;
+  border-radius: var(--r-pill);
+}
+
+.boton-de-tema svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.boton-de-tema .icono-sol,
+.boton-de-tema[aria-pressed="true"] .icono-luna {
+  display: none;
+}
+
+.boton-de-tema[aria-pressed="true"] .icono-sol {
+  display: block;
+}
+
+.boton-de-tema[aria-pressed="true"] {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: transparent;
+  color: var(--cabecera-fantasma);
+}
+
+.boton-de-tema[aria-pressed="true"]:hover {
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--cabecera-claro);
+}
+
 /* «Presentacion» es un menu, pero lleva dentro la letra grande, que cambia la
    herramienta entera. Con ella puesta, el boton sigue en verde como cuando era
    un conmutador suelto. */
@@ -2893,6 +2933,11 @@ border-radius: var(--r-pill);
   line-height: 1.35;
 }
 
+/* La fila entera despliega con el raton (ver renderHeatmap()). */
+.heatmap-capability-row {
+  cursor: pointer;
+}
+
 
 .heatmap-detail-row {
   transition: background-color 140ms ease;
@@ -2911,52 +2956,60 @@ border-radius: var(--r-pill);
   padding-bottom: 9px;
 }
 
-.heatmap-toggle {
-  min-height: 26px;
-  padding: 0 9px;
-  font-size: var(--fs-2xs);
-}
-
-.heatmap-detail-row td:nth-child(2) {
+/* Las subcapacidades van sangradas bajo su capacidad, a la altura de su
+   nombre: la columna «Subcapacidades», con su boton, se fue con la flecha. */
+.heatmap-detail-row td:first-child {
+  padding-left: 40px;
   color: var(--ink-2);
   font-size: var(--fs-xs);
   font-weight: var(--fw-normal);
   line-height: 1.35;
 }
 
-.heatmap-detail-capability {
+/*
+  El nombre de la capacidad es el boton que la despliega, con una flecha que
+  gira. Antes era un boton aparte, «Ver subcapacidades (4)», en su propia
+  columna: diez botones con caja en una tabla de datos pesaban mas que los
+  datos, y la columna le quitaba sitio a las cifras.
+*/
+.heatmap-toggle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.heatmap-flecha {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--green-dark);
+  border-bottom: 2px solid var(--green-dark);
+  translate: 0 -2px;
+  rotate: -45deg;
+  transition: rotate 200ms ease;
+}
+
+.heatmap-toggle[aria-expanded="true"] .heatmap-flecha {
+  rotate: 45deg;
+}
+
+.heatmap-cuenta {
   color: var(--muted);
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-medium);
-}
-
-
-
-.heatmap-toggle {
-  min-height: 30px;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  background: var(--surface);
-  color: var(--green-dark);
-  font-size: var(--fs-2xs);
   font-weight: var(--fw-bold);
-  white-space: nowrap;
-  transition:
-    background-color 140ms ease,
-    border-color 140ms ease,
-    color 140ms ease;
+  font-variant-numeric: tabular-nums;
 }
 
-.heatmap-toggle:hover {
-  border-color: rgba(134, 188, 37, 0.7);
-  background: var(--surface-realce);
-}
-
-.heatmap-toggle[aria-expanded="true"] {
-  border-color: rgba(134, 188, 37, 0.65);
-  background: rgba(134, 188, 37, 0.12);
+.heatmap-capability-row:hover .heatmap-toggle strong {
   color: var(--green-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 
@@ -3021,11 +3074,16 @@ font-size: var(--fs-sm);
 }
 
 
-.heatmap-toggle:focus-visible,
 .heatmap-expand-toggle:focus-visible {
   border-color: var(--green);
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+.heatmap-toggle:focus-visible {
+  border-radius: var(--r-sm);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
 }
 
 
@@ -6748,6 +6806,109 @@ height: 100% !important;
    Las animaciones de entrada usan `translate` y no `transform`: el aviso ya
    lleva un transform para centrarse, y el chip de guardado otro al pasar el
    raton, y una animacion de transform los pisaria mientras dura. */
+
+/* Las formas grises mientras cargan los datos (pintarEsqueletos() en
+   app/celdas.js). Laten despacio, que es lo que dice «esta llegando»; con
+   «reducir movimiento» se quedan quietas. Van en el gris de las lineas, que
+   ya esta comprobado en los dos temas. */
+@keyframes esqueleto-latido {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+[data-esqueleto] .esqueleto-linea,
+[data-esqueleto] .esqueleto-cifra,
+[data-esqueleto] .bar-track,
+.esqueleto-radar svg {
+  animation: esqueleto-latido 1.6s ease-in-out infinite;
+}
+
+.esqueleto-linea,
+.esqueleto-cifra {
+  display: block;
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--line-tenue);
+}
+
+.esqueleto-kpi {
+  display: grid;
+  gap: 12px;
+  min-height: 112px;
+}
+
+.esqueleto-kpi .esqueleto-cifra {
+  width: 45%;
+  height: 32px;
+  border-radius: var(--r-md);
+}
+
+.esqueleto-urgente {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.esqueleto-radar {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.esqueleto-radar svg {
+  width: auto;
+  height: 82%;
+  max-width: 100%;
+}
+
+.esqueleto-red {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.esqueleto-area {
+  fill: var(--line-tenue);
+}
+
+/* El destello del dominio recien completado (celebrarDominioCompleto() en
+   app/dominios.js): un anillo verde que se abre y se apaga una vez, y un check
+   en su contador mientras dura. Fuera de ese momento no hay check: el
+   contador completo sigue siendo el verde suave de siempre. */
+@keyframes destello-completo {
+  from {
+    box-shadow: 0 0 0 0 rgba(134, 188, 37, 0.75);
+  }
+
+  to {
+    box-shadow: 0 0 0 12px rgba(134, 188, 37, 0);
+  }
+}
+
+.domain-button.recien-completo,
+.tab-badge.recien-completo,
+.modo-taller-dominio.recien-completo select {
+  animation: destello-completo 800ms ease-out;
+}
+
+/* En el dominio abierto, el boton ya es verde y su contador lleva el velo:
+   ahi basta con el anillo y el check. */
+.domain-button.recien-completo:not(.active) .domain-progress,
+.tabs a .tab-badge.recien-completo {
+  border-color: var(--green);
+  background: var(--green);
+  color: var(--sobre-marca);
+}
+
+.domain-button.recien-completo .domain-progress::before,
+.tab-badge.recien-completo::before {
+  content: "✓";
+  margin-right: 3px;
+}
 
 /* Las cifras que cuentan no bailan de ancho a cada paso. */
 .kpi-card strong,

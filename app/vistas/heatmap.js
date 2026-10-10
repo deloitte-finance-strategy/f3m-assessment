@@ -49,7 +49,6 @@ export function renderHeatmap() {
               data-fila="s:${escapeAttr(item.id || item.subcapacidad)}"
               ${item.id ? `data-abrir-subcapacidad="${escapeAttr(item.id)}"` : ""}
             >
-              <td class="heatmap-detail-capability">${escapeHtml(item.capacidad)}</td>
               <td>${item.id
                 ? `<button class="fila-enlace" type="button" title="Abrir su tarjeta en el Assessment">${escapeHtml(item.subcapacidad)}</button>`
                 : escapeHtml(item.subcapacidad)}</td>
@@ -65,16 +64,15 @@ export function renderHeatmap() {
       return `
         <tr class="heatmap-capability-row" data-fila="c:${escapeAttr(entry.capacidad)}">
           <td>
-            <strong>${escapeHtml(entry.capacidad)}</strong>
-          </td>
-          <td>
             <button
               class="heatmap-toggle"
               type="button"
               data-capability-toggle="${escapeAttr(entry.capacidad)}"
               aria-expanded="${String(isExpanded)}"
             >
-              ${isExpanded ? "Ocultar subcapacidades" : `Ver subcapacidades (${entry.items.length})`}
+              <span class="heatmap-flecha" aria-hidden="true"></span>
+              <strong>${escapeHtml(entry.capacidad)}</strong>
+              <span class="heatmap-cuenta">${entry.items.length}<span class="solo-lectores"> subcapacidades</span></span>
             </button>
           </td>
           ${heatScoreCell(entry.procesos)}
@@ -102,7 +100,6 @@ export function renderHeatmap() {
     <thead>
       <tr>
         <th scope="col">Capacidad</th>
-        <th scope="col">Subcapacidades</th>
         <th scope="col" class="number">Procesos</th>
         <th scope="col" class="number">Tecnología</th>
         <th scope="col" class="number">Organización</th>
@@ -114,7 +111,7 @@ export function renderHeatmap() {
     <tbody>
       ${rows || `
         <tr>
-          <td colspan="8" class="table-empty-cell">
+          <td colspan="7" class="table-empty-cell">
             ${buildFilteredEmptyState()}
           </td>
         </tr>
@@ -124,6 +121,19 @@ export function renderHeatmap() {
 
   els.heatmapTable.querySelectorAll(".heatmap-toggle").forEach((button) => {
     button.addEventListener("click", handleHeatmapToggle);
+  });
+
+  // Se despliega pulsando en cualquier parte de la fila, no solo en el nombre:
+  // con el raton la fila entera es el blanco, como en las subcapacidades. El
+  // teclado llega al boton del nombre, que es el que dice si esta desplegada.
+  els.heatmapTable.querySelectorAll(".heatmap-capability-row").forEach((fila) => {
+    fila.addEventListener("click", (event) => {
+      if (event.target.closest(".heatmap-toggle") || String(window.getSelection?.() || "")) {
+        return;
+      }
+
+      fila.querySelector(".heatmap-toggle")?.click();
+    });
   });
 
   updateHeatmapExpandAllButton(capabilityRows); // NUEVO: sincroniza texto Expandir/Colapsar todo
@@ -161,10 +171,9 @@ function handleHeatmapToggle(event) {
     `[data-capability-detail="${CSS.escape(capability)}"]`,
   );
 
+  // La flecha gira sola con aria-expanded (ver styles.css): el boton ya no
+  // cambia de texto, que era lo que hacia saltar el ancho de la columna.
   button.setAttribute("aria-expanded", String(nextExpanded));
-  button.textContent = nextExpanded
-    ? "Ocultar subcapacidades"
-    : `Ver subcapacidades (${detailRows.length})`;
 
   pintadoAnterior.desplegadas = new Set(expandedHeatmapCapabilities);
 

@@ -33,17 +33,17 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.447 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.457 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
 | `sw.js` | **El service worker**: guarda la herramienta en el navegador para abrirla sin red | 172 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 2.018 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.990 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 189 |
 | `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 355 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
-| `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 257 |
+| `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 260 |
 | `app/graficos.js` | Los seis radares de Chart.js, a dónde lleva pulsar sus ejes y el del resumen | 823 |
 | `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 185 |
-| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 494 |
+| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 555 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
 | `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 88 |
 | `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 409 |
@@ -57,7 +57,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/movimiento.js` | **El movimiento**: cifras que cuentan, barras que se deslizan, paneles que se despliegan | 380 |
 | `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 167 |
 | `app/logo.js` | **El logo del cliente**: elegirlo, reducirlo a lo que admiten las reglas y enseñarlo | 176 |
-| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 330 |
+| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 412 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe, al resumen, a la preparación y al acta | 922 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
@@ -69,10 +69,10 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 396 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 228 |
 | `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.302 |
-| `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad, que lleva a su tarjeta | 314 |
+| `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad, que lleva a su tarjeta | 323 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.429 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.590 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -285,6 +285,10 @@ contraste mal puesto no es un problema estético, es un dato que no se lee.
 
 La vista de arranque es **Overview**: `vistaDesdeLaUrl()` cae ahí cuando la URL no trae ancla.
 
+Los encabezados siguen un solo patrón: el nombre de la pestaña encima y lo que enseña debajo, en
+español («Heatmap · Madurez por capacidad», «Assessment · Puntuación por subcapacidad»). Antes
+mezclaban «Workspace», «Vista visual» y «Scoring», y no se sabía qué pestaña era cada página.
+
 Consecuencia práctica: si algo depende de medir un elemento oculto, hay que hacerlo visible primero.
 Es lo que hace `conLasVistasDelInformeVisibles()`, en `app/informe.js`, para capturar los radares
 del PDF — un canvas oculto no tiene tamaño y saldría en blanco.
@@ -326,7 +330,9 @@ más brechas altas y medias (`brechasDeCasos()` y `ordenarPorBrechas()` en `core
 entonces sí se repinta, pero solo cuando cambia el orden o lo que dice alguna ficha. Ese orden lo
 sigue también la diapositiva «Oportunidades de IA» del informe, que lo dice en su entradilla.
 
-En el **Heatmap**, cada subcapacidad desplegada lleva a su tarjeta del Assessment con
+En el **Heatmap**, una capacidad se despliega pulsando su fila o su nombre, que es el botón, con
+una flecha que gira y el número de subcapacidades al lado; no hay columna «Subcapacidades» ni botón
+aparte. Cada subcapacidad desplegada lleva a su tarjeta del Assessment con
 `abrirTarjetaEnSuDominio()`, como «Lo más urgente»: la fila entera con el ratón y el nombre, que es
 un botón, con el teclado.
 
@@ -452,6 +458,12 @@ herramienta» de `styles.css`) y la regla general de `prefers-reduced-motion` lo
 de un valor que solo se sabe al pintar —el ancho de antes de una barra, el alto de un panel, de
 dónde viene la marca del dominio— va en `app/movimiento.js`, que pregunta `sinMovimiento()` antes.
 
+- **Mientras cargan los datos**, el Overview y el Dashboard enseñan formas grises que laten
+  (`pintarEsqueletos()` en `app/celdas.js`): las tarjetas, las barras, la tabla, «Lo más urgente»
+  y la red de los radares. Van dentro de los contenedores que el primer pintado sustituye entero,
+  y `quitarEsqueletos()` se lleva el resto —las de los radares, encima del canvas, y las de la
+  vista que no se ha pintado— al terminar la carga, también si falla. Sin ellas, con la wifi de un
+  cliente, la pantalla se quedaba segundos con tarjetas en blanco que parecían rotas.
 - **Las pestañas** entran con un fundido de opacidad (`fundir()` en `mostrarVista()`), sin
   desplazamiento: un `translate` en la sección soltaba el encabezado pegajoso del Roadmap.
 - **Los radares crecen desde el centro** al entrar en el Overview o el Dashboard, al arrancar y al
@@ -483,6 +495,13 @@ dónde viene la marca del dominio— va en `app/movimiento.js`, que pregunta `si
   nuevo, la prioridad late si cambia y el nivel actual funde su color. Al puntuar la primera
   palanca o quitar la última, el resumen entra en vez de contar desde «Pendiente». Antes nada se
   movía ahí, porque lo que contaba era el Dashboard, y el Dashboard no se ve mientras se puntúa.
+- **Al completar un dominio** —al puntuar su última subcapacidad—, su botón del conmutador da un
+  destello y su contador lleva un check mientras dura; si es el abierto, también el contador de la
+  pestaña Assessment y el desplegable del modo taller, que es lo que está a la vista al puntuar
+  (`celebrarDominioCompleto()` en `app/dominios.js`, y `data-destello-del-dominio` en
+  `index.html`). Solo en ese momento: ni al cargar, ni con un dominio que ya estaba completo, ni
+  cuando se completan varios a la vez, que es abrir o restaurar una copia. El check fijo en todos
+  los completos era ruido.
 - **Al cambiar de dominio** la vista abierta entra con el mismo fundido que al cambiar de pestaña
   y los radares crecen. La marca verde no viaja: se probó una pieza que cruzaba del botón de antes
   al nuevo y tapaba los nombres por el camino; no convenció.
@@ -927,7 +946,7 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 1. `python -m http.server 8000` → `http://localhost:8000/`.
 2. Consola del navegador **en silencio**. Un arranque correcto no imprime nada: lo que aparezca
    ahí es un `warn` o un `error` de verdad, y hay que mirarlo.
-3. **Los dos temas y las dos densidades.** El conmutador «Oscuro» y el de «Presentación → Letra grande» son
+3. **Los dos temas y las dos densidades.** La luna (el sol en oscuro), a la derecha de «Sesión», y «Presentación → Letra grande» son
    independientes y se combinan: probar las cuatro combinaciones al menos en Overview y Heatmap,
    que son las que codifican datos en color y en tamaño. Sin elección guardada, cambiar el tema del
    sistema con la pestaña abierta tiene que arrastrar la herramienta. En Presentación, los campos
@@ -974,8 +993,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      nuevo. Con «reducir movimiento» activado en el sistema, nada de eso se mueve. Probarlo en los
      cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita
      desplazarse.
-   - **Heatmap**: desplegar y plegar capacidades; las subcapacidades entran en cascada y se
-     funden al plegar. Pulsar una abre su tarjeta en el Assessment, resaltada y con el foco en su
+   - **Heatmap**: desplegar y plegar capacidades pulsando en cualquier parte de su fila, y con
+     Intro sobre su nombre; la flecha gira, y las subcapacidades entran en cascada y se funden al
+     plegar. Pulsar una abre su tarjeta en el Assessment, resaltada y con el foco en su
      primer score.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
      Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final.
@@ -1036,7 +1056,10 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 12. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
    uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
    guardado se pone **rojo**.
-13. **El movimiento.** Al arrancar y al entrar en el Overview o el Dashboard, los radares crecen
+13. **El movimiento.** Con la red lenta (Network → Slow 3G), al arrancar se ven formas grises en el
+   Overview y el Dashboard, y desaparecen todas al llegar los datos. Puntuar la última subcapacidad
+   de un dominio hace destellar su botón y el contador de la pestaña, con un check que se va solo;
+   recargar no lo repite. Al arrancar y al entrar en el Overview o el Dashboard, los radares crecen
    desde el centro; puntuar en el Assessment y volver al Dashboard hace contar los KPIs y deslizarse
    las barras, y en la propia tarjeta el número salta y el score medio y el gap cuentan. Cambiar
    de dominio funde la vista. Los menús, el buscador y los modales

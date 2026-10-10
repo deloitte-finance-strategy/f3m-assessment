@@ -235,7 +235,7 @@ import {
 } from "./app/persistencia.js?v=33";
 
 // Los fragmentos de HTML que comparten varias vistas.
-import { buildFilteredEmptyState, priorityBadge } from "./app/celdas.js?v=33";
+import { buildFilteredEmptyState, pintarEsqueletos, priorityBadge, quitarEsqueletos } from "./app/celdas.js?v=33";
 
 // El Heatmap, primera vista que sale de aqui.
 import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=33";
@@ -837,6 +837,12 @@ function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
 
 
 function setInitialLoading(isLoading) {
+  if (isLoading) {
+    pintarEsqueletos();
+  } else {
+    quitarEsqueletos();
+  }
+
   if (!els.initialLoadingState) {
     return;
   }

@@ -323,21 +323,6 @@
           </div>
 
           <!--
-            Tema oscuro. Arranca siguiendo la preferencia del sistema; pulsarlo
-            fija una elección que manda sobre ella, en los dos sentidos.
-            aria-pressed, como «Letra grande»: los dos son conmutadores.
-          -->
-          <button
-            class="header-secondary-action"
-            id="themeButton"
-            type="button"
-            aria-pressed="false"
-            title="Sigue la preferencia del sistema hasta que lo pulses"
-          >
-            Oscuro
-          </button>
-
-          <!--
             «Sesion» y no «Escenario»: aqui esta lo de la sesion con el
             cliente, del nombre del cliente a las copias. El modo taller
             empezo aqui y paso a «Presentacion», con la letra grande.
@@ -431,6 +416,31 @@
             </div>
           </div>
 
+          <!--
+            Tema oscuro, con la luna o el sol, en la esquina. Arranca siguiendo
+            la preferencia del sistema; pulsarlo fija una eleccion que manda
+            sobre ella, en los dos sentidos. Era un boton con texto, «Oscuro»,
+            en una cabecera que en un portatil va justa. Sigue siendo un
+            conmutador con aria-pressed y su nombre, «Tema oscuro», para quien
+            no ve el icono; el icono cambia: luna en claro, sol en oscuro.
+          -->
+          <button
+            class="header-secondary-action boton-de-tema"
+            id="themeButton"
+            type="button"
+            aria-pressed="false"
+            title="Pasar al tema oscuro"
+          >
+            <span class="solo-lectores">Tema oscuro</span>
+            <svg class="icono-luna" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+              <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.8 6.8 0 0 0 10.7 10.7z"/>
+            </svg>
+            <svg class="icono-sol" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="4.2"/>
+              <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>
+            </svg>
+          </button>
+
           <input
             id="scenarioFileInput"
             type="file"
@@ -480,7 +490,7 @@
         <a href="#dashboard">Dashboard</a>
         <a href="#assessment">
           Assessment
-          <span class="tab-badge" id="assessmentTabBadge">0/0</span>
+          <span class="tab-badge" id="assessmentTabBadge" data-destello-del-dominio>0/0</span>
         </a>
         <a href="#heatmap">Heatmap</a>
         <a href="#roadmap">
@@ -536,8 +546,8 @@
       <section id="overview" class="section-block">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Los nueve dominios</p>
-            <h2>Lectura global del modelo F3M</h2>
+            <p class="eyebrow">Overview</p>
+            <h2>Los nueve dominios de un vistazo</h2>
           </div>
           <p class="small-note" id="overviewSourceNote"></p>
         </div>
@@ -635,7 +645,7 @@
       <section id="dashboard" class="section-block">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Resumen ejecutivo</p>
+            <p class="eyebrow">Dashboard</p>
             <h2 id="dashboardDomainTitle">Lectura del dominio FP&A</h2>
           </div>
           <p class="small-note" id="sourceNote"></p>
@@ -731,8 +741,8 @@
 <section id="assessment" class="section-block">
   <div class="section-heading">
     <div>
-      <p class="eyebrow">Workspace</p>
-      <h2>Scoring por subcapacidad</h2>
+      <p class="eyebrow">Assessment</p>
+      <h2>Puntuación por subcapacidad</h2>
     </div>
 
     <div class="assessment-controls">
@@ -781,10 +791,10 @@
 <section id="heatmap" class="section-block">
   <div class="section-heading">
     <div>
-      <p class="eyebrow">Vista visual</p>
-      <h2>Heatmap de madurez</h2>
+      <p class="eyebrow">Heatmap</p>
+      <h2>Madurez por capacidad</h2>
     </div>
-    <p class="small-note">Vista agrupada por capacidad. Usa “Ver subcapacidades” para desplegar el detalle.</p>
+    <p class="small-note">Vista agrupada por capacidad. Pulsa una capacidad para ver sus subcapacidades, y una subcapacidad para abrir su tarjeta.</p>
   </div>
 
   <div class="active-filters active-filters-block" data-active-filters hidden></div>
@@ -841,7 +851,7 @@
       <section id="ia" class="section-block">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Inteligencia artificial</p>
+            <p class="eyebrow">IA</p>
             <h2>Casos de uso y biblioteca de documentos</h2>
           </div>
           <p class="small-note" id="iaSourceNote"></p>
@@ -1298,7 +1308,7 @@
       -->
       <div class="modo-taller-donde">
         <strong>Modo taller</strong>
-        <label class="modo-taller-dominio">
+        <label class="modo-taller-dominio" data-destello-del-dominio>
           <span class="solo-lectores">Dominio</span>
           <select id="modoTallerDominio"></select>
         </label>
