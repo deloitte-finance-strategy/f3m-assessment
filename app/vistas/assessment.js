@@ -17,17 +17,17 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=32";
-import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=32";
-import { createDefaultTargets } from "../../core/objetivos.js?v=32";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=32";
-import { abrirDialogo, showNotice } from "../avisos.js?v=32";
+} from "../../core/calculo.js?v=33";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=33";
+import { createDefaultTargets } from "../../core/objetivos.js?v=33";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=33";
+import { abrirDialogo, showNotice } from "../avisos.js?v=33";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=32";
+} from "../celdas.js?v=33";
 import {
   DOMAINS,
   LEVERS,
@@ -35,28 +35,28 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=32";
+} from "../estado.js?v=33";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "../edicion.js?v=32";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=32";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=32";
+} from "../edicion.js?v=33";
+import { describirObjetivos, getVisibleItems } from "../filtros.js?v=33";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=33";
 import {
   persistItemChange,
   persistTargetsDeDominios,
   persistTargetsDelDominioActivo,
-} from "../persistencia.js?v=32";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=32";
-import { repintarTodo } from "../repintado.js?v=32";
-import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=32";
+} from "../persistencia.js?v=33";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=33";
+import { repintarTodo } from "../repintado.js?v=33";
+import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=33";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=32";
+} from "../subcapacidad.js?v=33";
 
 
 export function renderCapabilityTargets() {

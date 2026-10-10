@@ -15,17 +15,17 @@
  * las pedia prestadas el modal del Roadmap; con la pestana IA ya son tres sitios.
  */
 
-import { average, getMaturityLevelNumber, priorityFromGap } from "../core/calculo.js?v=32";
+import { average, getMaturityLevelNumber, priorityFromGap } from "../core/calculo.js?v=33";
 import {
   escapeAttr,
   escapeHtml,
   formatMedia,
   priorityColor,
-} from "../core/presentacion.js?v=32";
-import { pieDeFuente } from "./biblioteca.js?v=32";
-import { LEVERS, els, state } from "./estado.js?v=32";
-import { getScopedItems } from "./filtros.js?v=32";
-import { repintarConMovimiento } from "./movimiento.js?v=32";
+} from "../core/presentacion.js?v=33";
+import { pieDeFuente } from "./biblioteca.js?v=33";
+import { LEVERS, els, state } from "./estado.js?v=33";
+import { getScopedItems } from "./filtros.js?v=33";
+import { repintarConMovimiento } from "./movimiento.js?v=33";
 
 
 export function buildFilteredEmptyState() {
@@ -327,4 +327,86 @@ export function gapClass(value) {
   if (!Number.isFinite(value)) return "heat-blank";
 
   return CLASE_DE_GAP[priorityFromGap(value)] || "gap-low";
+}
+
+
+// ---------------------------------------------------------------------------
+// Formas grises mientras llegan los datos
+// ---------------------------------------------------------------------------
+
+/**
+ * Mientras cargan los nueve dominios, el Overview y el Dashboard enseñaban las
+ * tarjetas de los radares en blanco y huecos donde iban las cifras. Con la wifi
+ * de un cliente eso dura segundos, y proyectado se lee como «se ha roto». Las
+ * formas grises dicen «esta llegando» con la silueta de lo que va a salir.
+ *
+ * Van dentro de los mismos contenedores que el primer pintado sustituye entero,
+ * asi que no hay que acordarse de quitarlas vista a vista. Lo que queda en una
+ * vista que no se ha pintado —y las de los radares, que van encima del canvas—
+ * lo quita quitarEsqueletos() al terminar la carga, tambien si falla.
+ */
+export function pintarEsqueletos() {
+  const linea = (ancho) => `<i class="esqueleto-linea" style="width:${ancho}%"></i>`;
+  const kpi = `
+    <div class="panel esqueleto-kpi" data-esqueleto aria-hidden="true">
+      ${linea(55)}<i class="esqueleto-cifra"></i>${linea(80)}
+    </div>
+  `;
+  const barras = (cuantas) => Array.from({ length: cuantas }, () => `
+    <div class="bar-row" data-esqueleto aria-hidden="true">
+      ${linea(70)}<span class="bar-track"></span>${linea(100)}
+    </div>
+  `).join("");
+  const filas = Array.from({ length: 4 }, () => `
+    <tr>${[60, 40, 40, 40, 40].map((ancho) => `<td>${linea(ancho)}</td>`).join("")}</tr>
+  `).join("");
+
+  [els.overviewKpiGrid, els.kpiGrid].forEach((rejilla) => {
+    if (rejilla && !rejilla.children.length) rejilla.innerHTML = kpi.repeat(4);
+  });
+  [[els.overviewPriorityBars, 4], [els.priorityBars, 4], [els.overviewLeverBars, 3], [els.leverBars, 3]]
+    .forEach(([destino, cuantas]) => {
+      if (destino && !destino.children.length) destino.innerHTML = barras(cuantas);
+    });
+  [els.overviewSummaryTable, els.summaryTable].forEach((tabla) => {
+    if (tabla && !tabla.children.length) {
+      tabla.innerHTML = `<tbody data-esqueleto aria-hidden="true">${filas}</tbody>`;
+    }
+  });
+  if (els.overviewUrgentes && !els.overviewUrgentes.children.length) {
+    els.overviewUrgentes.innerHTML = `
+      <li class="esqueleto-urgente" data-esqueleto aria-hidden="true">${linea(35)}${linea(80)}${linea(65)}</li>
+    `.repeat(2);
+  }
+
+  // Los radares: la silueta de la red, con un eje por dominio en el Overview
+  // y cinco en el Dashboard, que es lo que tiene la mayoria de los dominios.
+  document.querySelectorAll(".radar-chart-wrap").forEach((marco) => {
+    const ejes = marco.closest(".radar-grid-overview") ? 9 : 5;
+
+    marco.insertAdjacentHTML("beforeend", `
+      <div class="esqueleto-radar" data-esqueleto aria-hidden="true">${redDeRadar(ejes)}</div>
+    `);
+  });
+}
+
+
+export function quitarEsqueletos() {
+  document.querySelectorAll("[data-esqueleto]").forEach((forma) => forma.remove());
+}
+
+
+function redDeRadar(ejes) {
+  const punto = (radio, eje) => {
+    const angulo = -Math.PI / 2 + (eje * 2 * Math.PI) / ejes;
+    return `${(100 + radio * Math.cos(angulo)).toFixed(1)},${(100 + radio * Math.sin(angulo)).toFixed(1)}`;
+  };
+  const poligono = (radio) => Array.from({ length: ejes }, (_, eje) => punto(radio, eje)).join(" ");
+
+  return `
+    <svg viewBox="0 0 200 200">
+      ${[78, 52, 26].map((radio) => `<polygon class="esqueleto-red" points="${poligono(radio)}"/>`).join("")}
+      <polygon class="esqueleto-area" points="${poligono(46)}"/>
+    </svg>
+  `;
 }

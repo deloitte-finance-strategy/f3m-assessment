@@ -21,9 +21,9 @@ import {
   DEFAULT_TARGET_MATURITY,
   normalizeTargetValue,
   toScore,
-} from "./calculo.js?v=32";
+} from "./calculo.js?v=33";
 
-import { serializeTargetsForFirebase } from "./objetivos.js?v=32";
+import { serializeTargetsForFirebase } from "./objetivos.js?v=33";
 
 
 

@@ -13,14 +13,14 @@ import {
   resumenGlobal,
   toScore,
   unique,
-} from "./core/calculo.js?v=32";
+} from "./core/calculo.js?v=33";
 
 // Objetivos de madurez por capacidad y palanca: la mitad de todo gap.
 import {
   createDefaultTargets,
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "./core/objetivos.js?v=32";
+} from "./core/objetivos.js?v=33";
 
 // Reconocer el trabajo guardado. Si esto falla, una puntuacion no aparece y no
 // se rompe nada visiblemente, que es la peor forma de fallar.
@@ -29,14 +29,14 @@ import {
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
-} from "./core/coincidencias.js?v=32";
+} from "./core/coincidencias.js?v=33";
 
 // El CSV que se abre en Excel y se le envia al cliente.
 import {
   filasDeResumen,
   filasDeRoadmap,
   toCsv,
-} from "./core/exportacion.js?v=32";
+} from "./core/exportacion.js?v=33";
 
 // El contrato de un escenario: que campos admite Firebase y con que limites.
 // Espejo de database.rules.json, para no enviar nunca algo que sera rechazado.
@@ -51,7 +51,7 @@ import {
   normalizarItemCargado,
   recortarAlLimite,
   revisarEscenario,
-} from "./core/escenario.js?v=32";
+} from "./core/escenario.js?v=33";
 
 // Escapado, formato y colores de marca. Los comparten la aplicacion y el
 // informe PDF, que desde que vive aparte ya no puede leerlos de aqui.
@@ -62,14 +62,14 @@ import {
   fechaParaArchivo,
   formatNumber,
   priorityColor,
-} from "./core/presentacion.js?v=32";
+} from "./core/presentacion.js?v=33";
 
 // El informe PDF: entra el objeto de datos, sale el documento imprimible.
-import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=32";
+import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=33";
 
 // La red que impide que una diapositiva recorte contenido en silencio. Se
 // dispara con ?comprobar=desbordes; ver informe/desbordes.js.
-import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=32";
+import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=33";
 
 // El estado compartido y las constantes que lo describen.
 import {
@@ -91,7 +91,7 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "./app/estado.js?v=32";
+} from "./app/estado.js?v=33";
 
 // El banner de avisos y el dialogo de confirmacion.
 import {
@@ -100,14 +100,14 @@ import {
   ocultarAviso,
   showNotice,
   updateModalOpenState,
-} from "./app/avisos.js?v=32";
+} from "./app/avisos.js?v=33";
 
 // El almacenamiento del navegador, que puede fallar y no es motivo para caerse.
 import {
   borrarDeAlmacenamiento,
   escribirAlmacenamiento,
   leerAlmacenamiento,
-} from "./app/almacenamiento.js?v=32";
+} from "./app/almacenamiento.js?v=33";
 
 // Las dos preferencias de vista: el tema y la densidad.
 import {
@@ -121,7 +121,7 @@ import {
   seguirAlSistemaSiNoHayEleccion,
   tamanoDeLetraDeGrafico,
   temaActual,
-} from "./app/preferencias.js?v=32";
+} from "./app/preferencias.js?v=33";
 
 // Los seis radares de Chart.js: tres por capacidad y tres por dominio.
 import {
@@ -133,7 +133,7 @@ import {
   redimensionarRadares,
   renderCapabilityRadar,
   renderOverviewRadar,
-} from "./app/graficos.js?v=32";
+} from "./app/graficos.js?v=33";
 
 // El motor atado al estado: objetivos por dominio y metricas con cache.
 import {
@@ -141,11 +141,11 @@ import {
   agregarPorDominio,
   calculate,
   getCapabilityTargets,
-} from "./app/metricas.js?v=32";
+} from "./app/metricas.js?v=33";
 
 // El cortacircuitos: quien necesite repintar lo pide por aqui, no al
 // orquestador de vistas, para no cerrar un ciclo con el.
-import { configurarRepintado } from "./app/repintado.js?v=32";
+import { configurarRepintado } from "./app/repintado.js?v=33";
 
 // La conexion con Firebase.
 import {
@@ -155,7 +155,7 @@ import {
   enEscenarioCompartido,
   getScenarioShareUrl,
   getScenarioShortLabel,
-} from "./app/firebase.js?v=32";
+} from "./app/firebase.js?v=33";
 
 // El chip de guardado, que es la unica senal permanente de si el trabajo esta
 // a salvo. Va aparte de la persistencia para que la identidad pueda marcarlo
@@ -166,7 +166,7 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./app/indicador.js?v=32";
+} from "./app/indicador.js?v=33";
 
 // Quien edita: la sesion anonima y el nombre que se elige.
 import {
@@ -176,7 +176,7 @@ import {
   inicializarIdentidad,
   marcaDeAutoria,
   pedirNombreEditor,
-} from "./app/identidad.js?v=32";
+} from "./app/identidad.js?v=33";
 
 // Un escenario como dato: leerlo, volcarlo y volver a armarlo.
 import {
@@ -185,7 +185,7 @@ import {
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./app/escenario.js?v=32";
+} from "./app/escenario.js?v=33";
 
 // Los nueve dominios: catalogo, carga y conmutador.
 import {
@@ -198,7 +198,7 @@ import {
   renderDomainSwitcher,
   setActiveDomain,
   switchDomain,
-} from "./app/dominios.js?v=32";
+} from "./app/dominios.js?v=33";
 
 // Los tres filtros y el ambito de datos que sale de ellos.
 import {
@@ -212,7 +212,7 @@ import {
   populateCapacityFilter,
   removeActiveFilter,
   updateActiveFiltersUi,
-} from "./app/filtros.js?v=32";
+} from "./app/filtros.js?v=33";
 
 // Leer los campos de una subcapacidad, que llegan del Excel en dos formas.
 import {
@@ -221,7 +221,7 @@ import {
   getItemObjective,
   getItemQuestions,
   toList,
-} from "./app/subcapacidad.js?v=32";
+} from "./app/subcapacidad.js?v=33";
 
 // Guardar y recibir: el escenario compartido, las escrituras granulares por
 // ruta y la suscripcion remota.
@@ -232,19 +232,19 @@ import {
   persistItemChange,
   persistScenario,
   persistTargetsDelDominioActivo,
-} from "./app/persistencia.js?v=32";
+} from "./app/persistencia.js?v=33";
 
 // Los fragmentos de HTML que comparten varias vistas.
-import { buildFilteredEmptyState, priorityBadge } from "./app/celdas.js?v=32";
+import { buildFilteredEmptyState, pintarEsqueletos, priorityBadge, quitarEsqueletos } from "./app/celdas.js?v=33";
 
 // El Heatmap, primera vista que sale de aqui.
-import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=32";
+import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=33";
 
 // El Overview: los nueve dominios a la vez, sin aplicar los filtros.
-import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=32";
+import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=33";
 
 // El Dashboard: el dominio abierto, con sus KPIs y su tabla resumen.
-import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=32";
+import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=33";
 
 // El Assessment: puntuar cada subcapacidad en las tres palancas.
 import {
@@ -254,20 +254,20 @@ import {
   renderAssessments,
   renderCapabilityTargets,
   setupSiguientePendiente,
-} from "./app/vistas/assessment.js?v=32";
+} from "./app/vistas/assessment.js?v=33";
 
 // El Roadmap: las iniciativas priorizadas y sus campos editables.
-import { hayGuardadosPendientes } from "./app/edicion.js?v=32";
-import { renderRoadmap, setupCajaDelRoadmap } from "./app/vistas/roadmap.js?v=32";
+import { hayGuardadosPendientes } from "./app/edicion.js?v=33";
+import { renderRoadmap, setupCajaDelRoadmap } from "./app/vistas/roadmap.js?v=33";
 
 // Los dos modales: criterios de puntuacion y ficha de caso de IA.
-import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=32";
+import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=33";
 
 // La pestana IA: el catalogo de casos y la biblioteca de documentos.
-import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=32";
+import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=33";
 
 // La biblioteca de IA y el visor que abre «Más información».
-import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=32";
+import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=33";
 
 // Lo que la aplicacion le pasa al informe: datos, radares y tema claro.
 import {
@@ -277,7 +277,7 @@ import {
   exportarActa,
   exportarPreparacion,
   exportarResumen,
-} from "./app/informe.js?v=32";
+} from "./app/informe.js?v=33";
 
 // Si el trabajo en modo local tiene una copia fuera del navegador.
 import {
@@ -285,20 +285,20 @@ import {
   iniciarAvisoDeCopia,
   olvidarCambiosSinCopia,
   pintarAvisoDeCopia,
-} from "./app/copias.js?v=32";
+} from "./app/copias.js?v=33";
 
 // Ctrl+K: ir a cualquier subcapacidad de los nueve dominios.
-import { setupBuscador } from "./app/buscador.js?v=32";
+import { setupBuscador } from "./app/buscador.js?v=33";
 
 // Una subcapacidad a pantalla completa, para proyectarla en el taller.
-import { refrescarModoTaller, setupModoTaller } from "./app/taller.js?v=32";
-import { pintarLogoEnElMenu, setupLogoDelCliente } from "./app/logo.js?v=32";
+import { refrescarModoTaller, setupModoTaller } from "./app/taller.js?v=33";
+import { pintarLogoEnElMenu, setupLogoDelCliente } from "./app/logo.js?v=33";
 
 // Que se abra sin red: el service worker y el aviso de que se ha ido.
-import { setupSinConexion } from "./app/sin-conexion.js?v=32";
+import { setupSinConexion } from "./app/sin-conexion.js?v=33";
 
 // Fundidos, cifras que cuentan y paneles que se despliegan.
-import { activarDesplieguesSuaves, fundir } from "./app/movimiento.js?v=32";
+import { activarDesplieguesSuaves, fundir } from "./app/movimiento.js?v=33";
 
 
 document.addEventListener("DOMContentLoaded", init);
@@ -837,6 +837,12 @@ function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
 
 
 function setInitialLoading(isLoading) {
+  if (isLoading) {
+    pintarEsqueletos();
+  } else {
+    quitarEsqueletos();
+  }
+
   if (!els.initialLoadingState) {
     return;
   }
