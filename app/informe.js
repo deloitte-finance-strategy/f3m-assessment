@@ -15,37 +15,41 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=33";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=33";
-import { filasDeResumen } from "../core/exportacion.js?v=33";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=33";
-import { diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=33";
-import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=33";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=33";
-import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=33";
-import { documentoDePreparacion } from "../informe/preparacion.js?v=33";
-import { showNotice } from "./avisos.js?v=33";
-import { getActiveDomainConfig } from "./dominios.js?v=33";
-import { DOMAINS, els, state } from "./estado.js?v=33";
-import { getVisibleItems } from "./filtros.js?v=33";
-import { getScenarioShortLabel } from "./firebase.js?v=33";
+} from "../core/calculo.js?v=34";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=34";
+import { filasDeResumen } from "../core/exportacion.js?v=34";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=34";
+import { diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=34";
+import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=34";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=34";
+import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=34";
+import { documentoDePreparacion } from "../informe/preparacion.js?v=34";
+import { showNotice } from "./avisos.js?v=34";
+import { getActiveDomainConfig } from "./dominios.js?v=34";
+import { DOMAINS, els, state } from "./estado.js?v=34";
+import { getVisibleItems } from "./filtros.js?v=34";
 import {
   capturarRadarDelResumen,
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
   renderCapabilityRadar,
-} from "./graficos.js?v=33";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=33";
+} from "./graficos.js?v=34";
+import {
+  agregarPorCapacidad,
+  agregarPorDominio,
+  calculate,
+  objetivosDistintos,
+} from "./metricas.js?v=34";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "./subcapacidad.js?v=33";
-import { renderDashboard } from "./vistas/dashboard.js?v=33";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=33";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=33";
+} from "./subcapacidad.js?v=34";
+import { renderDashboard } from "./vistas/dashboard.js?v=34";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=34";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=34";
 
 
 /**
@@ -580,8 +584,6 @@ function datosComunes() {
     logo: state.logo,
     generatedAt: fechaLegible(ahora),
     fechaDeArchivo: fechaParaArchivo(ahora),
-    // Nunca el identificador completo: este informe se envía al cliente.
-    scenarioLabel: getScenarioShortLabel(),
     global: construirBloqueGlobalParaInforme(),
   };
 }
@@ -597,7 +599,6 @@ function datosComunes() {
  */
 function datosDeDominio(domainId, items, radarImages) {
   const config = DOMAINS[domainId] || getActiveDomainConfig();
-  const meta = (domainId === state.activeDomainId ? state.meta : state.domains[domainId]?.meta) || {};
   const total = state.domains[domainId]?.items?.length ?? items.length;
 
   const metrics = items.map((item) => ({ item, metrics: calculate(item, domainId) }));
@@ -613,8 +614,7 @@ function datosDeDominio(domainId, items, radarImages) {
     domainId,
     domainLabel: config.label,
     domainTitle: config.title,
-    sourceFile: meta.sourceFile || "-",
-    targetMaturity: meta.targetMaturity || "-",
+    objetivo: objetivosDistintos(items, domainId),
     visibleItems: items,
     metrics,
     scored,

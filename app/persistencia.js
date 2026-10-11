@@ -14,22 +14,22 @@
  * rama intacta en vez de desaparecer para todo el equipo.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=33";
-import { serializeTargetsForFirebase } from "../core/objetivos.js?v=33";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=34";
+import { serializeTargetsForFirebase } from "../core/objetivos.js?v=34";
 
-import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=33";
-import { escribirAlmacenamiento } from "./almacenamiento.js?v=33";
-import { ocultarAviso, showNotice } from "./avisos.js?v=33";
+import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=34";
+import { escribirAlmacenamiento } from "./almacenamiento.js?v=34";
+import { ocultarAviso, showNotice } from "./avisos.js?v=34";
 import {
   conLimiteDeEspera,
   conectarFirebase,
   enEscenarioCompartido,
   getConexion,
-} from "./firebase.js?v=33";
-import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=33";
-import { repintarTodo } from "./repintado.js?v=33";
-import { populateCapacityFilter } from "./filtros.js?v=33";
-import { anotarCambioLocal } from "./copias.js?v=33";
+} from "./firebase.js?v=34";
+import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=34";
+import { repintarTodo } from "./repintado.js?v=34";
+import { populateCapacityFilter } from "./filtros.js?v=34";
+import { anotarCambioLocal } from "./copias.js?v=34";
 
 import {
   hayCanalDeVuelta,
@@ -37,14 +37,14 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./indicador.js?v=33";
+} from "./indicador.js?v=34";
 
 import {
   applyScenarioPayload,
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./escenario.js?v=33";
+} from "./escenario.js?v=34";
 
 
 
@@ -509,6 +509,75 @@ function aplicarEscenarioRemoto(remoteScenario) {
   } finally {
     isApplyingRemoteScenario = false;
   }
+}
+
+
+/**
+ * En modo local, dos pestanas con la herramienta abierta se ponen al dia la
+ * una con la otra.
+ *
+ * Cada guardado escribe la copia local entera, asi que con dos pestanas lo que
+ * guardaba una borraba en silencio lo de la otra: una puntuacion hecha en A
+ * desaparecia en cuanto se puntuaba algo en B. Pasa al abrir el enlace dos
+ * veces, o con una pestana para proyectar y otra para mirar algo. El evento
+ * `storage` solo llega a las OTRAS pestanas, asi que aqui no hay eco que
+ * frenar, y aplicar el escenario no escribe nada.
+ *
+ * En un escenario compartido no hace falta: las dos reciben de Firebase.
+ */
+let yaSeDijoLoDeLasPestanas = false;
+
+
+
+
+export function escucharOtrasPestanas() {
+  if (enEscenarioCompartido) {
+    return;
+  }
+
+  window.addEventListener("storage", (event) => {
+    if (event.key !== STORAGE_KEY) {
+      return;
+    }
+
+    // «Borrar la evaluación» en la otra pestana. Aqui sigue todo en memoria,
+    // y el siguiente cambio lo volveria a guardar entero.
+    if (event.newValue === null) {
+      showNotice(
+        "Se ha borrado la evaluación en otra pestaña. Recarga esta para empezar de cero: si cambias algo aquí, "
+          + "se volverá a guardar lo que tienes en pantalla.",
+        "aviso",
+        true,
+        { texto: "Recargar", alHacerClic: () => window.location.reload() },
+      );
+      return;
+    }
+
+    try {
+      applyScenarioPayload(JSON.parse(event.newValue));
+
+      populateCapacityFilter();
+      repintarTodo();
+    } catch (error) {
+      console.error("No se pudo aplicar lo guardado en otra pestaña.", error);
+
+      showNotice(
+        "Esta herramienta está abierta en otra pestaña y no se ha podido poner al día con ella. Recarga esta "
+          + "antes de seguir, o lo que guardes aquí borrará lo de la otra.",
+        "error",
+      );
+      return;
+    }
+
+    if (!yaSeDijoLoDeLasPestanas) {
+      yaSeDijoLoDeLasPestanas = true;
+
+      showNotice(
+        "La herramienta está abierta también en otra pestaña. Lo que cambies en una se ve en la otra.",
+        "info",
+      );
+    }
+  });
 }
 
 

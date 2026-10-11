@@ -18,9 +18,10 @@ import {
   agregarPorDominio as agregarPorDominioCore,
   calcularMetricas,
   normalizeTargetValue,
-} from "../core/calculo.js?v=33";
+  unique,
+} from "../core/calculo.js?v=34";
 
-import { DOMAINS, state } from "./estado.js?v=33";
+import { DOMAINS, LEVERS, state } from "./estado.js?v=34";
 
 
 /**
@@ -149,6 +150,22 @@ export function calculate(item, domainId = state.activeDomainId) {
   });
 
   return metricas;
+}
+
+
+/**
+ * Los objetivos que se usan para unas subcapacidades, de menor a mayor y sin
+ * repetir. Para decirlos en una frase («4», «entre 4 y 5») sin prometer un
+ * solo numero cuando se han configurado varios.
+ */
+export function objetivosDistintos(items, domainId = state.activeDomainId) {
+  return unique(
+    items.flatMap((item) => {
+      const objetivos = getCapabilityTargets(item.capacidad, domainId);
+
+      return LEVERS.map((lever) => objetivos[lever.key]);
+    }),
+  ).sort((a, b) => a - b);
 }
 
 

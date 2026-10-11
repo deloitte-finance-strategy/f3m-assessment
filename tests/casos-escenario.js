@@ -26,7 +26,7 @@ import {
   normalizarProximosPasos,
   recortarAlLimite,
   revisarEscenario,
-} from "../core/escenario.js?v=33";
+} from "../core/escenario.js?v=34";
 
 
 /** Serializador de objetivos de mentira: aqui solo importa que se le llame. */
@@ -154,7 +154,7 @@ export const casos = [
 
       t.igual(revision.problemas.length, 1, "un problema");
       t.igual(
-        revision.problemas[0].includes("puntuacion"),
+        revision.problemas[0].includes("puntuación"),
         true,
         "y dice que va de una puntuacion",
       );

@@ -17,17 +17,17 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=33";
-import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=33";
-import { createDefaultTargets } from "../../core/objetivos.js?v=33";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=33";
-import { abrirDialogo, showNotice } from "../avisos.js?v=33";
+} from "../../core/calculo.js?v=34";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=34";
+import { createDefaultTargets } from "../../core/objetivos.js?v=34";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=34";
+import { abrirDialogo, showNotice } from "../avisos.js?v=34";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=33";
+} from "../celdas.js?v=34";
 import {
   DOMAINS,
   LEVERS,
@@ -35,28 +35,33 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=33";
+} from "../estado.js?v=34";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "../edicion.js?v=33";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=33";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=33";
+} from "../edicion.js?v=34";
+import {
+  describirObjetivos,
+  getVisibleItems,
+  prioridadQueYaNoCumple,
+  retenerMientrasDureElFiltro,
+} from "../filtros.js?v=34";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=34";
 import {
   persistItemChange,
   persistTargetsDeDominios,
   persistTargetsDelDominioActivo,
-} from "../persistencia.js?v=33";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=33";
-import { repintarTodo } from "../repintado.js?v=33";
-import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=33";
+} from "../persistencia.js?v=34";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=34";
+import { repintarTodo } from "../repintado.js?v=34";
+import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=34";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=33";
+} from "../subcapacidad.js?v=34";
 
 
 export function renderCapabilityTargets() {
@@ -654,6 +659,7 @@ export function renderAssessments() {
     ).join("");
 
     fragment.querySelector(".score-result").innerHTML = scoreResult(metrics);
+    pintarAvisoDeFiltro(card, item);
 
 
     const currentMaturityLevel = getMaturityLevelNumber(metrics.scoreMedio);
@@ -1187,8 +1193,11 @@ function aplicarScore(itemId, leverKey, score) {
     return;
   }
 
-  // Con un filtro de prioridad puesto, puntuar puede sacar la subcapacidad de
-  // la lista. Solo en ese caso hay que reconstruirla.
+  // Con un filtro de prioridad puesto, la que se puntua se queda en la lista
+  // aunque deje de cumplirlo. Lo que si puede cambiarla es un cambio que llegue
+  // a la vez del escenario compartido, y solo entonces hay que reconstruirla.
+  retenerMientrasDureElFiltro(item);
+
   const visiblesAntes = getVisibleItems().map((entry) => entry.id).join("|");
 
   item.scores[leverKey] = score;
@@ -1256,6 +1265,34 @@ function moverElResultado(card, resultado, metrics, palanca) {
 
 
 /**
+ * Una tarjeta que ya no cumple el filtro de prioridad y sigue en la lista por
+ * haberla puntuado lo dice. Sin el aviso, una «Media» con el filtro «Alta»
+ * puesto parecia un fallo del filtro.
+ */
+function pintarAvisoDeFiltro(card, item) {
+  const prioridad = prioridadQueYaNoCumple(item);
+  let aviso = card.querySelector(".aviso-de-filtro");
+
+  if (!prioridad) {
+    aviso?.remove();
+    return;
+  }
+
+  if (!aviso) {
+    aviso = document.createElement("p");
+    aviso.className = "aviso-de-filtro";
+    card.querySelector(".card-title-block")?.appendChild(aviso);
+  }
+
+  const yaNo = prioridad === "Pendiente"
+    ? "Ya no está pendiente."
+    : `Ya no es de prioridad ${prioridad.toLowerCase()}.`;
+
+  aviso.textContent = `${yaNo} Se queda aquí hasta que cambies el filtro.`;
+}
+
+
+/**
  * Refresca una sola tarjeta en su sitio.
  *
  * Reconstruir la lista entera cerraba todos los detalles abiertos y mandaba el
@@ -1279,6 +1316,8 @@ function actualizarTarjetaDeAssessment(item, { animar = false, palanca = null } 
   } else {
     moverElResultado(card, resultado, metrics, palanca);
   }
+
+  pintarAvisoDeFiltro(card, item);
 
   // El nivel de madurez resaltado cambia con el score medio.
   const nivelActual = getMaturityLevelNumber(metrics.scoreMedio);

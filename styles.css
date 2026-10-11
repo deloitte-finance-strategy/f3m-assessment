@@ -1865,9 +1865,18 @@ display: none;
 }
 
 
+/*
+  El aviso de filtros va debajo de los desplegables, alineado con ellos. Iba en
+  absoluto a su izquierda y se montaba encima del titulo de la seccion en todos
+  los anchos. Va antes en el HTML por el orden de lectura y de tabulacion: lo
+  que se esta filtrando se dice antes de los controles.
+*/
 .assessment-controls {
-  position: relative;
+  display: flex;
   flex: 0 0 auto;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -1882,9 +1891,6 @@ display: none;
 }
 
 .active-filters {
-  position: absolute;
-  right: calc(100% + 10px);
-  bottom: 0;
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
@@ -1901,7 +1907,6 @@ display: none;
 
 /* En Heatmap y Roadmap no hay barra de filtros al lado: el bloque va en linea. */
 .active-filters-block {
-  position: static;
   width: 100%;
   margin-bottom: 12px;
   padding: 8px 10px;
@@ -2067,6 +2072,20 @@ display: none;
   margin: 0;
   color: var(--muted);
   font-size: var(--fs-xs);
+}
+
+/*
+  La tarjeta puntuada que ya no cumple el filtro de prioridad y se queda en la
+  lista hasta que se cambie. Comparte la pareja de color de los demas avisos.
+*/
+.card-title-block .aviso-de-filtro {
+  width: fit-content;
+  margin: 8px 0 0;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--aviso-panel);
+  color: var(--aviso-fg);
+  font-weight: 600;
 }
 
 .capability-chip,
@@ -3624,20 +3643,6 @@ border-color: var(--line-tenue);
   line-height: 1.58;
 }
 
-/* Fuente del contenido */
-.ai-modal-source {
-  padding: 10px 14px;
-  border-style: dashed;
-  background: var(--surface-hundida);
-}
-
-.ai-modal-source .small-note {
-  display: block;
-  color: var(--graphite);
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-normal);
-  line-height: 1.5;
-}
 
 
 /* ==================================================
@@ -5597,12 +5602,7 @@ height: 100% !important;
 
   .assessment-controls {
     width: 100%;
-  }
-
-  .active-filters {
-    position: static;
-    width: fit-content;
-    margin-bottom: 10px;
+    align-items: flex-start;
   }
 
   .filters {

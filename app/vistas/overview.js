@@ -6,8 +6,8 @@
  * via getDominiosDelOverview() y no getScopedItems().
  */
 
-import { masUrgentes, rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=33";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=33";
+import { masUrgentes, rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=34";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=34";
 import {
   celdaDeAvance,
   gapClass,
@@ -16,8 +16,8 @@ import {
   priorityBadge,
   renderLeverBars,
   renderPriorityBars,
-} from "../celdas.js?v=33";
-import { repintarConMovimiento } from "../movimiento.js?v=33";
+} from "../celdas.js?v=34";
+import { repintarConMovimiento } from "../movimiento.js?v=34";
 import {
   DOMAINS,
   GRUPOS_DE_DOMINIO,
@@ -25,9 +25,9 @@ import {
   els,
   state,
   syncActiveDomainState,
-} from "../estado.js?v=33";
-import { renderOverviewRadar } from "../graficos.js?v=33";
-import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=33";
+} from "../estado.js?v=34";
+import { renderOverviewRadar } from "../graficos.js?v=34";
+import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=34";
 
 
 /**
@@ -313,9 +313,14 @@ function renderOverviewHeadline(filas, entradas) {
     (fila) => fila.evaluadas < fila.total,
   ).length;
 
+  // Este titular se proyecta: «Quedan 1 subcapacidades en 1 dominios» se leia
+  // en la sala justo al final, cuando falta una.
+  const cuantas = pendientes === 1 ? "Queda 1 subcapacidad" : `Quedan ${pendientes} subcapacidades`;
+  const enCuantos = aMedias === 1 ? "en un dominio" : `en ${aMedias} dominios`;
+
   titulares.push(
     pendientes
-      ? `Quedan ${pendientes} subcapacidades por evaluar en ${aMedias} dominios`
+      ? `${cuantas} por evaluar ${enCuantos}`
       : "Todos los dominios están evaluados por completo",
   );
 

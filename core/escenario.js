@@ -21,9 +21,9 @@ import {
   DEFAULT_TARGET_MATURITY,
   normalizeTargetValue,
   toScore,
-} from "./calculo.js?v=33";
+} from "./calculo.js?v=34";
 
-import { serializeTargetsForFirebase } from "./objetivos.js?v=33";
+import { serializeTargetsForFirebase } from "./objetivos.js?v=34";
 
 
 
@@ -298,7 +298,7 @@ export function revisarEscenario(payload) {
   if (payload === null || payload === undefined) {
     return {
       valido: false,
-      motivo: "El archivo esta vacio.",
+      motivo: "El archivo está vacío.",
       problemas: [],
       subcapacidades: 0,
     };
@@ -308,8 +308,8 @@ export function revisarEscenario(payload) {
     return {
       valido: false,
       motivo:
-        "El archivo contiene un valor suelto, no un escenario. Tiene que ser un " +
-        "JSON exportado con Guardar copia desde esta misma herramienta.",
+        "El archivo contiene un valor suelto, no un escenario. Tiene que ser una " +
+        "copia guardada con «Sesión → Guardar una copia» en esta misma herramienta.",
       problemas: [],
       subcapacidades: 0,
     };
@@ -351,8 +351,8 @@ export function revisarEscenario(payload) {
     return {
       valido: false,
       motivo:
-        "El archivo no contiene ninguna subcapacidad. Tiene que ser un JSON " +
-        "exportado con Guardar copia desde esta misma herramienta.",
+        "El archivo no contiene ninguna subcapacidad. Tiene que ser una copia " +
+        "guardada con «Sesión → Guardar una copia» en esta misma herramienta.",
       problemas: [],
       subcapacidades: 0,
     };
@@ -367,7 +367,7 @@ export function revisarEscenario(payload) {
 
   if (!Array.isArray(payload) && payload.version !== undefined
       && !Number.isFinite(Number(payload.version))) {
-    contar("la version del archivo no es un numero y se ignora");
+    contar("la versión del archivo no es un número y se ignora");
   }
 
   Object.keys(esObjeto(payload) && !Array.isArray(payload) ? payload : {})
@@ -380,7 +380,7 @@ export function revisarEscenario(payload) {
 
   bloques.forEach((bloque) => {
     if (bloque.extras.length) {
-      contar("algun dominio trae campos que esta herramienta no usa y se descartan");
+      contar("algún dominio trae campos que esta herramienta no usa y se descartan");
     }
 
     bloque.items.forEach((item) => {
@@ -400,33 +400,33 @@ export function revisarEscenario(payload) {
           bruto !== "" &&
           toScore(bruto) === null
         ) {
-          contar("alguna puntuacion no es un entero del 1 al 5 y queda sin puntuar");
+          contar("alguna puntuación no es un entero del 1 al 5 y queda sin puntuar");
         }
       });
 
       if (item.status !== undefined && item.status !== null && item.status !== "") {
         if (normalizarEstado(item.status, null) === null) {
-          contar("algun estado no es uno de los cuatro de la herramienta y se pone en No iniciado");
+          contar("algún estado no es uno de los cuatro de la herramienta y se pone en «No iniciado»");
         }
       }
 
       if (String(item.owner ?? "").length > LIMITES_DE_TEXTO.owner) {
-        contar(`algun responsable pasa de ${LIMITES_DE_TEXTO.owner} caracteres y se recorta`);
+        contar(`algún responsable pasa de ${LIMITES_DE_TEXTO.owner} caracteres y se recorta`);
       }
 
       if (String(item.comentario ?? "").length > LIMITES_DE_TEXTO.comentario) {
-        contar(`algun comentario pasa de ${LIMITES_DE_TEXTO.comentario} caracteres y se recorta`);
+        contar(`algún comentario pasa de ${LIMITES_DE_TEXTO.comentario} caracteres y se recorta`);
       }
 
       if (item.lastEditedBy !== undefined && normalizarAutoria(item.lastEditedBy) === null) {
-        contar("alguna marca de autoria no se entiende y se descarta");
+        contar("alguna marca de autoría no se entiende y se descarta");
       } else if (esObjeto(item.lastEditedBy)) {
         const sobran = Object.keys(item.lastEditedBy).filter(
           (campo) => !(campo in CAMPOS_DE_AUTORIA),
         );
 
         if (sobran.length) {
-          contar("alguna marca de autoria trae campos de mas y se limpian");
+          contar("alguna marca de autoría trae campos de más y se limpian");
         }
       }
 

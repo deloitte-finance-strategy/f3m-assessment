@@ -14,16 +14,16 @@
  * estos filtros son del dominio abierto.
  */
 
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=33";
-import { unique } from "../core/calculo.js?v=33";
-import { LEVERS, els, state } from "./estado.js?v=33";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=34";
+import { unique } from "../core/calculo.js?v=34";
+import { els, state } from "./estado.js?v=34";
 import {
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "./subcapacidad.js?v=33";
-import { calculate, getCapabilityTargets } from "./metricas.js?v=33";
-import { repintarTodo } from "./repintado.js?v=33";
+} from "./subcapacidad.js?v=34";
+import { calculate, objetivosDistintos } from "./metricas.js?v=34";
+import { repintarTodo } from "./repintado.js?v=34";
 
 
 
@@ -220,12 +220,7 @@ export function getScopedItems() {
  * uno, la cabecera mentia.
  */
 export function describirObjetivos() {
-  const valores = unique(
-    state.items.flatMap((item) => {
-      const objetivos = getCapabilityTargets(item.capacidad);
-      return LEVERS.map((lever) => objetivos[lever.key]);
-    }),
-  ).sort((a, b) => a - b);
+  const valores = objetivosDistintos(state.items);
 
   if (!valores.length) {
     return null;
@@ -294,17 +289,90 @@ function getTextoBuscable(item) {
 
 
 
+/**
+ * Lo que se puntua con el filtro de prioridad puesto se queda en el ambito
+ * hasta que cambia algun filtro.
+ *
+ * Es el unico filtro que depende de las puntuaciones. Con «Alta» puesto, la
+ * primera nota de una tarjeta podia bajarla a Media y sacarla de la lista en
+ * el acto: la de debajo subia a su sitio y el siguiente clic la puntuaba a
+ * ella. Tres clics para puntuar la 1.1 cambiaron la 1.1, la 2.3 y la 2.4, sin
+ * que nada lo dijera. Con «Pendiente», igual desde la primera palanca. El modo
+ * taller ya lo evitaba fijando su recorrido al abrirse.
+ *
+ * Se retiene en el ambito y no solo en la lista del Assessment para que KPIs,
+ * heatmap, roadmap, CSV y PDF sigan contando lo mismo que las tarjetas.
+ */
+const retenidas = new Set();
+
+
+
+
+let filtrosDeLasRetenidas = "";
+
+
+
+
+function soltarSiCambiaronLosFiltros() {
+  const firma = [
+    state.activeDomainId,
+    els.capacityFilter.value,
+    els.priorityFilter.value,
+    els.searchInput.value.trim().toLowerCase(),
+  ].join("\u0000");
+
+  if (firma !== filtrosDeLasRetenidas) {
+    retenidas.clear();
+    filtrosDeLasRetenidas = firma;
+  }
+}
+
+
+/** Lo llama aplicarScore() antes de cambiar el score. */
+export function retenerMientrasDureElFiltro(item) {
+  if (els.priorityFilter.value === "all") {
+    return;
+  }
+
+  soltarSiCambiaronLosFiltros();
+  retenidas.add(item.id);
+}
+
+
+/**
+ * La prioridad del filtro que la subcapacidad ya no cumple, si sigue en
+ * pantalla solo por haberla puntuado. Para decirlo en su tarjeta.
+ */
+export function prioridadQueYaNoCumple(item) {
+  const priority = els.priorityFilter.value;
+
+  if (priority === "all" || !retenidas.has(item.id)) {
+    return null;
+  }
+
+  return calculate(item).prioridad === priority ? null : priority;
+}
+
+
+
+
 export function getVisibleItems() {
   const capacity = els.capacityFilter.value;
   const priority = els.priorityFilter.value;
   const query = els.searchInput.value.trim().toLowerCase();
+
+  soltarSiCambiaronLosFiltros();
 
   return state.items.filter((item) => {
     if (capacity !== "all" && item.capacidad !== capacity) {
       return false;
     }
 
-    if (priority !== "all" && calculate(item).prioridad !== priority) {
+    if (
+      priority !== "all" &&
+      calculate(item).prioridad !== priority &&
+      !retenidas.has(item.id)
+    ) {
       return false;
     }
 
