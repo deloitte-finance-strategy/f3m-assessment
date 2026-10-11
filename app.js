@@ -699,6 +699,7 @@ function bindGlobalEvents() {
   enganchar("presentationModeButton", "click", alternarModoPresentacion);
   enganchar("themeButton", "click", alternarTema);
   window.addEventListener("beforeunload", avisarSiQuedaAlgoSinGuardar);
+  document.addEventListener("keydown", guardarCopiaConElTeclado);
   setupMenuDeCabecera(els.presentacionMenuButton, els.presentacionMenu);
   setupMenuDeCabecera(els.scenarioMenuButton, els.scenarioMenu, pintarAvisoDeCopia);
   setupMenuDeCabecera(els.exportPdfButton, els.informeMenu, pintarMenuDeInforme);
@@ -788,12 +789,44 @@ function vistaDesdeLaUrl() {
 }
 
 
+/**
+ * Donde estaba cada pestana, para volver ahi.
+ *
+ * Cambiar de pestana llevaba siempre arriba del todo: en la tarjeta 13 del
+ * Assessment, mirar algo en el Roadmap y volver dejaba en la primera, y habia
+ * que buscar donde se estaba delante de la sala. Se recuerda mientras no se
+ * cambie de dominio, porque con otro dominio la pagina es otra.
+ */
+const posicionDeCadaVista = new Map();
+
+
+
+
+let dominioDeLasPosiciones = null;
+
+
+
+
+function posicionesDelDominio() {
+  if (dominioDeLasPosiciones !== state.activeDomainId) {
+    posicionDeCadaVista.clear();
+    dominioDeLasPosiciones = state.activeDomainId;
+  }
+
+  return posicionDeCadaVista;
+}
+
+
 function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
   if (!VISTAS.includes(id)) {
     return;
   }
 
   const esOtraVista = id !== vistaActiva;
+
+  if (esOtraVista) {
+    posicionesDelDominio().set(vistaActiva, window.scrollY);
+  }
 
   vistaActiva = id;
 
@@ -816,9 +849,13 @@ function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
     enlace.setAttribute("aria-current", esActiva ? "page" : "false");
   });
 
-  if (actualizarUrl) {
-    // replaceState y no el hash directo: cambiar el hash provocaria un salto.
-    window.history.replaceState(null, "", `#${id}`);
+  // pushState y no el hash directo, que provocaria un salto. Y no
+  // replaceState, que es lo que habia: «Atrás» —o el boton lateral del raton,
+  // que se pulsa sin querer— salia de la herramienta delante de todos, en vez
+  // de volver a la pestana anterior. La vuelta la recoge el hashchange de
+  // setupVistas().
+  if (actualizarUrl && window.location.hash !== `#${id}`) {
+    window.history.pushState(null, "", `#${id}`);
   }
 
   // Al cambiar de pestana, la vista nueva entra con un fundido y sus radares
@@ -831,8 +868,13 @@ function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
     renderAll();
   }
 
+  // Volver a pulsar la pestana en la que se esta sigue llevando arriba. De un
+  // salto y no con el desplazamiento suave de la pagina: la vista entra con
+  // su fundido, y recorrer mil pixeles de una vista recien abierta mareaba.
   if (desplazar) {
-    window.scrollTo({ top: 0, behavior: "auto" });
+    const posicion = esOtraVista ? posicionesDelDominio().get(id) : undefined;
+
+    window.scrollTo({ top: posicion ?? 0, behavior: "instant" });
   }
 }
 
@@ -876,7 +918,20 @@ function setupDomainSwitcher() {
 
     const domainId = button.dataset.domainId;
 
-    if (!domainId || domainId === state.activeDomainId) {
+    if (!domainId) {
+      return;
+    }
+
+    // El Overview y la pestana IA no dependen del dominio, a proposito, asi que
+    // pulsar uno desde ellas no cambiaba nada de lo que se ve y parecia un
+    // boton roto delante del cliente. Desde ahi se abre su Dashboard, como al
+    // pulsar su fila o su nombre en el radar.
+    if (vistaActiva === "overview" || vistaActiva === "ia") {
+      await abrirDominioEnSuDashboard(domainId);
+      return;
+    }
+
+    if (domainId === state.activeDomainId) {
       return;
     }
 
@@ -1755,6 +1810,29 @@ function partesDelNombre(...partes) {
  * dos clientes en la carpeta de descargas no habia forma de saber cual era cual
  * sin abrirlas. Ahora lleva el cliente y la fecha, como el PDF y el CSV.
  */
+/**
+ * Ctrl+S (Cmd+S en Mac) descarga una copia, lo mismo que «Sesión → Guardar una
+ * copia». Es un gesto automatico, y abria el «Guardar página como» del
+ * navegador, que guarda una pagina que no sirve para nada. Tambien en un
+ * escenario compartido: alli el trabajo ya se guarda solo, pero quien pulsa
+ * Ctrl+S quiere un archivo, y una copia de mas no hace dano.
+ */
+function guardarCopiaConElTeclado(event) {
+  if (!(event.ctrlKey || event.metaKey) || event.altKey || event.key.toLowerCase() !== "s") {
+    return;
+  }
+
+  event.preventDefault();
+
+  if (event.repeat) {
+    return;
+  }
+
+  exportScenarioJson();
+  showNotice("Descargando una copia del trabajo, como con «Sesión → Guardar una copia».", "info");
+}
+
+
 function exportScenarioJson() {
   const nombre = partesDelNombre("Copia F3M", state.cliente, fechaParaArchivo(new Date()));
 

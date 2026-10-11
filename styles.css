@@ -1225,6 +1225,25 @@ transform: translateY(-1px);
   }
 }
 
+/* Con «Letra grande» pasa lo mismo mucho antes: a 1.280 y 1.366 px la barra
+   iba en dos pisos, y al quedarse fija arriba se comia 50 px de cada pantalla
+   y la primera tarjeta del Assessment no se veia. */
+@media (max-width: 1500px) {
+  :root[data-densidad="presentacion"] .tabs-siguiente-largo,
+  :root[data-densidad="presentacion"] .tabs-buscar-texto,
+  :root[data-densidad="presentacion"] .tabs-buscar-atajo {
+    display: none;
+  }
+
+  :root[data-densidad="presentacion"] .tabs-siguiente-corto {
+    display: inline;
+  }
+
+  :root[data-densidad="presentacion"] .tabs-buscar {
+    padding: 0 12px;
+  }
+}
+
 /*
   El cuadro del buscador: arriba y no en el centro, donde los resultados
   crecen hacia abajo sin mover el campo en el que se esta escribiendo.
@@ -3306,7 +3325,8 @@ border-color: var(--line-tenue);
   Iniciativa no lleva ancho: se queda con lo que sobra, y es la unica columna
   que de verdad tiene texto que leer.
 
-  Suman 1.286 px, lo que deja sin desplazamiento un portatil de 1.366, que es
+  Con «Oleada» y «Último cambio», que ya no salen en local, sumaban 1.286 px
+  (ahora 1.214, y caben a 1.280). Eso dejaba sin desplazamiento un portatil de 1.366, que es
   la pantalla mas comun en las salas: con 1.370, la ultima columna salia
   cortada justo ahi. Y con 1.310 tambien, en Windows: su barra de
   desplazamiento ocupa 17 px de la ventana, y la medida se habia hecho en un
@@ -3328,11 +3348,10 @@ border-color: var(--line-tenue);
   --rm-prioridad: 96px;
   --rm-iniciativa-min: 196px;
   --rm-ia: 56px;
-  --rm-oleada: 74px;
-  --rm-responsable: 130px;
+  --rm-responsable: 170px;
   --rm-estado: 146px;
-  --rm-comentarios: 132px;
-  --rm-ultimo: 96px;
+  --rm-comentarios: 190px;
+  --rm-ultimo: 0px;
 }
 
 :root[data-densidad="presentacion"] .roadmap-table {
@@ -3343,9 +3362,25 @@ border-color: var(--line-tenue);
   --rm-prioridad: 122px;
   --rm-iniciativa-min: 280px;
   --rm-ia: 62px;
-  --rm-oleada: 98px;
-  --rm-responsable: 162px;
+  --rm-responsable: 200px;
   --rm-estado: 174px;
+  --rm-comentarios: 200px;
+  --rm-ultimo: 0px;
+}
+
+/*
+  Con «Último cambio», que solo sale en un escenario compartido con algo
+  editado, Responsable y Comentarios le devuelven su sitio: con los tres, la
+  tabla suma 1.286 px, lo que cabia antes a 1.366.
+*/
+.roadmap-table.roadmap-con-autoria {
+  --rm-responsable: 130px;
+  --rm-comentarios: 132px;
+  --rm-ultimo: 96px;
+}
+
+:root[data-densidad="presentacion"] .roadmap-table.roadmap-con-autoria {
+  --rm-responsable: 162px;
   --rm-comentarios: 150px;
   --rm-ultimo: 108px;
 }
@@ -3358,7 +3393,7 @@ border-color: var(--line-tenue);
   min-width: calc(
     var(--rm-capacidad) + var(--rm-subcapacidad) + var(--rm-gap) +
     var(--rm-prioridad) + var(--rm-iniciativa-min) + var(--rm-ia) +
-    var(--rm-oleada) + var(--rm-responsable) + var(--rm-estado) +
+    var(--rm-responsable) + var(--rm-estado) +
     var(--rm-comentarios) + var(--rm-ultimo)
   );
 }
@@ -3398,56 +3433,34 @@ border-color: var(--line-tenue);
   text-align: center;
 }
 
-/* Oleada */
-.roadmap-table th:nth-child(7),
-.roadmap-table td:nth-child(7) {
-  width: var(--rm-oleada);
-  text-align: center;
-}
+/*
+  No hay columna «Oleada»: repetia lo que dice la cabecera de cada grupo
+  («Oleada 1 · prioridad alta»), y su sitio lo aprovechan Responsable y
+  Comentarios.
+*/
 
 /* Responsable: el ancho que necesita un nombre y un apellido sin recortarse. */
-.roadmap-table th:nth-child(8),
-.roadmap-table td:nth-child(8) {
+.roadmap-table th:nth-child(7),
+.roadmap-table td:nth-child(7) {
   width: var(--rm-responsable);
 }
 
 /* Estado: antes el desplegable se leia "No ini" y "En cur". */
-.roadmap-table th:nth-child(9),
-.roadmap-table td:nth-child(9) {
+.roadmap-table th:nth-child(8),
+.roadmap-table td:nth-child(8) {
   width: var(--rm-estado);
 }
 
 /* Comentarios */
-.roadmap-table th:nth-child(10),
-.roadmap-table td:nth-child(10) {
+.roadmap-table th:nth-child(9),
+.roadmap-table td:nth-child(9) {
   width: var(--rm-comentarios);
 }
 
-/* Ultimo cambio */
-.roadmap-table th:nth-child(11),
-.roadmap-table td:nth-child(11) {
+/* Ultimo cambio, cuando sale */
+.roadmap-table th:nth-child(10),
+.roadmap-table td:nth-child(10) {
   width: var(--rm-ultimo);
-}
-
-.roadmap-wave-cell {
-  text-align: center;
-}
-
-/* La oleada no es una palanca: en azul competia con Organizacion, y encima sin
-   etiqueta que lo aclarase. En grafito ya no se confunde con nada. */
-.status-chip.roadmap-wave {
-  justify-content: center;
-  min-width: 32px;
-  min-height: 32px;
-  padding: 0 8px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-  background: var(--surface-muted);
-  color: var(--graphite);
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-heavy);
-  line-height: 1;
-  white-space: nowrap;
 }
 
 /* Owner */
@@ -3467,11 +3480,14 @@ border-color: var(--line-tenue);
   white-space: nowrap;
 }
 
-/* Comentarios */
+/* Comentarios. Crecen con lo que se escribe, como las notas del taller, que
+   son el mismo campo: en una caja de 55 px se leian dos lineas. */
 .roadmap-table textarea {
   width: 100%;
   min-width: 0;
   min-height: 54px;
+  max-height: calc(8 * 1.35em + 20px);
+  field-sizing: content;
   padding: 9px;
   resize: vertical;
   border: 1px solid var(--line);
@@ -3795,11 +3811,17 @@ border-color: var(--line-tenue);
   border-left: 3px solid rgba(79, 89, 82, 0.75);
 }
 
-/* Dos lineas y no mas: es para apuntar el porque mientras se habla, no para
-   redactar, y el detalle ya es largo. Quien necesite mas lo estira. */
+/* Empieza en dos lineas: es para apuntar el porque mientras se habla, no para
+   redactar, y el detalle ya es largo. Pero crece con lo que se escribe, hasta
+   ocho: con dos fijas, a la tercera salia una barra por dentro y lo escrito
+   dejaba de verse mientras se seguia escribiendo. field-sizing es de Chrome y
+   Edge; en Firefox se queda en dos lineas, que se pueden estirar. */
 .notas-detail-block textarea {
   display: block;
   width: 100%;
+  min-height: calc(2 * 1.45em + 16px);
+  max-height: calc(8 * 1.45em + 16px);
+  field-sizing: content;
   padding: 7px 10px;
   resize: vertical;
   border: 1px solid var(--line);

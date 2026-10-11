@@ -9,7 +9,7 @@
 import { ordenarPorPrioridadYGap } from "../../core/calculo.js?v=34";
 import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=34";
 import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=34";
-import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=34";
+import { buildFilteredEmptyState, pintarResponsablesConocidos, priorityBadge } from "../celdas.js?v=34";
 import { STATUS_OPTIONS, els, state } from "../estado.js?v=34";
 import { getVisibleItems } from "../filtros.js?v=34";
 import { getUsuarioActual } from "../identidad.js?v=34";
@@ -21,13 +21,6 @@ import {
   programarGuardado,
 } from "../edicion.js?v=34";
 import { getAiDataForItem } from "../subcapacidad.js?v=34";
-
-
-function getWaveShortLabel(wave) {
-  const match = String(wave || "").match(/\d+/);
-
-  return match ? match[0] : "-";
-}
 
 
 export function renderRoadmap() {
@@ -42,6 +35,16 @@ export function renderRoadmap() {
   const entradas = ordenarPorPrioridadYGap(
     roadmapItems.map((item) => ({ item, metrics: calculate(item) })),
   );
+
+  // «Último cambio» solo sale cuando hay algo que contar. Lo rellenan las
+  // escrituras del escenario compartido, asi que en local era una columna
+  // entera de guiones, y por ella la tabla no cabia a 1280 px y Responsable se
+  // cortaba («Dirección Fina…»). Sin ella, su sitio pasa a Responsable y a
+  // Comentarios (ver .roadmap-con-autoria en styles.css).
+  const conAutoria = roadmapItems.some((item) => item.lastEditedBy?.nombre);
+  const columnas = conAutoria ? 10 : 9;
+
+  els.roadmapTable.classList.toggle("roadmap-con-autoria", conAutoria);
 
   const filaDeIniciativa = ({ item, metrics }) => `
       <tr>
@@ -68,22 +71,14 @@ export function renderRoadmap() {
           }
         </td>
 
-        <td class="roadmap-wave-cell">
-          <span
-            class="status-chip roadmap-wave"
-            title="${escapeAttr(metrics.oleada)}"
-            aria-label="${escapeAttr(metrics.oleada)}"
-          >
-            ${escapeHtml(getWaveShortLabel(metrics.oleada))}
-          </span>
-        </td>
-
         <td>
           <input
             class="inline-input roadmap-owner"
             data-id="${escapeAttr(item.id)}"
             value="${escapeAttr(item.owner)}"
             maxlength="${LIMITES_DE_TEXTO.owner}"
+            list="responsablesConocidos"
+            autocomplete="off"
             placeholder="Responsable"
             aria-label="${escapeAttr(`Responsable de ${item.subcapacidad}`)}"
           >
@@ -99,14 +94,14 @@ export function renderRoadmap() {
           >${escapeHtml(item.comentario)}</textarea>
           ${contadorDeComentario(item)}
         </td>
-        <td class="roadmap-authorship">${celdaDeAutoria(item)}</td>
+        ${conAutoria ? `<td class="roadmap-authorship">${celdaDeAutoria(item)}</td>` : ""}
       </tr>
     `;
 
   const grupos = agruparPorOleada(entradas)
     .map((grupo) => `
       <tbody class="roadmap-oleada">
-        ${cabeceraDeOleada(grupo)}
+        ${cabeceraDeOleada(grupo, columnas)}
         ${grupo.entradas.map(filaDeIniciativa).join("")}
       </tbody>
     `)
@@ -123,17 +118,16 @@ export function renderRoadmap() {
         <th scope="col">Prioridad</th>
         <th scope="col">Iniciativa sugerida</th>
         <th scope="col">IA</th>
-        <th scope="col">Oleada</th>
         <th scope="col">Responsable</th>
         <th scope="col">Estado</th>
         <th scope="col">Comentarios</th>
-        <th scope="col">Último cambio</th>
+        ${conAutoria ? '<th scope="col">Último cambio</th>' : ""}
       </tr>
     </thead>
     ${grupos || `
       <tbody>
         <tr>
-          <td colspan="11" class="table-empty-cell">
+          <td colspan="${columnas}" class="table-empty-cell">
             ${buildFilteredEmptyState()}
           </td>
         </tr>
@@ -160,6 +154,7 @@ els.roadmapTable.querySelectorAll(".roadmap-comment").forEach((textarea) => {
 
   restaurarEdicionDeRoadmap(edicionEnCurso);
   pintarRecuentoDeIniciativas(roadmapItems.length);
+  pintarResponsablesConocidos();
 }
 
 
@@ -200,7 +195,7 @@ function agruparPorOleada(entradas) {
  * se ve. El texto va en un span fijo a la izquierda para que no se vaya con el
  * desplazamiento horizontal cuando la tabla esta en su caja.
  */
-function cabeceraDeOleada({ oleada, prioridad, entradas }) {
+function cabeceraDeOleada({ oleada, prioridad, entradas }, columnas) {
   const cuantas = entradas.length === 1 ? "1 iniciativa" : `${entradas.length} iniciativas`;
   const nombre = oleada === "Pendiente" ? "Sin oleada" : oleada;
   const detalle = oleada === "Pendiente"
@@ -209,7 +204,7 @@ function cabeceraDeOleada({ oleada, prioridad, entradas }) {
 
   return `
     <tr class="roadmap-oleada-cabecera roadmap-oleada-${prioridad.toLowerCase()}">
-      <th colspan="11" scope="rowgroup">
+      <th colspan="${columnas}" scope="rowgroup">
         <span class="roadmap-oleada-texto">
           <strong>${escapeHtml(nombre)}</strong>
           <span>${escapeHtml(detalle)}</span>

@@ -204,7 +204,8 @@ nunca para trabajo real** — cualquiera puede leerlo y sobrescribirlo.
 En un escenario compartido la app se autentica de forma anónima contra Firebase: no pide
 credenciales, pero asigna un identificador estable a cada navegador. Sirve para atribuir cada
 cambio, con **Sesión → "Poner mi nombre"** para elegir cómo apareces ante el resto.
-La columna **"Último cambio"** del Roadmap muestra quién tocó cada subcapacidad por última vez.
+La columna **"Último cambio"** del Roadmap muestra quién tocó cada subcapacidad por última vez. Solo
+sale cuando hay algo que contar: en modo local no hay autoría, y la columna era una fila de guiones.
 
 **La identidad es obligatoria para escribir.** Sin ella, la aplicación no intenta guardar en el
 escenario compartido: el chip se pone rojo y dice *"Sin identidad: no se está compartiendo"*. Los
