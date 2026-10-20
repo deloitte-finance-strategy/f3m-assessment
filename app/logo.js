@@ -10,10 +10,10 @@
  * Por eso se reduce antes: una foto de 4 MB no puede viajar en cada escritura.
  */
 
-import { FORMATOS_DE_LOGO, LIMITE_DE_LOGO, normalizarLogo } from "../core/escenario.js?v=34";
-import { showNotice } from "./avisos.js?v=34";
-import { persistLogo } from "./persistencia.js?v=34";
-import { state } from "./estado.js?v=34";
+import { FORMATOS_DE_LOGO, LIMITE_DE_LOGO, normalizarLogo } from "../core/escenario.js?v=35";
+import { showNotice } from "./avisos.js?v=35";
+import { persistLogo } from "./persistencia.js?v=35";
+import { state } from "./estado.js?v=35";
 
 
 /** Lo mas grande que hace falta: en la portada ocupa unos 50 x 20 mm. */
