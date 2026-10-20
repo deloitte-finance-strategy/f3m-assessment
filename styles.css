@@ -6404,9 +6404,9 @@ height: 100% !important;
   overflow: hidden;
 }
 
-/* Donde hay una palanca, el borde se marca: se ve de lejos en que niveles
-   esta la subcapacidad aunque no se lean las etiquetas. */
-.modo-taller-nivel.tiene-palancas {
+/* Donde esta la media, el borde se marca: se ve de lejos en que nivel esta la
+   subcapacidad aunque no se lea la etiqueta. */
+.modo-taller-nivel.tiene-la-media {
   border-color: var(--line-fuerte);
   box-shadow: 0 0 0 1px var(--line-fuerte);
 }
@@ -6456,6 +6456,13 @@ height: 100% !important;
   border: 1.5px dashed var(--green-dark);
   background: transparent;
   color: var(--green-dark);
+}
+
+/* La media es lo que se lee primero: rellena, con el texto y el fondo de la
+   pagina cambiados de sitio, el mismo contraste en los dos temas. */
+.modo-taller-marca-media {
+  background: var(--ink);
+  color: var(--surface);
 }
 
 .modo-taller-nivel p {
@@ -6759,7 +6766,7 @@ height: 100% !important;
   }
 }
 
-/* El nivel que gana o pierde una palanca cambia de borde poco a poco. */
+/* El nivel al que llega o del que se va la media cambia de borde poco a poco. */
 .modo-taller-nivel {
   transition: border-color 200ms ease, box-shadow 200ms ease;
 }

@@ -5,8 +5,8 @@
  * herramienta de trabajo del consultor: a 1366×768 y en Presentacion, al abrir
  * el Assessment no se veia ni una tarjeta, y los cinco niveles que se leen con
  * el cliente estaban plegados en «Ver detalle», debajo de la escala. Aqui los
- * cinco van en columnas, uno junto a otro, con cada palanca y el objetivo
- * marcados encima del nivel en el que estan.
+ * cinco van en columnas, uno junto a otro, con la media de las palancas y el
+ * objetivo marcados encima del nivel en el que estan.
  *
  * Es un modal mas (.modal-backdrop) y no un <dialog>, aunque el buscador si lo
  * sea. Un <dialog> abierto con showModal() va a la capa superior, por encima de
@@ -20,7 +20,7 @@
  * guardado diferido de edicion.js. Lo unico propio es como se enseña.
  */
 
-import { getMaturityLevel } from "../core/calculo.js?v=34";
+import { average, getMaturityLevel, getMaturityLevelNumber } from "../core/calculo.js?v=34";
 import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=34";
 import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=34";
 import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=34";
@@ -1032,37 +1032,46 @@ function casoDeIa(caso) {
 
 
 /**
- * Encima de cada nivel, las palancas que estan en el y el objetivo. Es lo que
- * se mira en la sala: donde estamos, palanca a palanca, y a donde hay que
- * llegar. El nivel resaltado de «Ver detalle» es el de la media, y con
- * Procesos en 1 y Tecnologia en 3 no dice ni lo uno ni lo otro.
+ * Encima de los niveles, la media de las tres palancas y el objetivo: donde
+ * esta la subcapacidad y a donde tiene que llegar, que es lo que se resta para
+ * el gap del pie. Antes iba cada palanca en el suyo, y se cambio: con tres
+ * etiquetas repartidas por las columnas no se veia la resta que da el gap. Lo
+ * de cada palanca ya esta en la escala de debajo.
  */
 function pintarMarcas(item, { animar = false } = {}) {
+  const metricas = calculate(item);
   const objetivos = getCapabilityTargets(item.capacidad);
-  const objetivosIguales = new Set(LEVERS.map((lever) => Math.round(objetivos[lever.key]))).size === 1;
 
-  // Las que ya estaban no se mueven: solo la palanca que acaba de llegar a su
-  // nivel entra con un salto corto, que es donde se mira al puntuar.
+  // El objetivo es el mismo contra el que se calcula el gap: el medio de las
+  // palancas puntuadas. Sin ninguna puntuada, el de las tres.
+  const objetivo = metricas.isPending
+    ? average(LEVERS.map((lever) => objetivos[lever.key]))
+    : metricas.targetMedio;
+  const nivelDelObjetivo = getMaturityLevelNumber(objetivo);
+  const nivelDeLaMedia = metricas.isPending ? null : getMaturityLevelNumber(metricas.scoreMedio);
+
+  // Lo que ya estaba no se mueve: solo la marca que acaba de cambiar de nivel
+  // entra con un salto corto, que es donde se mira al puntuar.
   const antes = new Set([...cuerpo.querySelectorAll(".modo-taller-marca[data-marca]")].map((marca) => marca.dataset.marca));
 
   cuerpo.querySelectorAll(".modo-taller-marcas").forEach((contenedor) => {
     const nivel = Number(contenedor.dataset.nivel);
-    const aqui = LEVERS.filter((lever) => item.scores[lever.key] === nivel);
-    const objetivoAqui = LEVERS.filter((lever) => Math.round(objetivos[lever.key]) === nivel);
+    const marcas = [];
 
-    const marcas = aqui.map(
-      (lever) => `
-        <span class="modo-taller-marca" data-marca="${lever.key}:${nivel}">
-          <span class="modo-taller-punto modo-taller-punto-${lever.key}" aria-hidden="true"></span>
-          ${escapeHtml(lever.label)}
+    if (nivel === nivelDeLaMedia) {
+      marcas.push(`
+        <span class="modo-taller-marca modo-taller-marca-media" data-marca="media:${nivel}">
+          Media ${escapeHtml(formatMedia(metricas.scoreMedio))}
         </span>
-      `,
-    );
+      `);
+    }
 
-    if (objetivoAqui.length) {
-      const de = objetivosIguales ? "" : ` · ${objetivoAqui.map((lever) => lever.label).join(", ")}`;
+    // Con el mismo objetivo en las tres palancas es un entero, y el nivel ya
+    // lo dice. Si no, el numero, para que la resta del gap se pueda hacer.
+    if (nivel === nivelDelObjetivo) {
+      const cifra = Number.isInteger(objetivo) ? "" : ` ${formatMedia(objetivo)}`;
 
-      marcas.push(`<span class="modo-taller-marca modo-taller-marca-objetivo" data-marca="objetivo:${nivel}">Objetivo${escapeHtml(de)}</span>`);
+      marcas.push(`<span class="modo-taller-marca modo-taller-marca-objetivo" data-marca="objetivo:${nivel}">Objetivo${escapeHtml(cifra)}</span>`);
     }
 
     contenedor.innerHTML = marcas.join("");
@@ -1072,7 +1081,7 @@ function pintarMarcas(item, { animar = false } = {}) {
         marca.classList.toggle("recien", !antes.has(marca.dataset.marca));
       });
     }
-    contenedor.closest(".modo-taller-nivel")?.classList.toggle("tiene-palancas", aqui.length > 0);
+    contenedor.closest(".modo-taller-nivel")?.classList.toggle("tiene-la-media", nivel === nivelDeLaMedia);
   });
 }
 

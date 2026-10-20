@@ -351,7 +351,8 @@ los filtros. Es un `<dialog>` nativo y no uno de los modales: `showModal()` ya d
 inerte, atrapa el foco y cierra con Escape.
 
 **El modo taller** (**Presentación → Modo taller**, en la cabecera) proyecta una subcapacidad a pantalla
-completa: los cinco niveles en columnas, con las palancas y el objetivo marcados encima, la escala
+completa: los cinco niveles en columnas, con la media de las tres palancas y el objetivo marcados
+encima —no cada palanca en su nivel, que ya se ve en la escala—, la escala
 para puntuar, las preguntas clave, las notas del taller y los casos de IA. **Sí usa el ámbito**: recorre las tarjetas
 que enseña el Assessment, con sus filtros, y la lista se fija al abrir, para que puntuar una que el
 filtro de prioridad deja fuera no la saque del recorrido a mitad de sesión. Puntúa y guarda con lo
@@ -411,8 +412,8 @@ va al título y no al primer campo, porque con el cursor en un campo Re Pág no 
 
 **Las pantallas del modo taller entran con un fundido corto** (`animarLaEntrada()`, 220 ms): hacia
 delante por la derecha, hacia atrás por la izquierda, y al abrir o al cambiar de dominio solo funde.
-Al puntuar, **solo la palanca que llega a su nivel** entra con un salto, el borde del nivel cambia
-poco a poco, y el score medio y el gap **cuentan** del valor de antes al nuevo
+Al puntuar, **la media salta solo si cambia de nivel**, el borde del nivel cambia poco a poco, y el
+score medio y el gap **cuentan** del valor de antes al nuevo
 (`contarLasCifras()`), con la región `aria-busy` mientras cuentan para que el lector de pantalla
 anuncie solo el final. Con «reducir movimiento» en el sistema no se anima nada: el CSS lo apaga con
 la regla general de `prefers-reduced-motion` y el JavaScript lo pregunta antes de contar. El marco
@@ -654,9 +655,13 @@ dominios cambiados y otros no.
 
 **Cálculo** (`calcularMetricas()` en `core/calculo.js`):
 
-- El gap se calcula **por palanca**: `max(0, target - score)`.
-- El gap del ítem es el **promedio de los gaps de las palancas puntuadas**. No es `4 - scoreMedio`.
-  Con objetivo 4 y scores `[3, 2, 5]` el gap es `1,0`, no `0,67`.
+- El gap del ítem es `max(0, objetivo medio - score medio)`, los dos de las palancas puntuadas: la
+  resta de lo que enseña la tarjeta. Con objetivo 4 y scores `[3, 2, 5]` el gap es `0,67`. Una
+  palanca por encima del objetivo compensa a las de debajo.
+- **Antes era el promedio de los gaps por palanca** (`max(0, target - score)` cada uno), y ese caso
+  daba `1,0`. Se pasó a la resta sencilla en octubre de 2026 porque en el taller no cuadraba con
+  la media y el objetivo proyectados; si se vuelve al de por palanca está por decidir. Los gaps de
+  cada palanca se siguen calculando en `metrics.gaps`, aunque hoy no se enseñan.
 - Solo entran en los promedios las palancas **con score informado**.
 - Sin ninguna palanca puntuada, el ítem queda `isPending: true`, con prioridad y oleada
   `"Pendiente"`. No se inventan valores para lo no evaluado.
@@ -989,8 +994,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      desde el cierre: escribir tres con Tab e Intro, quitar uno con ×, y llenar hasta diez sin que
      la pantalla se desplace; salen en el acta, en el correo y en el índice («Próximos pasos · 3»),
      y siguen tras recargar. «Siguiente» y «Anterior» entran con un fundido desde su lado; al
-     puntuar, solo la palanca que cambia salta a su nivel y el score medio y el gap cuentan hasta el
-     nuevo. Con «reducir movimiento» activado en el sistema, nada de eso se mueve. Probarlo en los
+     puntuar, encima de los niveles solo están la media y el objetivo, la media salta cuando cambia
+     de nivel, y el score medio y el gap cuentan hasta el nuevo: el gap es el objetivo menos la
+     media, sin más (con 3, 2 y 5 contra 4, 0,67). Con «reducir movimiento» activado en el sistema, nada de eso se mueve. Probarlo en los
      cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita
      desplazarse.
    - **Heatmap**: desplegar y plegar capacidades pulsando en cualquier parte de su fila, y con

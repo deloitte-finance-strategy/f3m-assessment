@@ -75,13 +75,14 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
   - `< 3.5`: `3 - Estandarizado`
   - `< 4.5`: `4 - Optimizado`
   - `>= 4.5`: `5 - Avanzado/Referente`
-- Gap: se calcula **por palanca** como `max(0, objetivo - score)`, y el gap de la subcapacidad es el
-  **promedio de los gaps de las palancas puntuadas**.
+- Gap: `max(0, objetivo medio - score medio)`, con los dos medios de las palancas puntuadas. Es la
+  resta de lo que enseña la tarjeta: con objetivo `4` y scores `[3, 2, 5]`, `4 - 3,33` → gap `0,67`.
+  Una palanca por encima del objetivo compensa a las que están por debajo, y si la media pasa del
+  objetivo el gap es `0`, no negativo.
 
-  No es `max(0, 4 - score medio)`. Las dos fórmulas divergen en cuanto alguna palanca supera su
-  objetivo: ese exceso se recorta a `0` en vez de compensar a las demás. Ejemplo real con objetivo
-  `4` y scores `[3, 2, 5]` → gap `1.0`, no `0.67`. Como el gap determina prioridad y oleada, la
-  diferencia se propaga al roadmap.
+  Antes era el promedio de los gaps de cada palanca, cada uno recortado a `0`, y ese mismo caso daba
+  `1,0`. Queda pendiente decidir si se vuelve a él; el motor sigue calculando el gap de cada palanca.
+  Como el gap determina prioridad y oleada, la fórmula se nota en el roadmap.
 - Prioridad:
   - `Alta` si gap `>= 2`
   - `Media` si gap `>= 1`
