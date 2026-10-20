@@ -6182,6 +6182,54 @@ height: 100% !important;
   color: var(--ink);
 }
 
+/* «Guia de scoring», con la forma de «3 de 20»: se pulsa, y no es la salida.
+   Pulsada se queda en verde, como «Presentacion» con la letra grande. */
+.modo-taller-guia-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-height: 2.3em;
+  padding: 0 0.9em;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.92em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.modo-taller-guia-boton[hidden] {
+  display: none;
+}
+
+.modo-taller-guia-boton svg {
+  width: 1.05em;
+  height: 1.05em;
+  fill: none;
+  stroke: currentColor;
+  stroke-linejoin: round;
+  stroke-width: 1.4;
+}
+
+.modo-taller-guia-boton:hover {
+  border-color: var(--green);
+  background: rgba(134, 188, 37, 0.18);
+  color: var(--cabecera-claro);
+}
+
+.modo-taller-guia-boton[aria-pressed="true"] {
+  border-color: var(--green);
+  background: rgba(134, 188, 37, 0.3);
+  color: var(--cabecera-claro);
+  font-weight: var(--fw-medium);
+}
+
+.modo-taller-guia-boton:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 /* «3 de 20» abre el indice: con borde, como el selector de dominio, porque
    se pulsa; mas fino que «Salir», porque no es la salida. */
 .modo-taller-indice {
@@ -6424,11 +6472,11 @@ height: 100% !important;
   font-size: 1.3em;
 }
 
-.modo-taller-nivel-1 h3 { background: var(--score-1); color: var(--score-1-fg); }
-.modo-taller-nivel-2 h3 { background: var(--score-2); color: var(--score-2-fg); }
-.modo-taller-nivel-3 h3 { background: var(--score-3); color: var(--score-3-fg); }
-.modo-taller-nivel-4 h3 { background: var(--score-4); color: var(--score-4-fg); }
-.modo-taller-nivel-5 h3 { background: var(--score-5); color: var(--score-5-fg); }
+.modo-taller-nivel-1 h3, .modo-taller-guia-nivel-1 { background: var(--score-1); color: var(--score-1-fg); }
+.modo-taller-nivel-2 h3, .modo-taller-guia-nivel-2 { background: var(--score-2); color: var(--score-2-fg); }
+.modo-taller-nivel-3 h3, .modo-taller-guia-nivel-3 { background: var(--score-3); color: var(--score-3-fg); }
+.modo-taller-nivel-4 h3, .modo-taller-guia-nivel-4 { background: var(--score-4); color: var(--score-4-fg); }
+.modo-taller-nivel-5 h3, .modo-taller-guia-nivel-5 { background: var(--score-5); color: var(--score-5-fg); }
 
 .modo-taller-marcas {
   display: flex;
@@ -6473,6 +6521,155 @@ height: 100% !important;
   overflow: auto;
   font-size: 1em;
   line-height: 1.42;
+}
+
+/* La guia de scoring, en el sitio de los niveles (app/guia.js): una columna
+   por palanca, en el orden de la escala de debajo, y una fila por nivel. Cada
+   columna se dibuja como una tarjeta, y los niveles llevan sus colores de
+   siempre. Con display y no con [hidden] a secas: la regla de la clase le
+   ganaba al atributo y salian las dos. */
+.modo-taller-niveles[hidden],
+.modo-taller-guia[hidden] {
+  display: none;
+}
+
+/* El espacio entre columnas tambien queda por fuera de la primera y de la
+   ultima: el margen negativo lo devuelve, y la tabla llega a los mismos bordes
+   que el resto. Si alguna vez no cupiera, se desplaza dentro de su sitio en vez
+   de montarse sobre la escala de puntuar. */
+.modo-taller-guia {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 11em;
+  margin: 0 -0.75em;
+  overflow: auto;
+}
+
+.modo-taller-guia table {
+  width: 100%;
+  height: 100%;
+  border-collapse: separate;
+  border-spacing: 0.75em 0;
+  table-layout: fixed;
+}
+
+.modo-taller-guia-esquina {
+  width: 11em;
+  padding: 0 0 0.55em;
+  vertical-align: bottom;
+}
+
+.modo-taller-guia-esquina strong {
+  display: block;
+  font-size: 1.02em;
+}
+
+.modo-taller-guia-esquina small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78em;
+}
+
+.modo-taller-guia thead th {
+  padding: 0.55em 0.85em 0.5em;
+  border: 1px solid var(--line);
+  border-bottom-color: var(--line-velo);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  background: var(--surface);
+  font-weight: var(--fw-normal);
+  text-align: left;
+  vertical-align: top;
+}
+
+.modo-taller-guia-palanca {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  font-size: 1.02em;
+  font-weight: var(--fw-bold);
+}
+
+/* En linea y no uno debajo de otro: los cuatro puntos caben en uno o dos
+   renglones, y la guia entera en el sitio de los niveles. */
+.modo-taller-guia-checklist {
+  margin: 0.2em 0 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 0.8em;
+  line-height: 1.35;
+  list-style: none;
+}
+
+.modo-taller-guia-checklist li {
+  display: inline;
+  margin-right: 0.6em;
+  white-space: nowrap;
+}
+
+.modo-taller-guia-checklist li::before {
+  margin-right: 0.25em;
+  color: var(--green-dark);
+  content: "✓";
+  font-weight: var(--fw-heavy);
+}
+
+/* Los cinco niveles en una tira de color, de arriba abajo: la misma escala
+   que las cabeceras de la pantalla de los niveles. */
+.modo-taller-guia-nivel {
+  padding: 0 0.85em;
+  font-size: 0.95em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.modo-taller-guia-nivel span {
+  font-size: 1.2em;
+}
+
+.modo-taller-guia tbody tr:first-child .modo-taller-guia-nivel {
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+
+.modo-taller-guia tbody tr:last-child .modo-taller-guia-nivel {
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+}
+
+.modo-taller-guia tbody td {
+  padding: 0.35em 0.85em;
+  border: 1px solid var(--line);
+  border-top-color: var(--line-velo);
+  border-bottom: 0;
+  background: var(--surface);
+  font-size: 0.95em;
+  line-height: 1.3;
+  vertical-align: middle;
+  transition: box-shadow 200ms ease;
+}
+
+.modo-taller-guia tbody tr:first-child td {
+  border-top: 0;
+}
+
+.modo-taller-guia tbody tr:last-child td {
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+}
+
+/* Donde esta hoy la palanca, la celda se recuadra, como el nivel de la media
+   en la pantalla de los niveles. */
+.modo-taller-guia tbody td.es-hoy {
+  box-shadow: inset 0 0 0 2px var(--line-fuerte);
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+
+/* Las marcas van en la linea del texto, delante, para que cada nivel siga
+   siendo un renglon. */
+.modo-taller-guia .modo-taller-marca {
+  height: 1.5em;
+  margin-right: 0.4em;
+  font-size: 0.8em;
+  vertical-align: 0.1em;
 }
 
 .modo-taller-punto {
@@ -7562,6 +7759,11 @@ height: 100% !important;
   .modo-taller-apoyo,
   .modo-taller-cierre-columnas {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Seis columnas no caben: la guia se desplaza de lado dentro de su sitio. */
+  .modo-taller-guia table {
+    min-width: 52em;
   }
 
   .modo-taller-apertura-cabecera {

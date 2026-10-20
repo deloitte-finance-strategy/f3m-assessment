@@ -128,6 +128,7 @@
     <link rel="modulepreload" href="app/repintado.js?v=35">
     <link rel="modulepreload" href="app/subcapacidad.js?v=35">
     <link rel="modulepreload" href="app/taller.js?v=35">
+    <link rel="modulepreload" href="app/guia.js?v=35">
     <link rel="modulepreload" href="app/cierre.js?v=35">
     <link rel="modulepreload" href="app/apertura.js?v=35">
     <link rel="modulepreload" href="app/proximos-pasos.js?v=35">
@@ -1314,6 +1315,18 @@
         </label>
         <span id="modoTallerDonde"></span>
       </div>
+      <!--
+        La guia de scoring, la del boton «Ver criterios F3M» de la tarjeta. No
+        abre un modal: pone la rubrica de las tres palancas en el sitio de los
+        niveles y deja la escala de puntuar a la vista, que es donde se usa.
+        Solo sale en las subcapacidades. Ver app/guia.js.
+      -->
+      <button class="modo-taller-guia-boton" id="modoTallerGuiaBoton" type="button" aria-pressed="false" aria-controls="modoTallerGuia" hidden>
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8 3.6C6.6 2.6 4.6 2.2 2 2.4v9.8c2.6-.2 4.6.2 6 1.2 1.4-1 3.4-1.4 6-1.2V2.4c-2.6-.2-4.6.2-6 1.2Zm0 0v9.8" />
+        </svg>
+        Guía de scoring
+      </button>
       <!--
         «3 de 20» abre el indice del recorrido: en un taller el cliente salta de
         tema («volvamos a lo del forecast»), y pasar una a una eran cinco clics

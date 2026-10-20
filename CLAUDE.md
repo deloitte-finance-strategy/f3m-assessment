@@ -33,7 +33,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.457 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.470 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
 | `sw.js` | **El service worker**: guarda la herramienta en el navegador para abrirla sin red | 172 |
 | `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.990 |
@@ -61,7 +61,8 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe, al resumen, a la preparación y al acta | 922 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.240 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.303 |
+| `app/guia.js` | **La guía de scoring del taller**: la rúbrica de las tres palancas en el sitio de los niveles | 128 |
 | `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
 | `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 282 |
 | `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 224 |
@@ -72,7 +73,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad, que lleva a su tarjeta | 323 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.590 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.799 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
@@ -86,7 +87,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 307 |
 | `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.028 |
 | `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 112 |
-| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 582 |
+| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 595 |
 | `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 795 |
 | `informe/resumen.js` | **El resumen de una página**: la función financiera en una diapositiva, para el comité | 565 |
 | `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
@@ -152,7 +153,7 @@ filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persis
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
 `app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/sin-conexion.js`, `app/movimiento.js`, `app/taller.js`,
-`app/apertura.js`, `app/cierre.js` y `app/proximos-pasos.js`. Lo nuevo nace ya en `app/`, no en
+`app/apertura.js`, `app/guia.js`, `app/cierre.js` y `app/proximos-pasos.js`. Lo nuevo nace ya en `app/`, no en
 `app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
 
@@ -370,6 +371,17 @@ cambia por capacidad en vez de dar un número que no vale para todas. Es la posi
 (`APERTURA`), y el modo taller abre en ella salvo que se viniera de una tarjeta más allá de la
 primera: entonces la sesión ya estaba en marcha y se abre en esa tarjeta. Desde la primera
 subcapacidad, «← Apertura» y Re Pág vuelven a ella.
+
+**«Guía de scoring», en la barra, pone la guía de puntuación en el sitio de los cinco niveles**
+(`app/guia.js`): la de «Ver criterios F3M» de la tarjeta, con una columna por palanca —en el orden
+de la escala de debajo, con su checklist— y una fila por nivel, y en cada columna dónde está hoy la
+palanca y su objetivo. No es un modal a propósito: lo que se pregunta en la sala es «¿esto es un 3 o
+un 4?», y un modal tapaba la escala en la que se contesta; así se puntúa con la guía a la vista, y
+sus marcas se mueven al puntuar. Con los niveles en columnas, como la pantalla de siempre, no cabía a
+1366×768. El texto es `RUBRICA_GENERAL` y `CHECKLIST_DE_LA_RUBRICA` de `informe/preparacion.js`, que
+`tests/casos-preparacion.js` compara con el modal de `index.html`. El botón solo sale en las
+subcapacidades, cada una empieza con sus niveles —la guía se pide— y Escape la cierra antes que el
+modo taller.
 
 **«3 de 20», en la barra, abre el índice del recorrido**: la apertura, las subcapacidades agrupadas
 por capacidad con un punto en las puntuadas, y el cierre. Un clic o Intro lleva a cualquiera. Con el
@@ -980,7 +992,10 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      («1 de 4» con una capacidad elegida). Tab no sale del modo taller, Ctrl+K no abre el buscador
      encima, y Escape vuelve a la tarjeta en la que se estaba, con el foco en su primer score.
      Pulsar un caso de IA abre su documento encima: el primer Escape cierra solo el visor y deja
-     el foco en el caso, y el segundo sale del modo taller. Abrirlo sin haber tocado ninguna
+     el foco en el caso, y el segundo sale del modo taller. «Guía de scoring», en la barra, cambia
+     los niveles por la guía: puntuar con ella abierta mueve «Hoy» en la columna de esa palanca,
+     Escape vuelve a los niveles sin salir, «Siguiente» llega a la próxima con sus niveles, y en la
+     apertura, el cierre y los pasos el botón no está. Abrirlo sin haber tocado ninguna
      tarjeta empieza en la apertura, que cabe sin desplazarse en los nueve dominios; «Empezar»
      lleva a «1 de N» y cada capacidad de la apertura, a su primera subcapacidad. «3 de 20» abre el
      índice con el foco en la actual: las flechas y Intro llevan a otra, y Escape cierra solo el
@@ -998,7 +1013,7 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      de nivel, y el score medio y el gap cuentan hasta el nuevo: el gap es el objetivo menos la
      media, sin más (con 3, 2 y 5 contra 4, 0,67). Con «reducir movimiento» activado en el sistema, nada de eso se mueve. Probarlo en los
      cuatro modos de tema y densidad a 1366×768: ninguna de las 152 subcapacidades necesita
-     desplazarse.
+     desplazarse, tampoco con la guía de scoring abierta.
    - **Heatmap**: desplegar y plegar capacidades pulsando en cualquier parte de su fila, y con
      Intro sobre su nombre; la flecha gira, y las subcapacidades entran en cascada y se funden al
      plegar. Pulsar una abre su tarjeta en el Assessment, resaltada y con el foco en su
