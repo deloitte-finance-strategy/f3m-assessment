@@ -20,42 +20,42 @@
  * guardado diferido de edicion.js. Lo unico propio es como se enseña.
  */
 
-import { getMaturityLevel } from "../core/calculo.js?v=33";
-import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=33";
-import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=33";
-import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=33";
-import { nombreDeMasInformacion } from "./biblioteca.js?v=33";
-import { priorityBadge } from "./celdas.js?v=33";
-import { htmlDeLaApertura } from "./apertura.js?v=33";
-import { htmlDelCierre, revelarElCierre } from "./cierre.js?v=33";
-import { sinMovimiento } from "./movimiento.js?v=33";
+import { getMaturityLevel } from "../core/calculo.js?v=34";
+import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=34";
+import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=34";
+import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=34";
+import { nombreDeMasInformacion } from "./biblioteca.js?v=34";
+import { priorityBadge } from "./celdas.js?v=34";
+import { htmlDeLaApertura } from "./apertura.js?v=34";
+import { htmlDelCierre, revelarElCierre } from "./cierre.js?v=34";
+import { sinMovimiento } from "./movimiento.js?v=34";
 import {
   conectarLosPasos,
   guardarLosPasosPendientes,
   htmlDeLosPasos,
   pasosDelDominio,
   seEstaEscribiendoUnPaso,
-} from "./proximos-pasos.js?v=33";
-import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=33";
+} from "./proximos-pasos.js?v=34";
+import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=34";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "./edicion.js?v=33";
-import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=33";
-import { capacidadesDePreparacion } from "../informe/preparacion.js?v=33";
-import { getVisibleItems } from "./filtros.js?v=33";
-import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=33";
-import { calculate, getCapabilityTargets } from "./metricas.js?v=33";
-import { repintarTodo } from "./repintado.js?v=33";
-import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=33";
+} from "./edicion.js?v=34";
+import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=34";
+import { capacidadesDePreparacion } from "../informe/preparacion.js?v=34";
+import { getVisibleItems } from "./filtros.js?v=34";
+import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=34";
+import { calculate, getCapabilityTargets } from "./metricas.js?v=34";
+import { repintarTodo } from "./repintado.js?v=34";
+import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=34";
 import {
   conectarPuntuacion,
   enfocarPalanca,
   idDeLaTarjetaEnCurso,
   llevarALasTarjetas,
   scoreControl,
-} from "./vistas/assessment.js?v=33";
+} from "./vistas/assessment.js?v=34";
 
 
 let panel = null;

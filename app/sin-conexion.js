@@ -11,8 +11,8 @@
  * escenario compartido, que sin red no llega al resto del equipo.
  */
 
-import { ocultarAvisoSiDice, showNotice } from "./avisos.js?v=33";
-import { enEscenarioCompartido } from "./firebase.js?v=33";
+import { ocultarAvisoSiDice, showNotice } from "./avisos.js?v=34";
+import { enEscenarioCompartido } from "./firebase.js?v=34";
 
 
 let avisoDado = "";
