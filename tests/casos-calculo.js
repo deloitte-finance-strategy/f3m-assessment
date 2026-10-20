@@ -1,8 +1,8 @@
 /**
  * Pruebas del motor de calculo F3M.
  *
- * Cubren lo que el README y CLAUDE.md describen como reglas de negocio: gap por
- * palanca, prioridad, oleada, nivel de madurez, subcapacidades pendientes y
+ * Cubren lo que el README y CLAUDE.md describen como reglas de negocio: gap,
+ * prioridad, oleada, nivel de madurez, subcapacidades pendientes y
  * agregacion por capacidad. Si alguien cambia una regla sin querer, esto falla.
  *
  * No dependen del DOM, ni de Firebase, ni de la aplicacion: solo del motor.
@@ -27,7 +27,7 @@ import {
   round2,
   toScore,
   unique,
-} from "../core/calculo.js?v=33";
+} from "../core/calculo.js?v=34";
 
 
 // --- utilidades de los casos ------------------------------------------------
@@ -81,49 +81,78 @@ const agregarDominios = (dominios, tablaDeObjetivos = {}) => {
 export const casos = [
   // ------------------------------------------------------------------- gap
   {
-    grupo: "Gap por palanca",
-    nombre: "el caso del README: objetivo 4 y scores [3, 2, 5] dan gap 1, no 0,67",
+    grupo: "Gap",
+    nombre: "el caso del README: objetivo 4 y scores [3, 2, 5] dan gap 0,67, objetivo medio menos score medio",
     ejecutar: (t) => {
       const m = metricas({ procesos: 3, tecnologia: 2, organizacion: 5 });
 
-      // Gaps por palanca: 1, 2 y 0 (recortado). Promedio: 1.
+      // 4 - 3,33. Con el gap por palanca de antes salia 1: 1, 2 y 0 recortado.
+      t.igual(m.gap, 0.67, "gap del item");
+      t.igual(m.prioridad, "Baja", "prioridad");
+      t.igual(m.oleada, "Oleada 3", "oleada");
+      t.igual(m.scoreMedio, 3.33, "score medio");
+      t.igual(m.targetMedio, 4, "objetivo medio");
+      t.igual(m.nivel, "3 - Estandarizado", "nivel");
+
+      // Los de cada palanca se siguen calculando, recortados a 0.
       t.igual(m.gaps.procesos, 1, "gap de procesos");
       t.igual(m.gaps.tecnologia, 2, "gap de tecnologia");
       t.igual(m.gaps.organizacion, 0, "gap de organizacion, recortado a 0");
-      t.igual(m.gap, 1, "gap del item");
-      t.igual(m.prioridad, "Media", "prioridad");
-      t.igual(m.oleada, "Oleada 2", "oleada");
-      t.igual(m.scoreMedio, 3.33, "score medio");
-      t.igual(m.nivel, "3 - Estandarizado", "nivel");
     },
   },
   {
-    grupo: "Gap por palanca",
-    nombre: "estar por encima del objetivo no compensa estar por debajo",
+    grupo: "Gap",
+    nombre: "una palanca por encima del objetivo compensa a las que estan por debajo",
     ejecutar: (t) => {
-      // Sin el recorte a 0, el gap medio seria (2 + (-1)) / 2 = 0,5, y la
-      // prioridad bajaria de Media a Baja.
+      // Objetivo 4 y media 3,5: gap 0,5. Con el gap por palanca era 1, porque
+      // el exceso de tecnologia se recortaba a 0 antes de promediar.
       const m = metricas({ procesos: 2, tecnologia: 5, organizacion: null });
 
-      t.igual(m.gaps.tecnologia, 0, "la palanca por encima del objetivo aporta 0");
-      t.igual(m.gap, 1, "gap del item");
-      t.igual(m.prioridad, "Media", "prioridad");
+      t.igual(m.gap, 0.5, "gap del item");
+      t.igual(m.prioridad, "Baja", "prioridad");
+      t.igual(m.gaps.tecnologia, 0, "el gap de tecnologia sola sigue recortado a 0");
     },
   },
   {
-    grupo: "Gap por palanca",
-    nombre: "cada palanca se mide contra SU objetivo, no contra uno unico",
+    grupo: "Gap",
+    nombre: "por encima del objetivo el gap es 0, no negativo",
+    ejecutar: (t) => {
+      const m = metricas({ procesos: 5, tecnologia: 5, organizacion: 4 });
+
+      t.igual(m.scoreMedio, 4.67, "score medio por encima del objetivo");
+      t.igual(m.gap, 0, "gap recortado a 0");
+      t.igual(m.prioridad, "Baja", "prioridad");
+    },
+  },
+  {
+    grupo: "Gap",
+    nombre: "con un objetivo distinto por palanca, se resta el objetivo medio",
     ejecutar: (t) => {
       const m = metricas(
         { procesos: 3, tecnologia: 3, organizacion: 3 },
         objetivo(3, 5, 4),
       );
 
+      t.igual(m.targetMedio, 4, "objetivo medio");
+      t.igual(m.gap, 1, "gap del item: 4 - 3");
       t.igual(m.gaps.procesos, 0, "objetivo 3");
       t.igual(m.gaps.tecnologia, 2, "objetivo 5");
       t.igual(m.gaps.organizacion, 1, "objetivo 4");
-      t.igual(m.gap, 1, "gap del item");
-      t.igual(m.targetMedio, 4, "objetivo medio");
+    },
+  },
+  {
+    grupo: "Gap",
+    nombre: "la resta va sin redondear: no arrastra los redondeos del score y el objetivo medios",
+    ejecutar: (t) => {
+      // 4,67 - 1,33 daria 3,34; la cuenta exacta es 10/3.
+      const m = metricas(
+        { procesos: 1, tecnologia: 1, organizacion: 2 },
+        objetivo(4, 5, 5),
+      );
+
+      t.igual(m.targetMedio, 4.67, "objetivo medio redondeado");
+      t.igual(m.scoreMedio, 1.33, "score medio redondeado");
+      t.igual(m.gap, 3.33, "gap de la cuenta exacta");
     },
   },
 

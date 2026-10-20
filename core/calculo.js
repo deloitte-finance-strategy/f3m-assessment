@@ -213,12 +213,18 @@ export function oleadaDesdePrioridad(prioridad) {
  * Tres decisiones deliberadas, documentadas en el README con un ejemplo
  * numerico, que no deben cambiarse sin cambiar tambien las pruebas:
  *
- * 1. El gap se calcula POR PALANCA: max(0, objetivo - score). Recortar a 0
- *    significa que estar por encima del objetivo no compensa estar por debajo
- *    en otra palanca.
- * 2. El gap del item es el promedio de los gaps de las palancas puntuadas, no
- *    "objetivo - score medio". Con objetivo 4 y scores [3, 2, 5] el gap es 1,0
- *    y no 0,67.
+ * 1. El gap del item es "objetivo medio - score medio", recortado a 0: lo que
+ *    se ve en la tarjeta, restado. Con objetivo 4 y scores [3, 2, 5] el gap es
+ *    0,67. Una palanca por encima del objetivo compensa a las que estan por
+ *    debajo.
+ *
+ *    Antes era el promedio de los gaps de cada palanca, cada uno recortado a 0
+ *    por separado, y ese mismo caso daba 1,0. En la sala no cuadraba con la
+ *    media y el objetivo que se proyectan, asi que se paso a la resta sencilla
+ *    mientras se decide si se vuelve al gap por palanca. Los gaps de cada
+ *    palanca se siguen calculando, en `gaps`, para ese dia.
+ * 2. El objetivo medio sale de las palancas puntuadas, como el score medio:
+ *    con solo Procesos puntuado, se compara con el objetivo de Procesos.
  * 3. Solo entran en los promedios las palancas con score informado. Un item sin
  *    ninguna queda pendiente, sin prioridad ni oleada inventadas.
  */
@@ -271,8 +277,14 @@ export function calcularMetricas(item, objetivos) {
     palancasPuntuadas.map((entry) => entry.target),
   );
 
-  const gap = average(
-    palancasPuntuadas.map((entry) => entry.gap),
+  // Con las diferencias sin redondear y no con scoreMedio y targetMedio, que ya
+  // vienen a dos decimales: restar dos redondeos puede desviarse una centesima.
+  const gap = round2(
+    Math.max(
+      0,
+      palancasPuntuadas.reduce((suma, entry) => suma + entry.target - entry.score, 0) /
+        palancasPuntuadas.length,
+    ),
   );
 
   const gaps = {

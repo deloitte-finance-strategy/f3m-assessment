@@ -6,9 +6,9 @@
  * las dos vistas lo dicen en pantalla.
  */
 
-import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=33";
-import { filasDeResumen } from "../../core/exportacion.js?v=33";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=33";
+import { rankingDeBrechas, rankingDePalancas, resumenGlobal } from "../../core/calculo.js?v=34";
+import { filasDeResumen } from "../../core/exportacion.js?v=34";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=34";
 import {
   buildFilteredEmptyState,
   celdaDeAvance,
@@ -16,12 +16,12 @@ import {
   priorityBadge,
   renderLeverBars,
   renderPriorityBars,
-} from "../celdas.js?v=33";
-import { repintarConMovimiento } from "../movimiento.js?v=33";
-import { els, state } from "../estado.js?v=33";
-import { getScopedItems } from "../filtros.js?v=33";
-import { renderCapabilityRadar } from "../graficos.js?v=33";
-import { agregarPorCapacidad, calculate } from "../metricas.js?v=33";
+} from "../celdas.js?v=34";
+import { repintarConMovimiento } from "../movimiento.js?v=34";
+import { els, state } from "../estado.js?v=34";
+import { getScopedItems } from "../filtros.js?v=34";
+import { renderCapabilityRadar } from "../graficos.js?v=34";
+import { agregarPorCapacidad, calculate } from "../metricas.js?v=34";
 
 
 export function renderDashboard() {

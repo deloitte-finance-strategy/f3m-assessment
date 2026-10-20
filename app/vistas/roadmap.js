@@ -6,21 +6,21 @@
  * que el comentario tambien se escribe desde el Assessment.
  */
 
-import { ordenarPorPrioridadYGap } from "../../core/calculo.js?v=33";
-import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=33";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=33";
-import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=33";
-import { STATUS_OPTIONS, els, state } from "../estado.js?v=33";
-import { getVisibleItems } from "../filtros.js?v=33";
-import { getUsuarioActual } from "../identidad.js?v=33";
-import { calculate } from "../metricas.js?v=33";
+import { ordenarPorPrioridadYGap } from "../../core/calculo.js?v=34";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=34";
+import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=34";
+import { buildFilteredEmptyState, priorityBadge } from "../celdas.js?v=34";
+import { STATUS_OPTIONS, els, state } from "../estado.js?v=34";
+import { getVisibleItems } from "../filtros.js?v=34";
+import { getUsuarioActual } from "../identidad.js?v=34";
+import { calculate } from "../metricas.js?v=34";
 import {
   actualizarContadorDeComentario,
   contadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "../edicion.js?v=33";
-import { getAiDataForItem } from "../subcapacidad.js?v=33";
+} from "../edicion.js?v=34";
+import { getAiDataForItem } from "../subcapacidad.js?v=34";
 
 
 function getWaveShortLabel(wave) {
