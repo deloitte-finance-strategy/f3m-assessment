@@ -16,16 +16,17 @@
  * documento entero, sin scripts, por lo mismo que el informe.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=34";
-import { normalizarLogo } from "../core/escenario.js?v=34";
-import { COLOR_DE_PALANCA, escapeAttr, escapeHtml } from "../core/presentacion.js?v=34";
-import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=34";
+import { PALANCAS } from "../core/calculo.js?v=35";
+import { normalizarLogo } from "../core/escenario.js?v=35";
+import { COLOR_DE_PALANCA, escapeAttr, escapeHtml } from "../core/presentacion.js?v=35";
+import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=35";
 
 
 /**
  * La rubrica general de cada palanca, comun a los nueve dominios.
  *
- * Es la que ensena el modal «Criterios F3M» de index.html. Son dos copias, y
+ * Es la que ensena el modal «Criterios F3M» de index.html, y de aqui la sacan
+ * tambien la apertura del taller y su guia de scoring. Son dos copias, y
  * tests/casos-preparacion.js comprueba que digan lo mismo: el cliente no puede
  * recibir una escala y ver otra en la pantalla del taller.
  */
@@ -51,6 +52,18 @@ export const RUBRICA_GENERAL = {
     "Business partnering",
     "Influencia estratégica",
   ],
+};
+
+
+/**
+ * Lo que se comprueba en cada palanca, el «Checklist» del mismo modal. La guia
+ * de scoring del modo taller lo pone junto a cada palanca, y la misma prueba
+ * lo compara con index.html.
+ */
+export const CHECKLIST_DE_LA_RUBRICA = {
+  procesos: ["Existe proceso formal", "Es consistente", "Está medido", "Impacta decisiones"],
+  tecnologia: ["Herramienta estructurada", "Integración", "Automatización", "Soporte a decisiones"],
+  organizacion: ["Roles claros", "Accountability", "Participación en decisiones", "Influencia estratégica"],
 };
 
 

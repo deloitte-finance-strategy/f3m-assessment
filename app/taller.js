@@ -20,42 +20,43 @@
  * guardado diferido de edicion.js. Lo unico propio es como se enseña.
  */
 
-import { average, getMaturityLevel, getMaturityLevelNumber } from "../core/calculo.js?v=34";
-import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=34";
-import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=34";
-import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=34";
-import { nombreDeMasInformacion } from "./biblioteca.js?v=34";
-import { priorityBadge } from "./celdas.js?v=34";
-import { htmlDeLaApertura } from "./apertura.js?v=34";
-import { htmlDelCierre, revelarElCierre } from "./cierre.js?v=34";
-import { sinMovimiento } from "./movimiento.js?v=34";
+import { average, getMaturityLevel, getMaturityLevelNumber } from "../core/calculo.js?v=35";
+import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=35";
+import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=35";
+import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=35";
+import { nombreDeMasInformacion } from "./biblioteca.js?v=35";
+import { priorityBadge } from "./celdas.js?v=35";
+import { htmlDeLaApertura } from "./apertura.js?v=35";
+import { htmlDeLaGuia, pintarMarcasDeLaGuia } from "./guia.js?v=35";
+import { htmlDelCierre, revelarElCierre } from "./cierre.js?v=35";
+import { sinMovimiento } from "./movimiento.js?v=35";
 import {
   conectarLosPasos,
   guardarLosPasosPendientes,
   htmlDeLosPasos,
   pasosDelDominio,
   seEstaEscribiendoUnPaso,
-} from "./proximos-pasos.js?v=34";
-import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=34";
+} from "./proximos-pasos.js?v=35";
+import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=35";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "./edicion.js?v=34";
-import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=34";
-import { capacidadesDePreparacion } from "../informe/preparacion.js?v=34";
-import { getVisibleItems } from "./filtros.js?v=34";
-import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=34";
-import { calculate, getCapabilityTargets } from "./metricas.js?v=34";
-import { repintarTodo } from "./repintado.js?v=34";
-import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=34";
+} from "./edicion.js?v=35";
+import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=35";
+import { capacidadesDePreparacion } from "../informe/preparacion.js?v=35";
+import { getVisibleItems } from "./filtros.js?v=35";
+import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=35";
+import { calculate, getCapabilityTargets } from "./metricas.js?v=35";
+import { repintarTodo } from "./repintado.js?v=35";
+import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=35";
 import {
   conectarPuntuacion,
   enfocarPalanca,
   idDeLaTarjetaEnCurso,
   llevarALasTarjetas,
   scoreControl,
-} from "./vistas/assessment.js?v=34";
+} from "./vistas/assessment.js?v=35";
 
 
 let panel = null;
@@ -69,6 +70,11 @@ let siguiente = null;
 let selectorDeDominio = null;
 let menuDelEquipo = null;
 let menuDelIndice = null;
+let botonDeLaGuia = null;
+
+// La guia de scoring en el sitio de los niveles. Cada subcapacidad empieza con
+// sus niveles, que son lo que se lee con el cliente: la guia se pide.
+let conGuia = false;
 
 // Antes de la primera subcapacidad va la apertura, y despues de la ultima, el
 // cierre y los proximos pasos: el indice va de APERTURA a recorrido.length + 1.
@@ -129,6 +135,7 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   anterior = document.getElementById("modoTallerAnterior");
   siguiente = document.getElementById("modoTallerSiguiente");
   selectorDeDominio = document.getElementById("modoTallerDominio");
+  botonDeLaGuia = document.getElementById("modoTallerGuiaBoton");
 
   const boton = document.getElementById("modoTallerButton");
 
@@ -148,6 +155,7 @@ export function setupModoTaller({ irAlAssessment = () => {} } = {}) {
   document.getElementById("modoTallerSalir")?.addEventListener("click", () => cerrarModoTaller());
   anterior?.addEventListener("click", () => irA(indice - 1));
   siguiente?.addEventListener("click", () => irA(indice + 1));
+  botonDeLaGuia?.addEventListener("click", () => mostrarLaGuia(!conGuia));
   cuerpo.addEventListener("click", alPulsarEnElCuerpo);
   cuerpo.addEventListener("animationend", (event) => {
     if (event.target === cuerpo) {
@@ -237,6 +245,7 @@ export function cerrarModoTaller({ volver = true } = {}) {
   cerrarMenusDeLaBarra();
   panel.hidden = true;
   cuerpo.innerHTML = "";
+  conGuia = false;
   updateModalOpenState();
   apartarElChipDelPie(false);
 
@@ -492,6 +501,8 @@ function pintar({ enfocar = true } = {}) {
         .join("")}
     </ol>
 
+    ${htmlDeLaGuia(LEVERS)}
+
     <div class="modo-taller-palancas">
       ${LEVERS.map(
         (lever) => `
@@ -535,6 +546,7 @@ function pintar({ enfocar = true } = {}) {
 
   conectarPuntuacion(cuerpo);
 
+  mostrarLaGuia(false);
   pintarMarcas(item);
   pintarResultado(item);
 
@@ -593,6 +605,7 @@ function pintarApertura({ enfocar = true } = {}) {
     palancas: LEVERS,
   });
   resultado.innerHTML = "";
+  mostrarLaGuia(false);
 
   posicion.textContent = "Apertura";
   anterior.hidden = true;
@@ -639,6 +652,7 @@ function pintarCierre({ enfocar = true } = {}) {
 
   cuerpo.innerHTML = htmlDelCierre(datos, { cambiadasHoy: cambiadasEnEstaSesion() });
   resultado.innerHTML = "";
+  mostrarLaGuia(false);
 
   posicion.textContent = "Cierre del taller";
   anterior.hidden = false;
@@ -671,6 +685,7 @@ function pintarPasos({ enfocar = true } = {}) {
   });
   conectarLosPasos(cuerpo, domainId);
   resultado.innerHTML = "";
+  mostrarLaGuia(false);
 
   posicion.textContent = "Próximos pasos";
   anterior.hidden = false;
@@ -1083,6 +1098,41 @@ function pintarMarcas(item, { animar = false } = {}) {
     }
     contenedor.closest(".modo-taller-nivel")?.classList.toggle("tiene-la-media", nivel === nivelDeLaMedia);
   });
+
+  const recienLlegadas = pintarMarcasDeLaGuia(cuerpo.querySelector(".modo-taller-guia"), {
+    scores: item.scores,
+    objetivos,
+  });
+
+  if (animar) {
+    recienLlegadas.forEach((marca) => marca.classList.add("recien"));
+  }
+}
+
+
+/**
+ * La guia de scoring ocupa el sitio de los cinco niveles, y la escala de
+ * puntuar se queda debajo, a la vista: ver app/guia.js. El boton de la banda
+ * solo sale en las subcapacidades; en la apertura ya se explica la escala, y
+ * en el cierre y los pasos no se puntua.
+ *
+ * El foco no se mueve: si se estaba en una palanca, se sigue puntuando.
+ */
+function mostrarLaGuia(mostrar) {
+  const guia = cuerpo.querySelector(".modo-taller-guia");
+  const niveles = cuerpo.querySelector(".modo-taller-niveles");
+
+  conGuia = Boolean(mostrar && guia);
+
+  if (guia && niveles) {
+    guia.hidden = !conGuia;
+    niveles.hidden = conGuia;
+  }
+
+  if (botonDeLaGuia) {
+    botonDeLaGuia.hidden = !guia;
+    botonDeLaGuia.setAttribute("aria-pressed", String(conGuia));
+  }
 }
 
 
@@ -1228,6 +1278,10 @@ function alPulsarTecla(event) {
     moverseEnElMenu(menu.menu, event.key === "ArrowDown" ? 1 : -1);
   } else if (menu && ["PageDown", "PageUp", "ArrowLeft", "ArrowRight"].includes(event.key)) {
     event.preventDefault();
+  } else if (event.key === "Escape" && conGuia) {
+    // Con la guia abierta, Escape vuelve a los niveles: es lo que tapa.
+    event.preventDefault();
+    mostrarLaGuia(false);
   } else if (event.key === "Escape") {
     event.preventDefault();
     cerrarModoTaller();

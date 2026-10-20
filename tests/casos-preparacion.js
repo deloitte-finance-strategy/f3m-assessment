@@ -9,12 +9,13 @@
  */
 
 import {
+  CHECKLIST_DE_LA_RUBRICA,
   NIVELES_DE_LA_RUBRICA,
   RUBRICA_GENERAL,
   capacidadesDePreparacion,
   documentoDePreparacion,
   listaDeEvidencias,
-} from "../informe/preparacion.js?v=34";
+} from "../informe/preparacion.js?v=35";
 
 
 const RAIZ = new URL("../", import.meta.url);
@@ -205,6 +206,21 @@ export const casos = [
             `${palanca}, nivel ${posicion + 1}: «${texto}»`,
           );
         });
+      });
+    },
+  },
+  {
+    grupo: "Preparación del taller",
+    nombre: "el checklist de la guía del taller es el mismo que enseña «Criterios F3M»",
+    ejecutar(t) {
+      t.igual(Object.keys(CHECKLIST_DE_LA_RUBRICA).join(), Object.keys(RUBRICA_GENERAL).join(), "las mismas palancas");
+
+      Object.entries(CHECKLIST_DE_LA_RUBRICA).forEach(([palanca, puntos]) => {
+        const lista = new RegExp(`id="criteriaPanel-${palanca}"[\\s\\S]*?<ul class="criteria-checklist">([\\s\\S]*?)</ul>`)
+          .exec(indexHtml)?.[1] || "";
+        const enLaPagina = [...lista.matchAll(/<li>([^<]*)<\/li>/g)].map((coincidencia) => coincidencia[1].trim());
+
+        t.igual(enLaPagina.join(" | "), puntos.join(" | "), `${palanca}: el checklist`);
       });
     },
   },

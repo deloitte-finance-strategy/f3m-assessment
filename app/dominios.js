@@ -10,10 +10,10 @@
  * decia "no se pudo cargar el JSON de datos" con los otros ocho perfectos.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=34";
-import { normalizarItemCargado } from "../core/escenario.js?v=34";
-import { normalizeDomainTargets } from "../core/objetivos.js?v=34";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=34";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=35";
+import { normalizarItemCargado } from "../core/escenario.js?v=35";
+import { normalizeDomainTargets } from "../core/objetivos.js?v=35";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=35";
 
 import {
   CASOS_DE_IA,
@@ -27,13 +27,13 @@ import {
   expandedHeatmapCapabilities,
   state,
   syncActiveDomainState,
-} from "./estado.js?v=34";
+} from "./estado.js?v=35";
 
-import { comportamientoDeDesplazamiento } from "./preferencias.js?v=34";
-import { repintarTodo } from "./repintado.js?v=34";
-import { conRadaresAnimados } from "./graficos.js?v=34";
-import { fundir } from "./movimiento.js?v=34";
-import { populateCapacityFilter } from "./filtros.js?v=34";
+import { comportamientoDeDesplazamiento } from "./preferencias.js?v=35";
+import { repintarTodo } from "./repintado.js?v=35";
+import { conRadaresAnimados } from "./graficos.js?v=35";
+import { fundir } from "./movimiento.js?v=35";
+import { populateCapacityFilter } from "./filtros.js?v=35";
 
 
 /**
