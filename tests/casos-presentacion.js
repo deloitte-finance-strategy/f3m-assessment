@@ -18,7 +18,8 @@ import {
   fechaParaArchivo,
   formatMedia,
   formatNumber,
-} from "../core/presentacion.js?v=35";
+  losDominios,
+} from "../core/presentacion.js?v=36";
 
 
 export const casos = [
@@ -156,6 +157,19 @@ export const casos = [
       t.igual(escapeHtml(undefined), "", "undefined");
       t.igual(escapeHtml(0), "0", "el cero si es un valor");
       t.igual(escapeAttr(null), "", "escapeAttr se comporta igual");
+    },
+  },
+
+  // ------------------------------------------------------------- dominios
+  {
+    grupo: "Cuantos dominios",
+    nombre: "se dicen en letra, y uno solo es el dominio",
+    ejecutar: (t) => {
+      t.igual(losDominios(9), "los nueve dominios", "los nueve");
+      t.igual(losDominios(6), "los seis dominios", "con tres que no aplican");
+      t.igual(losDominios(2), "los dos dominios", "dos");
+      t.igual(losDominios(1), "el dominio", "uno");
+      t.igual(losDominios(14), "los 14 dominios", "con mas de diez, en cifra");
     },
   },
 ];

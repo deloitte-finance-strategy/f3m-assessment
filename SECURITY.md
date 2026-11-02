@@ -115,8 +115,9 @@ anónimo, nombre elegido por la propia persona y fecha).
 
 Por escenario, si alguien los pone: el **nombre del cliente**, su **logo** (una imagen PNG, JPEG o
 WebP de hasta 150 KB, guardada dentro del escenario; un SVG se guarda ya dibujado en PNG, porque
-un SVG puede llevar código) y los **próximos pasos acordados** en cada dominio, con su responsable
-y su fecha, que son texto libre como el comentario.
+un SVG puede llevar código), los **próximos pasos acordados** en cada dominio, con su responsable
+y su fecha, que son texto libre como el comentario, y **qué dominios no aplican** a ese cliente,
+que es solo una lista de ids del catálogo.
 
 Conviene decir en voz alta lo del comentario libre: es un campo de texto de 2.000 caracteres donde
 puede acabar cualquier cosa del cliente. Es el dato más sensible de la herramienta, y sale también

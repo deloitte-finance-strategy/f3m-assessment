@@ -49,6 +49,11 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
   ámbar.
 - Ajustar los objetivos de madurez capacidad a capacidad, o los de **todas las capacidades** de
   un dominio de una vez, y llevarlos a **los nueve dominios** con un clic.
+- Elegir **qué dominios aplican a cada cliente**, en **Sesión → Dominios del cliente**. Los que no
+  aplican dejan de salir en el conmutador, el Overview, el buscador, la pestaña IA, el modo taller
+  y los informes, y no cuentan en ninguna media; lo puntuado en ellos no se borra y vuelve si se
+  marcan otra vez. Se guarda con el escenario, así que viaja en las copias y lo ve todo el equipo
+  de un escenario compartido.
 - Exportar resumen y roadmap en CSV.
 - Exportar **el informe**: un PDF con forma de presentación, en página 16:9, que abre con la lectura
   de la función financiera completa, sigue con el diagnóstico del dominio —escala de madurez,

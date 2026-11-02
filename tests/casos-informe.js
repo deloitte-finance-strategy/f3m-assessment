@@ -13,9 +13,9 @@
  *   que escribe el usuario llega sin escapar.
  */
 
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=35";
-import { deTantas, paginar } from "../informe/secciones.js?v=35";
-import { resumenDeDesbordes } from "../informe/desbordes.js?v=35";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=36";
+import { deTantas, paginar } from "../informe/secciones.js?v=36";
+import { resumenDeDesbordes } from "../informe/desbordes.js?v=36";
 
 
 /** Una subcapacidad y sus metricas, lo minimo que el informe necesita. */
@@ -257,6 +257,50 @@ export const casos = [
       t.igual(con.includes("FP&amp;A · Cierre"), true, "con su dominio, escapado");
       t.igual(cuentaDeDiapositivas(con) - cuentaDeDiapositivas(sin), 2, "dos diapositivas, ni una mas");
       t.igual(sin.includes("Lo más urgente"), false, "sin nada alto no hay diapositiva");
+    },
+  },
+  {
+    grupo: "El deck",
+    nombre: "con dominios que no aplican, la parte global dice cuales y no habla de nueve",
+    ejecutar: (t) => {
+      // Quien lee el informe no ha visto la herramienta: seis dominios donde
+      // el modelo tiene nueve tienen que leerse como una decision, no como un
+      // olvido, y ningun texto puede seguir diciendo «los nueve».
+      const global = (dominiosQueNoAplican) => ({
+        filas: [],
+        dominios: 9 - dominiosQueNoAplican.length,
+        dominiosTotales: 9 - dominiosQueNoAplican.length,
+        dominiosDelModelo: 9,
+        dominiosQueNoAplican,
+        subcapacidades: 104,
+        evaluadas: 100,
+        scoreGlobal: 2.5,
+        gapMedio: 1.5,
+        objetivoMedio: 4,
+        highCount: 12,
+        titulares: { mayorBrecha: null, palancaMasDebil: null, pendientes: 4 },
+        radarImages: { procesos: "", tecnologia: "", organizacion: "" },
+      });
+
+      const conTres = buildEnhancedPdfReportHtml(
+        datos({ global: global(["Fiscal", "Relación con Inversores", "Tesorería"]) }),
+      );
+      const conTodos = buildEnhancedPdfReportHtml(datos({ global: global([]) }));
+
+      t.igual(conTres.includes("No aplican a este cliente: Fiscal, Relación con Inversores y Tesorería"), true, "la nota del panorama");
+      t.igual(conTres.includes("No aplican Fiscal, Relación con Inversores y Tesorería."), true, "el cierre");
+      t.igual(conTres.includes("los nueve del modelo"), false, "sin «los nueve del modelo»");
+      t.igual(conTres.includes("Seis ejes, uno por dominio"), true, "el radar cuenta sus ejes");
+      t.igual(conTodos.includes("Nueve ejes, uno por dominio"), true, "con los nueve, como siempre");
+      t.igual(conTodos.includes("No aplican"), false, "y sin nota de lo que no aplica");
+
+      // Con dos dominios el radar seria una raya: la diapositiva no sale.
+      const conDos = buildEnhancedPdfReportHtml(
+        datos({ global: global(["Controlling", "Transacciones", "Auditoría Interna", "Relación con Inversores", "Fiscal", "Tesorería", "Finanzas Estratégicas"]) }),
+      );
+      t.igual(conTres.includes("Radar por dominio"), true, "con seis, la diapositiva del radar");
+      t.igual(conDos.includes("Radar por dominio"), false, "con dos, sin ella");
+      t.igual(cuentaDeDiapositivas(conTres) - cuentaDeDiapositivas(conDos), 1, "una diapositiva menos, ni dos");
     },
   },
   {

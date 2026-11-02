@@ -12,7 +12,9 @@
 
 import {
   CAMPOS_DE_AUTORIA,
+  DOMINIOS_ADMITIDOS,
   ESTADOS_VALIDOS,
+  dominiosExcluidosParaGuardar,
   LIMITE_DE_CLIENTE,
   LIMITE_DE_LOGO,
   LIMITES_DE_PASO,
@@ -20,13 +22,14 @@ import {
   MAXIMO_DE_PASOS,
   normalizarAutoria,
   normalizarCliente,
+  normalizarDominiosExcluidos,
   normalizarEscenarioParaFirebase,
   normalizarEstado,
   normalizarLogo,
   normalizarProximosPasos,
   recortarAlLimite,
   revisarEscenario,
-} from "../core/escenario.js?v=35";
+} from "../core/escenario.js?v=36";
 
 
 /** Serializador de objetivos de mentira: aqui solo importa que se le llame. */
@@ -527,6 +530,53 @@ export const casos = [
       conPasos.proximosPasos = { fpa: [{ accion: "Uno" }] };
       t.igual(normalizar(conPasos).proximosPasos.fpa[0].accion, "Uno", "viajan con el escenario");
       t.igual(revisarEscenario(conPasos).problemas.length, 0, "y un archivo con ellos no da avisos");
+    },
+  },
+
+  // ------------------------------------------------ los dominios que aplican
+  {
+    grupo: "Los dominios que no aplican",
+    nombre: "un escenario sin el campo los enseña todos",
+    ejecutar: (t) => {
+      // Es la compatibilidad con todo lo guardado antes: ni una copia ni un
+      // escenario compartido de antes de este campo puede perder un dominio.
+      t.igual(normalizarDominiosExcluidos(undefined).length, 0, "sin campo");
+      t.igual(normalizarDominiosExcluidos(null).length, 0, "nulo");
+      t.igual(normalizarDominiosExcluidos("fiscal").length, 0, "un texto suelto no es una lista");
+      t.igual(normalizar(escenarioSano()).dominiosExcluidos, undefined, "y no viaja vacio");
+    },
+  },
+  {
+    grupo: "Los dominios que no aplican",
+    nombre: "se leen igual de una lista que del objeto que guarda Firebase",
+    ejecutar: (t) => {
+      t.igual(normalizarDominiosExcluidos(["fiscal", "relacion-inversores"]).join(", "), "fiscal, relacion-inversores");
+      t.igual(normalizarDominiosExcluidos({ "relacion-inversores": true, fiscal: true }).join(", "), "fiscal, relacion-inversores", "en el orden de siempre");
+      t.igual(normalizarDominiosExcluidos({ fiscal: false }).length, 0, "false no excluye");
+      t.igual(normalizarDominiosExcluidos(["fiscal", "inventado", "fiscal"]).join(", "), "fiscal", "ni inventados ni repetidos");
+    },
+  },
+  {
+    grupo: "Los dominios que no aplican",
+    nombre: "excluirlos todos se lee como no excluir ninguno",
+    ejecutar: (t) => {
+      // Sin dominios no hay nada que enseñar: antes la herramienta entera que
+      // una en blanco que nadie sabria explicar delante del cliente.
+      t.igual(normalizarDominiosExcluidos(DOMINIOS_ADMITIDOS).length, 0, "los nueve");
+      t.igual(normalizarDominiosExcluidos(DOMINIOS_ADMITIDOS.slice(1)).length, DOMINIOS_ADMITIDOS.length - 1, "ocho si");
+    },
+  },
+  {
+    grupo: "Los dominios que no aplican",
+    nombre: "viajan como las reglas los validan, y un archivo con ellos no da avisos",
+    ejecutar: (t) => {
+      t.igual(JSON.stringify(dominiosExcluidosParaGuardar(["fiscal"])), '{"fiscal":true}', "clave a clave, con true");
+      t.igual(dominiosExcluidosParaGuardar([]), null, "ninguno es null, que en Firebase borra la rama");
+
+      const conExcluidos = escenarioSano();
+      conExcluidos.dominiosExcluidos = { "relacion-inversores": true, inventado: true };
+      t.igual(JSON.stringify(normalizar(conExcluidos).dominiosExcluidos), '{"relacion-inversores":true}', "solo los que existen");
+      t.igual(revisarEscenario(conExcluidos).problemas.length, 0, "un campo de la raiz que se conoce");
     },
   },
 ];

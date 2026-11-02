@@ -12,33 +12,42 @@ import {
   DEFAULT_TARGET_MATURITY,
   normalizeTargetValue,
   toScore,
-} from "../core/calculo.js?v=35";
+} from "../core/calculo.js?v=36";
 
 import {
+  dominiosExcluidosParaGuardar,
   normalizarAutoria,
   normalizarCliente,
+  normalizarDominiosExcluidos,
   normalizarEscenarioParaFirebase,
   normalizarEstado,
   normalizarLogo,
   normalizarProximosPasos,
   recortarAlLimite,
-} from "../core/escenario.js?v=35";
+} from "../core/escenario.js?v=36";
 
 import {
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "../core/objetivos.js?v=35";
+} from "../core/objetivos.js?v=36";
 
 import {
   findMatchingScenarioItem,
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
-} from "../core/coincidencias.js?v=35";
+} from "../core/coincidencias.js?v=36";
 
-import { LEVERS, STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=35";
-import { leerAlmacenamiento } from "./almacenamiento.js?v=35";
-import { setActiveDomain } from "./dominios.js?v=35";
+import {
+  LEVERS,
+  STORAGE_KEY,
+  dominioAplica,
+  primerDominioQueAplica,
+  state,
+  syncActiveDomainState,
+} from "./estado.js?v=36";
+import { leerAlmacenamiento } from "./almacenamiento.js?v=36";
+import { setActiveDomain } from "./dominios.js?v=36";
 
 
 
@@ -240,6 +249,7 @@ export function applyScenarioPayload(payload, { seguirDominioDelEscenario = fals
   state.cliente = normalizarCliente(payload.cliente);
   state.logo = normalizarLogo(payload.logo);
   state.proximosPasos = normalizarProximosPasos(payload.proximosPasos);
+  state.dominiosExcluidos = normalizarDominiosExcluidos(payload.dominiosExcluidos);
 
   if (payload.domains) {
     Object.keys(payload.domains).forEach((domainId) => {
@@ -284,12 +294,13 @@ export function applyScenarioPayload(payload, { seguirDominioDelEscenario = fals
     // Se vuelve a fijar el dominio activo en cualquier caso: aplicar el
     // escenario reasigna domain.targets, y state.targets debe volver a
     // apuntar al objeto nuevo. Lo que cambia es CUAL, no si se hace.
-    const dominioDestino =
+    const dominioDestino = dominioQueSeguir(
       seguirDominioDelEscenario &&
       payload.activeDomainId &&
       state.domains[payload.activeDomainId]
         ? payload.activeDomainId
-        : state.activeDomainId;
+        : state.activeDomainId,
+    );
 
     if (state.domains[dominioDestino]) {
       setActiveDomain(dominioDestino);
@@ -331,7 +342,26 @@ export function applyScenarioPayload(payload, { seguirDominioDelEscenario = fals
     setActiveDomain("fpa");
   }
 
+  // Un archivo antiguo no trae dominios excluidos, asi que vuelven todos y el
+  // abierto aplica siempre. Se pregunta igual: es la misma red que arriba.
+  if (!dominioAplica(state.activeDomainId) && primerDominioQueAplica()) {
+    setActiveDomain(primerDominioQueAplica());
+  }
+
   return resultado;
+}
+
+
+/**
+ * El dominio en el que quedarse, salvo que ya no aplique a este cliente.
+ *
+ * Abrir la copia de un cliente al que no le aplica el dominio en el que se
+ * estaba, o que otra persona del escenario lo quite, no puede dejar en
+ * pantalla un dominio que el conmutador ya no enseña: se pasa al primero que
+ * aplica.
+ */
+function dominioQueSeguir(domainId) {
+  return dominioAplica(domainId) ? domainId : primerDominioQueAplica() || domainId;
 }
 
 
@@ -392,6 +422,7 @@ export function buildScenarioPayload() {
     ...(state.cliente ? { cliente: state.cliente } : {}),
     ...(state.logo ? { logo: state.logo } : {}),
     ...(Object.keys(state.proximosPasos).length ? { proximosPasos: state.proximosPasos } : {}),
+    ...(state.dominiosExcluidos.length ? { dominiosExcluidos: dominiosExcluidosParaGuardar(state.dominiosExcluidos) } : {}),
     domains: domainsPayload,
   };
 }

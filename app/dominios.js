@@ -10,10 +10,10 @@
  * decia "no se pudo cargar el JSON de datos" con los otros ocho perfectos.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=35";
-import { normalizarItemCargado } from "../core/escenario.js?v=35";
-import { normalizeDomainTargets } from "../core/objetivos.js?v=35";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=35";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue, unique } from "../core/calculo.js?v=36";
+import { normalizarItemCargado } from "../core/escenario.js?v=36";
+import { normalizeDomainTargets } from "../core/objetivos.js?v=36";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=36";
 
 import {
   CASOS_DE_IA,
@@ -23,17 +23,18 @@ import {
   ETIQUETAS_DE_CASOS,
   GRUPOS_DE_DOMINIO,
   LEVERS,
+  dominioAplica,
   els,
   expandedHeatmapCapabilities,
   state,
   syncActiveDomainState,
-} from "./estado.js?v=35";
+} from "./estado.js?v=36";
 
-import { comportamientoDeDesplazamiento } from "./preferencias.js?v=35";
-import { repintarTodo } from "./repintado.js?v=35";
-import { conRadaresAnimados } from "./graficos.js?v=35";
-import { fundir } from "./movimiento.js?v=35";
-import { populateCapacityFilter } from "./filtros.js?v=35";
+import { comportamientoDeDesplazamiento } from "./preferencias.js?v=36";
+import { repintarTodo } from "./repintado.js?v=36";
+import { conRadaresAnimados } from "./graficos.js?v=36";
+import { fundir } from "./movimiento.js?v=36";
+import { populateCapacityFilter } from "./filtros.js?v=36";
 
 
 /**
@@ -134,7 +135,20 @@ export async function cargarCatalogoDeCasosDeIa() {
 }
 
 
-/** Los botones del conmutador, agrupados como dice el catalogo. */
+/**
+ * Los dominios que no han podido cargarse. Se recuerdan aqui porque el
+ * conmutador se vuelve a pintar al cambiar los que aplican al cliente, y sin
+ * esto un dominio roto volveria a parecer disponible.
+ */
+const dominiosNoDisponibles = new Set();
+
+
+/**
+ * Los botones del conmutador, agrupados como dice el catalogo.
+ *
+ * Solo los dominios que aplican al cliente, y solo los grupos que conservan
+ * alguno: un grupo vacio era una caja con su rotulo y nada dentro.
+ */
 export function renderDomainSwitcher() {
   const contenedor = document.querySelector(".domain-groups");
 
@@ -142,11 +156,12 @@ export function renderDomainSwitcher() {
     return;
   }
 
-  const dominios = Object.values(DOMAINS);
+  const dominios = Object.values(DOMAINS).filter((dominio) => dominioAplica(dominio.id));
 
-  const grupos = GRUPOS_DE_DOMINIO.length
+  const grupos = (GRUPOS_DE_DOMINIO.length
     ? GRUPOS_DE_DOMINIO
-    : unique(dominios.map((dominio) => dominio.group));
+    : unique(dominios.map((dominio) => dominio.group))
+  ).filter((grupo) => dominios.some((dominio) => dominio.group === grupo));
 
   contenedor.innerHTML = grupos
     .map((grupo) => {
@@ -187,6 +202,8 @@ export function renderDomainSwitcher() {
       })
       .join(" "),
   );
+
+  marcarDominiosNoDisponibles([...dominiosNoDisponibles]);
 }
 
 
@@ -269,6 +286,8 @@ export async function loadCoreDomains() {
 /** Deja sin usar los botones de los dominios que no han podido cargarse. */
 export function marcarDominiosNoDisponibles(fallidos) {
   fallidos.forEach((domainId) => {
+    dominiosNoDisponibles.add(domainId);
+
     const boton = document.querySelector(`[data-domain-id="${CSS.escape(domainId)}"]`);
 
     if (!boton) {

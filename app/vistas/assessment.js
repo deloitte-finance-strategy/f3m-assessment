@@ -17,46 +17,48 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=35";
-import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=35";
-import { createDefaultTargets } from "../../core/objetivos.js?v=35";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=35";
-import { abrirDialogo, showNotice } from "../avisos.js?v=35";
+} from "../../core/calculo.js?v=36";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=36";
+import { createDefaultTargets } from "../../core/objetivos.js?v=36";
+import { escapeAttr, escapeHtml, formatMedia, losDominios } from "../../core/presentacion.js?v=36";
+import { abrirDialogo, showNotice } from "../avisos.js?v=36";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=35";
+} from "../celdas.js?v=36";
 import {
   DOMAINS,
   LEVERS,
+  dominioAplica,
+  dominiosQueAplican,
   els,
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=35";
+} from "../estado.js?v=36";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "../edicion.js?v=35";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=35";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=35";
+} from "../edicion.js?v=36";
+import { describirObjetivos, getVisibleItems } from "../filtros.js?v=36";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=36";
 import {
   persistItemChange,
   persistTargetsDeDominios,
   persistTargetsDelDominioActivo,
-} from "../persistencia.js?v=35";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=35";
-import { repintarTodo } from "../repintado.js?v=35";
-import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=35";
+} from "../persistencia.js?v=36";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=36";
+import { repintarTodo } from "../repintado.js?v=36";
+import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=36";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=35";
+} from "../subcapacidad.js?v=36";
 
 
 export function renderCapabilityTargets() {
@@ -257,6 +259,10 @@ function filaParaTodas(capabilities) {
   // objetivo unico: si las tres dicen «Varios», no hay nada que copiar.
   const hayAlgoQueCopiar = comunes.some((valor) => valor !== null);
 
+  // A los que aplican al cliente, que son los que se ven. Con uno solo, el
+  // boton no tiene a donde copiar: esta fila ya cambia ese dominio entero.
+  const cuantosAplican = dominiosQueAplican().length;
+
   return `
     <div class="capability-target-row capability-target-row-todas">
       <div class="capability-target-name">
@@ -266,14 +272,15 @@ function filaParaTodas(capabilities) {
           Cambia una palanca en todo ${escapeHtml(dominio)} de una vez
         </span>
 
+        ${cuantosAplican > 1 ? `
         <button
           class="objetivos-a-los-nueve"
           type="button"
           data-objetivos-a-los-nueve
           ${hayAlgoQueCopiar ? "" : "disabled"}
         >
-          Usar estos objetivos en los nueve dominios
-        </button>
+          Usar estos objetivos en ${escapeHtml(losDominios(cuantosAplican))}
+        </button>` : ""}
       </div>
 
       ${controles}
@@ -363,13 +370,20 @@ async function aplicarObjetivosALosNueve() {
   );
 
   const dominio = DOMAINS[state.activeDomainId]?.label || "este dominio";
+  // Solo los que aplican al cliente: los que no, no se ven, y cambiarles algo
+  // que no se ve es una sorpresa para el dia que se vuelvan a marcar.
   const dominiosCargados = Object.keys(state.domains).filter(
-    (id) => state.domains[id]?.items?.length,
+    (id) => state.domains[id]?.items?.length && dominioAplica(id),
   );
+
+  const cuantosAplican = dominiosQueAplican().length;
+  const aDonde = dominiosCargados.length === cuantosAplican
+    ? losDominios(cuantosAplican)
+    : `los ${dominiosCargados.length} dominios cargados`;
 
   const parrafos = [
     `${aCopiar.map(({ lever, valor }) => `${lever.label} ${valor}`).join(", ")}, en todas las capacidades de ${
-      dominiosCargados.length === 9 ? "los nueve dominios" : `los ${dominiosCargados.length} dominios cargados`
+      aDonde
     }. Sustituye los objetivos que tuvieran.`,
   ];
 
@@ -387,7 +401,7 @@ async function aplicarObjetivosALosNueve() {
 
   const confirmado = await abrirDialogo({
     eyebrow: "Ambición de madurez",
-    titulo: "Usar estos objetivos en los nueve dominios",
+    titulo: `Usar estos objetivos en ${losDominios(cuantosAplican)}`,
     parrafos,
     tono: "peligro",
     confirmar: "Aplicar a todos",
@@ -419,7 +433,7 @@ async function aplicarObjetivosALosNueve() {
   persistTargetsDeDominios(dominiosCargados);
 
   showNotice(
-    `Objetivos aplicados en ${dominiosCargados.length === 9 ? "los nueve dominios" : `${dominiosCargados.length} dominios`}.`,
+    `Objetivos aplicados en ${aDonde}.`,
     "exito",
   );
 }

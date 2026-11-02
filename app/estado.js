@@ -13,9 +13,9 @@
  * una funcion de lectura.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=35";
-import { ESTADOS_VALIDOS } from "../core/escenario.js?v=35";
-import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=35";
+import { PALANCAS } from "../core/calculo.js?v=36";
+import { ESTADOS_VALIDOS } from "../core/escenario.js?v=36";
+import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=36";
 
 
 export const DEFAULT_DOMAIN_ID = "fpa";
@@ -91,6 +91,10 @@ export const state = {
   // Lo acordado al cerrar cada taller, por dominio: { fpa: [{ accion,
   // responsable, fecha }] }. Sale en el acta y en el correo.
   proximosPasos: {},
+  // Los dominios que no aplican a este cliente, por id. Es del escenario, como
+  // el nombre: lo decide el equipo para el cliente, no cada consultor. Sus
+  // datos siguen en `domains`: quitarlo no borra nada.
+  dominiosExcluidos: [],
   domains: {},
   meta: null,
   items: [],
@@ -186,4 +190,33 @@ export function syncActiveDomainState() {
   state.domains[state.activeDomainId].items = state.items;
   state.domains[state.activeDomainId].meta = state.meta;
   state.domains[state.activeDomainId].targets = state.targets;
+}
+
+
+/**
+ * Si un dominio aplica a este cliente.
+ *
+ * Toda la herramienta pregunta aqui y no a la lista: el conmutador, el
+ * Overview, el buscador, la pestaña IA, el modo taller y los informes. Los que
+ * no aplican siguen cargados y con sus puntuaciones, solo que no se enseñan.
+ */
+export function dominioAplica(domainId) {
+  return !state.dominiosExcluidos.includes(domainId);
+}
+
+
+/** Los ids del catalogo que aplican, en el orden del catalogo. */
+export function dominiosQueAplican() {
+  return Object.keys(DOMAINS).filter(dominioAplica);
+}
+
+
+/**
+ * El primer dominio cargado que aplica, en el orden del catalogo, o null.
+ *
+ * Es a donde se va cuando el abierto deja de aplicar: al quitarlo, al abrir
+ * una copia o al llegar el cambio de otra persona del escenario.
+ */
+export function primerDominioQueAplica() {
+  return dominiosQueAplican().find((domainId) => state.domains[domainId]) || null;
 }

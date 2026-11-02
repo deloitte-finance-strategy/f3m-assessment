@@ -21,18 +21,20 @@
  * Sin filtros, como la parte global del informe, que es lo que resume.
  */
 
-import { normalizarLogo } from "../core/escenario.js?v=35";
+import { normalizarLogo } from "../core/escenario.js?v=36";
 import {
   COLOR_DE_PALANCA,
+  MINIMO_DE_EJES_DE_UN_RADAR,
+  enLetra,
   escapeAttr,
   escapeHtml,
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=35";
-import { PALETA, getEnhancedPdfReportStyles } from "./estilos.js?v=35";
-import { svgBullet } from "./graficos.js?v=35";
-import { kpisDeLaFuncionFinanciera, rejillaDeKpis, titularHtml } from "./secciones.js?v=35";
+} from "../core/presentacion.js?v=36";
+import { PALETA, getEnhancedPdfReportStyles } from "./estilos.js?v=36";
+import { svgBullet } from "./graficos.js?v=36";
+import { kpisDeLaFuncionFinanciera, rejillaDeKpis, titularHtml } from "./secciones.js?v=36";
 
 
 /** Cinco brechas: las que caben en la columna sin apretar la letra. */
@@ -106,7 +108,7 @@ export function diapositivaDelResumen(data) {
           ${rejillaDeKpis(kpisDeLaFuncionFinanciera(global))}
 
           <div class="resumen-centro crece">
-            ${madurez(data.radar, global.palancas || [])}
+            ${madurez(data.radar, global.palancas || [], global.dominios)}
             <div class="resumen-derecha">
               ${brechas(global.brechas)}
               ${pasos(data.pasos || [])}
@@ -127,9 +129,12 @@ export function diapositivaDelResumen(data) {
 
 /** De cuanto habla la hoja, en el pie: quien la recibe no ha visto la herramienta. */
 export function alcance(global) {
+  // Con dominios que no aplican al cliente, «que aplican»: el comite sabe que
+  // el modelo tiene nueve, y seis a secas parece que faltan tres.
+  const queAplican = global.dominiosQueNoAplican?.length ? " que aplican" : "";
   const dominios = global.dominios < global.dominiosTotales
-    ? `${global.dominios} de los ${global.dominiosTotales} dominios`
-    : `los ${global.dominios} dominios`;
+    ? `${global.dominios} de los ${global.dominiosTotales} dominios${queAplican}`
+    : `los ${global.dominios} dominios${queAplican}`;
 
   return `${global.evaluadas} de ${global.subcapacidades} subcapacidades puntuadas en ${dominios} · Sin filtros`;
 }
@@ -145,7 +150,7 @@ function logo(data) {
 
 
 /** El radar de los dominios y, debajo, cada palanca frente a su objetivo. */
-export function madurez(radar, palancas) {
+export function madurez(radar, palancas, dominios = MINIMO_DE_EJES_DE_UN_RADAR) {
   const filas = palancas
     .map((palanca) => `
       <li>
@@ -165,11 +170,14 @@ export function madurez(radar, palancas) {
     <section class="resumen-bloque resumen-madurez">
       <h3>Madurez por dominio</h3>
       ${
-        radar
-          ? `<img class="radar" src="${escapeAttr(radar)}" alt="Radar de la madurez media de cada dominio frente a su objetivo">`
-          : `<p class="nota resumen-sin-radar">No se pudo dibujar el radar: la librería de gráficos no cargó.</p>`
+        dominios < MINIMO_DE_EJES_DE_UN_RADAR
+          ? `<p class="nota resumen-sin-radar">Con ${escapeHtml(enLetra(dominios))} ${dominios === 1 ? "dominio" : "dominios"} no hay radar: `
+            + "con menos de tres ejes no se lee. Cada palanca frente a su objetivo, aquí debajo.</p>"
+          : radar
+            ? `<img class="radar" src="${escapeAttr(radar)}" alt="Radar de la madurez media de cada dominio frente a su objetivo">`
+              + `<p class="nota">Un eje por dominio. El área es la madurez media y la línea discontinua, el objetivo.</p>`
+            : `<p class="nota resumen-sin-radar">No se pudo dibujar el radar: la librería de gráficos no cargó.</p>`
       }
-      <p class="nota">Un eje por dominio. El área es la madurez media y la línea discontinua, el objetivo.</p>
       ${filas ? `<ul class="resumen-palancas">${filas}</ul>` : ""}
     </section>
   `;

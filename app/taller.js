@@ -20,43 +20,43 @@
  * guardado diferido de edicion.js. Lo unico propio es como se enseña.
  */
 
-import { average, getMaturityLevel, getMaturityLevelNumber } from "../core/calculo.js?v=35";
-import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=35";
-import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=35";
-import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=35";
-import { nombreDeMasInformacion } from "./biblioteca.js?v=35";
-import { priorityBadge } from "./celdas.js?v=35";
-import { htmlDeLaApertura } from "./apertura.js?v=35";
-import { htmlDeLaGuia, pintarMarcasDeLaGuia } from "./guia.js?v=35";
-import { htmlDelCierre, revelarElCierre } from "./cierre.js?v=35";
-import { sinMovimiento } from "./movimiento.js?v=35";
+import { average, getMaturityLevel, getMaturityLevelNumber } from "../core/calculo.js?v=36";
+import { LIMITES_DE_TEXTO } from "../core/escenario.js?v=36";
+import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=36";
+import { SELECTOR_DE_MODAL_ABIERTO, atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=36";
+import { nombreDeMasInformacion } from "./biblioteca.js?v=36";
+import { priorityBadge } from "./celdas.js?v=36";
+import { htmlDeLaApertura } from "./apertura.js?v=36";
+import { htmlDeLaGuia, pintarMarcasDeLaGuia } from "./guia.js?v=36";
+import { htmlDelCierre, revelarElCierre } from "./cierre.js?v=36";
+import { sinMovimiento } from "./movimiento.js?v=36";
 import {
   conectarLosPasos,
   guardarLosPasosPendientes,
   htmlDeLosPasos,
   pasosDelDominio,
   seEstaEscribiendoUnPaso,
-} from "./proximos-pasos.js?v=35";
-import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=35";
+} from "./proximos-pasos.js?v=36";
+import { avanceDeDominio, getActiveDomainConfig, switchDomain } from "./dominios.js?v=36";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "./edicion.js?v=35";
-import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, state } from "./estado.js?v=35";
-import { capacidadesDePreparacion } from "../informe/preparacion.js?v=35";
-import { getVisibleItems } from "./filtros.js?v=35";
-import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=35";
-import { calculate, getCapabilityTargets } from "./metricas.js?v=35";
-import { repintarTodo } from "./repintado.js?v=35";
-import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=35";
+} from "./edicion.js?v=36";
+import { DOMAINS, GRUPOS_DE_DOMINIO, LEVERS, dominioAplica, state } from "./estado.js?v=36";
+import { capacidadesDePreparacion } from "../informe/preparacion.js?v=36";
+import { getVisibleItems } from "./filtros.js?v=36";
+import { copiarTextoDelCorreo, datosDelActa, exportarActa } from "./informe.js?v=36";
+import { calculate, getCapabilityTargets } from "./metricas.js?v=36";
+import { repintarTodo } from "./repintado.js?v=36";
+import { getAiDataForItem, getItemObjective, getItemQuestions } from "./subcapacidad.js?v=36";
 import {
   conectarPuntuacion,
   enfocarPalanca,
   idDeLaTarjetaEnCurso,
   llevarALasTarjetas,
   scoreControl,
-} from "./vistas/assessment.js?v=35";
+} from "./vistas/assessment.js?v=36";
 
 
 let panel = null;
@@ -936,16 +936,17 @@ const NOTAS_DEL_EQUIPO = [
 
 
 /**
- * Los nueve dominios, agrupados como en el conmutador y con su avance, que es
- * la pregunta de quien decide a cual pasar: cual queda por hacer. Los que no
- * se pudieron cargar salen, pero apagados.
+ * Los dominios que aplican al cliente, agrupados como en el conmutador y con
+ * su avance, que es la pregunta de quien decide a cual pasar: cual queda por
+ * hacer. Los que no se pudieron cargar salen, pero apagados; los que no
+ * aplican, no salen.
  */
 function pintarSelectorDeDominio() {
   if (!selectorDeDominio) {
     return;
   }
 
-  const dominios = Object.values(DOMAINS);
+  const dominios = Object.values(DOMAINS).filter((dominio) => dominioAplica(dominio.id));
   const grupos = GRUPOS_DE_DOMINIO.length ? GRUPOS_DE_DOMINIO : [...new Set(dominios.map((dominio) => dominio.group))];
 
   selectorDeDominio.innerHTML = grupos

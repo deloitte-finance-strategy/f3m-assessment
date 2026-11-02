@@ -25,6 +25,12 @@
           }
         },
 
+        "dominiosExcluidos": {
+          "$dominioExcluido": {
+            ".validate": "$dominioExcluido.matches(/^(auditoria-interna|controlling|finanzas-estrategicas|finanzas-negocio|fiscal|fpa|relacion-inversores|tesoreria|transacciones)$/) && newData.isBoolean() && newData.val() == true"
+          }
+        },
+
         "domains": {
           "$domainId": {
             ".validate": "$domainId.matches(/^(auditoria-interna|controlling|finanzas-estrategicas|finanzas-negocio|fiscal|fpa|relacion-inversores|tesoreria|transacciones)$/)",

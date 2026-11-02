@@ -14,22 +14,23 @@
  * rama intacta en vez de desaparecer para todo el equipo.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=35";
-import { serializeTargetsForFirebase } from "../core/objetivos.js?v=35";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=36";
+import { serializeTargetsForFirebase } from "../core/objetivos.js?v=36";
+import { dominiosExcluidosParaGuardar } from "../core/escenario.js?v=36";
 
-import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=35";
-import { escribirAlmacenamiento } from "./almacenamiento.js?v=35";
-import { ocultarAviso, showNotice } from "./avisos.js?v=35";
+import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=36";
+import { escribirAlmacenamiento } from "./almacenamiento.js?v=36";
+import { ocultarAviso, showNotice } from "./avisos.js?v=36";
 import {
   conLimiteDeEspera,
   conectarFirebase,
   enEscenarioCompartido,
   getConexion,
-} from "./firebase.js?v=35";
-import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=35";
-import { repintarTodo } from "./repintado.js?v=35";
-import { populateCapacityFilter } from "./filtros.js?v=35";
-import { anotarCambioLocal } from "./copias.js?v=35";
+} from "./firebase.js?v=36";
+import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=36";
+import { repintarTodo } from "./repintado.js?v=36";
+import { populateCapacityFilter } from "./filtros.js?v=36";
+import { anotarCambioLocal } from "./copias.js?v=36";
 
 import {
   hayCanalDeVuelta,
@@ -37,14 +38,14 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./indicador.js?v=35";
+} from "./indicador.js?v=36";
 
 import {
   applyScenarioPayload,
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./escenario.js?v=35";
+} from "./escenario.js?v=36";
 
 
 
@@ -166,6 +167,10 @@ export async function initializeSharedScenario() {
 
         if (Object.keys(state.proximosPasos).length) {
           persistProximosPasos();
+        }
+
+        if (state.dominiosExcluidos.length) {
+          persistDominiosExcluidos();
         }
       } catch (error) {
         console.warn(
@@ -619,6 +624,17 @@ export function persistLogo() {
 }
 
 
+/**
+ * Los dominios que no aplican a este cliente, tambien en su propia escritura y
+ * por lo mismo: son el campo mas nuevo de las reglas. Si las publicadas aun no
+ * lo conocen, el chip se pone en rojo y el resto del equipo sigue viendo los
+ * nueve, pero no se pierde ni una puntuacion.
+ */
+export function persistDominiosExcluidos() {
+  persistGranularChange({ dominiosExcluidos: dominiosExcluidosParaGuardar(state.dominiosExcluidos) });
+}
+
+
 /** Los de un dominio, o con `domainId` vacio los de todos, como tras una escritura completa. */
 export function persistProximosPasos(domainId = null) {
   if (domainId) {
@@ -864,6 +880,7 @@ export function persistScenario() {
       persistCliente();
       persistLogo();
       persistProximosPasos();
+      persistDominiosExcluidos();
     })
     .catch((error) => {
       console.warn(

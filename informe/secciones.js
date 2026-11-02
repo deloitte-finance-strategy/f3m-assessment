@@ -12,19 +12,20 @@
  * quien conoce el deck entero. Cada seccion solo sabe pintar su cuerpo.
  */
 
-import { average } from "../core/calculo.js?v=35";
-import { normalizarLogo } from "../core/escenario.js?v=35";
+import { average } from "../core/calculo.js?v=36";
+import { normalizarLogo } from "../core/escenario.js?v=36";
 
 import {
   COLOR_DE_PALANCA,
+  enLetra,
   escapeAttr,
   escapeHtml,
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=35";
+} from "../core/presentacion.js?v=36";
 
-import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=35";
+import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=36";
 
 
 /**
@@ -331,12 +332,26 @@ export function cierre(data) {
 
 
 function textoDeAlcanceGlobal(data) {
-  return data.global
-    ? `La parte global recorre ${data.global.subcapacidades} subcapacidades de ${data.global.dominios} dominios`
-      + (data.global.dominios < data.global.dominiosTotales
-        ? `, de los ${data.global.dominiosTotales} del modelo.`
-        : ", los nueve del modelo.")
-    : "Este informe no incluye la parte global: no había dominios cargados al exportarlo.";
+  if (!data.global) {
+    return "Este informe no incluye la parte global: no había dominios cargados al exportarlo.";
+  }
+
+  const { subcapacidades, dominios, dominiosTotales } = data.global;
+  const noAplican = data.global.dominiosQueNoAplican || [];
+  const inicio = `La parte global recorre ${subcapacidades} subcapacidades de ${dominios} dominios`;
+
+  // Con dominios que no aplican al cliente, «los nueve del modelo» seria
+  // falso, y quien lee el informe no ha visto la herramienta: se dice cuales
+  // se dejaron fuera, para que no parezca un olvido.
+  if (noAplican.length) {
+    return `${inicio}${dominios < dominiosTotales ? `, de los ${dominiosTotales} que aplican` : ", los que aplican"}`
+      + ` a este cliente. No aplican ${enumerar(noAplican)}.`;
+  }
+
+  return inicio
+    + (dominios < dominiosTotales
+      ? `, de los ${dominiosTotales} del modelo.`
+      : ", los nueve del modelo.");
 }
 
 
@@ -552,6 +567,10 @@ function notaDeAlcanceGlobal(global) {
     );
   }
 
+  if (global.dominiosQueNoAplican?.length) {
+    partes.splice(1, 0, `No aplican a este cliente: ${enumerar(global.dominiosQueNoAplican)}`);
+  }
+
   return `<p class="nota-alcance">${escapeHtml(partes.join(" · "))}</p>`;
 }
 
@@ -656,10 +675,15 @@ export function masUrgentes(urgentes, tanda, desde) {
 
 
 export function radarGlobal(data) {
+  // Tantos ejes como dominios en la parte global: nueve, o los que apliquen
+  // al cliente. Decia «nueve» siempre, y con seis en el dibujo no cuadraba.
+  const ejes = data.global.dominios;
+  const cuantosEjes = ejes === 1 ? "Un eje" : `${enLetra(ejes).charAt(0).toUpperCase()}${enLetra(ejes).slice(1)} ejes`;
+
   return `
     ${radaresHtml(data.global.radarImages, { sufijo: "por dominio" })}
     <p class="nota" style="margin-top:4mm;">
-      Nueve ejes, uno por dominio. La línea continua es la madurez actual y la discontinua, el objetivo configurado.
+      ${escapeHtml(cuantosEjes)}, uno por dominio. La línea continua es la madurez actual y la discontinua, el objetivo configurado.
       Un dominio sin puntuar no se dibuja: su eje queda vacío.
     </p>
   `;
