@@ -11,13 +11,13 @@
  * existe para impedir.
  */
 
-import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../../core/presentacion.js?v=35";
+import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../../core/presentacion.js?v=36";
 
-import { LEVERS, els, expandedHeatmapCapabilities, state } from "../estado.js?v=35";
-import { agregarPorCapacidad } from "../metricas.js?v=35";
-import { getScopedItems } from "../filtros.js?v=35";
-import { buildFilteredEmptyState, gapClass, heatScoreCell, priorityBadge } from "../celdas.js?v=35";
-import { entrar, sinMovimiento } from "../movimiento.js?v=35";
+import { LEVERS, els, expandedHeatmapCapabilities, state } from "../estado.js?v=36";
+import { agregarPorCapacidad } from "../metricas.js?v=36";
+import { getScopedItems } from "../filtros.js?v=36";
+import { buildFilteredEmptyState, gapClass, heatScoreCell, priorityBadge } from "../celdas.js?v=36";
+import { entrar, sinMovimiento } from "../movimiento.js?v=36";
 
 
 /**

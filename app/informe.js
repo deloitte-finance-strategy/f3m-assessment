@@ -15,37 +15,37 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=35";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=35";
-import { filasDeResumen } from "../core/exportacion.js?v=35";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=35";
-import { diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=35";
-import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=35";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=35";
-import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=35";
-import { documentoDePreparacion } from "../informe/preparacion.js?v=35";
-import { showNotice } from "./avisos.js?v=35";
-import { getActiveDomainConfig } from "./dominios.js?v=35";
-import { DOMAINS, els, state } from "./estado.js?v=35";
-import { getVisibleItems } from "./filtros.js?v=35";
-import { getScenarioShortLabel } from "./firebase.js?v=35";
+} from "../core/calculo.js?v=36";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=36";
+import { filasDeResumen } from "../core/exportacion.js?v=36";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=36";
+import { MINIMO_DE_EJES_DE_UN_RADAR, diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=36";
+import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=36";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=36";
+import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=36";
+import { documentoDePreparacion } from "../informe/preparacion.js?v=36";
+import { showNotice } from "./avisos.js?v=36";
+import { getActiveDomainConfig } from "./dominios.js?v=36";
+import { DOMAINS, dominiosQueAplican, els, state } from "./estado.js?v=36";
+import { getVisibleItems } from "./filtros.js?v=36";
+import { getScenarioShortLabel } from "./firebase.js?v=36";
 import {
   capturarRadarDelResumen,
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
   renderCapabilityRadar,
-} from "./graficos.js?v=35";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=35";
+} from "./graficos.js?v=36";
+import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=36";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "./subcapacidad.js?v=35";
-import { renderDashboard } from "./vistas/dashboard.js?v=35";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=35";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=35";
+} from "./subcapacidad.js?v=36";
+import { renderDashboard } from "./vistas/dashboard.js?v=36";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=36";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=36";
 
 
 /**
@@ -563,7 +563,9 @@ function datosDelResumen() {
 
   return {
     ...comunes,
-    radar: comunes.global ? capturarRadarDelResumen(comunes.global.filas) : "",
+    radar: comunes.global?.filas.length >= MINIMO_DE_EJES_DE_UN_RADAR
+      ? capturarRadarDelResumen(comunes.global.filas)
+      : "",
     pasos: dominios.flatMap((dominio) =>
       (state.proximosPasos?.[dominio.id] || []).map((paso) => ({ ...paso, dominio: nombreDe.get(dominio.id) })),
     ),
@@ -668,7 +670,7 @@ function construirTitularesDelDominio(items, metrics, total) {
 
 
 /**
- * La parte global del informe: los nueve dominios, como en el Overview.
+ * La parte global del informe: los dominios que aplican, como en el Overview.
  *
  * Devuelve null si no hay ningun dominio cargado, y entonces el informe se
  * salta la parte entera en vez de abrir con tres diapositivas vacias.
@@ -749,7 +751,15 @@ function construirBloqueGlobalParaInforme() {
       })),
     },
     dominios: filas.length,
-    dominiosTotales: Object.keys(DOMAINS).length,
+    // Los que aplican al cliente, no los nueve del modelo: un «6 de 9» diria
+    // que faltan tres por cargar cuando es que no se evaluan. Los que no
+    // aplican van aparte y con su nombre, porque quien lee el informe no ha
+    // visto la herramienta y tiene que saber que se dejaron fuera a proposito.
+    dominiosTotales: dominiosQueAplican().length,
+    dominiosDelModelo: Object.keys(DOMAINS).length,
+    dominiosQueNoAplican: state.dominiosExcluidos
+      .filter((domainId) => DOMAINS[domainId])
+      .map((domainId) => DOMAINS[domainId].label),
     subcapacidades: entradas.length,
     evaluadas: evaluadas.length,
 

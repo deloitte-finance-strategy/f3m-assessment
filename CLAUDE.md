@@ -33,63 +33,64 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.470 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.493 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
 | `sw.js` | **El service worker**: guarda la herramienta en el navegador para abrirla sin red | 172 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 1.990 |
-| `app/estado.js` | El estado compartido y las constantes que lo describen | 189 |
-| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 355 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 2.001 |
+| `app/estado.js` | El estado compartido y las constantes que lo describen | 222 |
+| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 436 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 260 |
 | `app/graficos.js` | Los seis radares de Chart.js, a dónde lleva pulsar sus ejes y el del resumen | 823 |
 | `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 185 |
-| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 555 |
+| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 574 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
 | `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 88 |
-| `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 409 |
+| `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 440 |
 | `app/firebase.js` | La conexión: configuración, referencia y límite de espera | 220 |
 | `app/identidad.js` | La sesión anónima y el nombre de quien edita | 249 |
 | `app/copias.js` | **Si el trabajo local tiene copia.** Cuándo fue la última y el punto del aviso | 143 |
 | `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 158 |
-| `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 905 |
+| `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 922 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
 | `app/sin-conexion.js` | Registra `sw.js` y avisa cuando se va la red, diciendo qué sigue funcionando | 89 |
 | `app/movimiento.js` | **El movimiento**: cifras que cuentan, barras que se deslizan, paneles que se despliegan | 380 |
 | `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 167 |
 | `app/logo.js` | **El logo del cliente**: elegirlo, reducirlo a lo que admiten las reglas y enseñarlo | 176 |
+| `app/dominios-del-cliente.js` | **Los dominios del cliente**: elegir cuáles de los nueve aplican y decirlo en pantalla | 233 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 412 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
-| `app/informe.js` | Lo que la aplicación le pasa al informe, al resumen, a la preparación y al acta | 922 |
-| `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 196 |
-| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.303 |
+| `app/informe.js` | Lo que la aplicación le pasa al informe, al resumen, a la preparación y al acta | 932 |
+| `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 197 |
+| `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.304 |
 | `app/guia.js` | **La guía de scoring del taller**: la rúbrica de las tres palancas en el sitio de los niveles | 128 |
 | `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
 | `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 282 |
 | `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 224 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
-| `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 396 |
+| `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 418 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 228 |
-| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.302 |
+| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.316 |
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad, que lleva a su tarjeta | 323 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
-| `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 674 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.799 |
-| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 528 |
+| `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 697 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.951 |
+| `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 540 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
-| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 660 |
+| `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 704 |
 | `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
-| `core/presentacion.js` | Escapado, formato de números y fechas, y colores de marca | 210 |
+| `core/presentacion.js` | Escapado, formato de números y fechas, y colores de marca | 246 |
 | `core/busqueda.js` | Qué subcapacidades casan con lo que se escribe, y qué resaltar | 152 |
 | `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 510 |
-| `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 480 |
-| `informe/secciones.js` | Una función por diapositiva | 1.079 |
+| `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 484 |
+| `informe/secciones.js` | Una función por diapositiva | 1.103 |
 | `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 307 |
 | `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.028 |
 | `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 112 |
 | `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 595 |
 | `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 795 |
-| `informe/resumen.js` | **El resumen de una página**: la función financiera en una diapositiva, para el comité | 565 |
+| `informe/resumen.js` | **El resumen de una página**: la función financiera en una diapositiva, para el comité | 573 |
 | `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
 | `data/domains.json` | **Fuente única de la lista de dominios** | — |
@@ -152,7 +153,7 @@ infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, mét
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
-`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/sin-conexion.js`, `app/movimiento.js`, `app/taller.js`,
+`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/dominios-del-cliente.js`, `app/sin-conexion.js`, `app/movimiento.js`, `app/taller.js`,
 `app/apertura.js`, `app/guia.js`, `app/cierre.js` y `app/proximos-pasos.js`. Lo nuevo nace ya en `app/`, no en
 `app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
@@ -320,6 +321,22 @@ sino "cómo está la función financiera"—, así que lee `state.domains` enter
 `getDominiosDelOverview()` y **no aplica los filtros**: son del dominio abierto (el desplegable de
 capacidad se rellena con las capacidades del activo), así que a nivel global no significan nada. Su
 nota de ámbito lo dice en pantalla para que el descuadre con el Dashboard no se lea como un fallo.
+
+**Los dominios que no aplican al cliente** se quitan de todo lo anterior, y de una sola vez. Se
+eligen en **Sesión → Dominios del cliente** (`app/dominios-del-cliente.js`) y se guardan en el
+escenario como `dominiosExcluidos`: los que **no** aplican, para que un escenario de antes y un
+dominio que se añada al catálogo apliquen por defecto. Quitar uno no borra nada —sus puntuaciones
+siguen en `state.domains` y vuelven al marcarlo—, y excluirlos todos se lee como no excluir
+ninguno. El filtro vive en `getDominiosDelOverview()`, que es la puerta del Overview, del buscador,
+de la pestaña IA (que además esconde los casos que solo salen en dominios excluidos) y de la parte
+global de los tres informes; el conmutador, el desplegable del modo taller y «Usar estos objetivos
+en los N dominios» preguntan a `dominioAplica()` de `app/estado.js`. Si el dominio abierto deja de
+aplicar —desde el diálogo, al abrir una copia o al llegar el cambio de otra persona—, se pasa al
+primero que aplica. Cuando falta alguno, una línea junto al chip del dominio dice cuántos y lleva al
+diálogo, los textos dicen «los seis dominios» en vez de «los nueve» (`losDominios()` de
+`core/presentacion.js`), y el informe nombra los que no aplican, porque quien lo lee no ha visto la
+herramienta. Con menos de tres dominios no hay radar de dominios (`MINIMO_DE_EJES_DE_UN_RADAR`):
+con dos era una raya.
 
 **La pestaña IA tampoco usa ese ámbito**, por otro motivo: no habla de subcapacidades puntuadas sino
 del catálogo de casos, que es el mismo para los nueve dominios. Va antes del corte de `renderAll()`,
@@ -754,6 +771,10 @@ Al tocar el flujo de guardado, tener en cuenta:
   la misma regla y por el mismo motivo: `persistLogo()` y `persistProximosPasos()`, cada uno en su
   escritura, y se reenvían por separado después de cada escritura completa. Sin las reglas nuevas
   publicadas en la consola funcionan en local y no se comparten; nada más deja de guardarse.
+- **Los dominios que no aplican** (`dominiosExcluidos`, en la raíz, como `{ fiscal: true }`)
+  siguen la misma regla: `persistDominiosExcluidos()`, en su propia escritura y reenviada tras cada
+  escritura completa. Sin las reglas nuevas publicadas, en un escenario compartido el chip se pone
+  en rojo al cambiarlos y el resto del equipo sigue viendo los nueve; no se pierde ni una puntuación.
 - El logo viaja **dentro del escenario, como data URL**, y no como archivo aparte: así va en las
   copias y en el escenario compartido sin otro almacenamiento. Por eso `reducirLogo()` lo deja en
   640×240 como mucho y por debajo de `LIMITE_DE_LOGO`. Solo PNG, JPEG o WebP: **un SVG se acepta
@@ -1074,6 +1095,13 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    el logo sale en la portada de los dos informes, en la preparación, en el acta y en la apertura
    del taller; sigue tras recargar y «Quitar el logo» lo quita de todos. Un archivo que no es una
    imagen da un aviso, no un error en la consola.
+   «Sesión → Dominios del cliente», quitando tres: el conmutador, el Overview (título, tabla,
+   radares de seis ejes y «Lo más urgente»), el buscador, la pestaña IA, el desplegable del modo
+   taller y el informe de todo el proyecto dejan de enseñarlos, y junto al chip del dominio sale
+   «3 dominios no aplican a …». Quitar el abierto lleva al primero que aplica; dejarlos todos sin
+   marcar no deja guardar. Sigue tras recargar, viaja en «Guardar una copia» y al volver a
+   marcarlos vuelven con lo que tenían. Con dos dominios no hay radar en el Overview, ni
+   diapositiva de radar, ni radar en el resumen, que lo dice.
 12. Si se ha tocado el flujo compartido: probar con `?scenario=<id-de-prueba>` (el README documenta
    uno seguro), y cortar la red desde las herramientas de desarrollo para comprobar que el chip de
    guardado se pone **rojo**.

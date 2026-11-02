@@ -14,9 +14,10 @@ import {
   acortar,
   alcance,
   documentoDelResumen,
+  madurez,
   tituloDelResumen,
-} from "../informe/resumen.js?v=35";
-import { kpisDeLaFuncionFinanciera, panoramaGlobal, rejillaDeKpis } from "../informe/secciones.js?v=35";
+} from "../informe/resumen.js?v=36";
+import { kpisDeLaFuncionFinanciera, panoramaGlobal, rejillaDeKpis } from "../informe/secciones.js?v=36";
 
 
 const GLOBAL = {
@@ -164,6 +165,24 @@ export const casos = [
         alcance({ ...GLOBAL, dominios: 8 }),
         "40 de 152 subcapacidades puntuadas en 8 de los 9 dominios · Sin filtros",
       );
+      t.igual(
+        alcance({ ...GLOBAL, dominios: 6, dominiosTotales: 6, dominiosQueNoAplican: ["Fiscal", "Tesorería", "Relación con Inversores"] }),
+        "40 de 152 subcapacidades puntuadas en los 6 dominios que aplican · Sin filtros",
+        "con dominios que no aplican al cliente",
+      );
+    },
+  },
+  {
+    grupo: "Resumen de una página",
+    nombre: "con menos de tres dominios no hay radar, y lo dice sin culpar a la librería",
+    ejecutar(t) {
+      const radar = "data:image/png;base64,AAAA";
+
+      t.igual(madurez(radar, [], 6).includes('<img class="radar"'), true, "con seis, el radar");
+      t.igual(madurez(radar, [], 2).includes('<img class="radar"'), false, "con dos, sin radar");
+      t.igual(madurez("", [], 2).includes("Con dos dominios no hay radar"), true, "y dice por que");
+      t.igual(madurez("", [], 2).includes("librería"), false, "no es que la librería no cargara");
+      t.igual(madurez("", [], 6).includes("librería"), true, "eso, solo si de verdad no cargó");
     },
   },
 ];

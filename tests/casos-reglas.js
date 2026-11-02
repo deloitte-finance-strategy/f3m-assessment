@@ -30,7 +30,7 @@ import {
   LIMITE_DE_META,
   LIMITES_DE_PASO,
   LIMITES_DE_TEXTO,
-} from "../core/escenario.js?v=35";
+} from "../core/escenario.js?v=36";
 
 
 const RAIZ = new URL("../", import.meta.url);
@@ -71,6 +71,7 @@ const ITEM = DOMINIO?.items?.$indice;
 const TARGET = DOMINIO?.targets?.$indiceTarget;
 const PASOS = ESCENARIO?.proximosPasos?.$dominioDePasos;
 const PASO = PASOS?.$paso;
+const EXCLUIDO = ESCENARIO?.dominiosExcluidos?.$dominioExcluido;
 
 
 /** El numero de un ".validate" del tipo "... length <= N". */
@@ -128,6 +129,7 @@ export const casos = [
       t.igual(Boolean(ITEM?.scores), true, "items/$indice/scores");
       t.igual(Boolean(ITEM?.lastEditedBy), true, "items/$indice/lastEditedBy");
       t.igual(Boolean(PASO), true, "proximosPasos/$dominioDePasos/$paso");
+      t.igual(Boolean(EXCLUIDO), true, "dominiosExcluidos/$dominioExcluido");
     },
   },
 
@@ -281,6 +283,7 @@ export const casos = [
 
       t.igual(alternativasDe(DOMINIO), enOrden(delCatalogo), "$domainId");
       t.igual(alternativasDe(PASOS), enOrden(delCatalogo), "proximosPasos/$dominioDePasos");
+      t.igual(alternativasDe(EXCLUIDO), enOrden(delCatalogo), "dominiosExcluidos/$dominioExcluido");
       t.igual(enOrden(DOMINIOS_ADMITIDOS), enOrden(delCatalogo), "DOMINIOS_ADMITIDOS");
     },
   },

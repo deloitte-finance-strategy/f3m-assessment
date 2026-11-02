@@ -26,19 +26,27 @@ import {
   resumenDeFuentes,
   textoDeBrechas,
   titulosDeCasos,
-} from "../../core/biblioteca.js?v=35";
-import { escapeAttr, escapeHtml } from "../../core/presentacion.js?v=35";
-import { fuentesDelCaso } from "../biblioteca.js?v=35";
+} from "../../core/biblioteca.js?v=36";
+import { escapeAttr, escapeHtml, losDominios } from "../../core/presentacion.js?v=36";
+import { fuentesDelCaso } from "../biblioteca.js?v=36";
 import {
   CLASES_DE_TIPO_DE_VALOR,
   aiCaseCards,
   clasesDeTipoDeIa,
   kpiCard,
-} from "../celdas.js?v=35";
-import { BIBLIOTECA, CASOS_DE_IA, ETIQUETAS_DE_CASOS, els } from "../estado.js?v=35";
-import { calculate } from "../metricas.js?v=35";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=35";
-import { getDominiosDelOverview } from "./overview.js?v=35";
+} from "../celdas.js?v=36";
+import {
+  BIBLIOTECA,
+  CASOS_DE_IA,
+  DOMAINS,
+  ETIQUETAS_DE_CASOS,
+  dominiosQueAplican,
+  els,
+  state,
+} from "../estado.js?v=36";
+import { calculate } from "../metricas.js?v=36";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=36";
+import { getDominiosDelOverview } from "./overview.js?v=36";
 
 
 const FILTROS_VACIOS = { texto: "", dominio: "", tipoValor: "", tipoIa: "", documento: "" };
@@ -88,12 +96,25 @@ function plural(cuantos, singular, pluralDe = `${singular}s`) {
  * contar como localizada, ni ofrecerse en el filtro por documento.
  */
 function prepararContexto(dominios) {
-  const casos = [...CASOS_DE_IA.values()].map((caso) => ({
-    ...caso,
-    fuentes: fuentesDelCaso(caso),
-  }));
-
   const apariciones = aparicionesDeCasos(dominios);
+
+  // Un caso que solo aparece en dominios que no aplican al cliente no se
+  // enseña: a quien no tiene Relacion con Inversores, sus casos le sobran en
+  // la pestaña y en el recuento. Se mira donde aparece de verdad y no si le
+  // faltan apariciones, porque un dominio que no ha cargado tambien deja casos
+  // sin ellas, y esos se siguen enseñando como hasta ahora.
+  const soloFuera = aparicionesDeCasos(
+    state.dominiosExcluidos
+      .filter((domainId) => state.domains[domainId])
+      .map((domainId) => ({ id: domainId, label: DOMAINS[domainId]?.label, items: state.domains[domainId].items })),
+  );
+
+  const casos = [...CASOS_DE_IA.values()]
+    .filter((caso) => apariciones.has(caso.titulo) || !soloFuera.has(caso.titulo))
+    .map((caso) => ({
+      ...caso,
+      fuentes: fuentesDelCaso(caso),
+    }));
 
   return {
     casos,
@@ -161,8 +182,10 @@ function pintarResumen() {
     [...apariciones.values()].flat().map((aparicion) => aparicion.domainId),
   ).size;
 
-  els.iaSourceNote.textContent =
-    "Común a los nueve dominios: no cambia con el dominio abierto ni con los filtros del Assessment.";
+  els.iaSourceNote.textContent = state.dominiosExcluidos.length
+    ? `Común a ${losDominios(dominiosQueAplican().length)} que aplican: no cambia con el dominio abierto `
+      + "ni con los filtros del Assessment."
+    : "Común a los nueve dominios: no cambia con el dominio abierto ni con los filtros del Assessment.";
 
   const notaDeFuentes = resumen.conFuente
     ? [

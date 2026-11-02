@@ -21,9 +21,9 @@
  * reescalar, que es lo mas cerca de una ppt sin generar una ppt.
  */
 
-import { escapeHtml } from "../core/presentacion.js?v=35";
+import { MINIMO_DE_EJES_DE_UN_RADAR, escapeHtml } from "../core/presentacion.js?v=36";
 
-import { getEnhancedPdfReportStyles } from "./estilos.js?v=35";
+import { getEnhancedPdfReportStyles } from "./estilos.js?v=36";
 
 import {
   POR_DIAPOSITIVA,
@@ -47,7 +47,7 @@ import {
   resumenPorCapacidad,
   roadmap,
   separador,
-} from "./secciones.js?v=35";
+} from "./secciones.js?v=36";
 
 
 const PARTE_GLOBAL = "La función financiera";
@@ -178,12 +178,16 @@ function parteGlobal(data) {
         "Los dominios ordenados por brecha. La barra es la madurez media y la marca vertical, el objetivo.",
       cuerpo: () => rankingDeDominios(data),
     },
-    {
-      parte: PARTE_GLOBAL,
-      titulo: "Radar por dominio",
-      entradilla: "Madurez actual frente a objetivo en las tres palancas, con un eje por dominio.",
-      cuerpo: () => radarGlobal(data),
-    },
+    // Con menos de tres dominios que aplican no hay radar que enseñar: ver
+    // MINIMO_DE_EJES_DE_UN_RADAR. El ranking de al lado dice lo mismo.
+    ...(data.global.dominios >= MINIMO_DE_EJES_DE_UN_RADAR
+      ? [{
+          parte: PARTE_GLOBAL,
+          titulo: "Radar por dominio",
+          entradilla: "Madurez actual frente a objetivo en las tres palancas, con un eje por dominio.",
+          cuerpo: () => radarGlobal(data),
+        }]
+      : []),
     ...urgentes,
   ];
 }

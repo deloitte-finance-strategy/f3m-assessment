@@ -6,8 +6,8 @@
  * via getDominiosDelOverview() y no getScopedItems().
  */
 
-import { masUrgentes, rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=35";
-import { escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=35";
+import { masUrgentes, rankingDePalancas, resumenGlobal, unique } from "../../core/calculo.js?v=36";
+import { MINIMO_DE_EJES_DE_UN_RADAR, escapeAttr, escapeHtml, formatMedia } from "../../core/presentacion.js?v=36";
 import {
   celdaDeAvance,
   gapClass,
@@ -16,18 +16,20 @@ import {
   priorityBadge,
   renderLeverBars,
   renderPriorityBars,
-} from "../celdas.js?v=35";
-import { repintarConMovimiento } from "../movimiento.js?v=35";
+} from "../celdas.js?v=36";
+import { repintarConMovimiento } from "../movimiento.js?v=36";
 import {
   DOMAINS,
   GRUPOS_DE_DOMINIO,
   LEVERS,
+  dominioAplica,
+  dominiosQueAplican,
   els,
   state,
   syncActiveDomainState,
-} from "../estado.js?v=35";
-import { renderOverviewRadar } from "../graficos.js?v=35";
-import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=35";
+} from "../estado.js?v=36";
+import { renderOverviewRadar } from "../graficos.js?v=36";
+import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=36";
 
 
 /**
@@ -40,6 +42,12 @@ import { agregarPorDominio, getCapabilityTargets } from "../metricas.js?v=35";
  * Los que no hayan podido cargarse se saltan, igual que hace
  * actualizarAvanceDeDominios(). El Overview cuenta sobre los que hay y lo dice:
  * un "8/8" honesto vale mas que un "8/9" que finge saber algo del noveno.
+ *
+ * Y los que no aplican al cliente, tambien. Esta funcion es la puerta de todo
+ * lo que mira la funcion financiera entera —el Overview, el buscador, la
+ * pestaña IA y la parte global de los informes—, asi que filtrar aqui es lo
+ * que hace que ninguno de ellos pueda enseñar un dominio que el conmutador ya
+ * no enseña, ni contarlo en una media.
  */
 export function getDominiosDelOverview() {
   // Los scores del dominio abierto viven en state.items hasta que alguien los
@@ -57,7 +65,7 @@ export function getDominiosDelOverview() {
     dominios
       .filter(
         (dominio) =>
-          dominio.group === grupo && state.domains[dominio.id],
+          dominio.group === grupo && state.domains[dominio.id] && dominioAplica(dominio.id),
       )
       .map((dominio) => ({
         id: dominio.id,
@@ -131,7 +139,7 @@ export function renderOverview() {
 
   const prioridadAlta = resumenDelOverview.prioridadAlta;
 
-  const sinCargar = Object.keys(DOMAINS).length - filas.length;
+  const sinCargar = dominiosQueAplican().length - filas.length;
 
   els.overviewSourceNote.textContent = [
     `${entradas.length} subcapacidades en ${filas.length} dominios`,
@@ -188,7 +196,19 @@ export function renderOverview() {
   );
   renderOverviewSummaryTable(filas);
   renderLoMasUrgente(filas, entradas);
-  renderOverviewRadar(filas);
+
+  // Con menos de tres dominios que aplican, sin radar: ver
+  // MINIMO_DE_EJES_DE_UN_RADAR. El bloque entero, titulo incluido.
+  const conRadar = filas.length >= MINIMO_DE_EJES_DE_UN_RADAR;
+  const bloqueDelRadar = els.overviewRadarProcessesChart?.closest(".summary-radar-block");
+
+  if (bloqueDelRadar) {
+    bloqueDelRadar.hidden = !conRadar;
+  }
+
+  if (conRadar) {
+    renderOverviewRadar(filas);
+  }
 }
 
 
@@ -315,7 +335,9 @@ function renderOverviewHeadline(filas, entradas) {
 
   titulares.push(
     pendientes
-      ? `Quedan ${pendientes} subcapacidades por evaluar en ${aMedias} dominios`
+      ? `${pendientes === 1 ? "Queda 1 subcapacidad" : `Quedan ${pendientes} subcapacidades`} por evaluar en ${
+        aMedias === 1 ? "1 dominio" : `${aMedias} dominios`
+      }`
       : "Todos los dominios están evaluados por completo",
   );
 

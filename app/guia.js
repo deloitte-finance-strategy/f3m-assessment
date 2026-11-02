@@ -23,8 +23,8 @@ import {
   NIVELES_DE_LA_RUBRICA,
   QUE_MIDE,
   RUBRICA_GENERAL,
-} from "../informe/preparacion.js?v=35";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=35";
+} from "../informe/preparacion.js?v=36";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=36";
 
 
 /** Oculta: la enseña el boton «Guía de scoring» de la banda. */

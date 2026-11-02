@@ -8,9 +8,9 @@
  * palabra antes de borrar el trabajo de nueve dominios.
  */
 
-import { els } from "./estado.js?v=35";
-import { escapeHtml } from "../core/presentacion.js?v=35";
-import { ocultarConSalida } from "./movimiento.js?v=35";
+import { els } from "./estado.js?v=36";
+import { escapeHtml } from "../core/presentacion.js?v=36";
+import { ocultarConSalida } from "./movimiento.js?v=36";
 
 
 /**
@@ -204,6 +204,7 @@ export function abrirDialogo({
   campo = null,
   confirmacionEscrita = null,
   accionSecundaria = null,
+  casillas = null,
 }) {
   return new Promise((resolve) => {
     const disparador = document.activeElement;
@@ -217,7 +218,7 @@ export function abrirDialogo({
       .map((texto) => `<p>${escapeHtml(texto)}</p>`)
       .join("");
 
-    els.dialogModal.className = `modal-backdrop dialog-${tono}`;
+    els.dialogModal.className = `modal-backdrop dialog-${tono}${casillas ? " dialog-con-casillas" : ""}`;
 
     // alertdialog solo cuando de verdad es una alerta. El marcado lo traia
     // fijo, asi que "Poner mi nombre" —un campo de texto sin ninguna urgencia—
@@ -246,7 +247,28 @@ export function abrirDialogo({
     els.dialogSecondary.hidden = !accionSecundaria;
     els.dialogSecondary.textContent = accionSecundaria?.texto || "";
 
+    pintarCasillas(casillas);
+
+    const marcadas = () =>
+      [...(els.dialogCasillas?.querySelectorAll("input[type=checkbox]:checked") || [])].map(
+        (casilla) => casilla.value,
+      );
+
     const validar = () => {
+      if (casillas) {
+        // Con menos de las que hacen falta no se puede confirmar, y se dice
+        // por que: un boton apagado sin explicacion parece un fallo.
+        const faltan = marcadas().length < (casillas.minimo || 0);
+
+        els.dialogConfirm.disabled = faltan;
+
+        if (els.dialogCasillasAviso) {
+          els.dialogCasillasAviso.hidden = !faltan;
+        }
+
+        return;
+      }
+
       if (!confirmacionEscrita) {
         return;
       }
@@ -259,7 +281,7 @@ export function abrirDialogo({
     els.dialogConfirm.disabled = Boolean(confirmacionEscrita);
     validar();
 
-    const alConfirmar = () => terminar(campo ? els.dialogField.value : true);
+    const alConfirmar = () => terminar(casillas ? marcadas() : campo ? els.dialogField.value : true);
     const alCancelar = () => terminar(false);
 
     const alPulsarTecla = (event) => {
@@ -295,6 +317,7 @@ export function abrirDialogo({
       els.dialogCancel.removeEventListener("click", alCancelar);
       els.dialogSecondary.removeEventListener("click", alPulsarSecundaria);
       els.dialogField.removeEventListener("input", validar);
+      els.dialogCasillas?.removeEventListener("change", validar);
       els.dialogModal.removeEventListener("click", alPulsarFondo);
       document.removeEventListener("keydown", alPulsarTecla, true);
 
@@ -314,21 +337,79 @@ export function abrirDialogo({
     els.dialogCancel.addEventListener("click", alCancelar);
     els.dialogSecondary.addEventListener("click", alPulsarSecundaria);
     els.dialogField.addEventListener("input", validar);
+    els.dialogCasillas?.addEventListener("change", validar);
     els.dialogModal.addEventListener("click", alPulsarFondo);
     document.addEventListener("keydown", alPulsarTecla, true);
 
     els.dialogModal.hidden = false;
     updateModalOpenState();
 
-    // El foco entra en el dialogo: al campo si lo hay, y si no a Cancelar, que
-    // es la opcion segura.
+    // El foco entra en el dialogo: al campo si lo hay, a la primera casilla si
+    // es para elegir, y si no a Cancelar, que es la opcion segura.
+    const primeraCasilla = casillas && els.dialogCasillas?.querySelector("input[type=checkbox]");
+
     if (pideTexto) {
       els.dialogField.focus();
       els.dialogField.select();
+    } else if (primeraCasilla) {
+      primeraCasilla.focus();
     } else {
       els.dialogCancel.focus();
     }
   });
+}
+
+
+/**
+ * Las casillas de un dialogo para elegir, en grupos con su rotulo.
+ *
+ * `casillas` es { grupos: [{ titulo, opciones: [{ valor, etiqueta, detalle,
+ * marcada }] }], minimo, avisoMinimo }. Cada grupo es un fieldset con su
+ * legend, que es lo que un lector de pantalla anuncia al entrar en el.
+ */
+function pintarCasillas(casillas) {
+  if (!els.dialogCasillas) {
+    return;
+  }
+
+  els.dialogCasillas.hidden = !casillas;
+
+  if (!casillas) {
+    els.dialogCasillas.innerHTML = "";
+    return;
+  }
+
+  els.dialogCasillas.innerHTML = `
+    <div class="dialog-casillas-grupos">
+      ${casillas.grupos
+        .map(
+          (grupo) => `
+            <fieldset class="dialog-casillas-grupo">
+              <legend>${escapeHtml(grupo.titulo)}</legend>
+              ${grupo.opciones
+                .map(
+                  (opcion) => `
+                    <label class="dialog-casilla">
+                      <input type="checkbox" value="${escapeHtml(opcion.valor)}" ${opcion.marcada ? "checked" : ""}>
+                      <span class="dialog-casilla-texto">
+                        <span>${escapeHtml(opcion.etiqueta)}</span>
+                        ${opcion.detalle ? `<small>${escapeHtml(opcion.detalle)}</small>` : ""}
+                      </span>
+                    </label>
+                  `,
+                )
+                .join("")}
+            </fieldset>
+          `,
+        )
+        .join("")}
+    </div>
+    <p class="dialog-casillas-aviso" id="dialogCasillasAviso" role="status" hidden>
+      ${escapeHtml(casillas.avisoMinimo || "Marca al menos una.")}
+    </p>
+  `;
+
+  els.dialogCasillasAviso = els.dialogCasillas.querySelector("#dialogCasillasAviso");
 }
 
 

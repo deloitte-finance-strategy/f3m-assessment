@@ -21,9 +21,9 @@ import {
   DEFAULT_TARGET_MATURITY,
   normalizeTargetValue,
   toScore,
-} from "./calculo.js?v=35";
+} from "./calculo.js?v=36";
 
-import { serializeTargetsForFirebase } from "./objetivos.js?v=35";
+import { serializeTargetsForFirebase } from "./objetivos.js?v=36";
 
 
 
@@ -63,6 +63,7 @@ export const CAMPOS_RAIZ = [
   "cliente",
   "logo",
   "proximosPasos",
+  "dominiosExcluidos",
   "domains",
 ];
 
@@ -191,6 +192,43 @@ export const DOMINIOS_ADMITIDOS = [
 ];
 
 const FORMA_DE_DOMINIO = new RegExp(`^(${DOMINIOS_ADMITIDOS.join("|")})$`);
+
+
+/**
+ * Los dominios que no aplican a este cliente: a SGAE no le aplica Relacion con
+ * Inversores, y enseñarlo en el taller y en el informe confunde.
+ *
+ * Se guardan los que NO aplican, no los que si, y no es indiferente: un
+ * escenario anterior a este campo no trae nada y tiene que seguir enseñando
+ * los nueve, y un dominio que se añada al catalogo mañana tiene que aparecer
+ * en los escenarios que ya existen, no quedarse fuera sin que nadie lo decida.
+ *
+ * En Firebase van como { fiscal: true }, que es lo que las reglas pueden
+ * validar clave a clave; aqui se aceptan tambien en lista. Excluirlos todos no
+ * es una eleccion posible —no quedaria nada que enseñar—, asi que se lee como
+ * no excluir ninguno: antes una herramienta entera que una en blanco.
+ */
+export function normalizarDominiosExcluidos(valor) {
+  const lista = Array.isArray(valor)
+    ? valor
+    : esObjeto(valor)
+      ? Object.keys(valor).filter((domainId) => valor[domainId] === true)
+      : [];
+
+  const excluidos = DOMINIOS_ADMITIDOS.filter((domainId) => lista.includes(domainId));
+
+  return excluidos.length < DOMINIOS_ADMITIDOS.length ? excluidos : [];
+}
+
+
+/** Como viajan: { fiscal: true }, o null si no hay ninguno, que en Firebase borra la rama. */
+export function dominiosExcluidosParaGuardar(valor) {
+  const excluidos = normalizarDominiosExcluidos(valor);
+
+  return excluidos.length
+    ? Object.fromEntries(excluidos.map((domainId) => [domainId, true]))
+    : null;
+}
 
 
 /** Campos que las reglas admiten dentro de cada dominio. */
@@ -536,6 +574,12 @@ export function normalizarEscenarioParaFirebase(
 
   if (Object.keys(proximosPasos).length) {
     escenario.proximosPasos = proximosPasos;
+  }
+
+  const dominiosExcluidos = dominiosExcluidosParaGuardar(payload.dominiosExcluidos);
+
+  if (dominiosExcluidos) {
+    escenario.dominiosExcluidos = dominiosExcluidos;
   }
 
   Object.entries(payload.domains || {}).forEach(([domainId, dominio]) => {

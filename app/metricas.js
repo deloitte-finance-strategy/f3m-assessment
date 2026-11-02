@@ -18,9 +18,9 @@ import {
   agregarPorDominio as agregarPorDominioCore,
   calcularMetricas,
   normalizeTargetValue,
-} from "../core/calculo.js?v=35";
+} from "../core/calculo.js?v=36";
 
-import { DOMAINS, state } from "./estado.js?v=35";
+import { DOMAINS, state } from "./estado.js?v=36";
 
 
 /**

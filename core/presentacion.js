@@ -208,3 +208,39 @@ export function cuandoFue(fecha, ahora) {
 export function fechaParaArchivo(fecha) {
   return `${fecha.getFullYear()}-${dosCifras(fecha.getMonth() + 1)}-${dosCifras(fecha.getDate())}`;
 }
+
+
+const EN_LETRA = ["cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez"];
+
+
+/** Un numero pequeño en letra, como se escribe en una frase: «seis». De once en adelante, en cifra. */
+export function enLetra(cuantos) {
+  return EN_LETRA[cuantos] || String(cuantos);
+}
+
+
+/**
+ * Cuantos dominios, dicho como se dice en una sesion: «los nueve dominios»,
+ * «los seis dominios», «el dominio».
+ *
+ * La herramienta decia «los nueve» en el titulo del Overview, en el buscador y
+ * en la pestaña IA. Con dominios que no aplican al cliente eso es falso, y
+ * delante del cliente se nota: el buscador prometia buscar en nueve y
+ * encontraba en seis.
+ */
+export function losDominios(cuantos) {
+  if (cuantos === 1) {
+    return "el dominio";
+  }
+
+  return `los ${enLetra(cuantos)} dominios`;
+}
+
+
+/**
+ * Por debajo de tres ejes un radar no es un radar: con dos dominios sale una
+ * raya y con uno, un punto, y proyectado parece un grafico roto. Con dominios
+ * que no aplican al cliente puede quedar asi, y entonces ni el Overview, ni el
+ * informe ni el resumen lo dibujan: la tabla y las palancas dicen lo mismo.
+ */
+export const MINIMO_DE_EJES_DE_UN_RADAR = 3;

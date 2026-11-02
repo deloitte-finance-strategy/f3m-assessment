@@ -1,7 +1,7 @@
 /**
  * El buscador: Ctrl+K, o la lupa de la barra de pestanas, y se escribe un
  * trozo del nombre de una subcapacidad para ir a su tarjeta en cualquiera de
- * los nueve dominios.
+ * los dominios que aplican al cliente.
  *
  * Es un <dialog> nativo y no uno de los modales de la herramienta: showModal()
  * ya deja el fondo inerte, atrapa el foco, cierra con Escape y lo devuelve al
@@ -11,11 +11,12 @@
  * cosa del orquestador, que lo inyecta. Importarlo cerraria un ciclo con el.
  */
 
-import { buscarSubcapacidades, trozosResaltados } from "../core/busqueda.js?v=35";
-import { escapeAttr, escapeHtml, formatMedia } from "../core/presentacion.js?v=35";
-import { SELECTOR_DE_MODAL_ABIERTO } from "./avisos.js?v=35";
-import { calculate } from "./metricas.js?v=35";
-import { getDominiosDelOverview } from "./vistas/overview.js?v=35";
+import { buscarSubcapacidades, trozosResaltados } from "../core/busqueda.js?v=36";
+import { escapeAttr, escapeHtml, formatMedia, losDominios } from "../core/presentacion.js?v=36";
+import { SELECTOR_DE_MODAL_ABIERTO } from "./avisos.js?v=36";
+import { dominiosQueAplican } from "./estado.js?v=36";
+import { calculate } from "./metricas.js?v=36";
+import { getDominiosDelOverview } from "./vistas/overview.js?v=36";
 
 
 let dialogo = null;
@@ -92,7 +93,7 @@ function pintar() {
   if (!consulta.trim()) {
     pie.textContent = "Escribe parte del nombre de una subcapacidad, de su capacidad o de su dominio.";
   } else if (!total) {
-    pie.textContent = `Nada con «${consulta.trim()}» en los nueve dominios.`;
+    pie.textContent = `Nada con «${consulta.trim()}» en ${losDominios(dominiosQueAplican().length)}.`;
   } else if (total > resultados.length) {
     pie.textContent = `Y ${total - resultados.length} más: añade otra palabra para afinar.`;
   } else {
