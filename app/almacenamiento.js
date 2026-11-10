@@ -76,3 +76,36 @@ export function borrarDeAlmacenamiento(clave) {
     return false;
   }
 }
+
+
+
+
+/**
+ * Lo que solo le importa a esta pestana: en que dominio estaba y a que altura.
+ *
+ * Va en sessionStorage y no en localStorage a proposito. Es de la pestana y se
+ * va al cerrarla: recargar deja donde se estaba, y abrir la herramienta manana
+ * empieza donde dice el escenario, como siempre. Con localStorage, dos pestanas
+ * en dominios distintos se pisarian el sitio la una a la otra.
+ *
+ * Si falla no se avisa: no es trabajo, es comodidad, y lo peor que pasa es que
+ * al recargar se vuelve al dominio del escenario.
+ */
+export function leerDeLaPestana(clave) {
+  try {
+    return window.sessionStorage.getItem(clave);
+  } catch (error) {
+    return null;
+  }
+}
+
+
+
+
+export function escribirEnLaPestana(clave, valor) {
+  try {
+    window.sessionStorage.setItem(clave, valor);
+  } catch (error) {
+    // Sin almacenamiento de sesion no hay sitio que recordar, y nada mas.
+  }
+}

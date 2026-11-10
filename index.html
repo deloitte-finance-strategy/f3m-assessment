@@ -82,6 +82,14 @@
     <script src="tema.js?v=36"></script>
 
     <!--
+      Pide ya los tres JSON del arranque, sin esperar a que lleguen los modulos
+      de app.js, y dice en pantalla si la aplicacion no llega a arrancar.
+      Sincrono y en un archivo por lo mismo que tema.js. Por que no son tres
+      <link rel="preload">: en la cabecera de arranque.js.
+    -->
+    <script src="arranque.js?v=36"></script>
+
+    <!--
       Todo el codigo que app.js va a necesitar, pedido de golpe al llegar el
       HTML. Sin esto el navegador lo descubre por capas: baja app.js, lee sus
       imports, baja esos, lee los suyos... y cada capa es un viaje al servidor.
@@ -93,8 +101,8 @@
       la linea exacta que hay que poner o quitar. Llevan el mismo ?v= que los
       imports, o el navegador los bajaria dos veces.
 
-      Los tres JSON del arranque van por el mismo motivo: no dependen de nada y
-      app.js los pedia uno detras de otro. Los nueve de dominio no estan aqui
+      Los tres JSON del arranque se adelantan por el mismo motivo, pero desde
+      arranque.js y no con una precarga. Los nueve de dominio no se adelantan
       a proposito: la lista de dominios vive en data/domains.json y no se
       repite en este archivo.
 
@@ -157,9 +165,6 @@
     <link rel="modulepreload" href="informe/preparacion.js?v=36">
     <link rel="modulepreload" href="informe/resumen.js?v=36">
     <link rel="modulepreload" href="informe/secciones.js?v=36">
-    <link rel="preload" href="data/domains.json" as="fetch" crossorigin>
-    <link rel="preload" href="data/casos-ia.json" as="fetch" crossorigin>
-    <link rel="preload" href="data/biblioteca.json" as="fetch" crossorigin>
   </head>
   <body>
     <!--

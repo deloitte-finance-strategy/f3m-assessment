@@ -107,7 +107,9 @@ import {
 import {
   borrarDeAlmacenamiento,
   escribirAlmacenamiento,
+  escribirEnLaPestana,
   leerAlmacenamiento,
+  leerDeLaPestana,
 } from "./app/almacenamiento.js?v=36";
 
 // Las dos preferencias de vista: el tema y la densidad.
@@ -193,12 +195,14 @@ import {
   actualizarAvanceDeDominios,
   cargarCatalogoDeCasosDeIa,
   cargarCatalogoDeDominios,
+  dominioDeEstaPestana,
   getActiveDomainConfig,
   loadCoreDomains,
   marcarDominiosNoDisponibles,
   renderDomainSwitcher,
   setActiveDomain,
   switchDomain,
+  volverAlDominioDeEstaPestana,
 } from "./app/dominios.js?v=36";
 
 // Los tres filtros y el ambito de datos que sale de ellos.
@@ -308,6 +312,16 @@ document.addEventListener("DOMContentLoaded", init);
 
 
 async function init() {
+  // La senal de que la aplicacion ha arrancado. arranque.js la busca al
+  // terminar de cargar la pagina, y si no esta, lo dice en vez de dejar
+  // «Cargando los datos…» para siempre.
+  document.documentElement.dataset.arranque = "ok";
+
+  // Antes que nada mas: en que dominio y a que altura estaba esta pestana. El
+  // arranque pone su dominio por defecto, y eso ya lo pisaria.
+  const dominioDeAntes = dominioDeEstaPestana();
+  const posicionDeAntes = posicionAlRecargar();
+
   cacheElements();
   bindGlobalEvents();
   // El tema y la densidad ya vienen puestos de tema.js, que corre antes del
@@ -431,6 +445,10 @@ async function init() {
 
     await initializeSharedScenario();
 
+    // Recargar deja en el dominio en el que se estaba, no en el del ultimo
+    // cambio guardado. Va despues del escenario, que trae el suyo.
+    volverAlDominioDeEstaPestana(dominioDeAntes);
+
     iniciarAvisoDeCopia({ local: !enEscenarioCompartido });
 
     populateCapacityFilter();
@@ -476,6 +494,61 @@ async function init() {
   } finally {
     setInitialLoading(false); // NUEVO: oculta el estado de carga al terminar, incluso si hay error
   }
+
+  // Con todo pintado y el estado de carga ya quitado, que tambien ocupa.
+  volverALaPosicion(posicionDeAntes);
+}
+
+
+/**
+ * Recargar deja a la misma altura, ademas de en la misma pestana y dominio.
+ *
+ * El navegador ya intenta devolver la posicion al recargar, pero lo hace antes
+ * de que esta pagina tenga contenido —los datos llegan despues—, asi que se
+ * quedaba arriba: F5 en la tarjeta 13 del Assessment volvia a la primera.
+ *
+ * Solo al recargar o al volver con «Atrás». Entrar de nuevo por la direccion
+ * empieza arriba, que es lo que se espera de abrir algo.
+ */
+const CLAVE_DE_LA_POSICION = "f3m-posicion";
+
+
+function apuntarLaPosicion() {
+  escribirEnLaPestana(CLAVE_DE_LA_POSICION, JSON.stringify({
+    vista: vistaActiva,
+    dominio: state.activeDomainId,
+    altura: Math.round(window.scrollY),
+  }));
+}
+
+
+function posicionAlRecargar() {
+  const tipo = window.performance?.getEntriesByType?.("navigation")?.[0]?.type;
+
+  if (tipo !== "reload" && tipo !== "back_forward") {
+    return null;
+  }
+
+  try {
+    return JSON.parse(leerDeLaPestana(CLAVE_DE_LA_POSICION) || "null");
+  } catch (error) {
+    return null;
+  }
+}
+
+
+function volverALaPosicion(anterior) {
+  // Otra vista u otro dominio son otra pagina: su altura no significa nada aqui.
+  if (
+    !anterior
+    || anterior.vista !== vistaActiva
+    || anterior.dominio !== state.activeDomainId
+    || !(anterior.altura > 0)
+  ) {
+    return;
+  }
+
+  window.scrollTo({ top: anterior.altura, behavior: "instant" });
 }
 
 
@@ -712,6 +785,9 @@ function bindGlobalEvents() {
   enganchar("presentationModeButton", "click", alternarModoPresentacion);
   enganchar("themeButton", "click", alternarTema);
   window.addEventListener("beforeunload", avisarSiQuedaAlgoSinGuardar);
+  // pagehide y no beforeunload: es el que tambien llega en un movil y al
+  // guardar la pagina para «Atrás».
+  window.addEventListener("pagehide", apuntarLaPosicion);
   document.addEventListener("keydown", guardarCopiaConElTeclado);
   setupMenuDeCabecera(els.presentacionMenuButton, els.presentacionMenu);
   setupMenuDeCabecera(els.scenarioMenuButton, els.scenarioMenu, pintarAvisoDeCopia);

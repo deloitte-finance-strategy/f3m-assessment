@@ -1646,6 +1646,23 @@ background: var(--surface);
 box-shadow: var(--shadow);
 }
 
+/*
+  Cuando la aplicacion no llega a arrancar (arranque.js). El borde es el rojo
+  de los avisos de error: tiene que distinguirse de un «cargando» de un vistazo
+  desde el fondo de la sala.
+*/
+.loading-state-fallo {
+border-left: 4px solid var(--red);
+}
+
+.loading-state-fallo .small-note {
+max-width: 68ch;
+}
+
+.loading-state-fallo .primary-button {
+margin-top: 12px;
+}
+
 .loading-spinner {
 width: 34px;
 height: 34px;

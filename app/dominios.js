@@ -26,6 +26,7 @@ import {
   dominioAplica,
   els,
   expandedHeatmapCapabilities,
+  pedirDatosDelArranque,
   state,
   syncActiveDomainState,
 } from "./estado.js?v=36";
@@ -35,6 +36,11 @@ import { repintarTodo } from "./repintado.js?v=36";
 import { conRadaresAnimados } from "./graficos.js?v=36";
 import { fundir } from "./movimiento.js?v=36";
 import { populateCapacityFilter } from "./filtros.js?v=36";
+import { escribirEnLaPestana, leerDeLaPestana } from "./almacenamiento.js?v=36";
+
+
+// Por pestana, no por navegador: ver leerDeLaPestana() en almacenamiento.js.
+const CLAVE_DEL_DOMINIO_DE_LA_PESTANA = "f3m-dominio-abierto";
 
 
 /**
@@ -44,7 +50,7 @@ import { populateCapacityFilter } from "./filtros.js?v=36";
  * botones. Si falla, la aplicacion no puede arrancar, y se dice asi.
  */
 export async function cargarCatalogoDeDominios() {
-  const response = await fetch(CATALOGO_URL);
+  const response = await pedirDatosDelArranque(CATALOGO_URL);
 
   if (!response.ok) {
     throw new Error(`No se ha podido leer ${CATALOGO_URL}: ${response.status}`);
@@ -78,7 +84,7 @@ export async function cargarCatalogoDeDominios() {
  * eso esto lanza y quien llama decide, en vez de tragarse el fallo aqui.
  */
 export async function cargarCatalogoDeCasosDeIa() {
-  const response = await fetch(CASOS_DE_IA_URL);
+  const response = await pedirDatosDelArranque(CASOS_DE_IA_URL);
 
   if (!response.ok) {
     throw new Error(`No se ha podido leer ${CASOS_DE_IA_URL}: ${response.status}`);
@@ -326,9 +332,52 @@ export function setActiveDomain(domainId) {
   state.items = domainData.items;
   state.targets = domainData.targets;
 
+  escribirEnLaPestana(CLAVE_DEL_DOMINIO_DE_LA_PESTANA, domainId);
+
   updateActiveDomainUi();
+}
 
 
+
+
+/**
+ * El dominio en el que estaba esta pestana antes de recargar.
+ *
+ * Hay que pedirlo ANTES de poner ningun dominio: setActiveDomain() lo apunta
+ * cada vez, tambien con el de arranque, asi que despues ya no dice donde se
+ * estaba sino donde se acaba de empezar.
+ */
+export function dominioDeEstaPestana() {
+  return leerDeLaPestana(CLAVE_DEL_DOMINIO_DE_LA_PESTANA);
+}
+
+
+
+
+/**
+ * Al recargar, vuelve al dominio en el que se estaba.
+ *
+ * Sin esto, F5 dejaba en el dominio del ultimo cambio GUARDADO, que es el que
+ * viaja en el escenario: quien estaba repasando Fiscal sin tocar nada volvia a
+ * FP&A, y en un escenario compartido, al dominio en el que hubiera puntuado un
+ * companero. La pestana y la posicion si se conservaban, asi que se acababa en
+ * la misma vista de otro dominio sin que nada lo dijera.
+ *
+ * Solo si ese dominio sigue cargado y aplica al cliente: si lo han quitado
+ * mientras tanto, manda el escenario.
+ */
+export function volverAlDominioDeEstaPestana(domainId) {
+  if (
+    !domainId
+    || domainId === state.activeDomainId
+    || !state.domains[domainId]
+    || !dominioAplica(domainId)
+  ) {
+    return;
+  }
+
+  syncActiveDomainState();
+  setActiveDomain(domainId);
 }
 
 
