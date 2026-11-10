@@ -1200,11 +1200,15 @@ function handleScoreKeydown(event) {
 }
 
 
-function aplicarScore(itemId, leverKey, score) {
+function aplicarScore(itemId, leverKey, score, { deshaciendo = false } = {}) {
   const item = state.items.find((entry) => entry.id === itemId);
 
   if (!item || item.scores[leverKey] === score) {
     return;
+  }
+
+  if (!deshaciendo) {
+    apuntarParaDeshacer(item, leverKey, score);
   }
 
   // Con un filtro de prioridad puesto, la que se puntua se queda en la lista
@@ -1219,7 +1223,10 @@ function aplicarScore(itemId, leverKey, score) {
   syncActiveDomainState();
 
   const visiblesDespues = getVisibleItems().map((entry) => entry.id).join("|");
-  const mismaLista = visiblesAntes === visiblesDespues;
+
+  // Al deshacer se reconstruyen las tarjetas: quien puntua ya ha movido el
+  // radio con su clic, pero aqui no lo ha tocado nadie y hay que pintarlo.
+  const mismaLista = !deshaciendo && visiblesAntes === visiblesDespues;
 
   repintarTodo({ saltarAssessments: mismaLista });
 
@@ -1228,6 +1235,91 @@ function aplicarScore(itemId, leverKey, score) {
   }
 
   persistItemChange(item.id, `scores/${leverKey}`, score);
+}
+
+
+/**
+ * Deshacer la ultima puntuacion (Ctrl+Z).
+ *
+ * En un taller se puntua deprisa y un clic se va a la fila de al lado. Sin
+ * esto habia que acordarse de que valor tenia —si es que tenia alguno— y
+ * volver a ponerlo a mano, delante de la sala.
+ *
+ * Todas las formas de puntuar pasan por aplicarScore() —la tarjeta, el modo
+ * taller, las teclas—, asi que se apunta ahi y vale para todas.
+ *
+ * Tres cosas que no hace, a proposito:
+ *
+ * - **No deshace en otro dominio.** Lo ultimo puntuado puede ser de un dominio
+ *   que ya no esta abierto, y cambiar una nota que no se ve es justo el fallo
+ *   silencioso que se quiere evitar: lo dice y no toca nada.
+ * - **No pisa un cambio posterior.** Si esa palanca ya no vale lo que se le
+ *   puso —la cambio otra persona en el escenario compartido, o se abrio una
+ *   copia—, deshacer borraria ese cambio y no el propio.
+ * - **No guarda mas de MAXIMO_QUE_SE_DESHACE.** Es para el clic de hace un
+ *   momento, no un historial de la sesion.
+ */
+const MAXIMO_QUE_SE_DESHACE = 50;
+
+const puntuacionesRecientes = [];
+
+
+function apuntarParaDeshacer(item, leverKey, despues) {
+  puntuacionesRecientes.push({
+    domainId: state.activeDomainId,
+    itemId: item.id,
+    leverKey,
+    antes: item.scores[leverKey] ?? null,
+    despues,
+  });
+
+  if (puntuacionesRecientes.length > MAXIMO_QUE_SE_DESHACE) {
+    puntuacionesRecientes.shift();
+  }
+}
+
+
+/** Devuelve false si no habia nada que deshacer, para dejarle la tecla al navegador. */
+export function deshacerUltimaPuntuacion() {
+  const ultima = puntuacionesRecientes[puntuacionesRecientes.length - 1];
+
+  if (!ultima) {
+    return false;
+  }
+
+  if (ultima.domainId !== state.activeDomainId) {
+    showNotice(
+      `Lo último que se puntuó fue en ${DOMAINS[ultima.domainId]?.label || "otro dominio"}. `
+        + "Abre ese dominio para deshacerlo.",
+      "info",
+    );
+
+    return true;
+  }
+
+  puntuacionesRecientes.pop();
+
+  const item = state.items.find((entry) => entry.id === ultima.itemId);
+  const palanca = LEVERS.find((lever) => lever.key === ultima.leverKey)?.label || ultima.leverKey;
+
+  if (!item || (item.scores[ultima.leverKey] ?? null) !== ultima.despues) {
+    showNotice(
+      "Esa puntuación ha cambiado después de ponerla y ya no se puede deshacer desde aquí.",
+      "info",
+    );
+
+    return true;
+  }
+
+  aplicarScore(item.id, ultima.leverKey, ultima.antes, { deshaciendo: true });
+
+  showNotice(
+    `Deshecho: ${palanca} de «${item.subcapacidad}» `
+      + (ultima.antes === null ? "vuelve a estar sin puntuar." : `vuelve a ${ultima.antes}.`),
+    "info",
+  );
+
+  return true;
 }
 
 

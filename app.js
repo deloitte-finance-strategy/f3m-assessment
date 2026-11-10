@@ -255,6 +255,7 @@ import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=3
 
 // El Assessment: puntuar cada subcapacidad en las tres palancas.
 import {
+  deshacerUltimaPuntuacion,
   irASiguientePendiente,
   llevarALasTarjetas,
   pintarSiguientePendiente,
@@ -795,6 +796,7 @@ function bindGlobalEvents() {
   window.addEventListener("pagehide", apuntarLaPosicion);
   setupImpresion();
   document.addEventListener("keydown", guardarCopiaConElTeclado);
+  document.addEventListener("keydown", deshacerConElTeclado);
   setupMenuDeCabecera(els.presentacionMenuButton, els.presentacionMenu);
   setupMenuDeCabecera(els.scenarioMenuButton, els.scenarioMenu, pintarAvisoDeCopia);
   setupMenuDeCabecera(els.exportPdfButton, els.informeMenu, pintarMenuDeInforme);
@@ -1986,6 +1988,38 @@ function guardarCopiaConElTeclado(event) {
 
   exportScenarioJson();
   showNotice("Descargando una copia del trabajo, como con «Sesión → Guardar una copia».", "info");
+}
+
+
+/**
+ * Ctrl+Z deshace la ultima puntuacion.
+ *
+ * En un campo de texto la tecla es del campo: ahi deshace lo escrito, como en
+ * cualquier sitio. Y con un dialogo abierto encima —una confirmacion, los
+ * criterios, el buscador— no se toca una nota que queda tapada. El modo taller
+ * no cuenta como dialogo: ahi es donde mas se puntua.
+ */
+function deshacerConElTeclado(event) {
+  if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey || event.key.toLowerCase() !== "z") {
+    return;
+  }
+
+  const enUnCampo = event.target?.isContentEditable
+    || event.target?.matches?.("textarea, select, input:not([type='radio']):not([type='checkbox'])");
+
+  if (enUnCampo || document.querySelector(".modal-backdrop:not([hidden]):not(.modo-taller), dialog[open]")) {
+    return;
+  }
+
+  // Mantener la tecla pulsada no deshace en cadena: cada pulsacion, una.
+  if (event.repeat) {
+    event.preventDefault();
+    return;
+  }
+
+  if (deshacerUltimaPuntuacion()) {
+    event.preventDefault();
+  }
 }
 
 
