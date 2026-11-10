@@ -26,7 +26,8 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
 
 - Puntuar Procesos, Tecnología y Organización de cada subcapacidad con un clic, del 1 al 5
   (también con el teclado), y apuntar las **notas del taller** en su detalle. «Siguiente sin
-  puntuar», junto al dominio en la barra de pestañas, lleva a la próxima pendiente.
+  puntuar», junto al dominio en la barra de pestañas, lleva a la próxima pendiente. **Ctrl+Z**
+  deshace la última puntuación.
 - Ir a cualquier subcapacidad de los nueve dominios escribiendo un trozo de su nombre, con la
   lupa de la barra de pestañas o con **Ctrl+K**.
 - Calcular automáticamente score medio, nivel resultante, gap vs objetivo y prioridad.
@@ -44,7 +45,7 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
   documentos de los que salen. **«Más información»**, en cualquier ficha de caso, abre su documento
   de origen dentro de la herramienta, en la página o diapositiva donde aparece.
 - Guardar una copia del trabajo en un archivo y volver a abrirla más adelante, desde el menú
-  **Escenario** de la cabecera. Sin escenario compartido, el menú dice cuándo se guardó la
+  **Sesión** de la cabecera o con **Ctrl+S**. Sin escenario compartido, el menú dice cuándo se guardó la
   última, y si hay cambios de hace más de un día que no están en ninguna, el botón lleva un punto
   ámbar.
 - Ajustar los objetivos de madurez capacidad a capacidad, o los de **todas las capacidades** de
@@ -55,6 +56,10 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
   marcan otra vez. Se guarda con el escenario, así que viaja en las copias y lo ve todo el equipo
   de un escenario compartido.
 - Exportar resumen y roadmap en CSV.
+- Imprimir la vista abierta con **Ctrl+P**: sale apaisada, en claro y sin la cabecera ni los
+  botones, con una línea que dice el cliente, el dominio y la fecha. Si se imprime desde un
+  escenario compartido, conviene desmarcar «Encabezados y pies de página» en el diálogo: el pie
+  del navegador lleva la dirección, y la dirección es el enlace del escenario.
 - Exportar **el informe**: un PDF con forma de presentación, en página 16:9, que abre con la lectura
   de la función financiera completa, sigue con el diagnóstico del dominio —escala de madurez,
   perfil por palanca, radares, heatmap y brechas— y cierra con el roadmap por oleadas y las

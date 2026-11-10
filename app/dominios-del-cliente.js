@@ -17,8 +17,8 @@
  * solo se elige, se guarda y se dice en pantalla.
  */
 
-import { normalizarDominiosExcluidos } from "../core/escenario.js?v=36";
-import { losDominios } from "../core/presentacion.js?v=36";
+import { normalizarDominiosExcluidos } from "../core/escenario.js?v=37";
+import { losDominios } from "../core/presentacion.js?v=37";
 
 import {
   DOMAINS,
@@ -28,13 +28,13 @@ import {
   primerDominioQueAplica,
   state,
   syncActiveDomainState,
-} from "./estado.js?v=36";
+} from "./estado.js?v=37";
 
-import { abrirDialogo, showNotice } from "./avisos.js?v=36";
-import { avanceDeDominio, renderDomainSwitcher, switchDomain } from "./dominios.js?v=36";
-import { enEscenarioCompartido } from "./firebase.js?v=36";
-import { persistDominiosExcluidos } from "./persistencia.js?v=36";
-import { repintarTodo } from "./repintado.js?v=36";
+import { abrirDialogo, showNotice } from "./avisos.js?v=37";
+import { avanceDeDominio, renderDomainSwitcher, switchDomain } from "./dominios.js?v=37";
+import { enEscenarioCompartido } from "./firebase.js?v=37";
+import { persistDominiosExcluidos } from "./persistencia.js?v=37";
+import { repintarTodo } from "./repintado.js?v=37";
 
 
 /** Para quien, en una frase: el nombre del cliente si lo hay. */

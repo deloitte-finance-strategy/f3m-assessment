@@ -14,23 +14,23 @@
  * rama intacta en vez de desaparecer para todo el equipo.
  */
 
-import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=36";
-import { serializeTargetsForFirebase } from "../core/objetivos.js?v=36";
-import { dominiosExcluidosParaGuardar } from "../core/escenario.js?v=36";
+import { DEFAULT_TARGET_MATURITY, normalizeTargetValue } from "../core/calculo.js?v=37";
+import { serializeTargetsForFirebase } from "../core/objetivos.js?v=37";
+import { dominiosExcluidosParaGuardar } from "../core/escenario.js?v=37";
 
-import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=36";
-import { escribirAlmacenamiento } from "./almacenamiento.js?v=36";
-import { ocultarAviso, showNotice } from "./avisos.js?v=36";
+import { STORAGE_KEY, state, syncActiveDomainState } from "./estado.js?v=37";
+import { escribirAlmacenamiento } from "./almacenamiento.js?v=37";
+import { ocultarAviso, showNotice } from "./avisos.js?v=37";
 import {
   conLimiteDeEspera,
   conectarFirebase,
   enEscenarioCompartido,
   getConexion,
-} from "./firebase.js?v=36";
-import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=36";
-import { repintarTodo } from "./repintado.js?v=36";
-import { populateCapacityFilter } from "./filtros.js?v=36";
-import { anotarCambioLocal } from "./copias.js?v=36";
+} from "./firebase.js?v=37";
+import { getUsuarioActual, inicializarIdentidad, marcaDeAutoria } from "./identidad.js?v=37";
+import { repintarTodo } from "./repintado.js?v=37";
+import { populateCapacityFilter } from "./filtros.js?v=37";
+import { anotarCambioLocal } from "./copias.js?v=37";
 
 import {
   hayCanalDeVuelta,
@@ -38,14 +38,14 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./indicador.js?v=36";
+} from "./indicador.js?v=37";
 
 import {
   applyScenarioPayload,
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./escenario.js?v=36";
+} from "./escenario.js?v=37";
 
 
 

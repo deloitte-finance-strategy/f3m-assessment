@@ -16,7 +16,7 @@ import {
   normalizeMatchKey,
   subcapacidadVigente,
   toSavedItemsArray,
-} from "../core/coincidencias.js?v=36";
+} from "../core/coincidencias.js?v=37";
 
 
 const CARGADOS = [

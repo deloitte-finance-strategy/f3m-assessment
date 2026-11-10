@@ -29,7 +29,7 @@ import {
   normalizarProximosPasos,
   recortarAlLimite,
   revisarEscenario,
-} from "../core/escenario.js?v=36";
+} from "../core/escenario.js?v=37";
 
 
 /** Serializador de objetivos de mentira: aqui solo importa que se le llame. */

@@ -8,9 +8,9 @@
  * palabra antes de borrar el trabajo de nueve dominios.
  */
 
-import { els } from "./estado.js?v=36";
-import { escapeHtml } from "../core/presentacion.js?v=36";
-import { ocultarConSalida } from "./movimiento.js?v=36";
+import { els } from "./estado.js?v=37";
+import { escapeHtml } from "../core/presentacion.js?v=37";
+import { ocultarConSalida } from "./movimiento.js?v=37";
 
 
 /**

@@ -17,17 +17,17 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=36";
-import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=36";
-import { createDefaultTargets } from "../../core/objetivos.js?v=36";
-import { escapeAttr, escapeHtml, formatMedia, losDominios } from "../../core/presentacion.js?v=36";
-import { abrirDialogo, showNotice } from "../avisos.js?v=36";
+} from "../../core/calculo.js?v=37";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=37";
+import { createDefaultTargets } from "../../core/objetivos.js?v=37";
+import { escapeAttr, escapeHtml, formatMedia, losDominios } from "../../core/presentacion.js?v=37";
+import { abrirDialogo, showNotice } from "../avisos.js?v=37";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=36";
+} from "../celdas.js?v=37";
 import {
   DOMAINS,
   LEVERS,
@@ -37,33 +37,33 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=36";
+} from "../estado.js?v=37";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "../edicion.js?v=36";
+} from "../edicion.js?v=37";
 import {
   describirObjetivos,
   getVisibleItems,
   prioridadQueYaNoCumple,
   retenerMientrasDureElFiltro,
-} from "../filtros.js?v=36";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=36";
+} from "../filtros.js?v=37";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=37";
 import {
   persistItemChange,
   persistTargetsDeDominios,
   persistTargetsDelDominioActivo,
-} from "../persistencia.js?v=36";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=36";
-import { repintarTodo } from "../repintado.js?v=36";
-import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=36";
+} from "../persistencia.js?v=37";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=37";
+import { repintarTodo } from "../repintado.js?v=37";
+import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=37";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=36";
+} from "../subcapacidad.js?v=37";
 
 
 export function renderCapabilityTargets() {
