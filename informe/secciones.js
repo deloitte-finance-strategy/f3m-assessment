@@ -102,12 +102,34 @@ export function portada(data) {
 
     <div class="portada-datos">
       <div><span>Dominio analizado</span><strong>${escapeHtml(data.domainTitle || data.domainLabel)}</strong></div>
-      <div><span>Origen de los datos</span><strong>${escapeHtml(data.scenarioLabel)}</strong></div>
+      <div><span>Subcapacidades puntuadas</span><strong>${escapeHtml(avance(data))}</strong></div>
       <div><span>Filtros aplicados</span><strong>${escapeHtml(data.filters)}</strong></div>
-      <div><span>Objetivo base</span><strong>${escapeHtml(String(data.targetMaturity))}</strong></div>
+      <div><span>Objetivo de madurez</span><strong>${escapeHtml(objetivo(data.objetivo))}</strong></div>
       <div><span>Fecha de generación</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
     </div>
   `;
+}
+
+
+/**
+ * La portada decia «Origen de los datos: Modo local» y «Objetivo base 4». Lo
+ * primero es jerga de la herramienta, y lo segundo salia del Excel del dominio
+ * y no de los objetivos configurados: con objetivos entre 4 y 5, el cliente
+ * leia un 4. Ahora dice cuanto se ha puntuado y el objetivo que se usa.
+ */
+function avance(data) {
+  return `${data.scored.length} de ${data.visibleItems.length}`;
+}
+
+
+function objetivo(valores = []) {
+  if (!valores.length) {
+    return "-";
+  }
+
+  return valores.length === 1
+    ? String(valores[0])
+    : `Entre ${valores[0]} y ${valores[valores.length - 1]}`;
 }
 
 
@@ -153,11 +175,20 @@ function portadaDelProyecto(data) {
 
     <div class="portada-datos">
       <div><span>Dominios analizados</span><strong>${data.dominios.length} de ${escapeHtml(String(data.global?.dominiosTotales || 9))}</strong></div>
-      <div><span>Origen de los datos</span><strong>${escapeHtml(data.scenarioLabel)}</strong></div>
+      <div><span>Subcapacidades puntuadas</span><strong>${escapeHtml(avanceDelProyecto(data))}</strong></div>
       <div><span>Filtros aplicados</span><strong>Ninguno</strong></div>
       <div><span>Fecha de generación</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
     </div>
   `;
+}
+
+
+/** Lo puntuado en los dominios con capitulo, que son los que recorre el informe. */
+function avanceDelProyecto(data) {
+  const puntuadas = data.dominios.reduce((suma, dominio) => suma + dominio.scored.length, 0);
+  const total = data.dominios.reduce((suma, dominio) => suma + dominio.visibleItems.length, 0);
+
+  return `${puntuadas} de ${total}`;
 }
 
 
@@ -323,8 +354,8 @@ export function cierre(data) {
     </p>
     <div class="portada-datos">
       <div><span>Filtros aplicados</span><strong>${escapeHtml(data.filters)}</strong></div>
-      <div><span>Origen de los datos</span><strong>${escapeHtml(data.scenarioLabel)}</strong></div>
-      <div><span>Archivo de origen</span><strong>${escapeHtml(data.sourceFile)}</strong></div>
+      <div><span>Subcapacidades puntuadas</span><strong>${escapeHtml(avance(data))}</strong></div>
+      <div><span>Objetivo de madurez</span><strong>${escapeHtml(objetivo(data.objetivo))}</strong></div>
       <div><span>Fecha de generación</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
     </div>
   `;
@@ -370,7 +401,7 @@ function cierreDelProyecto(data) {
     </p>
     <div class="portada-datos">
       <div><span>Filtros aplicados</span><strong>Ninguno</strong></div>
-      <div><span>Origen de los datos</span><strong>${escapeHtml(data.scenarioLabel)}</strong></div>
+      <div><span>Subcapacidades puntuadas</span><strong>${escapeHtml(avanceDelProyecto(data))}</strong></div>
       <div><span>Dominios con capítulo</span><strong>${data.dominios.length}</strong></div>
       <div><span>Fecha de generación</span><strong>${escapeHtml(data.generatedAt)}</strong></div>
     </div>

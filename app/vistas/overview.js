@@ -333,11 +333,14 @@ function renderOverviewHeadline(filas, entradas) {
     (fila) => fila.evaluadas < fila.total,
   ).length;
 
+  // Este titular se proyecta: «Quedan 1 subcapacidades en 1 dominios» se leia
+  // en la sala justo al final, cuando falta una.
+  const cuantas = pendientes === 1 ? "Queda 1 subcapacidad" : `Quedan ${pendientes} subcapacidades`;
+  const enCuantos = aMedias === 1 ? "en un dominio" : `en ${aMedias} dominios`;
+
   titulares.push(
     pendientes
-      ? `${pendientes === 1 ? "Queda 1 subcapacidad" : `Quedan ${pendientes} subcapacidades`} por evaluar en ${
-        aMedias === 1 ? "1 dominio" : `${aMedias} dominios`
-      }`
+      ? `${cuantas} por evaluar ${enCuantos}`
       : "Todos los dominios están evaluados por completo",
   );
 

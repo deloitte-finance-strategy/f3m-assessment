@@ -501,8 +501,8 @@
   <div class="loading-spinner" aria-hidden="true"></div>
   <div>
     <p class="eyebrow">Cargando assessment</p>
-    <h2>Preparando datos y escenario compartido…</h2>
-    <p class="small-note">Esto puede tardar unos segundos si se está sincronizando con Firebase.</p>
+    <h2>Cargando los datos…</h2>
+    <p class="small-note" data-carga-compartida hidden>Conectando con el escenario compartido del equipo. Puede tardar unos segundos.</p>
   </div>
 </section>
 
@@ -862,6 +862,9 @@
         <div class="table-wrap panel">
           <table class="data-table roadmap-table" id="roadmapTable"></table>
         </div>
+
+        <!-- Los responsables ya escritos, para sugerirlos en el Roadmap y en los próximos pasos. -->
+        <datalist id="responsablesConocidos"></datalist>
       </section>
 
       <!--
@@ -1267,10 +1270,6 @@
       <div class="ai-modal-section">
         <h4>Aplicación en nivel avanzado</h4>
         <p id="aiModalAdvanced"></p>
-      </div>
-
-      <div class="ai-modal-section ai-modal-source">
-        <span class="small-note" id="aiModalSource"></span>
       </div>
     </div>
   </div>

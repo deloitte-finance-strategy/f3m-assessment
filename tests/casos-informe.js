@@ -75,9 +75,7 @@ function datos(extra = {}) {
     domainLabel: "Fiscal",
     domainTitle: "Fiscalidad",
     generatedAt: "16/09/2026, 10:00:00",
-    scenarioLabel: "Copia de este navegador",
-    sourceFile: "F3M_Fiscal.xlsx",
-    targetMaturity: 4,
+    objetivo: [4],
     filters: "Sin filtros",
     visibleItems: entradas.map((e) => e.item),
     metrics: entradas,
@@ -176,6 +174,22 @@ export const casos = [
       t.igual(html.includes('<section class="slide portada'), true, "portada");
       t.igual(html.includes('<section class="slide cierre'), true, "cierre");
       t.igual(html.includes("<title>Informe Fiscal · F3M Assessment</title>"), true, "titulo");
+    },
+  },
+  {
+    grupo: "El deck",
+    nombre: "la portada dice el avance y el objetivo que se usa, sin jerga de la herramienta",
+    ejecutar: (t) => {
+      // Decia «Origen de los datos: Modo local» y un «Objetivo base» leido del
+      // Excel, y la ultima diapositiva el nombre del Excel de trabajo.
+      const html = buildEnhancedPdfReportHtml(datos({ objetivo: [4, 5] }));
+
+      t.igual(html.includes("<span>Subcapacidades puntuadas</span><strong>3 de 3</strong>"), true, "el avance");
+      t.igual(html.includes("Entre 4 y 5"), true, "el objetivo configurado, no uno solo");
+      t.igual(html.includes("Origen de los datos"), false, "sin el origen de los datos");
+      t.igual(html.includes("Archivo de origen"), false, "sin el archivo de trabajo");
+
+      t.igual(buildEnhancedPdfReportHtml(datos()).includes("<strong>4</strong>"), true, "con un solo objetivo, el numero");
     },
   },
   {

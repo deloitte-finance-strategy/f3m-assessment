@@ -28,7 +28,6 @@ import { showNotice } from "./avisos.js?v=36";
 import { getActiveDomainConfig } from "./dominios.js?v=36";
 import { DOMAINS, dominiosQueAplican, els, state } from "./estado.js?v=36";
 import { getVisibleItems } from "./filtros.js?v=36";
-import { getScenarioShortLabel } from "./firebase.js?v=36";
 import {
   capturarRadarDelResumen,
   getOverviewRadarImagesForPdf,
@@ -36,7 +35,12 @@ import {
   redimensionarRadares,
   renderCapabilityRadar,
 } from "./graficos.js?v=36";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=36";
+import {
+  agregarPorCapacidad,
+  agregarPorDominio,
+  calculate,
+  objetivosDistintos,
+} from "./metricas.js?v=36";
 import {
   getAiDataForItem,
   getItemEvidenceText,
@@ -582,8 +586,6 @@ function datosComunes() {
     logo: state.logo,
     generatedAt: fechaLegible(ahora),
     fechaDeArchivo: fechaParaArchivo(ahora),
-    // Nunca el identificador completo: este informe se envía al cliente.
-    scenarioLabel: getScenarioShortLabel(),
     global: construirBloqueGlobalParaInforme(),
   };
 }
@@ -599,7 +601,6 @@ function datosComunes() {
  */
 function datosDeDominio(domainId, items, radarImages) {
   const config = DOMAINS[domainId] || getActiveDomainConfig();
-  const meta = (domainId === state.activeDomainId ? state.meta : state.domains[domainId]?.meta) || {};
   const total = state.domains[domainId]?.items?.length ?? items.length;
 
   const metrics = items.map((item) => ({ item, metrics: calculate(item, domainId) }));
@@ -615,8 +616,7 @@ function datosDeDominio(domainId, items, radarImages) {
     domainId,
     domainLabel: config.label,
     domainTitle: config.title,
-    sourceFile: meta.sourceFile || "-",
-    targetMaturity: meta.targetMaturity || "-",
+    objetivo: objetivosDistintos(items, domainId),
     visibleItems: items,
     metrics,
     scored,

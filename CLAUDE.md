@@ -65,7 +65,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.304 |
 | `app/guia.js` | **La guía de scoring del taller**: la rúbrica de las tres palancas en el sitio de los niveles | 128 |
 | `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
-| `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 282 |
+| `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 285 |
 | `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 224 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
 | `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 418 |
@@ -287,6 +287,12 @@ contraste mal puesto no es un problema estético, es un dato que no se lee.
 
 La vista de arranque es **Overview**: `vistaDesdeLaUrl()` cae ahí cuando la URL no trae ancla.
 
+Cambiar de pestaña **apunta una entrada en el historial** (`pushState`), así que «Atrás» vuelve a la
+pestaña anterior en vez de salir de la herramienta. Y **cada pestaña recuerda dónde estaba** mientras
+no se cambie de dominio: volver al Assessment deja en la tarjeta en la que se estaba. Volver a pulsar
+la pestaña abierta sigue llevando arriba. Desde el Overview y la IA, pulsar un dominio en el
+conmutador abre su Dashboard: ahí el dominio no cambia nada de lo que se ve.
+
 Los encabezados siguen un solo patrón: el nombre de la pestaña encima y lo que enseña debajo, en
 español («Heatmap · Madurez por capacidad», «Assessment · Puntuación por subcapacidad»). Antes
 mezclaban «Workspace», «Vista visual» y «Scoring», y no se sabía qué pestaña era cada página.
@@ -315,6 +321,12 @@ resumen, radares, heatmap, roadmap, CSV y PDF. Antes convivían dos ámbitos y e
 prioridad alta" mientras el roadmap enseñaba 2.
 
 No añadir una vista que lea `state.items` directamente.
+
+**Lo que se puntúa con el filtro de prioridad puesto se queda en el ámbito** hasta que cambia algún
+filtro (`retenerMientrasDureElFiltro()` en `app/filtros.js`), con un aviso en su tarjeta. Es el único
+filtro que depende de las puntuaciones: con «Alta», la primera nota podía sacar la tarjeta de la
+lista, la de debajo subía y el siguiente clic la puntuaba a ella. Se retiene en el ámbito y no solo
+en la lista para que KPIs, roadmap, CSV y PDF sigan contando lo mismo que las tarjetas.
 
 **El Overview es la excepción, y es deliberada.** Su pregunta es otra —no "cómo está este dominio"
 sino "cómo está la función financiera"—, así que lee `state.domains` entero vía
@@ -742,6 +754,11 @@ recalcula. No hay que acordarse de vaciar nada al tocar el estado.
   pantalla cuando la lectura remota del segundo fallaba. El nombre de quien edita va aparte, en
   `f3m-nombre-editor`.
 
+  Con la herramienta abierta en **dos pestañas**, en local, cada una se pone al día con lo que guarda
+  la otra (`escucharOtrasPestanas()` en `app/persistencia.js`, con el evento `storage`): cada
+  guardado escribe la copia entera, y sin eso lo guardado en una borraba lo de la otra. **Ctrl+S**
+  descarga una copia, como «Sesión → Guardar una copia».
+
   En modo local el trabajo solo vive en ese navegador, así que `app/copias.js` lleva la cuenta de
   si tiene copia fuera: `f3m-ultima-copia` (cuándo se guardó o se abrió la última) y
   `f3m-cambios-sin-copia-desde` (el primer cambio después). «Guardar una copia» dice cuándo fue la
@@ -1040,7 +1057,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      plegar. Pulsar una abre su tarjeta en el Assessment, resaltada y con el foco en su
      primer score.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
-     Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final.
+     Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final, y por
+     eso no hay columna «Oleada». «Último cambio» solo sale si alguna fila tiene autoría, es decir,
+     en un escenario compartido: sin ella, la tabla cabe a 1280 px.
      Cuando cabe a lo ancho, la tabla crece con la página y su encabezado se queda bajo las
      pestañas; cuando no cabe —Presentación, o menos de 1366 px— vuelve a su caja con desplazamiento
      propio. Lo decide `setupCajaDelRoadmap()`. Al tocar los anchos de sus columnas, medir con la

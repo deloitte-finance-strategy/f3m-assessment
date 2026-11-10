@@ -135,7 +135,7 @@ function renderTitularesEjecutivos(items, metrics) {
 
   titulares.push(
     pendientes
-      ? `Quedan ${pendientes} subcapacidades por evaluar`
+      ? `${pendientes === 1 ? "Queda 1 subcapacidad" : `Quedan ${pendientes} subcapacidades`} por evaluar`
       : "Todas las subcapacidades están evaluadas",
   );
 

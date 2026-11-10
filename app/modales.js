@@ -231,7 +231,6 @@ function openAiInitiativeModal(itemId) {
   els.aiModalCases.innerHTML = aiCaseCards(aiData.casos);
   pintarContadorDeCasos(els.aiModalCasesCount, aiData.casos);
   els.aiModalAdvanced.textContent = aiData.advanced || "Sin aplicación avanzada informada.";
-  els.aiModalSource.textContent = aiData.source ? `Fuente: ${aiData.source}` : "";
 
   els.aiInitiativeModal.hidden = false;
   els.closeAiInitiativeModalButton?.focus();

@@ -410,3 +410,45 @@ function redDeRadar(ejes) {
     </svg>
   `;
 }
+
+
+/**
+ * Los responsables que ya se han escrito, en cualquier dominio y en los
+ * proximos pasos, para sugerirlos al escribir otro. Sin la lista, en el acta
+ * acababan «Dirección Financiera», «Dir. Financiera» y «Direccion financiera»
+ * como si fueran tres personas. Se queda la primera forma de cada nombre que
+ * solo cambia en mayusculas, tildes o espacios.
+ */
+export function pintarResponsablesConocidos() {
+  const lista = document.getElementById("responsablesConocidos");
+
+  if (!lista) {
+    return;
+  }
+
+  const clave = (texto) =>
+    texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+  const porClave = new Map();
+  const anotar = (texto) => {
+    const limpio = String(texto || "").replace(/\s+/g, " ").trim();
+
+    if (limpio && !porClave.has(clave(limpio))) {
+      porClave.set(clave(limpio), limpio);
+    }
+  };
+
+  Object.values(state.domains).forEach((dominio) => {
+    (dominio.items || []).forEach((item) => anotar(item.owner));
+  });
+  Object.values(state.proximosPasos || {}).forEach((pasos) => {
+    (pasos || []).forEach((paso) => anotar(paso?.responsable));
+  });
+
+  const nombres = [...porClave.values()].sort((a, b) => a.localeCompare(b, "es"));
+  const html = nombres.map((nombre) => `<option value="${escapeAttr(nombre)}"></option>`).join("");
+
+  // Repintar la lista con un campo abierto cerraria sus sugerencias.
+  if (lista.innerHTML !== html) {
+    lista.innerHTML = html;
+  }
+}
