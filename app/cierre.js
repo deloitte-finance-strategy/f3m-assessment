@@ -61,18 +61,18 @@ export function htmlDelCierre(datos, { cambiadasHoy = 0 } = {}) {
 
     <div class="modo-taller-cierre-columnas">
       <section>
-        <h4>Más lejos del objetivo</h4>
+        <h3>Más lejos del objetivo</h3>
         ${brechas(cifras.brechas.slice(0, BRECHAS_EN_EL_CORREO), hayPuntuadas)}
       </section>
 
       <section>
-        <h4>Por palanca</h4>
+        <h3>Por palanca</h3>
         ${palancas(cifras.palancas)}
         <p class="modo-taller-cierre-nota">La barra es la media de lo puntuado; la línea, el objetivo.</p>
       </section>
 
       <section>
-        <h4>Para la próxima sesión</h4>
+        <h3>Para la próxima sesión</h3>
         ${pendientes(cifras.pendientes)}
       </section>
     </div>

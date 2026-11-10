@@ -101,6 +101,7 @@ import {
   ocultarAviso,
   showNotice,
   updateModalOpenState,
+  vigilarErroresInesperados,
 } from "./app/avisos.js?v=36";
 
 // El almacenamiento del navegador, que puede fallar y no es motivo para caerse.
@@ -304,6 +305,9 @@ import { pedirDominiosDelCliente, pintarDominiosDelCliente } from "./app/dominio
 // Que se abra sin red: el service worker y el aviso de que se ha ido.
 import { setupSinConexion } from "./app/sin-conexion.js?v=36";
 
+// Ctrl+P: la pantalla en papel, limpia y en claro.
+import { setupImpresion } from "./app/impresion.js?v=36";
+
 // Fundidos, cifras que cuentan y paneles que se despliegan.
 import { activarDesplieguesSuaves, fundir } from "./app/movimiento.js?v=36";
 
@@ -323,6 +327,7 @@ async function init() {
   const posicionDeAntes = posicionAlRecargar();
 
   cacheElements();
+  vigilarErroresInesperados();
   bindGlobalEvents();
   // El tema y la densidad ya vienen puestos de tema.js, que corre antes del
   // primer pintado. Aqui solo se ponen al dia los dos conmutadores, se engancha
@@ -788,6 +793,7 @@ function bindGlobalEvents() {
   // pagehide y no beforeunload: es el que tambien llega en un movil y al
   // guardar la pagina para «Atrás».
   window.addEventListener("pagehide", apuntarLaPosicion);
+  setupImpresion();
   document.addEventListener("keydown", guardarCopiaConElTeclado);
   setupMenuDeCabecera(els.presentacionMenuButton, els.presentacionMenu);
   setupMenuDeCabecera(els.scenarioMenuButton, els.scenarioMenu, pintarAvisoDeCopia);
@@ -1305,6 +1311,59 @@ function setupMenuDeCabecera(boton, panel, alAbrir) {
       boton.focus();
     }
   });
+
+  // Con el teclado, las flechas recorren las opciones, como en cualquier menu:
+  // antes solo valia el tabulador, y «Sesión» tiene once. Flecha abajo sobre
+  // el boton abre el menu y entra en el; Inicio y Fin van a los extremos.
+  const opciones = () => [...panel.querySelectorAll("button:not([disabled]), summary, a[href]")]
+    // Solo lo que se ve. Lo oculto no tiene caja, pero lo de dentro de un
+    // desplegable cerrado si la tiene para el navegador —solo no la pinta—,
+    // asi que eso se pregunta aparte: de «Para el equipo» cerrado cuenta su
+    // titulo y no sus tres botones.
+    .filter((opcion) => opcion.offsetParent !== null)
+    .filter((opcion) => opcion.tagName === "SUMMARY" || !opcion.closest("details:not([open])"));
+
+  menu?.addEventListener("keydown", (event) => {
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+      return;
+    }
+
+    if (panel.hidden) {
+      // Cerrado, solo la flecha abajo hace algo, y solo desde su boton.
+      if (event.key !== "ArrowDown" || event.target !== boton) {
+        return;
+      }
+
+      boton.click();
+    }
+
+    const lista = opciones();
+
+    if (!lista.length) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const actual = lista.indexOf(document.activeElement);
+    const destino = {
+      ArrowDown: actual + 1 < lista.length ? actual + 1 : 0,
+      ArrowUp: actual > 0 ? actual - 1 : lista.length - 1,
+      Home: 0,
+      End: lista.length - 1,
+    }[event.key];
+
+    lista[destino].focus();
+  });
+
+  // Y al salir con el tabulador, el menu se cierra: se quedaba abierto tapando
+  // la pagina mientras el foco ya iba por las pestanas. Sin destino conocido
+  // —se ha cambiado de ventana— no se cierra: al volver tiene que seguir ahi.
+  menu?.addEventListener("focusout", (event) => {
+    if (!panel.hidden && event.relatedTarget && !menu.contains(event.relatedTarget)) {
+      abrir(false);
+    }
+  });
 }
 
 
@@ -1418,7 +1477,7 @@ function pintarCliente() {
 
 async function pedirNombreDelCliente() {
   const nombre = await abrirDialogo({
-    eyebrow: "Escenario",
+    eyebrow: "Sesión",
     titulo: "Nombre del cliente",
     parrafos: [
       "Saldrá en la cabecera, en la portada y en el pie de cada diapositiva del informe, y en el nombre del PDF, del CSV y de las copias.",

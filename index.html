@@ -126,6 +126,7 @@
     <link rel="modulepreload" href="app/firebase.js?v=36">
     <link rel="modulepreload" href="app/graficos.js?v=36">
     <link rel="modulepreload" href="app/identidad.js?v=36">
+    <link rel="modulepreload" href="app/impresion.js?v=36">
     <link rel="modulepreload" href="app/indicador.js?v=36">
     <link rel="modulepreload" href="app/informe.js?v=36">
     <link rel="modulepreload" href="app/metricas.js?v=36">
@@ -274,7 +275,12 @@
             </div>
           </div>
 
-          <button class="header-secondary-action" id="exportCsvButton" type="button">
+          <button
+            class="header-secondary-action"
+            id="exportCsvButton"
+            type="button"
+            title="Las subcapacidades del dominio abierto, con los filtros activos, en un archivo para Excel"
+          >
             Exportar CSV
           </button>
 
@@ -469,6 +475,15 @@
     </header>
 
     <main class="app-shell" id="contenido" tabindex="-1">
+      <!--
+        Solo sale en papel (Ctrl+P): de quien es lo que se imprime y de cuando.
+        En pantalla lo dicen la cabecera y el conmutador, que no se imprimen.
+        Lo rellena app/impresion.js justo antes de imprimir.
+      -->
+      <p class="cabecera-de-impresion" id="cabeceraDeImpresion" aria-hidden="true">
+        <strong data-impresion-de></strong>
+        <span data-impresion-cuando></span>
+      </p>
 
 
 <section class="domain-switcher" aria-label="Navegación de dominios F3M">
@@ -1449,6 +1464,7 @@
           aria-expanded="false"
           aria-controls="buscadorResultados"
           aria-autocomplete="list"
+          aria-label="Buscar una subcapacidad"
           aria-describedby="buscadorPie"
           placeholder="Busca una subcapacidad en los nueve dominios"
           autocomplete="off"

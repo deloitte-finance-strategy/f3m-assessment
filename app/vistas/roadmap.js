@@ -395,6 +395,7 @@ function statusSelect(item) {
     <select
       class="inline-input roadmap-status"
       data-id="${escapeAttr(item.id)}"
+      data-estado="${escapeAttr(item.status)}"
       aria-label="${escapeAttr(`Estado de ${item.subcapacidad}`)}"
     >
       ${STATUS_OPTIONS.map((status) => `<option value="${escapeAttr(status)}" ${item.status === status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
@@ -410,6 +411,12 @@ function handleRoadmapFieldChange(event) {
 
   if (!item || !campo) {
     return;
+  }
+
+  // El color del estado sale de este atributo (styles.css), y cambiar el
+  // desplegable no repinta la fila.
+  if (campo === "status") {
+    elemento.dataset.estado = elemento.value;
   }
 
   guardarCampoAhora(item, campo, elemento);

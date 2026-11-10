@@ -55,6 +55,17 @@ export const SELECTOR_DE_MODAL_ABIERTO = ".modal-backdrop:not([hidden])";
 export function updateModalOpenState() {
   const hasOpenModal = document.querySelector(SELECTOR_DE_MODAL_ABIERTO) !== null;
 
+  // Con un modal abierto la pagina deja de desplazarse y su barra desaparece.
+  // En Windows la barra ocupa sitio, asi que todo lo de detras se movia 15 px
+  // a la derecha al abrir y volvia al cerrar: un salto que, proyectado, se ve.
+  // Se mide lo que ocupa ANTES de quitarla y el CSS reserva ese hueco. Donde
+  // la barra flota encima —macOS, tactil— mide 0 y no cambia nada.
+  if (hasOpenModal && !document.body.classList.contains("modal-open")) {
+    const barra = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+
+    document.documentElement.style.setProperty("--hueco-de-la-barra", `${barra}px`);
+  }
+
   document.body.classList.toggle("modal-open", hasOpenModal);
 
   REGIONES_DE_FONDO.forEach((selector) => {
@@ -433,4 +444,61 @@ export function atraparFoco(event, contenedor) {
     event.preventDefault();
     primero.focus();
   }
+}
+
+
+
+
+/**
+ * La red de lo que nadie esperaba: un error que se escapa, dicho en pantalla.
+ *
+ * Cada fallo previsto tiene su aviso —un dominio que no carga, una escritura
+ * rechazada, el almacenamiento lleno—. Lo que no tenia red era lo imprevisto:
+ * una excepcion en mitad de un repintado dejaba la pantalla a medias, sin una
+ * palabra, y quien puntuaba seguia puntuando sobre algo que ya no estaba al
+ * dia. Solo lo veia quien tuviera la consola abierta.
+ *
+ * Se avisa UNA vez por sesion: si algo esta roto se repetira a cada clic, y un
+ * aviso que vuelve a salir cada vez se aprende a cerrar sin leer.
+ *
+ * Solo lo de esta web. Una extension del navegador que falla, o el SDK de
+ * Firebase quejandose de la red por su cuenta, no son esta herramienta
+ * rompiendose, y la sincronizacion ya tiene su chip rojo. Por eso se mira de
+ * que archivo viene el error y no se avisa de lo que no trae procedencia.
+ */
+let errorInesperadoAvisado = false;
+
+
+export function vigilarErroresInesperados() {
+  const esDeEstaWeb = (texto) => String(texto || "").includes(window.location.origin);
+
+  const avisar = () => {
+    if (errorInesperadoAvisado) {
+      return;
+    }
+
+    errorInesperadoAvisado = true;
+
+    showNotice(
+      "Ha ocurrido un error inesperado y puede que la pantalla no esté al día. Recarga la página "
+        + "antes de seguir; si se repite, avisa al equipo que mantiene la herramienta.",
+      "error",
+    );
+  };
+
+  window.addEventListener("error", (event) => {
+    // Sin objeto de error es un recurso que no ha cargado o un aviso del
+    // navegador (el del ResizeObserver, por ejemplo), no una excepcion.
+    if (event.error instanceof Error && esDeEstaWeb(event.filename)) {
+      avisar();
+    }
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    const pila = event.reason instanceof Error ? String(event.reason.stack || "") : "";
+
+    if (esDeEstaWeb(pila) && !pila.includes("gstatic.com")) {
+      avisar();
+    }
+  });
 }

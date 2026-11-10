@@ -39,21 +39,21 @@ export function htmlDeLaApertura({ cliente = "", dominio = "", logo = "", items 
 
     <div class="modo-taller-cierre-columnas modo-taller-apertura-columnas">
       <section>
-        <h4>Lo que vamos a ver</h4>
+        <h3>Lo que vamos a ver</h3>
         <ol class="modo-taller-apertura-capacidades">
           ${capacidades.map(capacidad).join("")}
         </ol>
       </section>
 
       <section>
-        <h4>Cómo puntuamos</h4>
+        <h3>Cómo puntuamos</h3>
         <ol class="modo-taller-apertura-escala">
           ${NIVELES_DE_LA_RUBRICA.map((nombre, posicion) => nivel(nombre, posicion, objetivos)).join("")}
         </ol>
       </section>
 
       <section>
-        <h4>Las tres palancas</h4>
+        <h3>Las tres palancas</h3>
         <div class="modo-taller-apertura-palancas">
           ${palancas.map((palanca) => filaDePalanca(palanca, objetivos[palanca.key])).join("")}
         </div>
