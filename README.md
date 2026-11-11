@@ -55,7 +55,9 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
   y los informes, y no cuentan en ninguna media; lo puntuado en ellos no se borra y vuelve si se
   marcan otra vez. Se guarda con el escenario, así que viaja en las copias y lo ve todo el equipo
   de un escenario compartido.
-- Exportar resumen y roadmap en CSV.
+- Exportar los datos en **CSV para Excel**, desde el menú **Exportar CSV**: los del dominio
+  abierto, con los filtros activos, o los de **todo el proyecto** en un solo archivo, con una fila
+  por dominio, por capacidad y por subcapacidad.
 - Imprimir la vista abierta con **Ctrl+P**: sale apaisada, en claro y sin la cabecera ni los
   botones, con una línea que dice el cliente, el dominio y la fecha. Si se imprime desde un
   escenario compartido, conviene desmarcar «Encabezados y pies de página» en el diálogo: el pie
