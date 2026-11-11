@@ -57,8 +57,36 @@ const POR_DIAPOSITIVA = {
   urgentes: 5,
   brechas: 10,
   casosDeIa: 9,
-  comentarios: 6,
 };
+
+
+/**
+ * Cuantos caracteres caben por linea donde va texto que escribe la gente.
+ *
+ * Medido en el navegador con Inter, que es mas ancha que las fuentes con las
+ * que se abre el informe (Segoe UI en Windows, Helvetica en un Mac), y aun
+ * rebajado: en la tarjeta de un comentario caben unos 60 por linea y aqui se
+ * cuentan 57. El margen es para la fuente que no se ha medido.
+ */
+const CARACTERES_POR_LINEA = {
+  nota: 57,
+  notaEnColumnas: 60,
+  titulo: 48,
+  tituloAncho: 150,
+  capacidad: 42,
+  responsable: 20,
+};
+
+
+// A partir de aqui una nota va a lo ancho: unos 540 caracteres.
+const LINEAS_DE_UNA_NOTA_LARGA = 10;
+
+// Lo que deja libre una diapositiva con entradilla, en milimetros, con un
+// margen. Las que no la llevan tienen siete mas, que se quedan de holgura.
+const ALTO_PARA_COMENTARIOS = 126;
+
+// El `gap` de .tarjetas en informe/estilos.js.
+const SEPARACION_DE_TARJETAS = 4;
 
 
 /** Reparte una lista en tandas, siempre al menos una (aunque venga vacia). */
@@ -74,6 +102,93 @@ export function paginar(filas, porTanda) {
   }
 
   return tandas;
+}
+
+
+/**
+ * Cuantas lineas ocupa un texto donde caben `porLinea` caracteres.
+ *
+ * Es una estimacion, y a proposito tira por lo alto: sirve para repartir en
+ * diapositivas lo que escribe la gente —notas, responsables—, que no tiene
+ * largo fijo, y contar una linea de mas cuesta un hueco; contar una de menos
+ * recorta el texto en silencio. Las mayusculas ocupan un tercio mas que las
+ * minusculas, y hay quien escribe las notas enteras en mayusculas.
+ */
+export function lineasDe(texto, porLinea) {
+  let ancho = 0;
+
+  for (const letra of String(texto ?? "")) {
+    ancho += letra !== letra.toLowerCase() || /[mw@%&#]/.test(letra) ? 1.35 : 1;
+  }
+
+  return Math.max(1, Math.ceil(ancho / porLinea));
+}
+
+
+/**
+ * Reparte una lista en tandas por lo que ocupa cada fila, no por cuantas son.
+ *
+ * paginar() vale cuando todas las filas miden parecido. Cuando una puede
+ * medir diez veces mas que otra —una nota de dos palabras y una de dos mil
+ * caracteres—, un numero fijo por diapositiva o deja las diapositivas medio
+ * vacias o recorta las largas. Aqui cada tanda suma como mucho `presupuesto`
+ * y lleva como mucho `maximo` filas. Una fila que sola ya se pasa va en su
+ * propia tanda: no se puede partir, pero tampoco se pierde.
+ */
+export function paginarPorPeso(filas, pesoDe, presupuesto, maximo = Infinity) {
+  if (!filas.length) {
+    return [[]];
+  }
+
+  const tandas = [];
+  let tanda = [];
+  let peso = 0;
+
+  filas.forEach((fila) => {
+    const suyo = pesoDe(fila);
+
+    if (tanda.length && (peso + suyo > presupuesto || tanda.length >= maximo)) {
+      tandas.push(tanda);
+      tanda = [];
+      peso = 0;
+    }
+
+    tanda.push(fila);
+    peso += suyo;
+  });
+
+  tandas.push(tanda);
+
+  return tandas;
+}
+
+
+/**
+ * Como paginarPorPeso(), pero con las tandas parejas.
+ *
+ * Llenar cada diapositiva hasta arriba deja la ultima con lo que sobre: doce
+ * tarjetas en una y tres en la siguiente. Con las mismas diapositivas —nunca
+ * una mas—, aqui se reparte para que pesen parecido: nueve y seis. Se busca
+ * el tope mas bajo con el que siguen saliendo las mismas tandas.
+ */
+export function paginarEquilibrado(filas, pesoDe, presupuesto) {
+  const llenas = paginarPorPeso(filas, pesoDe, presupuesto);
+
+  if (llenas.length < 2) {
+    return llenas;
+  }
+
+  const total = filas.reduce((suma, fila) => suma + pesoDe(fila), 0);
+
+  for (let tope = total / llenas.length; tope < presupuesto; tope += 1) {
+    const parejas = paginarPorPeso(filas, pesoDe, tope);
+
+    if (parejas.length <= llenas.length) {
+      return parejas;
+    }
+  }
+
+  return llenas;
 }
 
 
@@ -617,7 +732,7 @@ export function rankingDeDominios(data) {
 
       return `
         <tr${esActivo ? ' style="background:#F0F5E6;"' : ""}>
-          <td class="principal">${escapeHtml(fila.label)}${esActivo ? " ·" : ""}</td>
+          <td class="principal">${escapeHtml(fila.label)}${esActivo ? ' <span class="marca-de-este-informe">Este informe</span>' : ""}</td>
           <td class="celda-grafico">
             ${svgBullet({
               valor: fila.scoreMedio,
@@ -639,23 +754,19 @@ export function rankingDeDominios(data) {
     <table class="tabla">
       <thead>
         <tr>
-          <th style="width:17%;">Dominio</th>
-          <th style="width:30%;">Madurez frente a objetivo</th>
+          <th style="width:21%;">Dominio</th>
+          <th style="width:27%;">Madurez frente a objetivo</th>
           <th class="num" style="width:9%;">Score</th>
           <th class="num" style="width:10%;">Objetivo</th>
           <th class="num" style="width:8%;">Gap</th>
           <th style="width:14%;">Prioridad</th>
-          <th class="num" style="width:12%;">Avance</th>
+          <th class="num" style="width:11%;">Avance</th>
         </tr>
       </thead>
       <tbody>
         ${cuerpo || tablaVacia(7, "No hay dominios cargados.")}
       </tbody>
     </table>
-    <p class="nota" style="margin-top:4mm;">
-      Ordenados por brecha descendente. La barra es la madurez media del dominio y la marca vertical, su objetivo medio.
-      ${data.global.filas.some((fila) => fila.id === data.domainId) ? "El dominio de este informe va señalado." : ""}
-    </p>
   `;
 }
 
@@ -938,7 +1049,8 @@ export function brechas(entradas, desde) {
             etiqueta: `${item.subcapacidad}: ${formatNumber(metrics.scoreMedio)} de 5, objetivo ${formatNumber(metrics.targetMedio)}`,
           })}
           <p class="nota" style="margin-top:1.4mm;">
-            Gap ${escapeHtml(formatMedia(metrics.gap))} · ${escapeHtml(metrics.prioridad)} · ${escapeHtml(metrics.oleada)}
+            <strong>${escapeHtml(formatMedia(metrics.scoreMedio))}</strong> frente a un objetivo de ${escapeHtml(formatMedia(metrics.targetMedio))}
+            · Gap ${escapeHtml(formatMedia(metrics.gap))} · ${escapeHtml(metrics.prioridad)} · ${escapeHtml(metrics.oleada)}
           </p>
         </div>
       </article>
@@ -966,6 +1078,28 @@ function chipDeOleada(oleada) {
 }
 
 
+/**
+ * El roadmap, repartido en diapositivas.
+ *
+ * Cinco filas por diapositiva, como siempre (ver POR_DIAPOSITIVA), salvo que
+ * un responsable largo haga mas alta su fila. Es el unico texto de la tabla
+ * que escribe la gente: con un nombre de cien caracteres, la fila media el
+ * doble y la ultima de la diapositiva se recortaba en silencio.
+ *
+ * Una fila normal pesa 1. Lo que pesa una con el responsable en muchas lineas
+ * sale de lo que mide: el relleno de la celda y 4,4 mm por linea, sobre los
+ * 24 mm que tiene cada una de las cinco filas.
+ */
+export function repartirRoadmap(entradas) {
+  return paginarPorPeso(
+    entradas,
+    ({ item }) => Math.max(1, (6.4 + 4.4 * lineasDe(item.owner, CARACTERES_POR_LINEA.responsable)) / 24),
+    POR_DIAPOSITIVA.roadmap,
+    POR_DIAPOSITIVA.roadmap,
+  );
+}
+
+
 export function roadmap(entradas) {
   const cuerpo = entradas
     .map(({ item, metrics }) => `
@@ -987,12 +1121,12 @@ export function roadmap(entradas) {
     <table class="tabla">
       <thead>
         <tr>
-          <th style="width:22%;">Subcapacidad</th>
-          <th style="width:9%;">Oleada</th>
-          <th style="width:11%;">Prioridad</th>
+          <th style="width:23%;">Subcapacidad</th>
+          <th style="width:8%;">Oleada</th>
+          <th style="width:9%;">Prioridad</th>
           <th style="width:36%;">Iniciativa sugerida</th>
-          <th style="width:11%;">Responsable</th>
-          <th style="width:11%;">Estado</th>
+          <th style="width:15%;">Responsable</th>
+          <th style="width:9%;">Estado</th>
         </tr>
       </thead>
       <tbody>
@@ -1112,6 +1246,77 @@ export function fichasDeIa(casos) {
 
 // ============================================================== comentarios
 
+/**
+ * Lo que mide una tarjeta de comentario, en milimetros, y si va a lo ancho.
+ *
+ * Una nota corta va en una tarjeta de un tercio de la diapositiva. Una larga
+ * —mas de LINEAS_DE_UNA_NOTA_LARGA en esa tarjeta— ocupa el ancho entero, con
+ * el texto en tres columnas: en un tercio, una nota de dos mil caracteres no
+ * cabia en la diapositiva ni ella sola.
+ *
+ * Los numeros salen de medir las tarjetas en el navegador: el relleno y los
+ * margenes (16 mm con el titulo y la capacidad en una linea), 3,9 mm por
+ * linea de texto, 4 por linea de titulo y 3,7 por linea de capacidad.
+ */
+function medidaDeComentario(item) {
+  const lineas = lineasDe(item.comentario, CARACTERES_POR_LINEA.nota);
+  const ancha = lineas > LINEAS_DE_UNA_NOTA_LARGA;
+
+  const titulo = lineasDe(item.subcapacidad, ancha ? CARACTERES_POR_LINEA.tituloAncho : CARACTERES_POR_LINEA.titulo);
+  const capacidad = ancha ? 1 : lineasDe(item.capacidad, CARACTERES_POR_LINEA.capacidad);
+
+  // En tres columnas el navegador las iguala: un tercio de las lineas, y una
+  // mas por si el reparto no sale redondo.
+  const texto = ancha
+    ? Math.ceil(lineasDe(item.comentario, CARACTERES_POR_LINEA.notaEnColumnas) / 3) + 1
+    : lineas;
+
+  return {
+    ancha,
+    alto: 12.2 + capacidad * 3.7 + titulo * 4 + texto * 3.9,
+  };
+}
+
+
+/**
+ * Los comentarios, repartidos en diapositivas por lo que ocupan.
+ *
+ * Eran seis por diapositiva, fueran como fueran. Con notas de una linea, eso
+ * son tres diapositivas con dos tercios en blanco; con dos notas largas en la
+ * misma, el texto se salia por abajo y se recortaba sin avisar. Ahora se
+ * llenan fila a fila —tres tarjetas por fila, o una sola si es larga— hasta
+ * lo que cabe.
+ */
+export function repartirComentarios(items) {
+  // Primero las filas de la rejilla, tal como las va a colocar el navegador:
+  // una tarjeta ancha ocupa una fila entera y corta la que estuviera a medias.
+  const filas = [];
+  let abierta = null;
+
+  items.forEach((item) => {
+    const medida = medidaDeComentario(item);
+
+    if (medida.ancha) {
+      filas.push({ items: [item], alto: medida.alto });
+      abierta = null;
+      return;
+    }
+
+    if (!abierta || abierta.items.length === 3) {
+      abierta = { items: [], alto: 0 };
+      filas.push(abierta);
+    }
+
+    abierta.items.push(item);
+    abierta.alto = Math.max(abierta.alto, medida.alto);
+  });
+
+  // Y despues las diapositivas: cada fila pesa su alto mas la separacion.
+  return paginarEquilibrado(filas, (fila) => fila.alto + SEPARACION_DE_TARJETAS, ALTO_PARA_COMENTARIOS + SEPARACION_DE_TARJETAS)
+    .map((tanda) => tanda.flatMap((fila) => fila.items));
+}
+
+
 export function comentarios(items) {
   if (!items.length) {
     return `<p class="nota">No hay comentarios registrados para los filtros actuales.</p>`;
@@ -1119,7 +1324,7 @@ export function comentarios(items) {
 
   const tarjetas = items
     .map((item) => `
-      <article class="tarjeta">
+      <article class="tarjeta${medidaDeComentario(item).ancha ? " tarjeta-ancha" : ""}">
         <span class="tarjeta-origen">${escapeHtml(item.capacidad)}</span>
         <h4>${escapeHtml(item.subcapacidad)}</h4>
         <p>${escapeHtml(item.comentario)}</p>

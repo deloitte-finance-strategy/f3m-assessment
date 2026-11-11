@@ -134,7 +134,7 @@ export function svgDonut({ valor, objetivo, maximo = 5, color = PALETA.marca, ti
       ${arco}
       ${marcaDeObjetivoEnAnillo(objetivo, maximo, radio, grosor)}
       <text x="50" y="45" text-anchor="middle" dominant-baseline="central"
-            font-size="25" font-weight="700" fill="${PALETA.tinta}">${escapeHtml(formatMedia(valor))}</text>
+            font-size="22" font-weight="700" fill="${PALETA.tinta}">${escapeHtml(formatMedia(valor))}</text>
       <text x="50" y="68" text-anchor="middle" font-size="9" font-weight="700"
             letter-spacing="0.6" fill="${PALETA.tintaTenue}">OBJ ${escapeHtml(formatNumber(objetivo))}</text>
     </svg>
@@ -148,10 +148,19 @@ function marcaDeObjetivoEnAnillo(objetivo, maximo, radio, grosor) {
   }
 
   const angulo = fraccion(objetivo, maximo) * 2 * Math.PI - Math.PI / 2;
-  const dentro = radio - grosor / 2 - 1;
-  const fuera = radio + grosor / 2 + 1;
 
+  // Del borde interior del anillo hacia fuera, y no un poco hacia dentro como
+  // antes: con el objetivo en 4 la marca cae a la izquierda, a la altura de la
+  // cifra, y se le pegaba como un guion («-2,53»). La cifra tambien es algo
+  // mas pequena por lo mismo.
+  const dentro = radio - grosor / 2;
+  const fuera = radio + grosor / 2 + 2.5;
+
+  // Un reborde claro la separa del arco de color cuando el score la alcanza.
   return `<line x1="${n(50 + Math.cos(angulo) * dentro)}" y1="${n(50 + Math.sin(angulo) * dentro)}"
+                x2="${n(50 + Math.cos(angulo) * fuera)}" y2="${n(50 + Math.sin(angulo) * fuera)}"
+                stroke="${PALETA.papel}" stroke-width="4"></line>
+          <line x1="${n(50 + Math.cos(angulo) * dentro)}" y1="${n(50 + Math.sin(angulo) * dentro)}"
                 x2="${n(50 + Math.cos(angulo) * fuera)}" y2="${n(50 + Math.sin(angulo) * fuera)}"
                 stroke="${PALETA.tinta}" stroke-width="2"></line>`;
 }

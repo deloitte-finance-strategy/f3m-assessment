@@ -43,6 +43,8 @@ import {
   radarGlobal,
   radarPorCapacidad,
   rankingDeDominios,
+  repartirComentarios,
+  repartirRoadmap,
   resumenDelDominio,
   resumenPorCapacidad,
   roadmap,
@@ -328,7 +330,7 @@ function parteDeAccion(data, opciones = {}) {
         },
       ];
 
-  paginar(data.roadmapItems, POR_DIAPOSITIVA.roadmap).forEach((tanda, indiceDeTanda, tandas) => {
+  repartirRoadmap(data.roadmapItems).forEach((tanda, indiceDeTanda, tandas) => {
     secciones.push({
       parte,
       titulo: "Roadmap e iniciativas",
@@ -370,7 +372,7 @@ function parteDeAccion(data, opciones = {}) {
 
   // Sin comentarios no hay diapositiva: una pagina que solo dice "no hay
   // comentarios" en un deck que se entrega parece un apartado sin terminar.
-  paginar(data.commentItems, POR_DIAPOSITIVA.comentarios).forEach((tanda, indiceDeTanda, tandas) => {
+  repartirComentarios(data.commentItems).forEach((tanda, indiceDeTanda, tandas) => {
     if (!tanda.length) {
       return;
     }
