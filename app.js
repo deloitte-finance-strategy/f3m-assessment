@@ -13,14 +13,14 @@ import {
   resumenGlobal,
   toScore,
   unique,
-} from "./core/calculo.js?v=37";
+} from "./core/calculo.js?v=38";
 
 // Objetivos de madurez por capacidad y palanca: la mitad de todo gap.
 import {
   createDefaultTargets,
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "./core/objetivos.js?v=37";
+} from "./core/objetivos.js?v=38";
 
 // Reconocer el trabajo guardado. Si esto falla, una puntuacion no aparece y no
 // se rompe nada visiblemente, que es la peor forma de fallar.
@@ -29,15 +29,8 @@ import {
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
-} from "./core/coincidencias.js?v=37";
+} from "./core/coincidencias.js?v=38";
 
-// El CSV que se abre en Excel y se le envia al cliente.
-import {
-  filasDelProyecto,
-  filasDeResumen,
-  filasDeRoadmap,
-  toCsv,
-} from "./core/exportacion.js?v=37";
 
 // El contrato de un escenario: que campos admite Firebase y con que limites.
 // Espejo de database.rules.json, para no enviar nunca algo que sera rechazado.
@@ -53,7 +46,7 @@ import {
   normalizarItemCargado,
   recortarAlLimite,
   revisarEscenario,
-} from "./core/escenario.js?v=37";
+} from "./core/escenario.js?v=38";
 
 // Escapado, formato y colores de marca. Los comparten la aplicacion y el
 // informe PDF, que desde que vive aparte ya no puede leerlos de aqui.
@@ -65,14 +58,14 @@ import {
   formatNumber,
   losDominios,
   priorityColor,
-} from "./core/presentacion.js?v=37";
+} from "./core/presentacion.js?v=38";
 
 // El informe PDF: entra el objeto de datos, sale el documento imprimible.
-import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=37";
+import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=38";
 
 // La red que impide que una diapositiva recorte contenido en silencio. Se
 // dispara con ?comprobar=desbordes; ver informe/desbordes.js.
-import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=37";
+import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=38";
 
 // El estado compartido y las constantes que lo describen.
 import {
@@ -94,7 +87,7 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "./app/estado.js?v=37";
+} from "./app/estado.js?v=38";
 
 // El banner de avisos y el dialogo de confirmacion.
 import {
@@ -104,7 +97,7 @@ import {
   showNotice,
   updateModalOpenState,
   vigilarErroresInesperados,
-} from "./app/avisos.js?v=37";
+} from "./app/avisos.js?v=38";
 
 // El almacenamiento del navegador, que puede fallar y no es motivo para caerse.
 import {
@@ -113,7 +106,7 @@ import {
   escribirEnLaPestana,
   leerAlmacenamiento,
   leerDeLaPestana,
-} from "./app/almacenamiento.js?v=37";
+} from "./app/almacenamiento.js?v=38";
 
 // Las dos preferencias de vista: el tema y la densidad.
 import {
@@ -127,7 +120,7 @@ import {
   seguirAlSistemaSiNoHayEleccion,
   tamanoDeLetraDeGrafico,
   temaActual,
-} from "./app/preferencias.js?v=37";
+} from "./app/preferencias.js?v=38";
 
 // Los seis radares de Chart.js: tres por capacidad y tres por dominio.
 import {
@@ -139,19 +132,27 @@ import {
   redimensionarRadares,
   renderCapabilityRadar,
   renderOverviewRadar,
-} from "./app/graficos.js?v=37";
+} from "./app/graficos.js?v=38";
 
 // El motor atado al estado: objetivos por dominio y metricas con cache.
 import {
   agregarPorCapacidad,
-  agregarPorDominio,
   calculate,
   getCapabilityTargets,
-} from "./app/metricas.js?v=37";
+} from "./app/metricas.js?v=38";
 
 // El cortacircuitos: quien necesite repintar lo pide por aqui, no al
 // orquestador de vistas, para no cerrar un ciclo con el.
-import { configurarRepintado } from "./app/repintado.js?v=37";
+import { configurarRepintado } from "./app/repintado.js?v=38";
+
+// «Exportar Excel»: el .xlsx y el CSV, del dominio o de todo el proyecto.
+import {
+  descargarArchivo,
+  exportarDatosDelDominio,
+  exportarDatosDelProyecto,
+  partesDelNombre,
+  pintarMenuDeDatos,
+} from "./app/exportar.js?v=38";
 
 // La conexion con Firebase.
 import {
@@ -161,7 +162,7 @@ import {
   enEscenarioCompartido,
   getScenarioShareUrl,
   getScenarioShortLabel,
-} from "./app/firebase.js?v=37";
+} from "./app/firebase.js?v=38";
 
 // El chip de guardado, que es la unica senal permanente de si el trabajo esta
 // a salvo. Va aparte de la persistencia para que la identidad pueda marcarlo
@@ -172,7 +173,7 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./app/indicador.js?v=37";
+} from "./app/indicador.js?v=38";
 
 // Quien edita: la sesion anonima y el nombre que se elige.
 import {
@@ -182,7 +183,7 @@ import {
   inicializarIdentidad,
   marcaDeAutoria,
   pedirNombreEditor,
-} from "./app/identidad.js?v=37";
+} from "./app/identidad.js?v=38";
 
 // Un escenario como dato: leerlo, volcarlo y volver a armarlo.
 import {
@@ -191,7 +192,7 @@ import {
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./app/escenario.js?v=37";
+} from "./app/escenario.js?v=38";
 
 // Los nueve dominios: catalogo, carga y conmutador.
 import {
@@ -206,7 +207,7 @@ import {
   setActiveDomain,
   switchDomain,
   volverAlDominioDeEstaPestana,
-} from "./app/dominios.js?v=37";
+} from "./app/dominios.js?v=38";
 
 // Los tres filtros y el ambito de datos que sale de ellos.
 import {
@@ -220,7 +221,7 @@ import {
   populateCapacityFilter,
   removeActiveFilter,
   updateActiveFiltersUi,
-} from "./app/filtros.js?v=37";
+} from "./app/filtros.js?v=38";
 
 // Leer los campos de una subcapacidad, que llegan del Excel en dos formas.
 import {
@@ -229,7 +230,7 @@ import {
   getItemObjective,
   getItemQuestions,
   toList,
-} from "./app/subcapacidad.js?v=37";
+} from "./app/subcapacidad.js?v=38";
 
 // Guardar y recibir: el escenario compartido, las escrituras granulares por
 // ruta y la suscripcion remota.
@@ -241,19 +242,19 @@ import {
   persistItemChange,
   persistScenario,
   persistTargetsDelDominioActivo,
-} from "./app/persistencia.js?v=37";
+} from "./app/persistencia.js?v=38";
 
 // Los fragmentos de HTML que comparten varias vistas.
-import { buildFilteredEmptyState, pintarEsqueletos, priorityBadge, quitarEsqueletos } from "./app/celdas.js?v=37";
+import { buildFilteredEmptyState, pintarEsqueletos, priorityBadge, quitarEsqueletos } from "./app/celdas.js?v=38";
 
 // El Heatmap, primera vista que sale de aqui.
-import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=37";
+import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=38";
 
 // El Overview: los nueve dominios a la vez, sin aplicar los filtros.
-import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=37";
+import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=38";
 
 // El Dashboard: el dominio abierto, con sus KPIs y su tabla resumen.
-import { renderDashboard } from "./app/vistas/dashboard.js?v=37";
+import { renderDashboard } from "./app/vistas/dashboard.js?v=38";
 
 // El Assessment: puntuar cada subcapacidad en las tres palancas.
 import {
@@ -264,20 +265,20 @@ import {
   renderAssessments,
   renderCapabilityTargets,
   setupSiguientePendiente,
-} from "./app/vistas/assessment.js?v=37";
+} from "./app/vistas/assessment.js?v=38";
 
 // El Roadmap: las iniciativas priorizadas y sus campos editables.
-import { hayGuardadosPendientes } from "./app/edicion.js?v=37";
-import { renderRoadmap, setupCajaDelRoadmap } from "./app/vistas/roadmap.js?v=37";
+import { hayGuardadosPendientes } from "./app/edicion.js?v=38";
+import { renderRoadmap, setupCajaDelRoadmap } from "./app/vistas/roadmap.js?v=38";
 
 // Los dos modales: criterios de puntuacion y ficha de caso de IA.
-import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=37";
+import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=38";
 
 // La pestana IA: el catalogo de casos y la biblioteca de documentos.
-import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=37";
+import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=38";
 
 // La biblioteca de IA y el visor que abre «Más información».
-import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=37";
+import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=38";
 
 // Lo que la aplicacion le pasa al informe: datos, radares y tema claro.
 import {
@@ -287,7 +288,7 @@ import {
   exportarActa,
   exportarPreparacion,
   exportarResumen,
-} from "./app/informe.js?v=37";
+} from "./app/informe.js?v=38";
 
 // Si el trabajo en modo local tiene una copia fuera del navegador.
 import {
@@ -295,24 +296,24 @@ import {
   iniciarAvisoDeCopia,
   olvidarCambiosSinCopia,
   pintarAvisoDeCopia,
-} from "./app/copias.js?v=37";
+} from "./app/copias.js?v=38";
 
 // Ctrl+K: ir a cualquier subcapacidad de los nueve dominios.
-import { setupBuscador } from "./app/buscador.js?v=37";
+import { setupBuscador } from "./app/buscador.js?v=38";
 
 // Una subcapacidad a pantalla completa, para proyectarla en el taller.
-import { refrescarModoTaller, setupModoTaller } from "./app/taller.js?v=37";
-import { pintarLogoEnElMenu, setupLogoDelCliente } from "./app/logo.js?v=37";
-import { pedirDominiosDelCliente, pintarDominiosDelCliente } from "./app/dominios-del-cliente.js?v=37";
+import { refrescarModoTaller, setupModoTaller } from "./app/taller.js?v=38";
+import { pintarLogoEnElMenu, setupLogoDelCliente } from "./app/logo.js?v=38";
+import { pedirDominiosDelCliente, pintarDominiosDelCliente } from "./app/dominios-del-cliente.js?v=38";
 
 // Que se abra sin red: el service worker y el aviso de que se ha ido.
-import { setupSinConexion } from "./app/sin-conexion.js?v=37";
+import { setupSinConexion } from "./app/sin-conexion.js?v=38";
 
 // Ctrl+P: la pantalla en papel, limpia y en claro.
-import { setupImpresion } from "./app/impresion.js?v=37";
+import { setupImpresion } from "./app/impresion.js?v=38";
 
 // Fundidos, cifras que cuentan y paneles que se despliegan.
-import { activarDesplieguesSuaves, fundir } from "./app/movimiento.js?v=37";
+import { activarDesplieguesSuaves, fundir } from "./app/movimiento.js?v=38";
 
 
 document.addEventListener("DOMContentLoaded", init);
@@ -616,6 +617,7 @@ function cacheElements() {
     "dialogMessage",
     "dialogFieldWrap",
     "dialogCasillas",
+    "dialogCampos",
     "dialogFieldLabel",
     "dialogField",
     "dialogSecondary",
@@ -631,13 +633,16 @@ function cacheElements() {
     "siguientePendienteButton",
     "importJsonButton",
     "exportJsonButton",
-    "exportCsvButton",
-    "csvMenu",
+    "exportarDatosButton",
+    "datosMenu",
+    "excelDominioButton",
+    "excelDominioLabel",
+    "excelDominioNota",
+    "excelProyectoButton",
+    "excelProyectoNota",
     "csvDominioButton",
     "csvDominioLabel",
-    "csvDominioNota",
     "csvProyectoButton",
-    "csvProyectoNota",
     "exportPdfButton", // NUEVO: botón de exportación PDF
     "informeMenu",
     "informeDominioButton",
@@ -779,8 +784,10 @@ function bindGlobalEvents() {
   enganchar("importJsonButton", "click", () => els.scenarioFileInput?.click());
   enganchar("scenarioFileInput", "change", importScenario);
   enganchar("exportJsonButton", "click", exportScenarioJson);
-  enganchar("csvDominioButton", "click", exportCsv);
-  enganchar("csvProyectoButton", "click", exportarCsvDelProyecto);
+  enganchar("excelDominioButton", "click", () => exportarDatosDelDominio({ formato: "xlsx" }));
+  enganchar("excelProyectoButton", "click", () => exportarDatosDelProyecto({ formato: "xlsx" }));
+  enganchar("csvDominioButton", "click", () => exportarDatosDelDominio({ formato: "csv" }));
+  enganchar("csvProyectoButton", "click", () => exportarDatosDelProyecto({ formato: "csv" }));
   enganchar("informeDominioButton", "click", () => exportPdfReport());
   enganchar("informeProyectoButton", "click", () => exportPdfReport({ proyecto: true }));
   enganchar("informeResumenButton", "click", () => exportarResumen());
@@ -809,7 +816,7 @@ function bindGlobalEvents() {
   setupMenuDeCabecera(els.presentacionMenuButton, els.presentacionMenu);
   setupMenuDeCabecera(els.scenarioMenuButton, els.scenarioMenu, pintarAvisoDeCopia);
   setupMenuDeCabecera(els.exportPdfButton, els.informeMenu, pintarMenuDeInforme);
-  setupMenuDeCabecera(els.exportCsvButton, els.csvMenu, pintarMenuDeCsv);
+  setupMenuDeCabecera(els.exportarDatosButton, els.datosMenu, pintarMenuDeDatos);
   setupVistas();
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
@@ -1412,7 +1419,8 @@ function pintarMenuDeInforme() {
   const alcance = getScopeSummary();
 
   if (els.informePreparacionLabel) {
-    els.informePreparacionLabel.textContent = `Preparación del taller de ${dominio.label || "este dominio"}`;
+    // Con puntos suspensivos: antes de abrirse pide la fecha y el lugar.
+    els.informePreparacionLabel.textContent = `Preparación del taller de ${dominio.label || "este dominio"}…`;
   }
 
   if (els.informePreparacionNota) {
@@ -1948,32 +1956,6 @@ async function importScenario(event) {
 }
 
 /**
- * El nombre del CSV, con el mismo patron que el PDF: «Datos F3M - Acme - FP&A -
- * 2026-10-05.csv», con el cliente si lo hay. Antes era siempre
- * «f3m_fpa_assessment_export.csv», y la segunda exportacion del dia pisaba a la
- * primera o salia como «(1)».
- */
-function nombreDelCsv(dominio, fecha) {
-  return `Datos F3M - ${partesDelNombre(state.cliente, dominio || "Dominio")} - ${fechaParaArchivo(fecha)}.csv`;
-}
-
-
-/**
- * Lo que va entre «F3M» y la fecha en el nombre de un archivo.
- *
- * Solo se quitan los caracteres que Windows no admite en un nombre de archivo:
- * el «&» de FP&A si vale, y es como se llama el dominio.
- */
-function partesDelNombre(...partes) {
-  return partes
-    .filter(Boolean)
-    .map((parte) => String(parte).replace(/[<>:"/\\|?*]+/g, " ").trim())
-    .filter(Boolean)
-    .join(" - ");
-}
-
-
-/**
  * La copia se llamaba siempre «f3m_multidomain_assessment_scenario.json»: con
  * dos clientes en la carpeta de descargas no habia forma de saber cual era cual
  * sin abrirlas. Ahora lleva el cliente y la fecha, como el PDF y el CSV.
@@ -2036,7 +2018,7 @@ function deshacerConElTeclado(event) {
 function exportScenarioJson() {
   const nombre = partesDelNombre("Copia F3M", state.cliente, fechaParaArchivo(new Date()));
 
-  downloadFile(
+  descargarArchivo(
     `${nombre}.json`,
     JSON.stringify(buildScenarioPayload(), null, 2),
     "application/json",
@@ -2046,140 +2028,6 @@ function exportScenarioJson() {
 }
 
 
-/**
- * Lo que dice el menu de «Exportar CSV» al abrirlo: de que dominio es el
- * primer archivo y cuantas subcapacidades lleva cada uno.
- *
- * El del dominio lleva lo que dejan los filtros, como todo lo del dominio
- * abierto, y este archivo se envia: el menu lo dice antes de descargarlo.
- */
-function pintarMenuDeCsv() {
-  const dominio = getActiveDomainConfig();
-  const alcance = getScopeSummary();
-  const dominios = getDominiosDelOverview();
-  const delProyecto = dominios.reduce((suma, uno) => suma + uno.items.length, 0);
-
-  if (els.csvDominioLabel) {
-    els.csvDominioLabel.textContent = `Datos de ${dominio.label || "este dominio"}`;
-  }
-
-  if (els.csvDominioButton) {
-    els.csvDominioButton.disabled = !alcance.visibles;
-  }
-
-  if (els.csvDominioNota) {
-    els.csvDominioNota.textContent = !alcance.visibles
-      ? "Los filtros no dejan ninguna subcapacidad"
-      : alcance.hayFiltros
-        ? `Solo ${alcance.visibles === 1 ? "la subcapacidad que dejan" : `las ${alcance.visibles} subcapacidades que dejan`} los filtros`
-        : `Sus ${alcance.total} subcapacidades y el resumen por capacidad`;
-  }
-
-  if (els.csvProyectoButton) {
-    els.csvProyectoButton.disabled = !delProyecto;
-  }
-
-  if (els.csvProyectoNota) {
-    els.csvProyectoNota.textContent = dominios.length === 1
-      ? "Solo aplica un dominio: es el mismo archivo, sin filtros"
-      : `${capitalizar(losDominios(dominios.length))} en un solo archivo, sin filtros`;
-  }
-}
-
-
-/** «los seis dominios» → «Los seis dominios», para empezar una frase. */
-function capitalizar(texto) {
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
-}
-
-
-/**
- * El CSV del dominio abierto: el resumen por capacidad y una fila por
- * subcapacidad, con los filtros activos.
- */
-function exportCsv() {
-  const activeDomain = getActiveDomainConfig();
-  const dominio = activeDomain.label || activeDomain.id;
-  const items = getScopedItems();
-
-  // Con los filtros sin dejar nada se descargaba un archivo vacio, de cero
-  // bytes, que Excel abre en blanco sin decir por que.
-  if (!items.length) {
-    showNotice("Los filtros no dejan ninguna subcapacidad: no hay nada que exportar. Quita algún filtro y vuelve a pedirlo.", "warning");
-    return;
-  }
-
-  downloadFile(
-    nombreDelCsv(dominio, new Date()),
-    toCsv([
-      ...filasDeResumen(agregarPorCapacidad(items), dominio),
-      ...filasDeRoadmap(items.map((item) => ({ item, metrics: calculate(item) })), dominio),
-    ]),
-    "text/csv;charset=utf-8",
-  );
-
-  // El archivo se envia, y dentro no dice que le faltan filas.
-  const alcance = getScopeSummary();
-
-  if (alcance.hayFiltros) {
-    showNotice(
-      `El CSV de ${dominio} lleva ${alcance.visibles === 1 ? "la subcapacidad que dejan" : `las ${alcance.visibles} subcapacidades que dejan`} los filtros, de ${alcance.total}.`,
-      "info",
-    );
-  }
-}
-
-
-/**
- * El CSV de todo el proyecto: todos los dominios que aplican al cliente en un
- * solo archivo, sin filtros.
- *
- * Sin filtros por lo mismo que el informe de todo el proyecto: son del dominio
- * abierto, y aplicar solo los que existen en los demas daria unos dominios
- * filtrados y otros enteros sin que se notara. A diferencia del informe,
- * lleva tambien los dominios sin empezar: en una hoja de calculo no estorban
- * —se filtran— y lo pendiente tambien es un dato del proyecto.
- */
-function exportarCsvDelProyecto() {
-  const dominios = getDominiosDelOverview();
-  const resumenes = agregarPorDominio(dominios);
-
-  const filas = filasDelProyecto(
-    dominios.map((dominio, indice) => ({
-      label: dominio.label || dominio.id,
-      resumen: resumenes[indice],
-      capacidades: agregarPorCapacidad(dominio.items, dominio.id),
-      entradas: dominio.items.map((item) => ({ item, metrics: calculate(item, dominio.id) })),
-    })),
-  );
-
-  if (!filas.length) {
-    showNotice("Todavía no hay datos que exportar.", "warning");
-    return;
-  }
-
-  downloadFile(
-    nombreDelCsv("Proyecto", new Date()),
-    toCsv(filas),
-    "text/csv;charset=utf-8",
-  );
-}
-
-
-// Cuantas filas caben en el informe sin que deje de ser legible.
-
-
-function downloadFile(filename, content, type) {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-}
 
 
 /**

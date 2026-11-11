@@ -19,9 +19,9 @@ import {
   calcularMetricas,
   normalizeTargetValue,
   unique,
-} from "../core/calculo.js?v=37";
+} from "../core/calculo.js?v=38";
 
-import { DOMAINS, LEVERS, state } from "./estado.js?v=37";
+import { DOMAINS, LEVERS, state } from "./estado.js?v=38";
 
 
 /**

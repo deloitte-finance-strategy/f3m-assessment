@@ -4791,6 +4791,19 @@ border-color: var(--line-tenue);
   display: none;
 }
 
+/* Varios campos seguidos, como los datos de la sesion de la preparacion. */
+.dialog-campos {
+  display: grid;
+}
+
+.dialog-campos[hidden] {
+  display: none;
+}
+
+.dialog-campos .dialog-field {
+  margin-top: 12px;
+}
+
 .dialog-field input {
   width: 100%;
   min-height: var(--control-h);

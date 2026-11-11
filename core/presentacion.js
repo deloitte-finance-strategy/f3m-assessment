@@ -50,6 +50,55 @@ export function priorityColor(priority) {
 }
 
 
+/**
+ * El chip de cada oleada: fondo claro y texto oscuro del mismo tono que su
+ * prioridad. Lo usan el roadmap del informe y el Excel de la exportacion.
+ */
+export const COLOR_DE_OLEADA = {
+  "Oleada 1": { fondo: "#F7DDDA", texto: "#7D1F19" },
+  "Oleada 2": { fondo: "#FBE9CC", texto: "#7A4700" },
+  "Oleada 3": { fondo: "#E2EFD4", texto: "#315D11" },
+  Pendiente: { fondo: "#EDEFEC", texto: "#78817A" },
+};
+
+
+/**
+ * Los cinco colores del heatmap, del rojo al verde. Los comparten el informe,
+ * la preparacion, el acta y el Excel de la exportacion.
+ *
+ * Son los mismos umbrales que getMaturityLevel() en core/calculo.js —1,5 / 2,5
+ * / 3,5 / 4,5— y no una escala continua: el informe y la aplicacion tienen que
+ * pintar del mismo color la misma celda.
+ */
+export const ESCALA_DE_CALOR = [
+  { hasta: 1.5, fondo: "#F6CFC9", texto: "#7D1F19" },
+  { hasta: 2.5, fondo: "#FBE0B6", texto: "#7A4700" },
+  { hasta: 3.5, fondo: "#F1EDB2", texto: "#4F4A00" },
+  { hasta: 4.5, fondo: "#D7EBC0", texto: "#315D11" },
+  { hasta: Infinity, fondo: "#BCDFCB", texto: "#0F5132" },
+];
+
+export const CALOR_SIN_DATO = { fondo: "#EDEFEC", texto: "#78817A" };
+
+
+/**
+ * El par fondo/texto que le toca a un score.
+ *
+ * Se pregunta por el valor tal cual y no por Number(value), que es lo que hacia
+ * el informe anterior: Number(null) es 0 y no NaN, asi que una subcapacidad sin
+ * puntuar caia en el primer tramo y se pintaba del rojo del nivel 1. La celda
+ * decia "-" y el color decia "evaluado con la peor nota", que es justo lo
+ * contrario de lo que pasa, y en un heatmap el color se lee antes que la cifra.
+ */
+export function colorDeCalor(value) {
+  if (!Number.isFinite(value)) {
+    return CALOR_SIN_DATO;
+  }
+
+  return ESCALA_DE_CALOR.find((tramo) => value < tramo.hasta) || ESCALA_DE_CALOR[4];
+}
+
+
 export function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")

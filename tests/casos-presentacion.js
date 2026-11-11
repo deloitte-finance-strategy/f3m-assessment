@@ -19,7 +19,7 @@ import {
   formatMedia,
   formatNumber,
   losDominios,
-} from "../core/presentacion.js?v=37";
+} from "../core/presentacion.js?v=38";
 
 
 export const casos = [

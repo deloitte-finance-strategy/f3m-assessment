@@ -55,16 +55,19 @@ Si `python` no está disponible en tu equipo, puedes usar cualquier servidor est
   y los informes, y no cuentan en ninguna media; lo puntuado en ellos no se borra y vuelve si se
   marcan otra vez. Se guarda con el escenario, así que viaja en las copias y lo ve todo el equipo
   de un escenario compartido.
-- Exportar los datos en **CSV para Excel**, desde el menú **Exportar CSV**: los del dominio
-  abierto, con los filtros activos, o los de **todo el proyecto** en un solo archivo, con una fila
-  por dominio, por capacidad y por subcapacidad.
+- Exportar los datos en **Excel**, desde el menú **Exportar Excel**: los del dominio abierto, con
+  los filtros activos, o los de **todo el proyecto** en un solo archivo. Lleva una portada que dice
+  qué lleva y con qué alcance, y una hoja por nivel —dominios, capacidades y subcapacidades— con
+  colores, anchos, cabecera fija y filtros. Los mismos datos siguen saliendo en **CSV**, plegados en
+  el mismo menú, para las plantillas que ya existan sobre él.
 - Imprimir la vista abierta con **Ctrl+P**: sale apaisada, en claro y sin la cabecera ni los
   botones, con una línea que dice el cliente, el dominio y la fecha. Si se imprime desde un
   escenario compartido, conviene desmarcar «Encabezados y pies de página» en el diálogo: el pie
   del navegador lleva la dirección, y la dirección es el enlace del escenario.
 - Exportar **el informe**: un PDF con forma de presentación, en página 16:9, que abre con la lectura
   de la función financiera completa, sigue con el diagnóstico del dominio —escala de madurez,
-  perfil por palanca, radares, heatmap y brechas— y cierra con el roadmap por oleadas y las
+  perfil por palanca, radares, heatmap y brechas— y cierra con el roadmap por oleadas —primero un
+  resumen de cada oleada, con sus capacidades y responsables, y luego la tabla— y las
   oportunidades de inteligencia artificial que aplican al dominio.
 
   **Exportar PDF** ofrece dos: el **del dominio** abierto, con los filtros activos, y el **de todo

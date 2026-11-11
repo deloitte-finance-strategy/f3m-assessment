@@ -13,18 +13,20 @@
  *   que escribe el usuario llega sin escapar.
  */
 
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=37";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=38";
 import {
   comentarios,
   deTantas,
   lineasDe,
+  oleadasDelRoadmap,
   paginar,
   paginarEquilibrado,
   paginarPorPeso,
   repartirComentarios,
   repartirRoadmap,
-} from "../informe/secciones.js?v=37";
-import { resumenDeDesbordes } from "../informe/desbordes.js?v=37";
+  roadmapPorOleadas,
+} from "../informe/secciones.js?v=38";
+import { resumenDeDesbordes } from "../informe/desbordes.js?v=38";
 
 
 /** Una subcapacidad y sus metricas, lo minimo que el informe necesita. */
@@ -767,6 +769,78 @@ export const casos = [
       const roto = buildEnhancedPdfReportHtml(datos({ logo: 'data:image/png;base64,AA" onerror="x' }));
       t.igual(roto.includes('class="portada-logo"'), false, "uno roto no se pinta");
       t.igual(roto.includes("onerror"), false, "ni se cuela en el HTML");
+    },
+  },
+  {
+    grupo: "Roadmap por oleadas",
+    nombre: "cuenta cada oleada, sus capacidades y quien las lleva, de mas a menos",
+    ejecutar: (t) => {
+      const alta = { metrics: { prioridad: "Alta", oleada: "Oleada 1", gap: 2.5 } };
+      const resumen = oleadasDelRoadmap([
+        entrada(1, { ...alta, item: { capacidad: "Liquidez", owner: "Tesorero" } }),
+        entrada(2, { ...alta, item: { capacidad: "Riesgos", owner: "Tesorero" } }),
+        entrada(3, { ...alta, item: { capacidad: "Riesgos", owner: "  " } }),
+        entrada(4, { item: { capacidad: "Liquidez", owner: "Controller" } }),
+        entrada(5, { metrics: { isPending: true, prioridad: "Pendiente", oleada: "Pendiente" } }),
+      ]);
+      const [uno, dos, tres] = resumen.grupos;
+
+      t.igual(resumen.puntuadas, 4);
+      t.igual(resumen.pendientes, 1);
+      t.igual(`${uno.oleada}:${uno.total} ${dos.oleada}:${dos.total} ${tres.oleada}:${tres.total}`, "Oleada 1:3 Oleada 2:1 Oleada 3:0");
+      t.igual(uno.capacidades.map((c) => `${c.nombre}=${c.cuantas}`).join(" "), "Riesgos=2 Liquidez=1", "la que mas, primero");
+      t.igual(uno.responsables.map((r) => `${r.nombre}=${r.cuantas}`).join(" "), "Tesorero=2");
+      t.igual(uno.sinResponsable, 1, "un responsable en blanco cuenta como sin responsable");
+    },
+  },
+  {
+    grupo: "Roadmap por oleadas",
+    nombre: "una lista larga ensena tres y dice cuantas faltan, y un nombre largo se acorta",
+    ejecutar: (t) => {
+      const entradas = [1, 2, 3, 4, 5, 6].map((n) =>
+        entrada(n, { item: { capacidad: `Capacidad ${n}`, owner: n === 1 ? "Dirección Financiera Corporativa y Control de Gestión de las unidades" : `Persona ${n}` } }),
+      );
+      const html = roadmapPorOleadas(oleadasDelRoadmap(entradas), { mostradas: 6, total: 6 });
+
+      t.igual(html.includes("Capacidad 3"), true);
+      t.igual(html.includes("Capacidad 4"), false, "la cuarta fila es la de «y 3 más»");
+      t.igual(html.includes("y 3 más"), true);
+      t.igual(html.includes("Dirección Financiera Corporativa y Control…"), true, "a 44 caracteres, sin el espacio de detrás");
+      t.igual(html.includes("Ninguna subcapacidad cae en esta oleada."), true, "las oleadas vacias lo dicen");
+    },
+  },
+  {
+    grupo: "Roadmap por oleadas",
+    nombre: "dice lo que no entra y cuantas filas lleva la tabla de despues",
+    ejecutar: (t) => {
+      const entradas = [entrada(1), entrada(2, { metrics: { isPending: true, oleada: "Pendiente", prioridad: "Pendiente" } })];
+      const html = roadmapPorOleadas(oleadasDelRoadmap(entradas), { mostradas: 15, total: 20 });
+
+      t.igual(html.includes("Una subcapacidad sin puntuar todavía no entra en ninguna oleada."), true);
+      t.igual(html.includes("detalla las 15 primeras por prioridad y gap"), true);
+    },
+  },
+  {
+    grupo: "Roadmap por oleadas",
+    nombre: "va justo antes de la tabla de iniciativas, y sin nada puntuado no sale",
+    ejecutar: (t) => {
+      const html = buildEnhancedPdfReportHtml(datos());
+      const pendientes = [1, 2].map((n) => entrada(n, { metrics: { isPending: true, oleada: "Pendiente", prioridad: "Pendiente" } }));
+      const sinPuntuar = buildEnhancedPdfReportHtml(datos({ metrics: pendientes, scored: [], roadmapItems: pendientes, roadmapTotal: 2 }));
+
+      t.igual(html.indexOf("Roadmap por oleadas") > 0, true);
+      t.igual(html.indexOf("Roadmap por oleadas") < html.indexOf("<h2>Roadmap e iniciativas"), true);
+      t.igual(sinPuntuar.includes("<h2>Roadmap por oleadas"), false);
+    },
+  },
+  {
+    grupo: "Roadmap por oleadas",
+    nombre: "lo que escribe la gente llega escapado",
+    ejecutar: (t) => {
+      const html = roadmapPorOleadas(oleadasDelRoadmap([entrada(1, { item: { owner: "<img src=x>", capacidad: "<b>Cap</b>" } })]));
+
+      t.igual(html.includes("<img src=x>"), false);
+      t.igual(html.includes("&lt;img src=x&gt;"), true);
     },
   },
 ];

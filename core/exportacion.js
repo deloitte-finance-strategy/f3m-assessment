@@ -6,7 +6,9 @@
  * necesita ni DOM ni estado: solo recibe filas y devuelve texto.
  */
 
-import { getMaturityLevel } from "./calculo.js?v=37";
+import { titulosDeCasos } from "./biblioteca.js?v=38";
+import { getMaturityLevel } from "./calculo.js?v=38";
+import { COLOR_DE_OLEADA, colorDeCalor } from "./presentacion.js?v=38";
 
 
 // Excel con configuración regional española espera punto y coma, no coma: con
@@ -88,6 +90,7 @@ const TITULOS = {
   TotalDeSubcapacidades: "Subcapacidades",
   IniciativaSugerida: "Iniciativa sugerida",
   Owner: "Responsable",
+  CasosDeIa: "Casos de IA",
 };
 
 
@@ -144,6 +147,9 @@ const COLUMNAS = [
   "Owner",
   "Estado",
   "Comentarios",
+  // Al final y no junto a la iniciativa, a proposito: quien tenga una
+  // plantilla montada sobre el orden de antes solo ve una columna mas.
+  "CasosDeIa",
 ];
 
 
@@ -279,6 +285,11 @@ export function filasDeRoadmap(entradas, dominio = "") {
       Owner: item.owner,
       Estado: item.status,
       Comentarios: item.comentario,
+
+      // Los titulos, como los lee la pestana IA: la misma lectura de ai.cases
+      // que cuenta las apariciones, asi que el archivo y la pantalla no pueden
+      // partirlos de forma distinta.
+      CasosDeIa: titulosDeCasos(item.ai?.cases).join("; "),
     }),
   );
 }
@@ -302,4 +313,214 @@ export function filasDelProyecto(dominios) {
     ...dominios.flatMap((dominio) => filasDeResumen(dominio.capacidades, dominio.label)),
     ...dominios.flatMap((dominio) => filasDeRoadmap(dominio.entradas, dominio.label)),
   ];
+}
+
+
+
+// ======================================================== el Excel (.xlsx)
+
+/**
+ * Las columnas de cada hoja del Excel: una hoja por nivel.
+ *
+ * El CSV mete los tres niveles en una sola tabla, con las mismas columnas para
+ * todos, y por eso las filas de dominio llevaban en blanco la capacidad, la
+ * iniciativa y el responsable. En el Excel cada nivel va en su hoja y con lo
+ * que tiene sentido en el: sin la columna «Tipo», que ya es el nombre de la
+ * hoja.
+ */
+const PALANCAS_Y_OBJETIVOS = [
+  "Procesos",
+  "ObjetivoProcesos",
+  "Tecnologia",
+  "ObjetivoTecnologia",
+  "Organizacion",
+  "ObjetivoOrganizacion",
+];
+
+const RESULTADO = ["ScoreMedio", "ObjetivoMedio", "Nivel", "Gap", "Prioridad"];
+
+export const COLUMNAS_POR_HOJA = {
+  dominio: ["Dominio", "Puntuadas", "TotalDeSubcapacidades", ...PALANCAS_Y_OBJETIVOS, ...RESULTADO],
+  capacidad: ["Dominio", "Capacidad", "Puntuadas", "TotalDeSubcapacidades", ...PALANCAS_Y_OBJETIVOS, ...RESULTADO],
+  subcapacidad: [
+    "Dominio",
+    "Capacidad",
+    "Subcapacidad",
+    ...PALANCAS_Y_OBJETIVOS,
+    ...RESULTADO,
+    "Oleada",
+    "IniciativaSugerida",
+    "Owner",
+    "Estado",
+    "Comentarios",
+    "CasosDeIa",
+  ],
+};
+
+const NOMBRE_DE_HOJA = {
+  dominio: "Dominios",
+  capacidad: "Capacidades",
+  subcapacidad: "Subcapacidades",
+};
+
+
+// La prioridad, con el chip de su oleada: Alta y Oleada 1 son la misma
+// urgencia, y en la hoja se leen igual.
+const COLOR_DE_PRIORIDAD_EN_CHIP = {
+  Alta: COLOR_DE_OLEADA["Oleada 1"],
+  Media: COLOR_DE_OLEADA["Oleada 2"],
+  Baja: COLOR_DE_OLEADA["Oleada 3"],
+  Pendiente: COLOR_DE_OLEADA.Pendiente,
+};
+
+/**
+ * Ancho y forma de cada columna. El ancho va en caracteres, que es como lo
+ * mide Excel; lo que es texto largo se parte en lineas dentro de la celda.
+ */
+const FORMA_DE_COLUMNA = {
+  Dominio: { ancho: 18 },
+  Capacidad: { ancho: 30, envolver: true },
+  Subcapacidad: { ancho: 44, envolver: true },
+  Puntuadas: { ancho: 11, tipo: "entero" },
+  TotalDeSubcapacidades: { ancho: 15, tipo: "entero" },
+  Procesos: { ancho: 10, tipo: "numero", dePalanca: true },
+  ObjetivoProcesos: { ancho: 11, tipo: "numero", dePalanca: true },
+  Tecnologia: { ancho: 11, tipo: "numero", dePalanca: true },
+  ObjetivoTecnologia: { ancho: 11, tipo: "numero", dePalanca: true },
+  Organizacion: { ancho: 12, tipo: "numero", dePalanca: true },
+  ObjetivoOrganizacion: { ancho: 12, tipo: "numero", dePalanca: true },
+  ScoreMedio: { ancho: 10, tipo: "numero", calor: true },
+  ObjetivoMedio: { ancho: 10, tipo: "numero" },
+  Nivel: { ancho: 21 },
+  Gap: { ancho: 8, tipo: "numero" },
+  Prioridad: { ancho: 11, chip: COLOR_DE_PRIORIDAD_EN_CHIP },
+  Oleada: { ancho: 11, chip: COLOR_DE_OLEADA },
+  IniciativaSugerida: { ancho: 58, envolver: true },
+  Owner: { ancho: 24, envolver: true },
+  Estado: { ancho: 13 },
+  Comentarios: { ancho: 58, envolver: true },
+  CasosDeIa: { ancho: 52, envolver: true },
+};
+
+const sinAlmohadilla = (color) => String(color || "").replace("#", "").toUpperCase();
+
+
+/**
+ * El estilo de una celda segun su columna, su nivel y lo que dice.
+ *
+ * Las medias van siempre con dos decimales, para que la columna se lea
+ * alineada. El score y el objetivo de una palanca en una subcapacidad no son
+ * medias sino lo que se eligio, un 3, y con dos decimales decian «3,00»: van
+ * con el formato general, que enseña el 3 como 3 y un objetivo de 3,5 entero.
+ */
+function estiloDeCelda(clave, valor, nivel) {
+  const forma = FORMA_DE_COLUMNA[clave] || {};
+  const estilo = { borde: true, envolver: Boolean(forma.envolver) };
+
+  if (forma.tipo === "numero") {
+    estilo.formato = forma.dePalanca && nivel === "subcapacidad" ? null : "0.00";
+    estilo.horizontal = "center";
+  } else if (forma.tipo === "entero") {
+    estilo.formato = "0";
+    estilo.horizontal = "center";
+  }
+
+  // El score medio con el color de su nivel, el mismo del heatmap: una
+  // columna que se lee de un vistazo, como la pantalla.
+  if (forma.calor && typeof valor === "number") {
+    const { fondo, texto } = colorDeCalor(valor);
+    estilo.relleno = sinAlmohadilla(fondo);
+    estilo.color = sinAlmohadilla(texto);
+    estilo.negrita = true;
+  }
+
+  // Prioridad y oleada en su color, como los chips del informe.
+  if (forma.chip && valor) {
+    const color = forma.chip[valor];
+
+    if (color) {
+      estilo.relleno = sinAlmohadilla(color.fondo);
+      estilo.color = sinAlmohadilla(color.texto);
+    }
+
+    estilo.negrita = true;
+    estilo.horizontal = "center";
+  }
+
+  return estilo;
+}
+
+
+const ESTILO_DE_CABECERA = {
+  negrita: true,
+  color: "FFFFFF",
+  relleno: "2B2B2B",
+  envolver: true,
+  vertical: "center",
+  borde: true,
+};
+
+
+/**
+ * Las hojas del Excel a partir de las filas del CSV: una por cada nivel que
+ * traigan, en el orden dominio, capacidad, subcapacidad.
+ *
+ * Sale de las mismas filas que el CSV, y no de otro recorrido, para que los dos
+ * archivos no puedan decir cosas distintas: el Excel solo las reparte y les da
+ * formato. Un valor vacio se queda vacio, no en cero.
+ */
+export function hojasDeDatos(filas) {
+  return Object.entries(TIPO_DE_FILA)
+    .map(([nivel, tipo]) => {
+      const columnas = COLUMNAS_POR_HOJA[nivel];
+      const delNivel = filas.filter((filaDelCsv) => filaDelCsv.Tipo === tipo);
+
+      return {
+        nombre: NOMBRE_DE_HOJA[nivel],
+        columnas: columnas.map((clave) => ({
+          clave,
+          titulo: TITULOS[clave] ?? clave,
+          ancho: FORMA_DE_COLUMNA[clave]?.ancho,
+        })),
+        filas: delNivel.map((filaDelCsv) =>
+          columnas.map((clave) => {
+            const valor = filaDelCsv[clave];
+            const vacio = valor === "" || valor === null || valor === undefined;
+
+            return { valor: vacio ? null : valor, estilo: estiloDeCelda(clave, valor, nivel) };
+          }),
+        ),
+        // Los nombres se quedan a la vista al desplazarse a la derecha.
+        fijar: { filas: 1, columnas: nivel === "subcapacidad" ? 3 : nivel === "capacidad" ? 2 : 1 },
+        filtro: true,
+        estiloDeCabecera: ESTILO_DE_CABECERA,
+        altoDeCabecera: 30,
+      };
+    })
+    .filter((hoja) => hoja.filas.length);
+}
+
+
+/**
+ * La primera hoja: de quien es el archivo y que lleva cada hoja.
+ *
+ * `lineas` es [[etiqueta, texto]]. El archivo se reenvia, y quien lo abre no
+ * ha visto la herramienta: sin esto no sabria si lleva filtros ni de cuando es.
+ */
+export function hojaDePortada({ titulo, subtitulo = "", lineas = [] }) {
+  return {
+    nombre: "Portada",
+    cabecera: false,
+    sinCuadricula: true,
+    columnas: [{ ancho: 22 }, { ancho: 90 }],
+    filas: [
+      [{ valor: titulo, estilo: { negrita: true, tamano: 16 } }],
+      ...(subtitulo ? [[{ valor: subtitulo, estilo: { color: "5F6368" } }]] : []),
+      [],
+      ...lineas.map(([etiqueta, texto]) => [
+        { valor: etiqueta, estilo: { negrita: true } },
+        { valor: texto, estilo: { envolver: true } },
+      ]),
+    ],
+  };
 }

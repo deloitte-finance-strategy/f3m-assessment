@@ -16,10 +16,10 @@
  * documento entero, sin scripts, por lo mismo que el informe.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=37";
-import { normalizarLogo } from "../core/escenario.js?v=37";
-import { COLOR_DE_PALANCA, escapeAttr, escapeHtml } from "../core/presentacion.js?v=37";
-import { ESCALA_DE_CALOR, PALETA } from "./estilos.js?v=37";
+import { PALANCAS } from "../core/calculo.js?v=38";
+import { normalizarLogo } from "../core/escenario.js?v=38";
+import { COLOR_DE_PALANCA, ESCALA_DE_CALOR, escapeAttr, escapeHtml } from "../core/presentacion.js?v=38";
+import { PALETA } from "./estilos.js?v=38";
 
 
 /**
@@ -182,12 +182,7 @@ export function documentoDePreparacion(datos) {
         ${tituloDelDocumentoHtml("Preparación del taller", datos)}
         <p class="bajada">Diagnóstico de madurez de la función financiera · Deloitte Finance Strategy</p>
 
-        <div class="huecos">
-          <div>Fecha de la sesión</div>
-          <div>Lugar o enlace</div>
-          <div>Asistentes por parte de ${cliente || "la organización"}</div>
-          <div>Equipo de Deloitte</div>
-        </div>
+        ${huecos(datos.sesion, cliente)}
 
         ${presentacion(capacidades, total, preguntas, dominio)}
         ${escala()}
@@ -201,6 +196,31 @@ export function documentoDePreparacion(datos) {
         </section>
       </body>
     </html>
+  `;
+}
+
+
+/**
+ * Fecha, lugar, asistentes y equipo: lo que se pide al generar el documento.
+ *
+ * Lo que llega relleno va detras de su rotulo, como la fecha del acta; lo que
+ * no, se queda como hueco para escribir a mano, que es como salia siempre.
+ */
+function huecos(sesion = {}, cliente = "") {
+  // Relleno, no necesita el aire de encima para escribir a mano: va mas junto,
+  // para que el indice siga cabiendo en la primera pagina.
+  const hueco = (rotulo, valor) =>
+    valor?.trim()
+      ? `<div class="lleno">${rotulo}<b>${escapeHtml(valor.trim())}</b></div>`
+      : `<div>${rotulo}</div>`;
+
+  return `
+    <div class="huecos">
+      ${hueco("Fecha de la sesión", sesion?.fecha)}
+      ${hueco("Lugar o enlace", sesion?.lugar)}
+      ${hueco(`Asistentes por parte de ${cliente || "la organización"}`, sesion?.asistentes)}
+      ${hueco("Equipo de Deloitte", sesion?.equipo)}
+    </div>
   `;
 }
 
@@ -443,6 +463,19 @@ export function estilosDelDocumento() {
       padding: 8pt 0 2pt;
       border-bottom: 0.75pt solid ${PALETA.lineaFuerte};
       color: ${PALETA.tintaSuave};
+    }
+
+    /* Lo que se escribio al generarlo, detras de su rotulo. Un enlace largo,
+       sin espacios, se parte donde haga falta en vez de salirse del hueco. */
+    .huecos .lleno {
+      padding-top: 3pt;
+    }
+
+    .huecos b {
+      margin-left: 5pt;
+      color: ${PALETA.tinta};
+      font-weight: 600;
+      overflow-wrap: anywhere;
     }
 
     .aviso {
