@@ -15,41 +15,42 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=37";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=37";
-import { filasDeResumen } from "../core/exportacion.js?v=37";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=37";
-import { MINIMO_DE_EJES_DE_UN_RADAR, diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=37";
-import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=37";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=37";
-import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=37";
-import { documentoDePreparacion } from "../informe/preparacion.js?v=37";
-import { showNotice } from "./avisos.js?v=37";
-import { getActiveDomainConfig } from "./dominios.js?v=37";
-import { DOMAINS, dominiosQueAplican, els, state } from "./estado.js?v=37";
-import { getVisibleItems } from "./filtros.js?v=37";
+} from "../core/calculo.js?v=38";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=38";
+import { filasDeResumen } from "../core/exportacion.js?v=38";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=38";
+import { MINIMO_DE_EJES_DE_UN_RADAR, diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=38";
+import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=38";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=38";
+import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=38";
+import { documentoDePreparacion } from "../informe/preparacion.js?v=38";
+import { leerAlmacenamiento, escribirAlmacenamiento } from "./almacenamiento.js?v=38";
+import { abrirDialogo, showNotice } from "./avisos.js?v=38";
+import { getActiveDomainConfig } from "./dominios.js?v=38";
+import { DOMAINS, dominiosQueAplican, els, scenarioId, state } from "./estado.js?v=38";
+import { getVisibleItems } from "./filtros.js?v=38";
 import {
   capturarRadarDelResumen,
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
   renderCapabilityRadar,
-} from "./graficos.js?v=37";
+} from "./graficos.js?v=38";
 import {
   agregarPorCapacidad,
   agregarPorDominio,
   calculate,
   objetivosDistintos,
-} from "./metricas.js?v=37";
+} from "./metricas.js?v=38";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "./subcapacidad.js?v=37";
-import { renderDashboard } from "./vistas/dashboard.js?v=37";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=37";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=37";
+} from "./subcapacidad.js?v=38";
+import { renderDashboard } from "./vistas/dashboard.js?v=38";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=38";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=38";
 
 
 /**
@@ -161,6 +162,78 @@ function abrirElDeck(construir, dibujar, aviso) {
 
 
 /**
+ * Los datos de la sesion que se piden al generar la preparacion: fecha, lugar,
+ * asistentes y equipo. Salen en la primera pagina, en los huecos que antes
+ * habia que rellenar a mano.
+ *
+ * Se recuerdan por dominio en este navegador, para no escribirlos otra vez al
+ * volver a generarla, y no viajan en el escenario: son de quien prepara la
+ * sesion, y meterlos en las reglas de Firebase seria otro campo que publicar en
+ * la consola antes de que funcionara. La clave lleva el escenario, como la
+ * copia local, para que los de un cliente no salgan en el documento de otro.
+ */
+const CLAVE_DE_LA_SESION = `f3m-datos-de-la-sesion${scenarioId ? `:${scenarioId}` : ""}`;
+
+const CAMPOS_DE_LA_SESION = ["fecha", "lugar", "asistentes", "equipo"];
+
+
+function leerDatosDeLaSesion(domainId) {
+  try {
+    const guardados = JSON.parse(leerAlmacenamiento(CLAVE_DE_LA_SESION) || "{}");
+    const delDominio = guardados?.[domainId] || {};
+
+    return Object.fromEntries(
+      CAMPOS_DE_LA_SESION.map((campo) => [campo, typeof delDominio[campo] === "string" ? delDominio[campo] : ""]),
+    );
+  } catch {
+    return {};
+  }
+}
+
+
+function guardarDatosDeLaSesion(domainId, datos) {
+  let guardados = {};
+
+  try {
+    guardados = JSON.parse(leerAlmacenamiento(CLAVE_DE_LA_SESION) || "{}") || {};
+  } catch {
+    guardados = {};
+  }
+
+  guardados[domainId] = Object.fromEntries(CAMPOS_DE_LA_SESION.map((campo) => [campo, datos[campo] || ""]));
+  escribirAlmacenamiento(CLAVE_DE_LA_SESION, JSON.stringify(guardados));
+}
+
+
+/**
+ * El dialogo que pide los datos de la sesion. Devuelve false si se cancela.
+ *
+ * Va antes de abrir la ventana, y no al reves: el navegador solo deja abrir una
+ * ventana en el mismo gesto, y el gesto que cuenta es el clic en «Generar», no
+ * el del menu. Por eso el dialogo no espera a nada mas antes de resolverse.
+ */
+function pedirDatosDeLaSesion(dominio) {
+  const guardados = leerDatosDeLaSesion(state.activeDomainId);
+  const cliente = state.cliente || "el cliente";
+
+  return abrirDialogo({
+    eyebrow: `Preparación del taller · ${dominio.label}`,
+    titulo: "Datos de la sesión",
+    parrafos: [
+      "Salen en la primera página del documento, así que mejor breves. Lo que dejes en blanco queda como un hueco para rellenar a mano.",
+    ],
+    campos: [
+      { clave: "fecha", etiqueta: "Fecha y hora", valor: guardados.fecha, placeholder: "Martes 18 de noviembre, de 10:00 a 12:30", maxLength: 60 },
+      { clave: "lugar", etiqueta: "Lugar o enlace", valor: guardados.lugar, placeholder: "Oficinas del cliente, sala 3, o Teams", maxLength: 120 },
+      { clave: "asistentes", etiqueta: `Asistentes por parte de ${cliente}`, valor: guardados.asistentes, placeholder: "Nombres y cargos", maxLength: 160 },
+      { clave: "equipo", etiqueta: "Equipo de Deloitte", valor: guardados.equipo, placeholder: "Nombres", maxLength: 100 },
+    ],
+    confirmar: "Generar la preparación",
+  });
+}
+
+
+/**
  * El documento de preparacion del taller, para enviar al cliente antes.
  *
  * Del dominio abierto y con los filtros del Assessment, como el modo taller:
@@ -168,7 +241,7 @@ function abrirElDeck(construir, dibujar, aviso) {
  * capacidad. Pero este documento sale hacia el cliente, asi que si los
  * filtros dejan algo fuera, el aviso lo dice.
  */
-export function exportarPreparacion() {
+export async function exportarPreparacion() {
   const items = getVisibleItems();
 
   if (!items.length) {
@@ -176,7 +249,16 @@ export function exportarPreparacion() {
     return;
   }
 
-  // En el mismo gesto del clic, como el informe, y por lo mismo.
+  const dominio = getActiveDomainConfig();
+  const sesion = await pedirDatosDeLaSesion(dominio);
+
+  if (sesion === false) {
+    return;
+  }
+
+  guardarDatosDeLaSesion(state.activeDomainId, sesion);
+
+  // En el mismo gesto del clic en «Generar», como el informe, y por lo mismo.
   const ventana = window.open("", "_blank");
 
   if (!ventana) {
@@ -186,10 +268,9 @@ export function exportarPreparacion() {
 
   ventana.opener = null;
 
-  const dominio = getActiveDomainConfig();
-
   ventana.document.open();
   ventana.document.write(documentoDePreparacion({
+    sesion,
     cliente: state.cliente,
     logo: state.logo,
     domainLabel: dominio.label,

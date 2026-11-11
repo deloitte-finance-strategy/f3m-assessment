@@ -16,7 +16,7 @@ import {
   documentoDePreparacion,
   listaDeEvidencias,
   tituloDelDocumentoHtml,
-} from "../informe/preparacion.js?v=37";
+} from "../informe/preparacion.js?v=38";
 
 
 const RAIZ = new URL("../", import.meta.url);
@@ -260,6 +260,40 @@ export const casos = [
 
       const svg = documentoDePreparacion({ domainLabel: "FP&A", subcapacidades: [], logo: "data:image/svg+xml;base64,PHN2Zz4=" });
       t.igual(svg.includes('class="logo-cliente"'), false, "un SVG no pasa");
+    },
+  },
+  {
+    grupo: "Preparación del taller",
+    nombre: "los datos de la sesión van detrás de su rótulo, y lo que falta queda como hueco",
+    ejecutar(t) {
+      const html = documentoDePreparacion({
+        cliente: "Acme",
+        domainLabel: "FP&A",
+        subcapacidades: DOMINIO,
+        sesion: { fecha: "Martes 18 de noviembre, 10:00", lugar: "  ", asistentes: "", equipo: "Ana López" },
+      });
+
+      t.igual(html.includes('<div class="lleno">Fecha de la sesión<b>Martes 18 de noviembre, 10:00</b></div>'), true);
+      t.igual(html.includes("<div>Lugar o enlace</div>"), true, "un campo con solo espacios es un hueco");
+      t.igual(html.includes("<div>Asistentes por parte de Acme</div>"), true);
+      t.igual(html.includes('<div class="lleno">Equipo de Deloitte<b>Ana López</b></div>'), true, "relleno, va más junto");
+    },
+  },
+  {
+    grupo: "Preparación del taller",
+    nombre: "sin datos de la sesión salen los cuatro huecos de siempre, y lo escrito llega escapado",
+    ejecutar(t) {
+      const sinDatos = documentoDePreparacion({ domainLabel: "FP&A", subcapacidades: DOMINIO });
+      const conMarcas = documentoDePreparacion({
+        domainLabel: "FP&A",
+        subcapacidades: DOMINIO,
+        sesion: { lugar: "<img src=x onerror=alert(1)>" },
+      });
+
+      t.igual((sinDatos.match(/<div class="huecos">[\s\S]*?<\/div>\s*<\/div>/)?.[0].match(/<b>/g) || []).length, 0);
+      t.igual(sinDatos.includes("<div>Fecha de la sesión</div>"), true);
+      t.igual(conMarcas.includes("<img src=x"), false);
+      t.igual(conMarcas.includes("<b>&lt;img src=x onerror=alert(1)&gt;</b>"), true);
     },
   },
 ];

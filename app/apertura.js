@@ -14,8 +14,8 @@
  * Solo pinta. Cuando se enseña y que pasa al pulsar lo decide app/taller.js.
  */
 
-import { capacidadesDePreparacion, NIVELES_DE_LA_RUBRICA, QUE_MIDE, RUBRICA_GENERAL } from "../informe/preparacion.js?v=37";
-import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=37";
+import { capacidadesDePreparacion, NIVELES_DE_LA_RUBRICA, QUE_MIDE, RUBRICA_GENERAL } from "../informe/preparacion.js?v=38";
+import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=38";
 
 
 /**

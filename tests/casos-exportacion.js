@@ -14,8 +14,10 @@ import {
   filasDelProyecto,
   filasDeResumen,
   filasDeRoadmap,
+  hojaDePortada,
+  hojasDeDatos,
   toCsv,
-} from "../core/exportacion.js?v=37";
+} from "../core/exportacion.js?v=38";
 
 
 /** Una capacidad agregada, en la forma que devuelve agregarPorCapacidad(). */
@@ -300,7 +302,7 @@ export const casos = [
         cabecera,
         "Tipo;Dominio;Capacidad;Subcapacidad;Puntuadas;Subcapacidades;"
           + "Procesos;Objetivo Procesos;Tecnología;Objetivo Tecnología;Organización;Objetivo Organización;"
-          + "Score medio;Objetivo medio;Nivel;Gap;Prioridad;Oleada;Iniciativa sugerida;Responsable;Estado;Comentarios",
+          + "Score medio;Objetivo medio;Nivel;Gap;Prioridad;Oleada;Iniciativa sugerida;Responsable;Estado;Comentarios;Casos de IA",
       );
     },
   },
@@ -427,7 +429,7 @@ export const casos = [
       const columnas = filas.map((fila) => Object.keys(fila).join("|"));
 
       t.igual(new Set(columnas).size, 1);
-      t.igual(toCsv(filas).split("\r\n").every((linea) => linea.split(";").length === 22), true);
+      t.igual(toCsv(filas).split("\r\n").every((linea) => linea.split(";").length === 23), true);
     },
   },
   {
@@ -435,6 +437,107 @@ export const casos = [
     nombre: "sin dominios no hay filas",
     ejecutar: (t) => {
       t.igual(filasDelProyecto([]).length, 0);
+    },
+  },
+  {
+    grupo: "Los casos de IA en el archivo",
+    nombre: "cada subcapacidad lleva sus casos, separados por punto y coma",
+    ejecutar: (t) => {
+      const [fila] = filasDeRoadmap([entrada({ ai: { cases: "Conciliación automática;  Previsión de caja ; " } })]);
+
+      t.igual(fila.CasosDeIa, "Conciliación automática; Previsión de caja");
+    },
+  },
+  {
+    grupo: "Los casos de IA en el archivo",
+    nombre: "sin casos la celda queda vacia, y las filas de resumen no la llenan",
+    ejecutar: (t) => {
+      t.igual(filasDeRoadmap([entrada()])[0].CasosDeIa, "");
+      t.igual(filasDeResumen([capacidad()])[0].CasosDeIa, "");
+      t.igual(toCsv(filasDeRoadmap([entrada({ ai: { cases: "A; B" } })])).split("\r\n")[1].endsWith(';"A; B"'), true, "la ultima columna, entrecomillada por su punto y coma");
+    },
+  },
+  {
+    grupo: "El Excel de la exportacion",
+    nombre: "una hoja por nivel, en orden, y solo las que tienen filas",
+    ejecutar: (t) => {
+      const proyecto = filasDelProyecto([
+        { label: "Fiscal", resumen: dominio(), capacidades: [capacidad()], entradas: [entrada()] },
+      ]);
+      const delDominio = [...filasDeResumen([capacidad()], "Fiscal"), ...filasDeRoadmap([entrada()], "Fiscal")];
+
+      t.igual(hojasDeDatos(proyecto).map((hoja) => hoja.nombre).join(" "), "Dominios Capacidades Subcapacidades");
+      t.igual(hojasDeDatos(delDominio).map((hoja) => hoja.nombre).join(" "), "Capacidades Subcapacidades");
+    },
+  },
+  {
+    grupo: "El Excel de la exportacion",
+    nombre: "cada hoja lleva sus columnas, con los mismos titulos que el CSV y sin «Tipo»",
+    ejecutar: (t) => {
+      const hojas = hojasDeDatos(filasDelProyecto([
+        { label: "Fiscal", resumen: dominio(), capacidades: [capacidad()], entradas: [entrada()] },
+      ]));
+      const titulos = (nombre) => hojas.find((hoja) => hoja.nombre === nombre).columnas.map((columna) => columna.titulo);
+
+      t.igual(titulos("Dominios").includes("Tipo"), false);
+      t.igual(titulos("Dominios").includes("Iniciativa sugerida"), false, "sin columnas siempre vacias");
+      t.igual(titulos("Capacidades").slice(0, 4).join("|"), "Dominio|Capacidad|Puntuadas|Subcapacidades");
+      t.igual(titulos("Subcapacidades").slice(-6).join("|"), "Oleada|Iniciativa sugerida|Responsable|Estado|Comentarios|Casos de IA");
+    },
+  },
+  {
+    grupo: "El Excel de la exportacion",
+    nombre: "los numeros siguen siendo numeros, y un vacio no se convierte en cero",
+    ejecutar: (t) => {
+      const [hoja] = hojasDeDatos(filasDeRoadmap([entrada({ scores: { procesos: 3, tecnologia: null, organizacion: 4 } })], "Fiscal"));
+      const celda = (titulo) => hoja.filas[0][hoja.columnas.findIndex((columna) => columna.titulo === titulo)];
+
+      t.igual(celda("Procesos").valor, 3);
+      t.igual(celda("Tecnología").valor, null);
+      t.igual(celda("Comentarios").valor, null);
+    },
+  },
+  {
+    grupo: "El Excel de la exportacion",
+    nombre: "las medias van con dos decimales, y el score de una palanca tal cual, sin «3,00»",
+    ejecutar: (t) => {
+      const [capacidades, subcapacidades] = hojasDeDatos([
+        ...filasDeResumen([capacidad()], "Fiscal"),
+        ...filasDeRoadmap([entrada({ scores: { procesos: 3, tecnologia: 2, organizacion: 4 } })], "Fiscal"),
+      ]);
+      const formato = (hoja, titulo) => hoja.filas[0][hoja.columnas.findIndex((columna) => columna.titulo === titulo)].estilo.formato;
+
+      t.igual(formato(subcapacidades, "Procesos"), null, "un 3 se ve como 3");
+      t.igual(formato(subcapacidades, "Objetivo Procesos"), null);
+      t.igual(formato(subcapacidades, "Score medio"), "0.00");
+      t.igual(formato(subcapacidades, "Gap"), "0.00");
+      t.igual(formato(capacidades, "Procesos"), "0.00", "en la capacidad es una media");
+    },
+  },
+  {
+    grupo: "El Excel de la exportacion",
+    nombre: "el score medio lleva el color de su nivel, y la prioridad y la oleada el de su chip",
+    ejecutar: (t) => {
+      const [hoja] = hojasDeDatos(filasDeRoadmap([entrada()], "Fiscal"));
+      const celda = (titulo) => hoja.filas[0][hoja.columnas.findIndex((columna) => columna.titulo === titulo)];
+
+      // 3 cae en el tramo amarillo del heatmap; Media y Oleada 2, en el ambar.
+      t.igual(celda("Score medio").estilo.relleno, "F1EDB2");
+      t.igual(celda("Prioridad").estilo.relleno, "FBE9CC");
+      t.igual(celda("Oleada").estilo.relleno, "FBE9CC");
+      t.igual(celda("Gap").estilo.relleno, undefined);
+    },
+  },
+  {
+    grupo: "El Excel de la exportacion",
+    nombre: "la portada dice de quien es el archivo y que lleva",
+    ejecutar: (t) => {
+      const portada = hojaDePortada({ titulo: "F3M Assessment · Acme", lineas: [["Alcance", "Sin filtros"]] });
+
+      t.igual(portada.nombre, "Portada");
+      t.igual(portada.cabecera, false);
+      t.igual(portada.filas[0][0].valor, "F3M Assessment · Acme");
+      t.igual(portada.filas.at(-1).map((celda) => celda.valor).join(": "), "Alcance: Sin filtros");
     },
   },
 ];

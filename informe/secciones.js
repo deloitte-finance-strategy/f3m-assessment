@@ -12,10 +12,11 @@
  * quien conoce el deck entero. Cada seccion solo sabe pintar su cuerpo.
  */
 
-import { average } from "../core/calculo.js?v=37";
-import { normalizarLogo } from "../core/escenario.js?v=37";
+import { average } from "../core/calculo.js?v=38";
+import { normalizarLogo } from "../core/escenario.js?v=38";
 
 import {
+  COLOR_DE_OLEADA,
   COLOR_DE_PALANCA,
   enLetra,
   escapeAttr,
@@ -23,9 +24,9 @@ import {
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=37";
+} from "../core/presentacion.js?v=38";
 
-import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=37";
+import { barrasHtml, estiloDeCalor, svgBullet, svgDonut, svgEscalaDeMadurez } from "./graficos.js?v=38";
 
 
 /**
@@ -618,7 +619,7 @@ function radaresHtml(radarImages, { sufijo }) {
         ["Organización", radarImages?.organizacion, COLOR_DE_PALANCA.organizacion],
       ]
         .map(([titulo, imagen, color]) => `
-          <article class="panel panel-claro">
+          <article class="panel panel-claro panel-radar">
             <p class="radar-titulo"><em style="background:${color}"></em>${escapeHtml(titulo)}</p>
             ${
               imagen
@@ -1063,18 +1064,150 @@ export function brechas(entradas, desde) {
 
 // ============================================================ parte 3 · roadmap
 
-const COLOR_DE_OLEADA = {
-  "Oleada 1": { fondo: "#F7DDDA", texto: "#7D1F19" },
-  "Oleada 2": { fondo: "#FBE9CC", texto: "#7A4700" },
-  "Oleada 3": { fondo: "#E2EFD4", texto: "#315D11" },
-  Pendiente: { fondo: "#EDEFEC", texto: "#78817A" },
-};
-
-
 function chipDeOleada(oleada) {
   const color = COLOR_DE_OLEADA[oleada] || COLOR_DE_OLEADA.Pendiente;
 
   return `<span class="chip-oleada" style="background:${color.fondo}; color:${color.texto};">${escapeHtml(oleada)}</span>`;
+}
+
+
+/**
+ * Las tres oleadas, de la mas urgente a la menos, con lo que significa cada una.
+ * Es la regla de oleadaDesdePrioridad() en core/calculo.js, dicha con palabras.
+ */
+const OLEADAS = [
+  { oleada: "Oleada 1", criterio: "Prioridad alta · gap de 2 o más" },
+  { oleada: "Oleada 2", criterio: "Prioridad media · gap de 1 a 2" },
+  { oleada: "Oleada 3", criterio: "Prioridad baja · gap por debajo de 1" },
+];
+
+// Cuantas filas caben en cada lista de una columna sin que la diapositiva
+// desborde, contando la de «y 3 más», y hasta donde se escribe un responsable:
+// el nombre entero sigue en la tabla de las diapositivas siguientes. Con
+// cuatro filas en cada lista, mas la de «Sin responsable», sobra un dedo.
+const FILAS_POR_LISTA_DE_OLEADA = 4;
+const LARGO_DE_RESPONSABLE_EN_OLEADA = 44;
+
+
+/** [{ nombre, cuantas }] de mas a menos, y empatadas en el orden en que salen. */
+function contar(nombres) {
+  const cuentas = new Map();
+
+  nombres.forEach((nombre) => cuentas.set(nombre, (cuentas.get(nombre) || 0) + 1));
+
+  return [...cuentas]
+    .map(([nombre, cuantas], orden) => ({ nombre, cuantas, orden }))
+    .sort((a, b) => b.cuantas - a.cuantas || a.orden - b.orden)
+    .map(({ nombre, cuantas }) => ({ nombre, cuantas }));
+}
+
+
+/**
+ * El roadmap por oleadas, en datos: cuantas iniciativas van en cada una, en que
+ * capacidades y quien las lleva.
+ *
+ * Cuenta todas las subcapacidades del alcance del informe, no las quince de la
+ * tabla de despues: es el resumen de la tabla entera, y si contara solo las
+ * quince, las oleadas 2 y 3 saldrian casi vacias.
+ */
+export function oleadasDelRoadmap(entradas = []) {
+  const grupos = OLEADAS.map(({ oleada, criterio }) => {
+    const delGrupo = entradas.filter(({ metrics }) => metrics?.oleada === oleada);
+    const responsable = ({ item }) => String(item?.owner ?? "").trim();
+
+    return {
+      oleada,
+      criterio,
+      total: delGrupo.length,
+      capacidades: contar(delGrupo.map(({ item }) => item.capacidad)),
+      responsables: contar(delGrupo.map(responsable).filter(Boolean)),
+      sinResponsable: delGrupo.filter((entrada) => !responsable(entrada)).length,
+    };
+  });
+
+  return {
+    grupos,
+    puntuadas: grupos.reduce((suma, grupo) => suma + grupo.total, 0),
+    pendientes: entradas.filter(({ metrics }) => metrics?.isPending).length,
+  };
+}
+
+
+function acortar(texto, largo) {
+  return texto.length > largo ? `${texto.slice(0, largo - 1).trimEnd()}…` : texto;
+}
+
+
+function listaDeOleada(filas, { vacia, largo = Infinity, extra = "" }) {
+  if (!filas.length && !extra) {
+    return `<p class="oleada-vacia">${escapeHtml(vacia)}</p>`;
+  }
+
+  // Si caben todas, todas; si no, una menos y la de «y N más» en su sitio.
+  const vistas = filas.length <= FILAS_POR_LISTA_DE_OLEADA ? filas : filas.slice(0, FILAS_POR_LISTA_DE_OLEADA - 1);
+  const resto = filas.length - vistas.length;
+
+  return `
+    <ul class="oleada-lista">
+      ${vistas
+        .map(({ nombre, cuantas }) => `<li><span>${escapeHtml(acortar(nombre, largo))}</span><b>${cuantas}</b></li>`)
+        .join("")}
+      ${resto > 0 ? `<li class="oleada-resto"><span>y ${resto} más</span></li>` : ""}
+      ${extra}
+    </ul>
+  `;
+}
+
+
+/**
+ * La diapositiva del roadmap por oleadas: una columna por oleada, con su cifra,
+ * sus capacidades y sus responsables. Va antes de la tabla de iniciativas, para
+ * que el comite vea el plan entero antes del detalle.
+ */
+export function roadmapPorOleadas(resumen, { mostradas, total } = {}) {
+  const columnas = resumen.grupos
+    .map((grupo) => {
+      const sinResponsable = grupo.sinResponsable
+        ? `<li class="oleada-sin"><span>Sin responsable</span><b>${grupo.sinResponsable}</b></li>`
+        : "";
+
+      return `
+        <article class="panel panel-claro oleada">
+          <header>
+            ${chipDeOleada(grupo.oleada)}
+            <span class="oleada-criterio">${escapeHtml(grupo.criterio)}</span>
+          </header>
+          <p class="oleada-cifra"><b>${grupo.total}</b> ${grupo.total === 1 ? "iniciativa" : "iniciativas"}</p>
+          ${grupo.total
+            ? `
+              <h3>En qué capacidades</h3>
+              ${listaDeOleada(grupo.capacidades, { vacia: "" })}
+              <h3>Quién las lleva</h3>
+              ${listaDeOleada(grupo.responsables, {
+                vacia: "Ninguna tiene responsable todavía.",
+                largo: LARGO_DE_RESPONSABLE_EN_OLEADA,
+                extra: sinResponsable,
+              })}
+            `
+            : `<p class="oleada-vacia">Ninguna subcapacidad cae en esta oleada.</p>`}
+        </article>
+      `;
+    })
+    .join("");
+
+  const notas = [
+    resumen.pendientes
+      ? `${resumen.pendientes === 1 ? "Una subcapacidad sin puntuar" : `${resumen.pendientes} subcapacidades sin puntuar`} todavía no ${resumen.pendientes === 1 ? "entra" : "entran"} en ninguna oleada.`
+      : "",
+    Number.isFinite(total) && total > mostradas
+      ? `La tabla de las diapositivas siguientes detalla las ${mostradas} primeras por prioridad y gap.`
+      : "La tabla de las diapositivas siguientes detalla cada iniciativa.",
+  ].filter(Boolean);
+
+  return `
+    <div class="rejilla-3 oleadas">${columnas}</div>
+    <p class="nota" style="margin-top:4mm;">${escapeHtml(notas.join(" "))}</p>
+  `;
 }
 
 

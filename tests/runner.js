@@ -6,20 +6,21 @@
  * son valores simples.
  */
 
-import { casos as casosDeCalculo } from "./casos-calculo.js?v=37";
-import { casos as casosDeEscenario } from "./casos-escenario.js?v=37";
-import { casos as casosDeReglas } from "./casos-reglas.js?v=37";
-import { casos as casosDePresentacion } from "./casos-presentacion.js?v=37";
-import { casos as casosDeGraficos } from "./casos-graficos.js?v=37";
-import { casos as casosDeObjetivos } from "./casos-objetivos.js?v=37";
-import { casos as casosDeCoincidencias } from "./casos-coincidencias.js?v=37";
-import { casos as casosDeExportacion } from "./casos-exportacion.js?v=37";
-import { casos as casosDeInforme } from "./casos-informe.js?v=37";
-import { casos as casosDeBiblioteca } from "./casos-biblioteca.js?v=37";
-import { casos as casosDeBusqueda } from "./casos-busqueda.js?v=37";
-import { casos as casosDePreparacion } from "./casos-preparacion.js?v=37";
-import { casos as casosDeActa } from "./casos-acta.js?v=37";
-import { casos as casosDeResumen } from "./casos-resumen.js?v=37";
+import { casos as casosDeCalculo } from "./casos-calculo.js?v=38";
+import { casos as casosDeEscenario } from "./casos-escenario.js?v=38";
+import { casos as casosDeReglas } from "./casos-reglas.js?v=38";
+import { casos as casosDePresentacion } from "./casos-presentacion.js?v=38";
+import { casos as casosDeGraficos } from "./casos-graficos.js?v=38";
+import { casos as casosDeObjetivos } from "./casos-objetivos.js?v=38";
+import { casos as casosDeCoincidencias } from "./casos-coincidencias.js?v=38";
+import { casos as casosDeExportacion } from "./casos-exportacion.js?v=38";
+import { casos as casosDeXlsx } from "./casos-xlsx.js?v=38";
+import { casos as casosDeInforme } from "./casos-informe.js?v=38";
+import { casos as casosDeBiblioteca } from "./casos-biblioteca.js?v=38";
+import { casos as casosDeBusqueda } from "./casos-busqueda.js?v=38";
+import { casos as casosDePreparacion } from "./casos-preparacion.js?v=38";
+import { casos as casosDeActa } from "./casos-acta.js?v=38";
+import { casos as casosDeResumen } from "./casos-resumen.js?v=38";
 
 
 /** Todos los casos, en el orden en que se quieren leer. */
@@ -31,6 +32,7 @@ export const casos = [
   ...casosDeReglas,
   ...casosDePresentacion,
   ...casosDeExportacion,
+  ...casosDeXlsx,
   ...casosDeGraficos,
   ...casosDeInforme,
   ...casosDePreparacion,

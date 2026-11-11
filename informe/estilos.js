@@ -10,7 +10,7 @@
  * todavia, asi que escribe los suyos literales y tienen que ser los mismos.
  */
 
-import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=37";
+import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=38";
 
 
 /**
@@ -54,40 +54,8 @@ export const PALETA = {
 };
 
 
-/**
- * Los cinco colores del heatmap, del rojo al verde.
- *
- * Son los mismos umbrales que getMaturityLevel() en core/calculo.js —1,5 / 2,5
- * / 3,5 / 4,5— y no una escala continua: el informe y la aplicacion tienen que
- * pintar del mismo color la misma celda.
- */
-export const ESCALA_DE_CALOR = [
-  { hasta: 1.5, fondo: "#F6CFC9", texto: "#7D1F19" },
-  { hasta: 2.5, fondo: "#FBE0B6", texto: "#7A4700" },
-  { hasta: 3.5, fondo: "#F1EDB2", texto: "#4F4A00" },
-  { hasta: 4.5, fondo: "#D7EBC0", texto: "#315D11" },
-  { hasta: Infinity, fondo: "#BCDFCB", texto: "#0F5132" },
-];
-
-export const CALOR_SIN_DATO = { fondo: "#EDEFEC", texto: "#78817A" };
-
-
-/**
- * El par fondo/texto que le toca a un score.
- *
- * Se pregunta por el valor tal cual y no por Number(value), que es lo que hacia
- * el informe anterior: Number(null) es 0 y no NaN, asi que una subcapacidad sin
- * puntuar caia en el primer tramo y se pintaba del rojo del nivel 1. La celda
- * decia "-" y el color decia "evaluado con la peor nota", que es justo lo
- * contrario de lo que pasa, y en un heatmap el color se lee antes que la cifra.
- */
-export function colorDeCalor(value) {
-  if (!Number.isFinite(value)) {
-    return CALOR_SIN_DATO;
-  }
-
-  return ESCALA_DE_CALOR.find((tramo) => value < tramo.hasta) || ESCALA_DE_CALOR[4];
-}
+// Los cinco colores del heatmap (ESCALA_DE_CALOR, colorDeCalor) viven en
+// core/presentacion.js desde que los usa tambien el Excel de la exportacion.
 
 
 export function getEnhancedPdfReportStyles() {
@@ -636,10 +604,16 @@ function estilosDeCifras() {
       color: ${PALETA.tintaSuave};
     }
 
+    /* El radar ocupa todo el ancho de su tarjeta: menos relleno que un panel,
+       porque lo que limita su tamano es el ancho, no el alto. */
+    .panel-radar {
+      padding: 4.5mm 3.5mm 3mm;
+    }
+
     .radar {
       display: block;
       width: 100%;
-      max-height: 88mm;
+      max-height: 96mm;
       object-fit: contain;
     }
 
@@ -769,6 +743,79 @@ function estilosDeTablas() {
       font-weight: 800;
       letter-spacing: 0.04em;
       white-space: nowrap;
+    }
+
+    /* El roadmap por oleadas: una columna por oleada, su cifra y dos listas. */
+    .oleada header {
+      display: flex;
+      align-items: center;
+      gap: 2.5mm;
+      margin-bottom: 4mm;
+    }
+
+    .oleada .chip-oleada {
+      font-size: 9pt;
+    }
+
+    .oleada-criterio {
+      font-size: 8pt;
+      color: ${PALETA.tintaSuave};
+    }
+
+    .oleada-cifra {
+      margin: 0 0 5mm;
+      font-size: 11pt;
+      color: ${PALETA.tintaSuave};
+    }
+
+    .oleada-cifra b {
+      margin-right: 1.5mm;
+      font-size: 30pt;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: ${PALETA.tinta};
+      font-variant-numeric: tabular-nums;
+    }
+
+    .oleada h3 {
+      margin: 4mm 0 2mm;
+    }
+
+    .oleada-lista {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .oleada-lista li {
+      display: flex;
+      justify-content: space-between;
+      gap: 3mm;
+      padding: 1.2mm 0;
+      border-bottom: 0.5pt solid ${PALETA.linea};
+      font-size: 8.6pt;
+      line-height: 1.3;
+    }
+
+    .oleada-lista li span {
+      overflow-wrap: anywhere;
+    }
+
+    .oleada-lista li b {
+      flex: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .oleada-lista .oleada-resto,
+    .oleada-lista .oleada-sin {
+      color: ${PALETA.tintaSuave};
+    }
+
+    .oleada-vacia {
+      margin: 0;
+      font-size: 8.6pt;
+      color: ${PALETA.tintaSuave};
     }
   `;
 }

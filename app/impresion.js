@@ -21,11 +21,11 @@
  * de app.js cerraria un ciclo con el orquestador.
  */
 
-import { diaLegible } from "../core/presentacion.js?v=37";
+import { diaLegible } from "../core/presentacion.js?v=38";
 
-import { DOMAINS, state } from "./estado.js?v=37";
-import { redimensionarRadares } from "./graficos.js?v=37";
-import { repintarTodo } from "./repintado.js?v=37";
+import { DOMAINS, state } from "./estado.js?v=38";
+import { redimensionarRadares } from "./graficos.js?v=38";
+import { repintarTodo } from "./repintado.js?v=38";
 
 
 // Las dos vistas que hablan de la funcion financiera entera y no del dominio

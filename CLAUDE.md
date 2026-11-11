@@ -33,16 +33,16 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.544 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.568 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
 | `arranque.js` | Pide ya los tres JSON del arranque y **dice en pantalla si la aplicación no llega a arrancar**. Síncrono en `<head>` | 111 |
 | `sw.js` | **El service worker**: guarda la herramienta en el navegador para abrirla sin red | 172 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 2.382 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 2.230 |
 | `app/estado.js` | El estado compartido y las constantes que lo describen | 249 |
-| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 504 |
+| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 552 |
 | `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 111 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 260 |
-| `app/graficos.js` | Los seis radares de Chart.js, a dónde lleva pulsar sus ejes y el del resumen | 823 |
+| `app/graficos.js` | Los seis radares de Chart.js, a dónde lleva pulsar sus ejes y el del resumen | 905 |
 | `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 202 |
 | `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 623 |
 | `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 381 |
@@ -62,8 +62,9 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/dominios-del-cliente.js` | **Los dominios del cliente**: elegir cuáles de los nueve aplican y decirlo en pantalla | 233 |
 | `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 454 |
 | `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 250 |
-| `app/informe.js` | Lo que la aplicación le pasa al informe, al resumen, a la preparación y al acta | 932 |
+| `app/informe.js` | Lo que la aplicación le pasa al informe, al resumen, a la preparación y al acta | 1.013 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 197 |
+| `app/exportar.js` | **«Exportar Excel»**: el Excel y el CSV del dominio o de todo el proyecto, y su menú | 293 |
 | `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.304 |
 | `app/guia.js` | **La guía de scoring del taller**: la rúbrica de las tres palancas en el sitio de los niveles | 128 |
 | `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
@@ -76,22 +77,23 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad, que lleva a su tarjeta | 323 |
 | `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 437 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 697 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 8.225 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 8.238 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 540 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 704 |
-| `core/exportacion.js` | El CSV para Excel en español, del dominio o de todo el proyecto, con su protección de fórmulas | 305 |
-| `core/presentacion.js` | Escapado, formato de números y fechas, y colores de marca | 246 |
+| `core/exportacion.js` | Las filas de la exportación: el CSV para Excel en español, con su protección de fórmulas, y las hojas del Excel | 526 |
+| `core/xlsx.js` | **Un .xlsx escrito a mano**: el ZIP, los estilos y las hojas, sin librería | 467 |
+| `core/presentacion.js` | Escapado, formato de números y fechas, y colores de marca | 295 |
 | `core/busqueda.js` | Qué subcapacidades casan con lo que se escribe, y qué resaltar | 152 |
 | `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 510 |
-| `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 486 |
-| `informe/secciones.js` | Una función por diapositiva | 1.339 |
+| `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 504 |
+| `informe/secciones.js` | Una función por diapositiva | 1.472 |
 | `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 316 |
-| `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.063 |
+| `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.110 |
 | `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 115 |
-| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 631 |
-| `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 796 |
+| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 664 |
+| `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 798 |
 | `informe/resumen.js` | **El resumen de una página**: la función financiera en una diapositiva, para el comité | 573 |
 | `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
@@ -157,7 +159,7 @@ infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, mét
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
-`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/dominios-del-cliente.js`, `app/sin-conexion.js`, `app/movimiento.js`, `app/impresion.js`, `app/taller.js`,
+`app/biblioteca.js`, `app/buscador.js`, `app/exportar.js`, `app/logo.js`, `app/dominios-del-cliente.js`, `app/sin-conexion.js`, `app/movimiento.js`, `app/impresion.js`, `app/taller.js`,
 `app/apertura.js`, `app/guia.js`, `app/cierre.js` y `app/proximos-pasos.js`. Lo nuevo nace ya en `app/`, no en
 `app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
@@ -364,17 +366,37 @@ prioridad alta" mientras el roadmap enseñaba 2.
 
 No añadir una vista que lea `state.items` directamente.
 
-**«Exportar CSV» es un menú con dos archivos**, como «Exportar PDF». **El del dominio** lleva el
-ámbito de siempre, con los filtros, y lo dice: su nota cuenta las subcapacidades que van, un aviso
-lo repite al descargar y, si los filtros no dejan ninguna, el botón se apaga en vez de bajar un
-archivo vacío. **El de todo el proyecto** (`filasDelProyecto()` en `core/exportacion.js`) lleva
-los dominios que aplican al cliente, **sin filtros** y por el mismo motivo que el informe de todo
-el proyecto: una fila por dominio, después las de capacidad y después las de subcapacidad, con
-la columna «Tipo» para filtrar en Excel. Las cifras de dominio salen de `agregarPorDominio()` y
-las de capacidad de `agregarPorCapacidad()`, las mismas del Overview y del Dashboard. Los títulos
-de columna son para quien abre el archivo («Objetivo Procesos», «Score medio», «Responsable»):
-se traducen al escribir (`TITULOS`), y las filas siguen llevando las claves de siempre, que son
-las que leen los radares.
+**«Exportar Excel» es un menú con dos archivos**, como «Exportar PDF» (`app/exportar.js`). **El
+del dominio** lleva el ámbito de siempre, con los filtros, y lo dice: su nota cuenta las
+subcapacidades que van, un aviso lo repite al descargar, la portada del archivo enumera los filtros
+y, si no dejan ninguna, el botón se apaga en vez de bajar un archivo vacío. **El de todo el
+proyecto** (`filasDelProyecto()` en `core/exportacion.js`) lleva los dominios que aplican al
+cliente, **sin filtros** y por el mismo motivo que el informe de todo el proyecto. Las cifras de
+dominio salen de `agregarPorDominio()` y las de capacidad de `agregarPorCapacidad()`, las mismas
+del Overview y del Dashboard. Los títulos de columna son para quien abre el archivo («Objetivo
+Procesos», «Score medio», «Responsable»): se traducen al escribir (`TITULOS`), y las filas siguen
+llevando las claves de siempre, que son las que leen los radares.
+
+**Es un .xlsx de verdad, escrito a mano en `core/xlsx.js`**, sin librería: un ZIP sin comprimir con
+el XML justo, en menos de 500 líneas. SheetJS o ExcelJS serían cientos de KB vendorizados para escribir
+texto y números con color. Lo que sale: una **portada** (`hojaDePortada()`) que dice de quién es,
+qué lleva, el alcance, la fecha y cómo se calcula, porque quien recibe el archivo no ha visto la
+herramienta; y **una hoja por nivel** (`hojasDeDatos()`: Dominios, Capacidades, Subcapacidades),
+cada una con sus columnas, anchos, cabecera y nombres fijos y filtro. El score medio va con el
+color del heatmap y la prioridad y la oleada con los de sus chips (`COLOR_DE_OLEADA` y
+`colorDeCalor()` viven en `core/presentacion.js` para que el Excel y el informe los compartan).
+**Todo el texto va como texto en línea, nunca como fórmula**, así que un «=HYPERLINK(…)» escrito
+en una nota no se ejecuta al abrirlo; los números son números. Las medias llevan dos decimales y
+el score y el objetivo de una palanca en una subcapacidad, el formato general: con «0.00» un 3
+salía «3,00». `tests/casos-xlsx.js` lee el ZIP de vuelta y comprueba las sumas de control, el
+escapado, los nombres de hoja y el orden de los elementos, que es lo que hace que Excel diga que el
+archivo está dañado. El mismo libro da siempre los mismos bytes (fecha fija dentro del ZIP).
+
+**El CSV de siempre sigue en el mismo menú**, plegado en «En CSV», para las plantillas que ya
+existan sobre él: una sola tabla con la columna «Tipo» para filtrar por nivel. Sale de las mismas
+filas que el Excel, así que no pueden decir cosas distintas. Los dos llevan al final **«Casos de
+IA»**, los títulos de los casos de cada subcapacidad separados por punto y coma
+(`titulosDeCasos()` de `core/biblioteca.js`).
 
 **Lo que se puntúa con el filtro de prioridad puesto se queda en el ámbito** hasta que cambia algún
 filtro (`retenerMientrasDureElFiltro()` en `app/filtros.js`), con un aviso en su tarjeta. Es el único
@@ -695,6 +717,18 @@ como el modo taller —un taller de una sola capacidad tiene su preparación—,
 menú y el aviso dicen cuántas quedan fuera. La rúbrica es una copia de la del modal «Criterios F3M»
 de `index.html`, y `tests/casos-preparacion.js` compara las dos.
 
+**Antes de abrirla pide los datos de la sesión** (`pedirDatosDeLaSesion()` en `app/informe.js`):
+fecha y hora, lugar, asistentes del cliente y equipo de Deloitte, en el diálogo de siempre con
+campos (`abrirDialogo({ campos })` de `app/avisos.js`). Todos opcionales: lo que se deja en blanco
+sale como el hueco para rellenar a mano de antes. Se recuerdan **por dominio y en `localStorage`**
+(`f3m-datos-de-la-sesion`, con el id del escenario detrás si lo hay), no en el escenario: son de
+la convocatoria, no del diagnóstico, y llevarlos al escenario compartido pediría reglas nuevas en
+Firebase. El diálogo va antes de `window.open()` y no después, porque el gesto que deja abrir la
+ventana es el clic en «Generar». Un hueco relleno pierde el aire de encima (`.huecos .lleno`) y
+los campos tienen un largo máximo, para que con textos normales el índice siga en la primera
+página en los nueve dominios con logo; con los cuatro al máximo, el índice pasa a la segunda en
+cinco dominios, sin cortar nada.
+
 **El título de la preparación y del acta va en dos líneas** —el documento, y debajo su dominio—
 con `tituloDelDocumentoHtml()`. Iba todo seguido, y junto al logo del cliente se partía en tres:
 con eso, el índice «Qué veremos» se iba a la segunda página en cinco de los nueve dominios y dos
@@ -734,8 +768,21 @@ El reparto de `informe/`:
 Los gráficos van en **SVG generado por funciones puras**, no en Chart.js: la ventana del informe se
 escribe con `document.write()` y **no lleva scripts a propósito**, así que no hay dónde arrancar una
 librería. De paso imprimen en vectorial y se pueden probar sin navegador. Los **radares siguen
-siendo PNG capturados de Chart.js** —seis ahora, no tres: los del Dashboard y los del Overview—
-porque un radar a mano sale peor y ese camino ya estaba probado.
+siendo PNG de Chart.js** —seis ahora, no tres: los del Dashboard y los del Overview— porque un
+radar a mano sale peor y ese camino ya estaba probado. **Pero no se copian de la pantalla: se
+dibujan otra vez fuera de ella, a la medida de su tarjeta** (`imagenParaElInforme()` y
+`MEDIDA_DEL_INFORME` en `app/graficos.js`), con lo último que pintó la pantalla, la letra a 10 px,
+los nombres de los ejes en líneas de 13 caracteres y sin leyenda, que ya explica la nota al pie.
+Copiados, el canvas de la pantalla tenía la letra para leerse a un metro y en la diapositiva el
+polígono ocupaba poco más de la mitad de la tarjeta; ahora el de dominios crece en torno a la
+mitad y el de capacidades, una cuarta parte.
+
+**El roadmap empieza por las oleadas** (`oleadasDelRoadmap()` y `roadmapPorOleadas()` en
+`informe/secciones.js`): una diapositiva con las tres una al lado de otra, cuántas iniciativas
+tiene cada una, en qué capacidades caen y quién las lleva, antes de la tabla. Lo que dice es de
+todas las puntuadas del ámbito, no solo de las quince que detalla la tabla, y lo dice. Una lista
+larga enseña tres y «y N más», y un responsable se acorta a 44 caracteres: medido con nombres de
+cien en `?comprobar=desbordes`.
 
 **Ninguna diapositiva puede desbordar.** Lleva `overflow: hidden`, y está ahí a propósito: sin él,
 un milímetro de más genera una página en blanco detrás de cada una y el PDF sale con veinte páginas
@@ -1074,7 +1121,7 @@ de cada caso y que los 9 JSON coinciden con sus Excel. Código de salida `1` si 
 
 Se prueban en `tests/`, sin dependencias, todos los módulos que no necesitan navegador: las reglas
 de negocio, los objetivos, la coincidencia de subcapacidades, el contrato de escenario y su espejo
-con `database.rules.json`, el formato de presentación, la exportación a CSV, la biblioteca de IA
+con `database.rules.json`, el formato de presentación, la exportación a CSV y a Excel —el .xlsx leído de vuelta—, la biblioteca de IA
 —que una fuente rota no llegue a la pantalla—, el buscador, el informe —el deck que arma `informe/pdf.js`, las
 primitivas SVG y la lectura de las medidas de desborde—, la preparación del taller, con su rúbrica
 comparada con la de `index.html`, el acta, con sus cifras comparadas con las del Dashboard, y el
@@ -1177,11 +1224,14 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      modal. Cambiar de dominio no cambia nada en esta pestaña, salvo con el orden «Prioridad del
      cliente», que sigue las puntuaciones y no el dominio abierto.
 5. Con un filtro puesto, comprobar que **KPIs, tabla, radares, heatmap, roadmap, CSV y PDF dan el
-   mismo recuento** — y que el **Overview no cambia**, que es lo suyo. **«Exportar CSV»** es un
-   menú: «Datos de {dominio}» lleva lo que dejan los filtros, lo dice en su nota y en un aviso, y
-   se apaga si no dejan nada; «Datos de todo el proyecto» lleva los dominios que aplican, sin
-   filtros, con una fila por dominio, por capacidad y por subcapacidad. Abierto en Excel, los
-   títulos se leen («Objetivo Procesos», «Score medio») y las tildes salen bien.
+   mismo recuento** — y que el **Overview no cambia**, que es lo suyo. **«Exportar Excel»** es un
+   menú: «Excel de {dominio}» lleva lo que dejan los filtros, lo dice en su nota, en un aviso y en
+   la portada del archivo, y se apaga si no dejan nada; «Excel de todo el proyecto» lleva los
+   dominios que aplican, sin filtros, con una hoja por dominio, capacidad y subcapacidad. Abierto
+   en Excel: abre sin avisos de archivo dañado, los números se pueden sumar, el score medio lleva
+   el color del heatmap, la cabecera y los nombres se quedan fijos y cada columna tiene filtro.
+   Plegado en «En CSV», el CSV de los dos sigue bajando, con las tildes bien y «Casos de IA» al
+   final.
 6. Ir y volver entre Overview y Dashboard: los radares de los dos siguen correctos (5 ejes de
    capacidad y 9 de dominio).
 7. **El informe.** Exportar desde **cada una de las seis vistas**, incluidos el Roadmap y la IA
@@ -1199,10 +1249,14 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    en el que se leen los nueve dominios. Con `?comprobar=desbordes`, también cuando los pasos y sus
    responsables son largos. Sin nada puntuado en ningún dominio, el botón está apagado.
    Con **una nota del taller muy larga** (dos mil caracteres) y un responsable de cien, la nota
-   sale entera, a lo ancho, y la medida de desbordes sigue en verde.
-   **La preparación del taller**, del mismo menú: vertical, sin una puntuación, cada subcapacidad
-   entera en su página y el índice entero en la primera, **también con el logo del cliente
-   puesto**. Con un filtro de capacidad, el menú y el
+   sale entera, a lo ancho, y la medida de desbordes sigue en verde. Los radares del informe
+   llenan su tarjeta, también exportando en oscuro o con letra grande, y antes de la tabla del
+   roadmap va «Roadmap por oleadas», que sigue en verde con responsables de cien caracteres.
+   **La preparación del taller**, del mismo menú: antes de abrirse pide los datos de la sesión;
+   «Cancelar» no abre nada, Intro genera, lo escrito sale en la primera página y vuelve relleno la
+   próxima vez en ese dominio, y en blanco quedan los huecos de siempre. Vertical, sin una
+   puntuación, cada subcapacidad entera en su página y el índice entero en la primera, **también
+   con el logo del cliente puesto** y con los datos de la sesión rellenos. Con un filtro de capacidad, el menú y el
    aviso dicen cuántas lleva, y el número de su capacidad es el suyo («3», no «1»).
    **El acta del taller**, del mismo menú: sus cuatro cifras son las del Dashboard, las notas del
    taller salen debajo de su subcapacidad y lo sin puntuar va a «Quedó pendiente» con sus casillas.

@@ -14,11 +14,11 @@
  * eso ataba el dibujo al estado.
  */
 
-import { formatMedia } from "../core/presentacion.js?v=37";
-import { els } from "./estado.js?v=37";
-import { showNotice } from "./avisos.js?v=37";
-import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=37";
-import { sinMovimiento } from "./movimiento.js?v=37";
+import { formatMedia } from "../core/presentacion.js?v=38";
+import { els } from "./estado.js?v=38";
+import { showNotice } from "./avisos.js?v=38";
+import { paletaDeRadar, tamanoDeLetraDeGrafico } from "./preferencias.js?v=38";
+import { sinMovimiento } from "./movimiento.js?v=38";
 
 
 
@@ -37,6 +37,10 @@ const overviewRadarCharts = {
   tecnologia: null,
   organizacion: null,
 };
+
+
+/** Lo ultimo que se dibujo en cada radar, por registro: ver renderSingleCapabilityRadar(). */
+const ultimosDibujos = new WeakMap();
 
 
 /**
@@ -196,9 +200,23 @@ function renderSingleCapabilityRadar({
   // Para una imagen pequena: sin leyenda —la explica quien la coloca— y al
   // doble de pixeles, que se imprime.
   compacto = false,
-}) {
+
+  // El tamano de letra y la separacion entre los nombres de los ejes y el
+  // radar, cuando quien dibuja quiere otros: los del informe.
+  letra = null,
+  rellenoDeEjes = 8,
+} = {}) {
   if (!canvas) {
     return;
+  }
+
+  // Lo que se pidio, para poder dibujarlo otra vez fuera de la pantalla a la
+  // medida del informe (ver imagenParaElInforme()).
+  if (!compacto) {
+    ultimosDibujos.set(registro, {
+      ...ultimosDibujos.get(registro),
+      [key]: { key, label, values, targetValues, color, backgroundColor, radarData },
+    });
   }
 
   // Estos dos colores se nombran porque ahora aparecen en dos sitios cada uno
@@ -208,7 +226,7 @@ function renderSingleCapabilityRadar({
   const colorDelObjetivo = paleta.objetivo;
 
   // En la imagen pequena, la letra un punto mayor: se reduce al colocarla.
-  const tamanoDeLetra = compacto ? 12 : tamanoDeLetraDeGrafico();
+  const tamanoDeLetra = letra ?? (compacto ? 12 : tamanoDeLetraDeGrafico());
   const colorDelTextoDeLeyenda = paleta.leyenda;
 
   const chartData = {
@@ -370,7 +388,7 @@ function renderSingleCapabilityRadar({
 
         pointLabels: {
           color: paleta.ejes,
-          padding: 8,
+          padding: rellenoDeEjes,
 
           font: {
             size: tamanoDeLetra,
@@ -664,7 +682,7 @@ function getRadarShortLabel(label) {
 
 
 
-function wrapRadarLabel(label) {
+function wrapRadarLabel(label, porLinea = 18) {
   const words = String(label).split(" ");
   const lines = [];
   let currentLine = "";
@@ -672,7 +690,7 @@ function wrapRadarLabel(label) {
   words.forEach((word) => {
     const nextLine = currentLine ? `${currentLine} ${word}` : word;
 
-    if (nextLine.length > 18) {
+    if (nextLine.length > porLinea) {
       if (currentLine) {
         lines.push(currentLine);
       }
@@ -719,11 +737,75 @@ function getCanvasImageDataUrl(palanca, canvas, registro = capabilityRadarCharts
 
 
 
+/**
+ * La medida a la que se dibujan los radares del informe, en pixeles de CSS.
+ *
+ * Antes el informe copiaba el canvas de la pantalla tal cual: 414×380 con la
+ * leyenda debajo, y en la tarjeta de la diapositiva el radar se quedaba en la
+ * mitad de su ancho, rodeado de blanco. Dibujado aparte, sin leyenda —la
+ * explica la nota de la diapositiva—, con los nombres de los ejes mas cerca y
+ * en una tarjeta con menos relleno, el radar sale un tercio mas grande y los
+ * nombres, impresos, a la misma letra que antes (unos 7 puntos). Lo que manda
+ * es la proporcion entre la letra y el ancho: medido, con 10 px sobre 380 el
+ * radar ocupa el 61 % del ancho, y con 12 sobre 414, el 56 %.
+ */
+const MEDIDA_DEL_INFORME = { ancho: 380, alto: 330, letra: 10, rellenoDeEjes: 4, porLinea: 13 };
+
+
+/**
+ * Un radar dibujado otra vez, fuera de la pantalla, a la medida del informe.
+ *
+ * Con los mismos datos y colores que el de la pantalla, que es el que acaba de
+ * pintarse con el tema claro (ver conLasVistasDelInformeVisibles()). Si el de
+ * la pantalla no existe, cadena vacia: el informe dice entonces que no se pudo
+ * capturar, igual que antes.
+ */
+function imagenParaElInforme(registro, key) {
+  const dibujo = ultimosDibujos.get(registro)?.[key];
+
+  if (!registro[key] || !dibujo || typeof Chart === "undefined") {
+    return "";
+  }
+
+  const caja = document.createElement("div");
+  const canvas = document.createElement("canvas");
+  const temporal = {};
+  const { ancho, alto, letra, rellenoDeEjes, porLinea } = MEDIDA_DEL_INFORME;
+
+  // Los nombres de los ejes, en lineas mas cortas: lo que limita el radar son
+  // los de los lados, y a lo alto sobra sitio. «Auditoría Interna» iba en una
+  // linea y empujaba el radar hacia dentro.
+  const radarData = {
+    ...dibujo.radarData,
+    displayLabels: dibujo.radarData.displayLabels.map((etiqueta) =>
+      wrapRadarLabel([].concat(etiqueta).join(" "), porLinea),
+    ),
+  };
+
+  caja.setAttribute("aria-hidden", "true");
+  caja.style.cssText = `position:fixed; left:-10000px; top:0; width:${ancho}px; height:${alto}px; pointer-events:none;`;
+  caja.appendChild(canvas);
+  document.body.appendChild(caja);
+
+  try {
+    renderSingleCapabilityRadar({ ...dibujo, radarData, canvas, registro: temporal, compacto: true, letra, rellenoDeEjes });
+
+    return getCanvasImageDataUrl(key, canvas, temporal);
+  } catch (error) {
+    console.warn("No se pudo dibujar el radar del informe.", error);
+    return "";
+  } finally {
+    temporal[key]?.destroy();
+    caja.remove();
+  }
+}
+
+
 export function getRadarImagesForPdf() {
   return {
-    procesos: getCanvasImageDataUrl("procesos", els.capabilityRadarProcessesChart),
-    tecnologia: getCanvasImageDataUrl("tecnologia", els.capabilityRadarTechnologyChart),
-    organizacion: getCanvasImageDataUrl("organizacion", els.capabilityRadarOrganizationChart),
+    procesos: imagenParaElInforme(capabilityRadarCharts, "procesos"),
+    tecnologia: imagenParaElInforme(capabilityRadarCharts, "tecnologia"),
+    organizacion: imagenParaElInforme(capabilityRadarCharts, "organizacion"),
   };
 }
 
@@ -736,9 +818,9 @@ export function getRadarImagesForPdf() {
  */
 export function getOverviewRadarImagesForPdf() {
   return {
-    procesos: getCanvasImageDataUrl("procesos", els.overviewRadarProcessesChart, overviewRadarCharts),
-    tecnologia: getCanvasImageDataUrl("tecnologia", els.overviewRadarTechnologyChart, overviewRadarCharts),
-    organizacion: getCanvasImageDataUrl("organizacion", els.overviewRadarOrganizationChart, overviewRadarCharts),
+    procesos: imagenParaElInforme(overviewRadarCharts, "procesos"),
+    tecnologia: imagenParaElInforme(overviewRadarCharts, "tecnologia"),
+    organizacion: imagenParaElInforme(overviewRadarCharts, "organizacion"),
   };
 }
 

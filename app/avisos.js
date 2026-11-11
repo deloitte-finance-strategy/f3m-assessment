@@ -8,9 +8,9 @@
  * palabra antes de borrar el trabajo de nueve dominios.
  */
 
-import { els } from "./estado.js?v=37";
-import { escapeHtml } from "../core/presentacion.js?v=37";
-import { ocultarConSalida } from "./movimiento.js?v=37";
+import { els } from "./estado.js?v=38";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=38";
+import { ocultarConSalida } from "./movimiento.js?v=38";
 
 
 /**
@@ -216,6 +216,7 @@ export function abrirDialogo({
   confirmacionEscrita = null,
   accionSecundaria = null,
   casillas = null,
+  campos = null,
 }) {
   return new Promise((resolve) => {
     const disparador = document.activeElement;
@@ -229,7 +230,7 @@ export function abrirDialogo({
       .map((texto) => `<p>${escapeHtml(texto)}</p>`)
       .join("");
 
-    els.dialogModal.className = `modal-backdrop dialog-${tono}${casillas ? " dialog-con-casillas" : ""}`;
+    els.dialogModal.className = `modal-backdrop dialog-${tono}${casillas ? " dialog-con-casillas" : ""}${campos ? " dialog-con-campos" : ""}`;
 
     // alertdialog solo cuando de verdad es una alerta. El marcado lo traia
     // fijo, asi que "Poner mi nombre" —un campo de texto sin ninguna urgencia—
@@ -259,6 +260,15 @@ export function abrirDialogo({
     els.dialogSecondary.textContent = accionSecundaria?.texto || "";
 
     pintarCasillas(casillas);
+    pintarCampos(campos);
+
+    const valoresDeCampos = () =>
+      Object.fromEntries(
+        [...(els.dialogCampos?.querySelectorAll("input[data-clave]") || [])].map((entrada) => [
+          entrada.dataset.clave,
+          entrada.value.trim(),
+        ]),
+      );
 
     const marcadas = () =>
       [...(els.dialogCasillas?.querySelectorAll("input[type=checkbox]:checked") || [])].map(
@@ -292,7 +302,8 @@ export function abrirDialogo({
     els.dialogConfirm.disabled = Boolean(confirmacionEscrita);
     validar();
 
-    const alConfirmar = () => terminar(casillas ? marcadas() : campo ? els.dialogField.value : true);
+    const alConfirmar = () =>
+      terminar(casillas ? marcadas() : campos ? valoresDeCampos() : campo ? els.dialogField.value : true);
     const alCancelar = () => terminar(false);
 
     const alPulsarTecla = (event) => {
@@ -302,7 +313,7 @@ export function abrirDialogo({
         return;
       }
 
-      if (event.key === "Enter" && pideTexto && !els.dialogConfirm.disabled) {
+      if (event.key === "Enter" && (pideTexto || (campos && event.target?.matches?.("input[data-clave]"))) && !els.dialogConfirm.disabled) {
         event.preventDefault();
         alConfirmar();
         return;
@@ -358,8 +369,11 @@ export function abrirDialogo({
     // El foco entra en el dialogo: al campo si lo hay, a la primera casilla si
     // es para elegir, y si no a Cancelar, que es la opcion segura.
     const primeraCasilla = casillas && els.dialogCasillas?.querySelector("input[type=checkbox]");
+    const primerCampo = campos && els.dialogCampos?.querySelector("input[data-clave]");
 
-    if (pideTexto) {
+    if (primerCampo) {
+      primerCampo.focus();
+    } else if (pideTexto) {
       els.dialogField.focus();
       els.dialogField.select();
     } else if (primeraCasilla) {
@@ -368,6 +382,40 @@ export function abrirDialogo({
       els.dialogCancel.focus();
     }
   });
+}
+
+
+/**
+ * Varios campos de texto en un dialogo, uno debajo de otro.
+ *
+ * `campos` es [{ clave, etiqueta, valor, placeholder, maxLength }], y el dialogo
+ * devuelve { clave: texto } al confirmar. Todos son opcionales: un campo en
+ * blanco devuelve "". Intro en cualquiera confirma, como en el campo suelto.
+ */
+function pintarCampos(campos) {
+  if (!els.dialogCampos) {
+    return;
+  }
+
+  els.dialogCampos.hidden = !campos;
+  els.dialogCampos.innerHTML = (campos || [])
+    .map(
+      (campo, indice) => `
+        <label class="dialog-field" for="dialogCampo${indice}">
+          <span>${escapeHtml(campo.etiqueta)}</span>
+          <input
+            id="dialogCampo${indice}"
+            type="text"
+            autocomplete="off"
+            data-clave="${escapeAttr(campo.clave)}"
+            maxlength="${Number(campo.maxLength) || 120}"
+            placeholder="${escapeAttr(campo.placeholder || "")}"
+            value="${escapeAttr(campo.valor || "")}"
+          >
+        </label>
+      `,
+    )
+    .join("");
 }
 
 

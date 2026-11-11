@@ -15,13 +15,13 @@
  * En un escenario compartido no se dice nada: el trabajo esta en Firebase.
  */
 
-import { cuandoFue } from "../core/presentacion.js?v=37";
+import { cuandoFue } from "../core/presentacion.js?v=38";
 import {
   borrarDeAlmacenamiento,
   escribirAlmacenamiento,
   leerAlmacenamiento,
-} from "./almacenamiento.js?v=37";
-import { els, state } from "./estado.js?v=37";
+} from "./almacenamiento.js?v=38";
+import { els, state } from "./estado.js?v=38";
 
 
 const CLAVE_ULTIMA_COPIA = "f3m-ultima-copia";

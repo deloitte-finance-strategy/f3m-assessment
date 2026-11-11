@@ -21,9 +21,9 @@
  * reescalar, que es lo mas cerca de una ppt sin generar una ppt.
  */
 
-import { MINIMO_DE_EJES_DE_UN_RADAR, escapeHtml } from "../core/presentacion.js?v=37";
+import { MINIMO_DE_EJES_DE_UN_RADAR, escapeHtml } from "../core/presentacion.js?v=38";
 
-import { getEnhancedPdfReportStyles } from "./estilos.js?v=37";
+import { getEnhancedPdfReportStyles } from "./estilos.js?v=38";
 
 import {
   POR_DIAPOSITIVA,
@@ -35,6 +35,7 @@ import {
   heatmap,
   indice,
   masUrgentes,
+  oleadasDelRoadmap,
   panoramaDeIa,
   panoramaGlobal,
   paginar,
@@ -48,8 +49,9 @@ import {
   resumenDelDominio,
   resumenPorCapacidad,
   roadmap,
+  roadmapPorOleadas,
   separador,
-} from "./secciones.js?v=37";
+} from "./secciones.js?v=38";
 
 
 const PARTE_GLOBAL = "La función financiera";
@@ -329,6 +331,22 @@ function parteDeAccion(data, opciones = {}) {
             }),
         },
       ];
+
+  // El plan entero antes del detalle: cuantas iniciativas van en cada oleada,
+  // en que capacidades y quien las lleva. Sin nada puntuado no hay oleadas que
+  // contar, y la diapositiva no sale.
+  const oleadas = oleadasDelRoadmap(data.metrics);
+
+  if (oleadas.puntuadas) {
+    secciones.push({
+      parte,
+      titulo: "Roadmap por oleadas",
+      entradilla:
+        `Las ${oleadas.puntuadas === 1 ? "iniciativa" : `${oleadas.puntuadas} iniciativas`} de las subcapacidades puntuadas, `
+        + "repartidas por urgencia: en qué capacidades caen y quién las lleva.",
+      cuerpo: () => roadmapPorOleadas(oleadas, { mostradas: data.roadmapItems.length, total: data.roadmapTotal }),
+    });
+  }
 
   repartirRoadmap(data.roadmapItems).forEach((tanda, indiceDeTanda, tandas) => {
     secciones.push({
