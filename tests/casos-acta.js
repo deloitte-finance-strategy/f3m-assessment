@@ -206,6 +206,21 @@ export const casos = [
   },
   {
     grupo: "Acta del taller",
+    nombre: "el título va en dos líneas, como el de la preparación",
+    ejecutar(t) {
+      // Son el antes y el después de la misma sesión: el mismo encabezado.
+      const html = documentoDeActa({ domainLabel: "FP&A", domainTitle: "Planificación y análisis financiero / FP&A", subcapacidades: DOMINIO });
+
+      t.igual(
+        html.includes('<h1>Acta del taller <span class="titulo-dominio">Planificación y análisis financiero / FP&amp;A</span></h1>'),
+        true,
+        "el documento, y debajo su dominio",
+      );
+      t.igual(/<h1>[^<]*·/.test(html), false, "sin el punto que los unía antes");
+    },
+  },
+  {
+    grupo: "Acta del taller",
     nombre: "sin notas no promete notas",
     ejecutar(t) {
       const html = documentoDeActa({

@@ -41,6 +41,7 @@ import {
   estilosDelDocumento,
   logoDelDocumento,
   tituloDelDocumento,
+  tituloDelDocumentoHtml,
 } from "./preparacion.js?v=37";
 
 
@@ -62,9 +63,9 @@ const PASOS_EN_BLANCO_COMO_MINIMO = 2;
 const COLUMNAS_DEL_DETALLE = `
   <colgroup>
     <col style="width:27%">
-    <col style="width:14%"><col style="width:14%"><col style="width:14%">
-    <col style="width:12%">
-    <col style="width:7%">
+    <col style="width:13%"><col style="width:13%"><col style="width:13%">
+    <col style="width:14%">
+    <col style="width:8%">
     <col style="width:12%">
   </colgroup>
 `;
@@ -139,7 +140,7 @@ export function documentoDeActa(datos) {
         </div>
 
         ${logoDelDocumento(datos)}
-        <h1>Acta del taller de ${escapeHtml(datos.domainTitle || datos.domainLabel || "")}</h1>
+        ${tituloDelDocumentoHtml("Acta del taller", datos)}
         <p class="bajada">Diagnóstico de madurez de la función financiera · Deloitte Finance Strategy</p>
 
         <div class="huecos">

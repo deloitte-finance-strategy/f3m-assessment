@@ -15,6 +15,7 @@ import {
   capacidadesDePreparacion,
   documentoDePreparacion,
   listaDeEvidencias,
+  tituloDelDocumentoHtml,
 } from "../informe/preparacion.js?v=37";
 
 
@@ -178,6 +179,29 @@ export const casos = [
 
       t.igual(titulo.includes("/"), false, "sin la barra que Windows no admite");
       t.igual(titulo.endsWith("2026-10-08"), true, "con la fecha al final");
+    },
+  },
+  {
+    grupo: "Preparación del taller",
+    nombre: "el título va en dos líneas: el documento, y debajo su dominio",
+    ejecutar(t) {
+      // Iba todo seguido («Preparación del taller · Planificación y análisis
+      // financiero / FP&A»), y con el logo al lado se partía por donde caía.
+      const html = documentoDePreparacion({
+        domainLabel: "FP&A",
+        domainTitle: "Planificación <i>y</i> análisis",
+        subcapacidades: DOMINIO,
+      });
+
+      t.igual(
+        html.includes('<h1>Preparación del taller <span class="titulo-dominio">Planificación &lt;i&gt;y&lt;/i&gt; análisis</span></h1>'),
+        true,
+        "el dominio, en su línea y escapado",
+      );
+      t.igual(/<h1>[^<]*·/.test(html), false, "sin el punto que los unía antes");
+
+      t.igual(tituloDelDocumentoHtml("Acta del taller", { domainLabel: "Fiscal" }), '<h1>Acta del taller <span class="titulo-dominio">Fiscal</span></h1>', "sin título largo, la etiqueta");
+      t.igual(tituloDelDocumentoHtml("Acta del taller", {}), "<h1>Acta del taller</h1>", "sin dominio, solo el documento");
     },
   },
   {

@@ -14,7 +14,16 @@
  */
 
 import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=37";
-import { deTantas, paginar } from "../informe/secciones.js?v=37";
+import {
+  comentarios,
+  deTantas,
+  lineasDe,
+  paginar,
+  paginarEquilibrado,
+  paginarPorPeso,
+  repartirComentarios,
+  repartirRoadmap,
+} from "../informe/secciones.js?v=37";
 import { resumenDeDesbordes } from "../informe/desbordes.js?v=37";
 
 
@@ -161,6 +170,191 @@ export const casos = [
       const rotulos = tandas.map((_, indice) => deTantas(indice, tandas.length));
 
       t.igual(rotulos.join(" · "), "1 de 3 · 2 de 3 · 3 de 3");
+    },
+  },
+
+  // ------------------------------------------------- repartir por lo que ocupa
+  {
+    grupo: "Reparto por lo que ocupa",
+    nombre: "las lineas de un texto se estiman por lo alto, y las mayusculas ocupan mas",
+    ejecutar: (t) => {
+      t.igual(lineasDe("", 57), 1, "sin texto sigue siendo una linea: la tarjeta la ocupa");
+      t.igual(lineasDe(null, 57), 1, "y sin dato, igual");
+      t.igual(lineasDe("a".repeat(57), 57), 1, "lo que cabe justo");
+      t.igual(lineasDe("a".repeat(58), 57), 2, "un caracter de mas ya es otra linea");
+
+      // Hay quien escribe las notas enteras en mayusculas. Contadas como
+      // minusculas, la estimacion se quedaba corta y la tarjeta se recortaba.
+      t.igual(lineasDe("A".repeat(57), 57), 2, "en mayusculas no cabe en una");
+    },
+  },
+  {
+    grupo: "Reparto por lo que ocupa",
+    nombre: "cada tanda suma como mucho el presupuesto, sin perder ni reordenar",
+    ejecutar: (t) => {
+      const peso = (fila) => fila;
+
+      t.igual(JSON.stringify(paginarPorPeso([1, 2, 3, 4, 5], peso, 6)), "[[1,2,3],[4],[5]]");
+      t.igual(JSON.stringify(paginarPorPeso([1, 1, 1, 1, 1], peso, 100, 2)), "[[1,1],[1,1],[1]]", "el maximo de filas tambien corta");
+
+      // Como paginar(): cero tandas haria desaparecer la seccion del deck.
+      t.igual(JSON.stringify(paginarPorPeso([], peso, 6)), "[[]]", "vacia, una tanda");
+    },
+  },
+  {
+    grupo: "Reparto por lo que ocupa",
+    nombre: "una fila que sola ya se pasa va en su propia tanda, no se pierde",
+    ejecutar: (t) => {
+      // No se puede partir, pero tampoco puede arrastrar a las demas ni
+      // quedarse fuera: va sola, y la medida de desbordes dira si recorta.
+      t.igual(JSON.stringify(paginarPorPeso([9, 1, 1], (fila) => fila, 6)), "[[9],[1,1]]");
+      t.igual(JSON.stringify(paginarPorPeso([1, 9, 1], (fila) => fila, 6)), "[[1],[9],[1]]");
+    },
+  },
+  {
+    grupo: "Reparto por lo que ocupa",
+    nombre: "el reparto parejo usa las mismas tandas, nunca una mas",
+    ejecutar: (t) => {
+      const peso = (fila) => fila;
+      const cinco = [3, 3, 3, 3, 3];
+
+      // Llenando hasta arriba quedan cuatro y una; parejo, tres y dos.
+      t.igual(JSON.stringify(paginarPorPeso(cinco, peso, 12)), "[[3,3,3,3],[3]]", "hasta arriba");
+      t.igual(JSON.stringify(paginarEquilibrado(cinco, peso, 12)), "[[3,3,3],[3,3]]", "parejo");
+      t.igual(JSON.stringify(paginarEquilibrado([3, 3], peso, 12)), "[[3,3]]", "lo que cabe en una no se parte");
+
+      // Con pesos desiguales, sea cual sea el reparto, ni una tanda mas ni
+      // una que se pase del presupuesto.
+      const desiguales = [5, 1, 7, 2, 2, 6, 3, 4, 1, 8, 2];
+      const llenas = paginarPorPeso(desiguales, peso, 10);
+      const parejas = paginarEquilibrado(desiguales, peso, 10);
+
+      t.igual(parejas.length, llenas.length, "las mismas diapositivas");
+      t.igual(parejas.flat().join(","), desiguales.join(","), "todo, y en su orden");
+      t.igual(parejas.every((tanda) => tanda.reduce((suma, fila) => suma + fila, 0) <= 10), true, "ninguna se pasa");
+    },
+  },
+  {
+    grupo: "Reparto por lo que ocupa",
+    nombre: "el roadmap sigue yendo de cinco en cinco, y con responsables largos caben menos",
+    ejecutar: (t) => {
+      const quince = (owner) => Array.from({ length: 15 }, (_, i) => entrada(i + 1, { item: { owner } }));
+
+      t.igual(repartirRoadmap(quince("")).map((tanda) => tanda.length).join(","), "5,5,5", "sin responsable");
+      t.igual(repartirRoadmap(quince("Marta Ruiz")).map((tanda) => tanda.length).join(","), "5,5,5", "con uno corriente");
+
+      // Un responsable de cuatro o cinco lineas hacia la fila mas alta que las
+      // demas, y la quinta se salia de la diapositiva.
+      const largo = "Dirección de Planificación Financiera y Control de Gestión Corporativo del Grupo, con Tesorería";
+      const tandas = repartirRoadmap(quince(largo));
+
+      t.igual(tandas.length > 3, true, "hacen falta mas diapositivas");
+      t.igual(tandas.every((tanda) => tanda.length <= 5), true, "y ninguna lleva mas de cinco");
+      t.igual(tandas.flat().length, 15, "sin perder ninguna fila");
+      t.igual(JSON.stringify(repartirRoadmap([])), "[[]]", "vacio, una tanda");
+    },
+  },
+  {
+    grupo: "Reparto por lo que ocupa",
+    nombre: "las notas cortas llenan la diapositiva: doce en una, y quince en nueve y seis",
+    ejecutar: (t) => {
+      // Iban de seis en seis: quince notas de una linea eran tres diapositivas
+      // con dos tercios en blanco.
+      const cortas = (cuantas) => Array.from({ length: cuantas }, (_, i) => ({
+        capacidad: "Cumplimiento",
+        subcapacidad: `1.${i + 1} Una subcapacidad`,
+        comentario: "Nota breve del taller.",
+      }));
+
+      const cuentas = (cuantas) => repartirComentarios(cortas(cuantas)).map((tanda) => tanda.length).join(",");
+
+      t.igual(cuentas(6), "6");
+      t.igual(cuentas(12), "12", "cuatro filas de tres caben en una");
+      t.igual(cuentas(15), "9,6", "y lo que no cabe se reparte parejo, no doce y tres");
+      t.igual(JSON.stringify(repartirComentarios([])), "[[]]", "sin notas, una tanda vacia que el deck se salta");
+    },
+  },
+  {
+    grupo: "Reparto por lo que ocupa",
+    nombre: "una nota larga va a lo ancho, en su fila, y no se lleva por delante el orden",
+    ejecutar: (t) => {
+      const larga = "Texto largo de la nota del taller. ".repeat(45);
+      const nota = (n, comentario) => ({ capacidad: "Cumplimiento", subcapacidad: `1.${n} Una subcapacidad`, comentario });
+      const mezcla = [nota(1, "Corta."), nota(2, larga), nota(3, "Corta."), nota(4, "Corta."), nota(5, larga), nota(6, larga)];
+
+      const tandas = repartirComentarios(mezcla);
+
+      t.igual(tandas.length > 1, true, "tres notas largas no caben en una diapositiva");
+      t.igual(tandas.flat().map((item) => item.subcapacidad.slice(0, 3)).join(" "), "1.1 1.2 1.3 1.4 1.5 1.6", "todas, en su orden");
+
+      const html = comentarios(mezcla);
+
+      t.igual((html.match(/tarjeta tarjeta-ancha/g) || []).length, 3, "las tres largas, a lo ancho");
+      t.igual(comentarios([nota(1, "Corta.")]).includes("tarjeta-ancha"), false, "una corta, en su columna");
+      t.igual(html.includes(larga), true, "y el texto sale entero");
+    },
+  },
+  {
+    grupo: "El deck",
+    nombre: "quince notas son dos diapositivas de comentarios, con todas dentro",
+    ejecutar: (t) => {
+      const notas = Array.from({ length: 15 }, (_, i) => ({
+        capacidad: "Cumplimiento",
+        subcapacidad: `1.${i + 1} Una subcapacidad`,
+        comentario: `Nota numero ${i + 1} del taller.`,
+      }));
+
+      const html = buildEnhancedPdfReportHtml(datos({ commentItems: notas }));
+      const sinNotas = buildEnhancedPdfReportHtml(datos());
+
+      t.igual(cuentaDeDiapositivas(html) - cuentaDeDiapositivas(sinNotas), 2, "dos diapositivas, no tres");
+      t.igual(notas.every((nota) => html.includes(nota.comentario)), true, "ninguna nota se queda fuera");
+      t.igual(html.includes('Comentarios y hallazgos <span style="font-weight:300;">· 2 de 2</span>'), true, "y rotuladas");
+    },
+  },
+  {
+    grupo: "El deck",
+    nombre: "el ranking dice con palabras cual es el dominio del informe",
+    ejecutar: (t) => {
+      // Era un punto suelto detras del nombre («Fiscal ·») y una nota al pie
+      // que lo explicaba: proyectado, el punto parecia una errata.
+      const fila = (id, label) => ({
+        id, label, scoreMedio: 3, targetMedio: 4, gap: 1, prioridad: "Media", evaluadas: 3, total: 3,
+        procesos: 3, tecnologia: 3, organizacion: 3, objetivoProcesos: 4, objetivoTecnologia: 4, objetivoOrganizacion: 4,
+      });
+
+      const html = buildEnhancedPdfReportHtml(
+        datos({
+          global: {
+            filas: [fila("fpa", "FP&A"), fila("fiscal", "Fiscal"), fila("tesoreria", "Tesorería")],
+            urgentes: [],
+            dominios: 3,
+            dominiosTotales: 3,
+            subcapacidades: 9,
+            evaluadas: 9,
+            scoreGlobal: 3,
+            gapMedio: 1,
+            objetivoMedio: 4,
+            highCount: 0,
+            titulares: { mayorBrecha: null, palancaMasDebil: null, pendientes: 0 },
+            radarImages: { procesos: "", tecnologia: "", organizacion: "" },
+          },
+        }),
+      );
+
+      t.igual((html.match(/class="marca-de-este-informe"/g) || []).length, 1, "una sola fila marcada");
+      t.igual(html.includes('Fiscal <span class="marca-de-este-informe">Este informe</span>'), true, "la del dominio del informe");
+      t.igual(html.includes("Fiscal ·<"), false, "sin el punto suelto");
+    },
+  },
+  {
+    grupo: "El deck",
+    nombre: "cada brecha dice su score y su objetivo con cifras, no solo con la barra",
+    ejecutar: (t) => {
+      const html = buildEnhancedPdfReportHtml(datos());
+
+      t.igual(html.includes("<strong>3,00</strong> frente a un objetivo de 4,00"), true, "score frente a objetivo");
+      t.igual(/frente a un objetivo de 4,00\s*· Gap 1,00 · Media · Oleada 2/.test(html), true, "y detras, el gap, la prioridad y la oleada");
     },
   },
 
@@ -321,8 +515,8 @@ export const casos = [
     grupo: "El deck",
     nombre: "un roadmap largo se reparte, no se trunca",
     ejecutar: (t) => {
-      // POR_DIAPOSITIVA.roadmap es 6: quince filas tienen que ocupar tres
-      // diapositivas, no una recortada a seis.
+      // POR_DIAPOSITIVA.roadmap es 5: quince filas tienen que ocupar tres
+      // diapositivas, no una recortada a cinco.
       const muchas = Array.from({ length: 15 }, (_, i) => entrada(i + 1));
 
       const html = buildEnhancedPdfReportHtml(

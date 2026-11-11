@@ -123,6 +123,24 @@ export function capacidadesDePreparacion(subcapacidades) {
 
 
 /**
+ * El titulo de la preparacion y del acta, en dos lineas: que documento es y,
+ * debajo y mas pequeno, de que dominio.
+ *
+ * Iba todo seguido («Preparación del taller de Planificación y análisis
+ * financiero / FP&A»), y con el logo del cliente al lado, que le quita ancho,
+ * pasaba de dos lineas a tres. Esos milimetros echaban el indice de la
+ * preparacion a la segunda pagina en cinco de los nueve dominios, con un
+ * hueco en blanco al pie de la primera. Asi el titulo mide lo mismo con logo
+ * y sin el, y sea cual sea el dominio.
+ */
+export function tituloDelDocumentoHtml(documento, datos) {
+  const dominio = datos.domainTitle || datos.domainLabel || "";
+
+  return `<h1>${escapeHtml(documento)}${dominio ? ` <span class="titulo-dominio">${escapeHtml(dominio)}</span>` : ""}</h1>`;
+}
+
+
+/**
  * El logo del cliente junto al titulo, en la preparacion y en el acta. Se
  * comprueba otra vez aqui por lo mismo que en la portada del informe: acaba
  * en el src de una imagen de algo que se envia.
@@ -161,7 +179,7 @@ export function documentoDePreparacion(datos) {
         </div>
 
         ${logoDelDocumento(datos)}
-        <h1>Preparación del taller de ${escapeHtml(datos.domainTitle || datos.domainLabel || "")}</h1>
+        ${tituloDelDocumentoHtml("Preparación del taller", datos)}
         <p class="bajada">Diagnóstico de madurez de la función financiera · Deloitte Finance Strategy</p>
 
         <div class="huecos">
@@ -375,42 +393,60 @@ export function estilosDelDocumento() {
       font-size: 11pt;
     }
 
+    /* Quince milimetros de alto y no mas: asi acaba donde acaba el titulo, y la
+       bajada de debajo tiene el ancho entero. Con dieciocho la bajada se
+       partia en dos lineas al lado del logo. */
     .logo-cliente {
       float: right;
       max-width: 55mm;
-      max-height: 18mm;
-      margin: 12pt 0 6pt 10mm;
+      max-height: 15mm;
+      margin: 12pt 0 2pt 10mm;
       object-fit: contain;
     }
 
     h1 {
-      margin: 16pt 0 4pt;
+      margin: 13pt 0 3pt;
       font-size: 21pt;
       line-height: 1.15;
     }
 
+    /* El dominio, en su propia linea bajo el titulo. Ver tituloDelDocumentoHtml(). */
+    .titulo-dominio {
+      display: block;
+      margin-top: 1pt;
+      font-size: 14pt;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    /*
+     * La linea del dominio son seis milimetros que antes no estaban en los
+     * dominios de nombre corto. Salen de aqui —la bajada y los huecos, un
+     * punto mas juntos— y del relleno de la escala, para que el indice de la
+     * preparacion siga cabiendo en la primera pagina en los nueve.
+     */
     .bajada {
-      margin-bottom: 12pt;
+      margin-bottom: 8pt;
       color: ${PALETA.tintaSuave};
-      font-size: 11pt;
+      font-size: 10pt;
     }
 
     .huecos {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6pt 18pt;
-      margin-bottom: 14pt;
+      gap: 5pt 18pt;
+      margin-bottom: 11pt;
       font-size: 9.5pt;
     }
 
     .huecos div {
-      padding: 10pt 0 2pt;
+      padding: 8pt 0 2pt;
       border-bottom: 0.75pt solid ${PALETA.lineaFuerte};
       color: ${PALETA.tintaSuave};
     }
 
     .aviso {
-      margin: 10pt 0 12pt;
+      margin: 8pt 0 10pt;
       padding: 8pt 11pt;
       border-left: 3pt solid ${PALETA.marca};
       background: #F1F7E7;
@@ -420,7 +456,7 @@ export function estilosDelDocumento() {
       display: flex;
       align-items: center;
       gap: 8pt;
-      margin: 14pt 0 6pt;
+      margin: 12pt 0 6pt;
       padding: 6pt 10pt;
       border-radius: 4pt;
       background: #EEF6E2;
@@ -537,7 +573,7 @@ function estilos() {
     }
 
     .rubrica td {
-      padding: 4pt 6pt;
+      padding: 3.4pt 6pt;
       border-bottom: 0.5pt solid ${PALETA.linea};
       vertical-align: middle;
     }

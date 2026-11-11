@@ -187,6 +187,30 @@ export const casos = [
       t.igual(sinValor.includes(">-</text>"), true, "guion y no cero");
     },
   },
+  {
+    grupo: "Anillo por palanca",
+    nombre: "la marca del objetivo no entra en el hueco de la cifra",
+    ejecutar: (t) => {
+      // Con el objetivo en 4 la marca cae a la izquierda, a la altura de la
+      // cifra. Empezaba dentro del anillo y se le pegaba como un guion: el
+      // «2,53» de Tecnologia se leia «-2,53».
+      const anillo = svgDonut({ valor: 2.53, objetivo: 4, maximo: 5 });
+      const distancia = (indice, extremo) =>
+        Math.hypot(
+          Number(atributo(anillo, "line", `x${extremo}`, indice)) - 50,
+          Number(atributo(anillo, "line", `y${extremo}`, indice)) - 50,
+        );
+
+      // Radio 38 y grosor 11: el borde interior del anillo esta a 32,5.
+      t.igual(cuantos(anillo, "line"), 2, "el reborde claro y la marca");
+      t.igual(distancia(1, 1) >= 32.49, true, "empieza en el borde interior, no mas adentro");
+      t.igual(distancia(1, 2) > 43.5, true, "y asoma por fuera");
+      t.igual(atributo(anillo, "line", "x1", 0), atributo(anillo, "line", "x1", 1), "el reborde va debajo, en el mismo sitio");
+      t.igual(Number(atributo(anillo, "line", "stroke-width", 0)) > Number(atributo(anillo, "line", "stroke-width", 1)), true, "y es mas ancho");
+
+      t.igual(cuantos(svgDonut({ valor: 2.53, objetivo: null, maximo: 5 }), "line"), 0, "sin objetivo no hay marca");
+    },
+  },
 
   // ------------------------------------------------------------------- barras
   {
