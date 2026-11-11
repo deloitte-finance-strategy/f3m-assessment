@@ -15,37 +15,41 @@ import {
   rankingDeBrechas,
   rankingDePalancas,
   resumenGlobal,
-} from "../core/calculo.js?v=36";
-import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=36";
-import { filasDeResumen } from "../core/exportacion.js?v=36";
-import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=36";
-import { MINIMO_DE_EJES_DE_UN_RADAR, diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=36";
-import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=36";
-import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=36";
-import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=36";
-import { documentoDePreparacion } from "../informe/preparacion.js?v=36";
-import { showNotice } from "./avisos.js?v=36";
-import { getActiveDomainConfig } from "./dominios.js?v=36";
-import { DOMAINS, dominiosQueAplican, els, state } from "./estado.js?v=36";
-import { getVisibleItems } from "./filtros.js?v=36";
-import { getScenarioShortLabel } from "./firebase.js?v=36";
+} from "../core/calculo.js?v=37";
+import { brechasDeCasos, ordenarPorBrechas } from "../core/biblioteca.js?v=37";
+import { filasDeResumen } from "../core/exportacion.js?v=37";
+import { medirDiapositivas, resumenDeDesbordes } from "../informe/desbordes.js?v=37";
+import { MINIMO_DE_EJES_DE_UN_RADAR, diaLegible, fechaLegible, fechaParaArchivo } from "../core/presentacion.js?v=37";
+import { documentoDeActa, textoDelCorreo } from "../informe/acta.js?v=37";
+import { buildEnhancedPdfReportHtml } from "../informe/pdf.js?v=37";
+import { BRECHAS_EN_EL_RESUMEN, documentoDelResumen } from "../informe/resumen.js?v=37";
+import { documentoDePreparacion } from "../informe/preparacion.js?v=37";
+import { showNotice } from "./avisos.js?v=37";
+import { getActiveDomainConfig } from "./dominios.js?v=37";
+import { DOMAINS, dominiosQueAplican, els, state } from "./estado.js?v=37";
+import { getVisibleItems } from "./filtros.js?v=37";
 import {
   capturarRadarDelResumen,
   getOverviewRadarImagesForPdf,
   getRadarImagesForPdf,
   redimensionarRadares,
   renderCapabilityRadar,
-} from "./graficos.js?v=36";
-import { agregarPorCapacidad, agregarPorDominio, calculate } from "./metricas.js?v=36";
+} from "./graficos.js?v=37";
+import {
+  agregarPorCapacidad,
+  agregarPorDominio,
+  calculate,
+  objetivosDistintos,
+} from "./metricas.js?v=37";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "./subcapacidad.js?v=36";
-import { renderDashboard } from "./vistas/dashboard.js?v=36";
-import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=36";
-import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=36";
+} from "./subcapacidad.js?v=37";
+import { renderDashboard } from "./vistas/dashboard.js?v=37";
+import { getOrdenDeCasosDeIa } from "./vistas/ia.js?v=37";
+import { getDominiosDelOverview, renderOverview } from "./vistas/overview.js?v=37";
 
 
 /**
@@ -582,8 +586,6 @@ function datosComunes() {
     logo: state.logo,
     generatedAt: fechaLegible(ahora),
     fechaDeArchivo: fechaParaArchivo(ahora),
-    // Nunca el identificador completo: este informe se envía al cliente.
-    scenarioLabel: getScenarioShortLabel(),
     global: construirBloqueGlobalParaInforme(),
   };
 }
@@ -599,7 +601,6 @@ function datosComunes() {
  */
 function datosDeDominio(domainId, items, radarImages) {
   const config = DOMAINS[domainId] || getActiveDomainConfig();
-  const meta = (domainId === state.activeDomainId ? state.meta : state.domains[domainId]?.meta) || {};
   const total = state.domains[domainId]?.items?.length ?? items.length;
 
   const metrics = items.map((item) => ({ item, metrics: calculate(item, domainId) }));
@@ -615,8 +616,7 @@ function datosDeDominio(domainId, items, radarImages) {
     domainId,
     domainLabel: config.label,
     domainTitle: config.title,
-    sourceFile: meta.sourceFile || "-",
-    targetMaturity: meta.targetMaturity || "-",
+    objetivo: objetivosDistintos(items, domainId),
     visibleItems: items,
     metrics,
     scored,

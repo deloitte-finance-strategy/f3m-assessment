@@ -8,7 +8,7 @@
  * escapado.
  */
 
-import { average, calcularMetricas, resumenGlobal } from "../core/calculo.js?v=36";
+import { average, calcularMetricas, resumenGlobal } from "../core/calculo.js?v=37";
 import {
   BRECHAS_EN_EL_CORREO,
   BRECHAS_EN_LA_PORTADA,
@@ -16,7 +16,7 @@ import {
   fraseDelActa,
   resumenDelActa,
   textoDelCorreo,
-} from "../informe/acta.js?v=36";
+} from "../informe/acta.js?v=37";
 
 
 const OBJETIVO_4 = { procesos: 4, tecnologia: 4, organizacion: 4 };
@@ -202,6 +202,21 @@ export const casos = [
       t.igual(titulo.startsWith("Acta del taller F3M - "), true);
       t.igual(titulo.includes("/"), false, "sin la barra que Windows no admite");
       t.igual(titulo.endsWith("2026-10-08"), true);
+    },
+  },
+  {
+    grupo: "Acta del taller",
+    nombre: "el título va en dos líneas, como el de la preparación",
+    ejecutar(t) {
+      // Son el antes y el después de la misma sesión: el mismo encabezado.
+      const html = documentoDeActa({ domainLabel: "FP&A", domainTitle: "Planificación y análisis financiero / FP&A", subcapacidades: DOMINIO });
+
+      t.igual(
+        html.includes('<h1>Acta del taller <span class="titulo-dominio">Planificación y análisis financiero / FP&amp;A</span></h1>'),
+        true,
+        "el documento, y debajo su dominio",
+      );
+      t.igual(/<h1>[^<]*·/.test(html), false, "sin el punto que los unía antes");
     },
   },
   {

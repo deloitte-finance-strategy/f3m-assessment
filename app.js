@@ -13,14 +13,14 @@ import {
   resumenGlobal,
   toScore,
   unique,
-} from "./core/calculo.js?v=36";
+} from "./core/calculo.js?v=37";
 
 // Objetivos de madurez por capacidad y palanca: la mitad de todo gap.
 import {
   createDefaultTargets,
   normalizeDomainTargets,
   serializeTargetsForFirebase,
-} from "./core/objetivos.js?v=36";
+} from "./core/objetivos.js?v=37";
 
 // Reconocer el trabajo guardado. Si esto falla, una puntuacion no aparece y no
 // se rompe nada visiblemente, que es la peor forma de fallar.
@@ -29,14 +29,15 @@ import {
   getSavedField,
   getSavedScore,
   getScenarioItemsFromPayload,
-} from "./core/coincidencias.js?v=36";
+} from "./core/coincidencias.js?v=37";
 
 // El CSV que se abre en Excel y se le envia al cliente.
 import {
+  filasDelProyecto,
   filasDeResumen,
   filasDeRoadmap,
   toCsv,
-} from "./core/exportacion.js?v=36";
+} from "./core/exportacion.js?v=37";
 
 // El contrato de un escenario: que campos admite Firebase y con que limites.
 // Espejo de database.rules.json, para no enviar nunca algo que sera rechazado.
@@ -52,7 +53,7 @@ import {
   normalizarItemCargado,
   recortarAlLimite,
   revisarEscenario,
-} from "./core/escenario.js?v=36";
+} from "./core/escenario.js?v=37";
 
 // Escapado, formato y colores de marca. Los comparten la aplicacion y el
 // informe PDF, que desde que vive aparte ya no puede leerlos de aqui.
@@ -62,15 +63,16 @@ import {
   escapeHtml,
   fechaParaArchivo,
   formatNumber,
+  losDominios,
   priorityColor,
-} from "./core/presentacion.js?v=36";
+} from "./core/presentacion.js?v=37";
 
 // El informe PDF: entra el objeto de datos, sale el documento imprimible.
-import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=36";
+import { buildEnhancedPdfReportHtml } from "./informe/pdf.js?v=37";
 
 // La red que impide que una diapositiva recorte contenido en silencio. Se
 // dispara con ?comprobar=desbordes; ver informe/desbordes.js.
-import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=36";
+import { medirDiapositivas, resumenDeDesbordes } from "./informe/desbordes.js?v=37";
 
 // El estado compartido y las constantes que lo describen.
 import {
@@ -92,7 +94,7 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "./app/estado.js?v=36";
+} from "./app/estado.js?v=37";
 
 // El banner de avisos y el dialogo de confirmacion.
 import {
@@ -101,14 +103,17 @@ import {
   ocultarAviso,
   showNotice,
   updateModalOpenState,
-} from "./app/avisos.js?v=36";
+  vigilarErroresInesperados,
+} from "./app/avisos.js?v=37";
 
 // El almacenamiento del navegador, que puede fallar y no es motivo para caerse.
 import {
   borrarDeAlmacenamiento,
   escribirAlmacenamiento,
+  escribirEnLaPestana,
   leerAlmacenamiento,
-} from "./app/almacenamiento.js?v=36";
+  leerDeLaPestana,
+} from "./app/almacenamiento.js?v=37";
 
 // Las dos preferencias de vista: el tema y la densidad.
 import {
@@ -122,7 +127,7 @@ import {
   seguirAlSistemaSiNoHayEleccion,
   tamanoDeLetraDeGrafico,
   temaActual,
-} from "./app/preferencias.js?v=36";
+} from "./app/preferencias.js?v=37";
 
 // Los seis radares de Chart.js: tres por capacidad y tres por dominio.
 import {
@@ -134,7 +139,7 @@ import {
   redimensionarRadares,
   renderCapabilityRadar,
   renderOverviewRadar,
-} from "./app/graficos.js?v=36";
+} from "./app/graficos.js?v=37";
 
 // El motor atado al estado: objetivos por dominio y metricas con cache.
 import {
@@ -142,11 +147,11 @@ import {
   agregarPorDominio,
   calculate,
   getCapabilityTargets,
-} from "./app/metricas.js?v=36";
+} from "./app/metricas.js?v=37";
 
 // El cortacircuitos: quien necesite repintar lo pide por aqui, no al
 // orquestador de vistas, para no cerrar un ciclo con el.
-import { configurarRepintado } from "./app/repintado.js?v=36";
+import { configurarRepintado } from "./app/repintado.js?v=37";
 
 // La conexion con Firebase.
 import {
@@ -156,7 +161,7 @@ import {
   enEscenarioCompartido,
   getScenarioShareUrl,
   getScenarioShortLabel,
-} from "./app/firebase.js?v=36";
+} from "./app/firebase.js?v=37";
 
 // El chip de guardado, que es la unica senal permanente de si el trabajo esta
 // a salvo. Va aparte de la persistencia para que la identidad pueda marcarlo
@@ -167,7 +172,7 @@ import {
   marcarEscrituraCorrecta,
   marcarFalloDeSincronia,
   updateSaveStatus,
-} from "./app/indicador.js?v=36";
+} from "./app/indicador.js?v=37";
 
 // Quien edita: la sesion anonima y el nombre que se elige.
 import {
@@ -177,7 +182,7 @@ import {
   inicializarIdentidad,
   marcaDeAutoria,
   pedirNombreEditor,
-} from "./app/identidad.js?v=36";
+} from "./app/identidad.js?v=37";
 
 // Un escenario como dato: leerlo, volcarlo y volver a armarlo.
 import {
@@ -186,20 +191,22 @@ import {
   buildScenarioPayload,
   getStoredScenario,
   sanitizeScenarioForFirebase,
-} from "./app/escenario.js?v=36";
+} from "./app/escenario.js?v=37";
 
 // Los nueve dominios: catalogo, carga y conmutador.
 import {
   actualizarAvanceDeDominios,
   cargarCatalogoDeCasosDeIa,
   cargarCatalogoDeDominios,
+  dominioDeEstaPestana,
   getActiveDomainConfig,
   loadCoreDomains,
   marcarDominiosNoDisponibles,
   renderDomainSwitcher,
   setActiveDomain,
   switchDomain,
-} from "./app/dominios.js?v=36";
+  volverAlDominioDeEstaPestana,
+} from "./app/dominios.js?v=37";
 
 // Los tres filtros y el ambito de datos que sale de ellos.
 import {
@@ -213,7 +220,7 @@ import {
   populateCapacityFilter,
   removeActiveFilter,
   updateActiveFiltersUi,
-} from "./app/filtros.js?v=36";
+} from "./app/filtros.js?v=37";
 
 // Leer los campos de una subcapacidad, que llegan del Excel en dos formas.
 import {
@@ -222,53 +229,55 @@ import {
   getItemObjective,
   getItemQuestions,
   toList,
-} from "./app/subcapacidad.js?v=36";
+} from "./app/subcapacidad.js?v=37";
 
 // Guardar y recibir: el escenario compartido, las escrituras granulares por
 // ruta y la suscripcion remota.
 import {
+  escucharOtrasPestanas,
   hayEscriturasEnVuelo,
   initializeSharedScenario,
   persistCliente,
   persistItemChange,
   persistScenario,
   persistTargetsDelDominioActivo,
-} from "./app/persistencia.js?v=36";
+} from "./app/persistencia.js?v=37";
 
 // Los fragmentos de HTML que comparten varias vistas.
-import { buildFilteredEmptyState, pintarEsqueletos, priorityBadge, quitarEsqueletos } from "./app/celdas.js?v=36";
+import { buildFilteredEmptyState, pintarEsqueletos, priorityBadge, quitarEsqueletos } from "./app/celdas.js?v=37";
 
 // El Heatmap, primera vista que sale de aqui.
-import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=36";
+import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatmap.js?v=37";
 
 // El Overview: los nueve dominios a la vez, sin aplicar los filtros.
-import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=36";
+import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=37";
 
 // El Dashboard: el dominio abierto, con sus KPIs y su tabla resumen.
-import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=36";
+import { renderDashboard } from "./app/vistas/dashboard.js?v=37";
 
 // El Assessment: puntuar cada subcapacidad en las tres palancas.
 import {
+  deshacerUltimaPuntuacion,
   irASiguientePendiente,
   llevarALasTarjetas,
   pintarSiguientePendiente,
   renderAssessments,
   renderCapabilityTargets,
   setupSiguientePendiente,
-} from "./app/vistas/assessment.js?v=36";
+} from "./app/vistas/assessment.js?v=37";
 
 // El Roadmap: las iniciativas priorizadas y sus campos editables.
-import { hayGuardadosPendientes } from "./app/edicion.js?v=36";
-import { renderRoadmap, setupCajaDelRoadmap } from "./app/vistas/roadmap.js?v=36";
+import { hayGuardadosPendientes } from "./app/edicion.js?v=37";
+import { renderRoadmap, setupCajaDelRoadmap } from "./app/vistas/roadmap.js?v=37";
 
 // Los dos modales: criterios de puntuacion y ficha de caso de IA.
-import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=36";
+import { setupAiInitiativeModal, setupScoringCriteriaModal } from "./app/modales.js?v=37";
 
 // La pestana IA: el catalogo de casos y la biblioteca de documentos.
-import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=36";
+import { renderIa, setupVistaIa } from "./app/vistas/ia.js?v=37";
 
 // La biblioteca de IA y el visor que abre «Más información».
-import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=36";
+import { cargarBiblioteca, setupVisorDeDocumentos } from "./app/biblioteca.js?v=37";
 
 // Lo que la aplicacion le pasa al informe: datos, radares y tema claro.
 import {
@@ -278,7 +287,7 @@ import {
   exportarActa,
   exportarPreparacion,
   exportarResumen,
-} from "./app/informe.js?v=36";
+} from "./app/informe.js?v=37";
 
 // Si el trabajo en modo local tiene una copia fuera del navegador.
 import {
@@ -286,28 +295,42 @@ import {
   iniciarAvisoDeCopia,
   olvidarCambiosSinCopia,
   pintarAvisoDeCopia,
-} from "./app/copias.js?v=36";
+} from "./app/copias.js?v=37";
 
 // Ctrl+K: ir a cualquier subcapacidad de los nueve dominios.
-import { setupBuscador } from "./app/buscador.js?v=36";
+import { setupBuscador } from "./app/buscador.js?v=37";
 
 // Una subcapacidad a pantalla completa, para proyectarla en el taller.
-import { refrescarModoTaller, setupModoTaller } from "./app/taller.js?v=36";
-import { pintarLogoEnElMenu, setupLogoDelCliente } from "./app/logo.js?v=36";
-import { pedirDominiosDelCliente, pintarDominiosDelCliente } from "./app/dominios-del-cliente.js?v=36";
+import { refrescarModoTaller, setupModoTaller } from "./app/taller.js?v=37";
+import { pintarLogoEnElMenu, setupLogoDelCliente } from "./app/logo.js?v=37";
+import { pedirDominiosDelCliente, pintarDominiosDelCliente } from "./app/dominios-del-cliente.js?v=37";
 
 // Que se abra sin red: el service worker y el aviso de que se ha ido.
-import { setupSinConexion } from "./app/sin-conexion.js?v=36";
+import { setupSinConexion } from "./app/sin-conexion.js?v=37";
+
+// Ctrl+P: la pantalla en papel, limpia y en claro.
+import { setupImpresion } from "./app/impresion.js?v=37";
 
 // Fundidos, cifras que cuentan y paneles que se despliegan.
-import { activarDesplieguesSuaves, fundir } from "./app/movimiento.js?v=36";
+import { activarDesplieguesSuaves, fundir } from "./app/movimiento.js?v=37";
 
 
 document.addEventListener("DOMContentLoaded", init);
 
 
 async function init() {
+  // La senal de que la aplicacion ha arrancado. arranque.js la busca al
+  // terminar de cargar la pagina, y si no esta, lo dice en vez de dejar
+  // «Cargando los datos…» para siempre.
+  document.documentElement.dataset.arranque = "ok";
+
+  // Antes que nada mas: en que dominio y a que altura estaba esta pestana. El
+  // arranque pone su dominio por defecto, y eso ya lo pisaria.
+  const dominioDeAntes = dominioDeEstaPestana();
+  const posicionDeAntes = posicionAlRecargar();
+
   cacheElements();
+  vigilarErroresInesperados();
   bindGlobalEvents();
   // El tema y la densidad ya vienen puestos de tema.js, que corre antes del
   // primer pintado. Aqui solo se ponen al dia los dos conmutadores, se engancha
@@ -423,11 +446,16 @@ async function init() {
 
     /* La copia local se carga siempre, también en escenarios compartidos */
     applyStoredScenario();
+    escucharOtrasPestanas();
 
     // Antes de sincronizar: así el primer cambio ya sale atribuido.
     await inicializarIdentidad();
 
     await initializeSharedScenario();
+
+    // Recargar deja en el dominio en el que se estaba, no en el del ultimo
+    // cambio guardado. Va despues del escenario, que trae el suyo.
+    volverAlDominioDeEstaPestana(dominioDeAntes);
 
     iniciarAvisoDeCopia({ local: !enEscenarioCompartido });
 
@@ -474,6 +502,61 @@ async function init() {
   } finally {
     setInitialLoading(false); // NUEVO: oculta el estado de carga al terminar, incluso si hay error
   }
+
+  // Con todo pintado y el estado de carga ya quitado, que tambien ocupa.
+  volverALaPosicion(posicionDeAntes);
+}
+
+
+/**
+ * Recargar deja a la misma altura, ademas de en la misma pestana y dominio.
+ *
+ * El navegador ya intenta devolver la posicion al recargar, pero lo hace antes
+ * de que esta pagina tenga contenido —los datos llegan despues—, asi que se
+ * quedaba arriba: F5 en la tarjeta 13 del Assessment volvia a la primera.
+ *
+ * Solo al recargar o al volver con «Atrás». Entrar de nuevo por la direccion
+ * empieza arriba, que es lo que se espera de abrir algo.
+ */
+const CLAVE_DE_LA_POSICION = "f3m-posicion";
+
+
+function apuntarLaPosicion() {
+  escribirEnLaPestana(CLAVE_DE_LA_POSICION, JSON.stringify({
+    vista: vistaActiva,
+    dominio: state.activeDomainId,
+    altura: Math.round(window.scrollY),
+  }));
+}
+
+
+function posicionAlRecargar() {
+  const tipo = window.performance?.getEntriesByType?.("navigation")?.[0]?.type;
+
+  if (tipo !== "reload" && tipo !== "back_forward") {
+    return null;
+  }
+
+  try {
+    return JSON.parse(leerDeLaPestana(CLAVE_DE_LA_POSICION) || "null");
+  } catch (error) {
+    return null;
+  }
+}
+
+
+function volverALaPosicion(anterior) {
+  // Otra vista u otro dominio son otra pagina: su altura no significa nada aqui.
+  if (
+    !anterior
+    || anterior.vista !== vistaActiva
+    || anterior.dominio !== state.activeDomainId
+    || !(anterior.altura > 0)
+  ) {
+    return;
+  }
+
+  window.scrollTo({ top: anterior.altura, behavior: "instant" });
 }
 
 
@@ -526,7 +609,6 @@ function cacheElements() {
     "aiModalCases",
     "aiModalCasesCount",
     "aiModalAdvanced",
-    "aiModalSource",
     "dialogModal",
     "dialogIcon",
     "dialogEyebrow",
@@ -550,6 +632,12 @@ function cacheElements() {
     "importJsonButton",
     "exportJsonButton",
     "exportCsvButton",
+    "csvMenu",
+    "csvDominioButton",
+    "csvDominioLabel",
+    "csvDominioNota",
+    "csvProyectoButton",
+    "csvProyectoNota",
     "exportPdfButton", // NUEVO: botón de exportación PDF
     "informeMenu",
     "informeDominioButton",
@@ -691,7 +779,8 @@ function bindGlobalEvents() {
   enganchar("importJsonButton", "click", () => els.scenarioFileInput?.click());
   enganchar("scenarioFileInput", "change", importScenario);
   enganchar("exportJsonButton", "click", exportScenarioJson);
-  enganchar("exportCsvButton", "click", exportCsv);
+  enganchar("csvDominioButton", "click", exportCsv);
+  enganchar("csvProyectoButton", "click", exportarCsvDelProyecto);
   enganchar("informeDominioButton", "click", () => exportPdfReport());
   enganchar("informeProyectoButton", "click", () => exportPdfReport({ proyecto: true }));
   enganchar("informeResumenButton", "click", () => exportarResumen());
@@ -711,9 +800,16 @@ function bindGlobalEvents() {
   enganchar("presentationModeButton", "click", alternarModoPresentacion);
   enganchar("themeButton", "click", alternarTema);
   window.addEventListener("beforeunload", avisarSiQuedaAlgoSinGuardar);
+  // pagehide y no beforeunload: es el que tambien llega en un movil y al
+  // guardar la pagina para «Atrás».
+  window.addEventListener("pagehide", apuntarLaPosicion);
+  setupImpresion();
+  document.addEventListener("keydown", guardarCopiaConElTeclado);
+  document.addEventListener("keydown", deshacerConElTeclado);
   setupMenuDeCabecera(els.presentacionMenuButton, els.presentacionMenu);
   setupMenuDeCabecera(els.scenarioMenuButton, els.scenarioMenu, pintarAvisoDeCopia);
   setupMenuDeCabecera(els.exportPdfButton, els.informeMenu, pintarMenuDeInforme);
+  setupMenuDeCabecera(els.exportCsvButton, els.csvMenu, pintarMenuDeCsv);
   setupVistas();
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
@@ -800,12 +896,44 @@ function vistaDesdeLaUrl() {
 }
 
 
+/**
+ * Donde estaba cada pestana, para volver ahi.
+ *
+ * Cambiar de pestana llevaba siempre arriba del todo: en la tarjeta 13 del
+ * Assessment, mirar algo en el Roadmap y volver dejaba en la primera, y habia
+ * que buscar donde se estaba delante de la sala. Se recuerda mientras no se
+ * cambie de dominio, porque con otro dominio la pagina es otra.
+ */
+const posicionDeCadaVista = new Map();
+
+
+
+
+let dominioDeLasPosiciones = null;
+
+
+
+
+function posicionesDelDominio() {
+  if (dominioDeLasPosiciones !== state.activeDomainId) {
+    posicionDeCadaVista.clear();
+    dominioDeLasPosiciones = state.activeDomainId;
+  }
+
+  return posicionDeCadaVista;
+}
+
+
 function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
   if (!VISTAS.includes(id)) {
     return;
   }
 
   const esOtraVista = id !== vistaActiva;
+
+  if (esOtraVista) {
+    posicionesDelDominio().set(vistaActiva, window.scrollY);
+  }
 
   vistaActiva = id;
 
@@ -828,9 +956,13 @@ function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
     enlace.setAttribute("aria-current", esActiva ? "page" : "false");
   });
 
-  if (actualizarUrl) {
-    // replaceState y no el hash directo: cambiar el hash provocaria un salto.
-    window.history.replaceState(null, "", `#${id}`);
+  // pushState y no el hash directo, que provocaria un salto. Y no
+  // replaceState, que es lo que habia: «Atrás» —o el boton lateral del raton,
+  // que se pulsa sin querer— salia de la herramienta delante de todos, en vez
+  // de volver a la pestana anterior. La vuelta la recoge el hashchange de
+  // setupVistas().
+  if (actualizarUrl && window.location.hash !== `#${id}`) {
+    window.history.pushState(null, "", `#${id}`);
   }
 
   // Al cambiar de pestana, la vista nueva entra con un fundido y sus radares
@@ -843,8 +975,13 @@ function mostrarVista(id, { actualizarUrl = true, desplazar = true } = {}) {
     renderAll();
   }
 
+  // Volver a pulsar la pestana en la que se esta sigue llevando arriba. De un
+  // salto y no con el desplazamiento suave de la pagina: la vista entra con
+  // su fundido, y recorrer mil pixeles de una vista recien abierta mareaba.
   if (desplazar) {
-    window.scrollTo({ top: 0, behavior: "auto" });
+    const posicion = esOtraVista ? posicionesDelDominio().get(id) : undefined;
+
+    window.scrollTo({ top: posicion ?? 0, behavior: "instant" });
   }
 }
 
@@ -858,6 +995,14 @@ function setInitialLoading(isLoading) {
 
   if (!els.initialLoadingState) {
     return;
+  }
+
+  // Es lo que ve la sala mientras arranca. Hablaba de «escenario compartido» y
+  // de Firebase también en local, que es casi siempre.
+  const nota = els.initialLoadingState.querySelector("[data-carga-compartida]");
+
+  if (nota) {
+    nota.hidden = !enEscenarioCompartido;
   }
 
   els.initialLoadingState.hidden = !isLoading;
@@ -880,7 +1025,20 @@ function setupDomainSwitcher() {
 
     const domainId = button.dataset.domainId;
 
-    if (!domainId || domainId === state.activeDomainId) {
+    if (!domainId) {
+      return;
+    }
+
+    // El Overview y la pestana IA no dependen del dominio, a proposito, asi que
+    // pulsar uno desde ellas no cambiaba nada de lo que se ve y parecia un
+    // boton roto delante del cliente. Desde ahi se abre su Dashboard, como al
+    // pulsar su fila o su nombre en el radar.
+    if (vistaActiva === "overview" || vistaActiva === "ia") {
+      await abrirDominioEnSuDashboard(domainId);
+      return;
+    }
+
+    if (domainId === state.activeDomainId) {
       return;
     }
 
@@ -1165,6 +1323,59 @@ function setupMenuDeCabecera(boton, panel, alAbrir) {
       boton.focus();
     }
   });
+
+  // Con el teclado, las flechas recorren las opciones, como en cualquier menu:
+  // antes solo valia el tabulador, y «Sesión» tiene once. Flecha abajo sobre
+  // el boton abre el menu y entra en el; Inicio y Fin van a los extremos.
+  const opciones = () => [...panel.querySelectorAll("button:not([disabled]), summary, a[href]")]
+    // Solo lo que se ve. Lo oculto no tiene caja, pero lo de dentro de un
+    // desplegable cerrado si la tiene para el navegador —solo no la pinta—,
+    // asi que eso se pregunta aparte: de «Para el equipo» cerrado cuenta su
+    // titulo y no sus tres botones.
+    .filter((opcion) => opcion.offsetParent !== null)
+    .filter((opcion) => opcion.tagName === "SUMMARY" || !opcion.closest("details:not([open])"));
+
+  menu?.addEventListener("keydown", (event) => {
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+      return;
+    }
+
+    if (panel.hidden) {
+      // Cerrado, solo la flecha abajo hace algo, y solo desde su boton.
+      if (event.key !== "ArrowDown" || event.target !== boton) {
+        return;
+      }
+
+      boton.click();
+    }
+
+    const lista = opciones();
+
+    if (!lista.length) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const actual = lista.indexOf(document.activeElement);
+    const destino = {
+      ArrowDown: actual + 1 < lista.length ? actual + 1 : 0,
+      ArrowUp: actual > 0 ? actual - 1 : lista.length - 1,
+      Home: 0,
+      End: lista.length - 1,
+    }[event.key];
+
+    lista[destino].focus();
+  });
+
+  // Y al salir con el tabulador, el menu se cierra: se quedaba abierto tapando
+  // la pagina mientras el foco ya iba por las pestanas. Sin destino conocido
+  // —se ha cambiado de ventana— no se cierra: al volver tiene que seguir ahi.
+  menu?.addEventListener("focusout", (event) => {
+    if (!panel.hidden && event.relatedTarget && !menu.contains(event.relatedTarget)) {
+      abrir(false);
+    }
+  });
 }
 
 
@@ -1278,7 +1489,7 @@ function pintarCliente() {
 
 async function pedirNombreDelCliente() {
   const nombre = await abrirDialogo({
-    eyebrow: "Escenario",
+    eyebrow: "Sesión",
     titulo: "Nombre del cliente",
     parrafos: [
       "Saldrá en la cabecera, en la portada y en el pie de cada diapositiva del informe, y en el nombre del PDF, del CSV y de las copias.",
@@ -1767,6 +1978,61 @@ function partesDelNombre(...partes) {
  * dos clientes en la carpeta de descargas no habia forma de saber cual era cual
  * sin abrirlas. Ahora lleva el cliente y la fecha, como el PDF y el CSV.
  */
+/**
+ * Ctrl+S (Cmd+S en Mac) descarga una copia, lo mismo que «Sesión → Guardar una
+ * copia». Es un gesto automatico, y abria el «Guardar página como» del
+ * navegador, que guarda una pagina que no sirve para nada. Tambien en un
+ * escenario compartido: alli el trabajo ya se guarda solo, pero quien pulsa
+ * Ctrl+S quiere un archivo, y una copia de mas no hace dano.
+ */
+function guardarCopiaConElTeclado(event) {
+  if (!(event.ctrlKey || event.metaKey) || event.altKey || event.key.toLowerCase() !== "s") {
+    return;
+  }
+
+  event.preventDefault();
+
+  if (event.repeat) {
+    return;
+  }
+
+  exportScenarioJson();
+  showNotice("Descargando una copia del trabajo, como con «Sesión → Guardar una copia».", "info");
+}
+
+
+/**
+ * Ctrl+Z deshace la ultima puntuacion.
+ *
+ * En un campo de texto la tecla es del campo: ahi deshace lo escrito, como en
+ * cualquier sitio. Y con un dialogo abierto encima —una confirmacion, los
+ * criterios, el buscador— no se toca una nota que queda tapada. El modo taller
+ * no cuenta como dialogo: ahi es donde mas se puntua.
+ */
+function deshacerConElTeclado(event) {
+  if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey || event.key.toLowerCase() !== "z") {
+    return;
+  }
+
+  const enUnCampo = event.target?.isContentEditable
+    || event.target?.matches?.("textarea, select, input:not([type='radio']):not([type='checkbox'])");
+
+  if (enUnCampo || document.querySelector(".modal-backdrop:not([hidden]):not(.modo-taller), dialog[open]")) {
+    return;
+  }
+
+  // Mantener la tecla pulsada no deshace en cadena: cada pulsacion, una.
+  if (event.repeat) {
+    event.preventDefault();
+    return;
+  }
+
+  if (deshacerUltimaPuntuacion()) {
+    event.preventDefault();
+  }
+}
+
+
 function exportScenarioJson() {
   const nombre = partesDelNombre("Copia F3M", state.cliente, fechaParaArchivo(new Date()));
 
@@ -1780,16 +2046,121 @@ function exportScenarioJson() {
 }
 
 
-function exportCsv() {
-  const roadmapRows = filasDeRoadmap(
-    getScopedItems().map((item) => ({ item, metrics: calculate(item) })),
-  );
+/**
+ * Lo que dice el menu de «Exportar CSV» al abrirlo: de que dominio es el
+ * primer archivo y cuantas subcapacidades lleva cada uno.
+ *
+ * El del dominio lleva lo que dejan los filtros, como todo lo del dominio
+ * abierto, y este archivo se envia: el menu lo dice antes de descargarlo.
+ */
+function pintarMenuDeCsv() {
+  const dominio = getActiveDomainConfig();
+  const alcance = getScopeSummary();
+  const dominios = getDominiosDelOverview();
+  const delProyecto = dominios.reduce((suma, uno) => suma + uno.items.length, 0);
 
+  if (els.csvDominioLabel) {
+    els.csvDominioLabel.textContent = `Datos de ${dominio.label || "este dominio"}`;
+  }
+
+  if (els.csvDominioButton) {
+    els.csvDominioButton.disabled = !alcance.visibles;
+  }
+
+  if (els.csvDominioNota) {
+    els.csvDominioNota.textContent = !alcance.visibles
+      ? "Los filtros no dejan ninguna subcapacidad"
+      : alcance.hayFiltros
+        ? `Solo ${alcance.visibles === 1 ? "la subcapacidad que dejan" : `las ${alcance.visibles} subcapacidades que dejan`} los filtros`
+        : `Sus ${alcance.total} subcapacidades y el resumen por capacidad`;
+  }
+
+  if (els.csvProyectoButton) {
+    els.csvProyectoButton.disabled = !delProyecto;
+  }
+
+  if (els.csvProyectoNota) {
+    els.csvProyectoNota.textContent = dominios.length === 1
+      ? "Solo aplica un dominio: es el mismo archivo, sin filtros"
+      : `${capitalizar(losDominios(dominios.length))} en un solo archivo, sin filtros`;
+  }
+}
+
+
+/** «los seis dominios» → «Los seis dominios», para empezar una frase. */
+function capitalizar(texto) {
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+
+/**
+ * El CSV del dominio abierto: el resumen por capacidad y una fila por
+ * subcapacidad, con los filtros activos.
+ */
+function exportCsv() {
   const activeDomain = getActiveDomainConfig();
+  const dominio = activeDomain.label || activeDomain.id;
+  const items = getScopedItems();
+
+  // Con los filtros sin dejar nada se descargaba un archivo vacio, de cero
+  // bytes, que Excel abre en blanco sin decir por que.
+  if (!items.length) {
+    showNotice("Los filtros no dejan ninguna subcapacidad: no hay nada que exportar. Quita algún filtro y vuelve a pedirlo.", "warning");
+    return;
+  }
 
   downloadFile(
-    nombreDelCsv(activeDomain.label || activeDomain.id, new Date()),
-    toCsv([...buildSummaryRows(), ...roadmapRows]),
+    nombreDelCsv(dominio, new Date()),
+    toCsv([
+      ...filasDeResumen(agregarPorCapacidad(items), dominio),
+      ...filasDeRoadmap(items.map((item) => ({ item, metrics: calculate(item) })), dominio),
+    ]),
+    "text/csv;charset=utf-8",
+  );
+
+  // El archivo se envia, y dentro no dice que le faltan filas.
+  const alcance = getScopeSummary();
+
+  if (alcance.hayFiltros) {
+    showNotice(
+      `El CSV de ${dominio} lleva ${alcance.visibles === 1 ? "la subcapacidad que dejan" : `las ${alcance.visibles} subcapacidades que dejan`} los filtros, de ${alcance.total}.`,
+      "info",
+    );
+  }
+}
+
+
+/**
+ * El CSV de todo el proyecto: todos los dominios que aplican al cliente en un
+ * solo archivo, sin filtros.
+ *
+ * Sin filtros por lo mismo que el informe de todo el proyecto: son del dominio
+ * abierto, y aplicar solo los que existen en los demas daria unos dominios
+ * filtrados y otros enteros sin que se notara. A diferencia del informe,
+ * lleva tambien los dominios sin empezar: en una hoja de calculo no estorban
+ * —se filtran— y lo pendiente tambien es un dato del proyecto.
+ */
+function exportarCsvDelProyecto() {
+  const dominios = getDominiosDelOverview();
+  const resumenes = agregarPorDominio(dominios);
+
+  const filas = filasDelProyecto(
+    dominios.map((dominio, indice) => ({
+      label: dominio.label || dominio.id,
+      resumen: resumenes[indice],
+      capacidades: agregarPorCapacidad(dominio.items, dominio.id),
+      entradas: dominio.items.map((item) => ({ item, metrics: calculate(item, dominio.id) })),
+    })),
+  );
+
+  if (!filas.length) {
+    showNotice("Todavía no hay datos que exportar.", "warning");
+    return;
+  }
+
+  downloadFile(
+    nombreDelCsv("Proyecto", new Date()),
+    toCsv(filas),
     "text/csv;charset=utf-8",
   );
 }
@@ -1828,7 +2199,7 @@ async function resetScenario() {
       eyebrow: "Escenario compartido",
       titulo: "Restaurar la copia de este navegador",
       parrafos: [
-        "Estás trabajando en un escenario compartido, así que esto no borra el escenario: solo la copia local, que se volverá a descargar al recargar la pagina.",
+        "Estás trabajando en un escenario compartido, así que esto no borra el escenario: solo la copia local, que se volverá a descargar al recargar la página.",
         "En la práctica no cambiará nada. Para volver de verdad a los datos base, abre la herramienta sin el parámetro ?scenario= en la dirección.",
       ],
       confirmar: "Restaurar de todos modos",

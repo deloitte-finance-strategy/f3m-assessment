@@ -6,7 +6,7 @@
  * necesita ni DOM ni estado: solo recibe filas y devuelve texto.
  */
 
-import { getMaturityLevel } from "./calculo.js?v=36";
+import { getMaturityLevel } from "./calculo.js?v=37";
 
 
 // Excel con configuración regional española espera punto y coma, no coma: con
@@ -68,6 +68,29 @@ export function csvEscape(value) {
 }
 
 
+/**
+ * Como se llama cada columna en la primera fila del archivo.
+ *
+ * Las claves de las filas son nombres de codigo, sin tildes ni espacios, y
+ * salian tal cual de cabecera: «Tecnologia», «ObjetivoOrganizacion»,
+ * «ScoreMedio», «Owner». Ese archivo se le envia al cliente. Las claves no se
+ * tocan —los radares leen estas mismas filas por ellas—; solo cambia lo que se
+ * escribe arriba. Una columna que no este aqui sale con su clave.
+ */
+const TITULOS = {
+  ObjetivoProcesos: "Objetivo Procesos",
+  Tecnologia: "Tecnología",
+  ObjetivoTecnologia: "Objetivo Tecnología",
+  Organizacion: "Organización",
+  ObjetivoOrganizacion: "Objetivo Organización",
+  ScoreMedio: "Score medio",
+  ObjetivoMedio: "Objetivo medio",
+  TotalDeSubcapacidades: "Subcapacidades",
+  IniciativaSugerida: "Iniciativa sugerida",
+  Owner: "Responsable",
+};
+
+
 /** Las filas como CSV, con la cabecera tomada de la primera. */
 export function toCsv(rows) {
   if (!rows.length) {
@@ -75,7 +98,9 @@ export function toCsv(rows) {
   }
 
   const headers = Object.keys(rows[0]);
-  const csvRows = [headers.join(CSV_SEPARATOR)];
+  const csvRows = [
+    headers.map((header) => csvEscape(TITULOS[header] ?? header)).join(CSV_SEPARATOR),
+  ];
 
   rows.forEach((row) => {
     csvRows.push(headers.map((header) => csvEscape(row[header])).join(CSV_SEPARATOR));
@@ -87,18 +112,22 @@ export function toCsv(rows) {
 
 
 /**
- * Las dos clases de fila comparten columnas a proposito.
+ * Las tres clases de fila comparten columnas a proposito.
  *
- * El archivo lleva resumen por capacidad y detalle por subcapacidad en la misma
- * tabla, distinguidos por la primera columna. Para que Excel las lea como una
- * sola tabla, las dos tienen que declarar EXACTAMENTE las mismas claves y en el
- * mismo orden: toCsv() toma la cabecera de la primera fila, asi que una clave
- * de menos en el resumen desplazaria todas las columnas del detalle.
+ * El archivo lleva el resumen por capacidad y el detalle por subcapacidad en la
+ * misma tabla —y el de todo el proyecto, ademas, una fila por dominio—,
+ * distinguidos por la primera columna. Para que Excel las lea como una sola
+ * tabla, todas tienen que declarar EXACTAMENTE las mismas claves y en el mismo
+ * orden: toCsv() toma la cabecera de la primera fila, asi que una clave de
+ * menos en el resumen desplazaria todas las columnas del detalle.
  */
 const COLUMNAS = [
   "Tipo",
+  "Dominio",
   "Capacidad",
   "Subcapacidad",
+  "Puntuadas",
+  "TotalDeSubcapacidades",
   "Procesos",
   "ObjetivoProcesos",
   "Tecnologia",
@@ -118,6 +147,20 @@ const COLUMNAS = [
 ];
 
 
+/**
+ * Lo que dice la primera columna de cada fila.
+ *
+ * Decia «Resumen» y «Roadmap», que no dicen de que es la fila: la de «Roadmap»
+ * lleva las puntuaciones de una subcapacidad, no solo su iniciativa. Con el
+ * nombre de lo que es, filtrar la columna en Excel se explica solo.
+ */
+export const TIPO_DE_FILA = {
+  dominio: "Dominio",
+  capacidad: "Capacidad",
+  subcapacidad: "Subcapacidad",
+};
+
+
 /** Una fila con las columnas del archivo en su orden, y el resto en blanco. */
 function fila(valores) {
   const salida = {};
@@ -130,12 +173,60 @@ function fila(valores) {
 }
 
 
-/** Las filas de resumen, una por capacidad, desde agregarPorCapacidad(). */
-export function filasDeResumen(capacidades) {
+/**
+ * Las filas de dominio, una por cada uno, desde agregarPorDominio(). Solo las
+ * lleva el archivo de todo el proyecto: son la tabla del Overview.
+ *
+ * El objetivo de cada palanca es la media de los de sus capacidades, asi que
+ * puede no ser entero («4,2»). Es el mismo que dibuja el radar del Overview.
+ */
+export function filasDeDominio(dominios) {
+  return dominios.map((dominio) =>
+    fila({
+      Tipo: TIPO_DE_FILA.dominio,
+      Dominio: dominio.label,
+
+      Puntuadas: dominio.evaluadas,
+      TotalDeSubcapacidades: dominio.total,
+
+      Procesos: dominio.procesos ?? "",
+      ObjetivoProcesos: dominio.objetivoProcesos ?? "",
+
+      Tecnologia: dominio.tecnologia ?? "",
+      ObjetivoTecnologia: dominio.objetivoTecnologia ?? "",
+
+      Organizacion: dominio.organizacion ?? "",
+      ObjetivoOrganizacion: dominio.objetivoOrganizacion ?? "",
+
+      ScoreMedio: dominio.scoreMedio ?? "",
+      ObjetivoMedio: dominio.targetMedio ?? "",
+      Nivel: getMaturityLevel(dominio.scoreMedio) ?? "",
+
+      Gap: dominio.gap ?? "",
+      Prioridad: dominio.prioridad,
+    }),
+  );
+}
+
+
+/**
+ * Las filas de resumen, una por capacidad, desde agregarPorCapacidad().
+ *
+ * `dominio` es el nombre del dominio al que pertenecen. Va en todas las filas,
+ * tambien en el archivo de un solo dominio: quien junta en una hoja los datos
+ * de varios necesita saber de cual es cada fila, y antes solo lo decia el
+ * nombre del archivo.
+ */
+export function filasDeResumen(capacidades, dominio = "") {
   return capacidades.map((capacidad) =>
     fila({
-      Tipo: "Resumen",
+      Tipo: TIPO_DE_FILA.capacidad,
+      Dominio: dominio,
       Capacidad: capacidad.capacidad,
+
+      // Lo que la tabla del Dashboard dice en «Avance» y el archivo callaba.
+      Puntuadas: capacidad.evaluadas ?? "",
+      TotalDeSubcapacidades: capacidad.total ?? "",
 
       Procesos: capacidad.procesos ?? "",
       ObjetivoProcesos: capacidad.objetivos.procesos,
@@ -160,10 +251,11 @@ export function filasDeResumen(capacidades) {
 
 
 /** Las filas de detalle, una por subcapacidad, desde [{ item, metrics }]. */
-export function filasDeRoadmap(entradas) {
+export function filasDeRoadmap(entradas, dominio = "") {
   return entradas.map(({ item, metrics }) =>
     fila({
-      Tipo: "Roadmap",
+      Tipo: TIPO_DE_FILA.subcapacidad,
+      Dominio: dominio,
       Capacidad: item.capacidad,
       Subcapacidad: item.subcapacidad,
 
@@ -189,4 +281,25 @@ export function filasDeRoadmap(entradas) {
       Comentarios: item.comentario,
     }),
   );
+}
+
+
+/**
+ * El archivo de todo el proyecto: los dominios, sus capacidades y sus
+ * subcapacidades, en ese orden.
+ *
+ * Por clase de fila y no dominio a dominio, a proposito: asi lo primero que se
+ * ve al abrirlo es la tabla del Overview, y debajo, cada vez con mas detalle,
+ * lo mismo que lleva el archivo de un dominio. En Excel se separan filtrando
+ * la primera columna.
+ *
+ * Recibe, por dominio, { label, resumen, capacidades, entradas }: la fila de
+ * agregarPorDominio(), las de agregarPorCapacidad() y [{ item, metrics }].
+ */
+export function filasDelProyecto(dominios) {
+  return [
+    ...filasDeDominio(dominios.map((dominio) => ({ ...dominio.resumen, label: dominio.label }))),
+    ...dominios.flatMap((dominio) => filasDeResumen(dominio.capacidades, dominio.label)),
+    ...dominios.flatMap((dominio) => filasDeRoadmap(dominio.entradas, dominio.label)),
+  ];
 }

@@ -21,9 +21,9 @@
  * reescalar, que es lo mas cerca de una ppt sin generar una ppt.
  */
 
-import { MINIMO_DE_EJES_DE_UN_RADAR, escapeHtml } from "../core/presentacion.js?v=36";
+import { MINIMO_DE_EJES_DE_UN_RADAR, escapeHtml } from "../core/presentacion.js?v=37";
 
-import { getEnhancedPdfReportStyles } from "./estilos.js?v=36";
+import { getEnhancedPdfReportStyles } from "./estilos.js?v=37";
 
 import {
   POR_DIAPOSITIVA,
@@ -43,11 +43,13 @@ import {
   radarGlobal,
   radarPorCapacidad,
   rankingDeDominios,
+  repartirComentarios,
+  repartirRoadmap,
   resumenDelDominio,
   resumenPorCapacidad,
   roadmap,
   separador,
-} from "./secciones.js?v=36";
+} from "./secciones.js?v=37";
 
 
 const PARTE_GLOBAL = "La función financiera";
@@ -328,7 +330,7 @@ function parteDeAccion(data, opciones = {}) {
         },
       ];
 
-  paginar(data.roadmapItems, POR_DIAPOSITIVA.roadmap).forEach((tanda, indiceDeTanda, tandas) => {
+  repartirRoadmap(data.roadmapItems).forEach((tanda, indiceDeTanda, tandas) => {
     secciones.push({
       parte,
       titulo: "Roadmap e iniciativas",
@@ -370,7 +372,7 @@ function parteDeAccion(data, opciones = {}) {
 
   // Sin comentarios no hay diapositiva: una pagina que solo dice "no hay
   // comentarios" en un deck que se entrega parece un apartado sin terminar.
-  paginar(data.commentItems, POR_DIAPOSITIVA.comentarios).forEach((tanda, indiceDeTanda, tandas) => {
+  repartirComentarios(data.commentItems).forEach((tanda, indiceDeTanda, tandas) => {
     if (!tanda.length) {
       return;
     }

@@ -33,63 +33,65 @@ navegador. Cualquier servidor estático equivalente sirve.
 
 | Archivo | Rol | Líneas |
 |---|---|---|
-| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.493 |
+| `index.html` | Maquetación, `<template>` de la tarjeta de assessment, modales | 1.544 |
 | `tema.js` | Resuelve tema y densidad **antes del primer pintado**. Síncrono en `<head>` | 59 |
+| `arranque.js` | Pide ya los tres JSON del arranque y **dice en pantalla si la aplicación no llega a arrancar**. Síncrono en `<head>` | 111 |
 | `sw.js` | **El service worker**: guarda la herramienta en el navegador para abrirla sin red | 172 |
-| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 2.001 |
-| `app/estado.js` | El estado compartido y las constantes que lo describen | 222 |
-| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 436 |
-| `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 78 |
+| `app.js` | Raíz de composición: `init()`, el cableado y el escenario | 2.382 |
+| `app/estado.js` | El estado compartido y las constantes que lo describen | 249 |
+| `app/avisos.js` | El banner de avisos y el diálogo de confirmación | 504 |
+| `app/almacenamiento.js` | `localStorage`, que puede fallar y no es motivo para caerse | 111 |
 | `app/preferencias.js` | Tema y densidad, y la paleta de los gráficos por tema | 260 |
 | `app/graficos.js` | Los seis radares de Chart.js, a dónde lleva pulsar sus ejes y el del resumen | 823 |
-| `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 185 |
-| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 574 |
-| `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 313 |
+| `app/metricas.js` | El motor atado al estado: objetivos por dominio y caché | 202 |
+| `app/dominios.js` | El catálogo, la carga de los nueve dominios y el conmutador | 623 |
+| `app/filtros.js` | Los tres filtros y el ámbito de datos que sale de ellos | 381 |
 | `app/subcapacidad.js` | Leer los campos de una subcapacidad, que llegan en dos formas | 88 |
 | `app/escenario.js` | Un escenario como dato: leerlo, volcarlo y volver a armarlo | 440 |
 | `app/firebase.js` | La conexión: configuración, referencia y límite de espera | 220 |
 | `app/identidad.js` | La sesión anónima y el nombre de quien edita | 249 |
 | `app/copias.js` | **Si el trabajo local tiene copia.** Cuándo fue la última y el punto del aviso | 143 |
 | `app/indicador.js` | **El chip de guardado.** La única señal de si el trabajo está a salvo | 158 |
-| `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 922 |
+| `app/persistencia.js` | **Guardar y recibir.** Escrituras granulares y suscripción remota | 991 |
 | `app/repintado.js` | El cortacircuitos, para no cerrar un ciclo con el orquestador | 40 |
 | `app/sin-conexion.js` | Registra `sw.js` y avisa cuando se va la red, diciendo qué sigue funcionando | 89 |
 | `app/movimiento.js` | **El movimiento**: cifras que cuentan, barras que se deslizan, paneles que se despliegan | 380 |
 | `app/edicion.js` | Los campos de texto de una subcapacidad: guardado diferido y freno de cierre | 167 |
+| `app/impresion.js` | **Ctrl+P**: la vista abierta en papel, en claro y con una línea que dice de quién es | 128 |
 | `app/logo.js` | **El logo del cliente**: elegirlo, reducirlo a lo que admiten las reglas y enseñarlo | 176 |
 | `app/dominios-del-cliente.js` | **Los dominios del cliente**: elegir cuáles de los nueve aplican y decirlo en pantalla | 233 |
-| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 412 |
-| `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 251 |
+| `app/celdas.js` | Los fragmentos de HTML que comparten varias vistas, fichas de IA incluidas | 454 |
+| `app/modales.js` | Los criterios F3M y la ficha de caso de IA, con su foco | 250 |
 | `app/informe.js` | Lo que la aplicación le pasa al informe, al resumen, a la preparación y al acta | 932 |
 | `app/buscador.js` | El buscador de Ctrl+K: un `<dialog>` que lleva a cualquier subcapacidad | 197 |
 | `app/taller.js` | **El modo taller**: una subcapacidad a pantalla completa, para proyectar | 1.304 |
 | `app/guia.js` | **La guía de scoring del taller**: la rúbrica de las tres palancas en el sitio de los niveles | 128 |
 | `app/apertura.js` | **La apertura del taller**: la primera pantalla del modo taller, con la escala y el objetivo | 155 |
-| `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 282 |
+| `app/proximos-pasos.js` | **Los próximos pasos acordados**: la pantalla que sigue al cierre, y su guardado | 285 |
 | `app/cierre.js` | **El cierre del taller**: la última pantalla del modo taller, con las cifras del acta | 224 |
 | `app/biblioteca.js` | **La biblioteca de IA**: la carga y el visor que abre «Más información» | 436 |
-| `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 418 |
+| `app/vistas/overview.js` | Los nueve dominios a la vez. **La vista que no aplica filtros** | 421 |
 | `app/vistas/dashboard.js` | El dominio abierto: KPIs, titulares y tabla resumen | 228 |
-| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.316 |
+| `app/vistas/assessment.js` | Puntuar, con la captura y restauración de foco | 1.447 |
 | `app/vistas/heatmap.js` | Una fila por capacidad, desplegable a subcapacidad, que lleva a su tarjeta | 323 |
-| `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 435 |
+| `app/vistas/roadmap.js` | Las iniciativas y sus campos editables, con guardado diferido | 437 |
 | `app/vistas/ia.js` | La pestaña IA: biblioteca y catálogo de casos. **Tampoco aplica filtros** | 697 |
-| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 7.951 |
+| `styles.css` | Estilos, tokens de color y escalas de tipografía y densidad | 8.225 |
 | `core/calculo.js` | **Motor de cálculo F3M.** Reglas de negocio puras | 540 |
 | `core/objetivos.js` | **Objetivos por capacidad y palanca.** La mitad de todo gap | 137 |
 | `core/coincidencias.js` | **Reconocer el trabajo guardado.** Si falla, se pierde en silencio | 259 |
 | `core/escenario.js` | **Contrato de un escenario.** Espejo de `database.rules.json` | 704 |
-| `core/exportacion.js` | El CSV para Excel en español, con su protección de fórmulas | 192 |
+| `core/exportacion.js` | El CSV para Excel en español, del dominio o de todo el proyecto, con su protección de fórmulas | 305 |
 | `core/presentacion.js` | Escapado, formato de números y fechas, y colores de marca | 246 |
 | `core/busqueda.js` | Qué subcapacidades casan con lo que se escribe, y qué resaltar | 152 |
 | `core/biblioteca.js` | **Dónde está cada caso.** Referencias comprobadas, etiquetas y filtros | 510 |
-| `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 484 |
-| `informe/secciones.js` | Una función por diapositiva | 1.103 |
-| `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 307 |
-| `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.028 |
-| `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 112 |
-| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 595 |
-| `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 795 |
+| `informe/pdf.js` | **El informe.** Orquestador: qué diapositivas y en qué orden | 486 |
+| `informe/secciones.js` | Una función por diapositiva | 1.339 |
+| `informe/graficos.js` | Primitivas SVG puras: bullet, anillo, escala de madurez | 316 |
+| `informe/estilos.js` | La paleta del informe y su hoja de estilos | 1.063 |
+| `informe/desbordes.js` | Mide si una diapositiva recorta. Con `?comprobar=desbordes` | 115 |
+| `informe/preparacion.js` | **La preparación del taller**: el documento que el cliente recibe antes | 631 |
+| `informe/acta.js` | **El acta del taller**: lo que el cliente recibe después, con lo puntuado y las notas | 796 |
 | `informe/resumen.js` | **El resumen de una página**: la función financiera en una diapositiva, para el comité | 573 |
 | `tests/` | Pruebas de `core/`, de `informe/` y del espejo con las reglas | — |
 | `.github/workflows/` | CI: las pruebas y `check_domains_sync.py` en cada PR | — |
@@ -100,7 +102,7 @@ navegador. Cualquier servidor estático equivalente sirve.
 | `biblioteca/` | Los documentos de la biblioteca. **Públicos**, como el repositorio. Ver su `LEEME.md` | — |
 | `database.rules.json` | Reglas de seguridad de la Realtime Database | — |
 | `scripts/*.py` | Conversión Excel→JSON, verificación, migración, rotación | — |
-| `scripts/check_module_version.py` | Que todos los módulos se pidan con la misma `?v=` y que `index.html` los precargue todos. **En CI** | — |
+| `scripts/check_module_version.py` | Que todos los módulos se pidan con la misma `?v=`, que `index.html` los precargue todos y que `arranque.js` adelante los datos que pide el arranque. **En CI** | — |
 | `scripts/check_modules.py` | Que cada import encuentre su export y no quede un nombre sin declarar en `app/`. **En CI** | — |
 | `vendor/` | Chart.js, servido desde aquí y no desde un CDN. **Se versiona** | — |
 | `SECURITY.md` | Modelo de amenazas, qué protege y qué no, y los procedimientos | — |
@@ -118,7 +120,8 @@ que la regla protegía: se siguen probando sin navegador.
 Flujo de arranque, en `init()` de `app.js`:
 
 ```
-cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScenarioModeNotice()
+<html data-arranque>             // la señal que busca arranque.js; ver «Si no arranca, se dice»
+  → cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScenarioModeNotice()
   → cargarCatalogoDeCasosDeIa()  // data/casos-ia.json; si falla, se sigue sin fichas
     + cargarBiblioteca()         // data/biblioteca.json; si falla, sin «Más información»
     + cargarCatalogoDeDominios() // los tres a la vez; este pinta el conmutador
@@ -127,7 +130,8 @@ cacheElements() → bindGlobalEvents() → setInitialLoading(true) → showScena
   → applyStoredScenario()        // copia local de localStorage
   → inicializarIdentidad()       // signInAnonymously, solo si hay ?scenario= (el SDK se pidió al empezar)
   → initializeSharedScenario()   // lee Firebase, aplica lo remoto, se suscribe
-  → populateCapacityFilter() → renderAll()
+  → volverAlDominioDeEstaPestana() // al recargar, el dominio en el que se estaba
+  → populateCapacityFilter() → renderAll() → volverALaPosicion()
 ```
 
 Dependencias de terceros, sin bundler:
@@ -153,7 +157,7 @@ infraestructura —estado, avisos, almacenamiento, preferencias, gráficos, mét
 filtros, subcapacidad, escenario, Firebase, identidad, indicador, copias, persistencia,
 repintado y edición—, las
 vistas en `app/vistas/`, `app/celdas.js` con lo que comparten, `app/modales.js`, `app/informe.js`,
-`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/dominios-del-cliente.js`, `app/sin-conexion.js`, `app/movimiento.js`, `app/taller.js`,
+`app/biblioteca.js`, `app/buscador.js`, `app/logo.js`, `app/dominios-del-cliente.js`, `app/sin-conexion.js`, `app/movimiento.js`, `app/impresion.js`, `app/taller.js`,
 `app/apertura.js`, `app/guia.js`, `app/cierre.js` y `app/proximos-pasos.js`. Lo nuevo nace ya en `app/`, no en
 `app.js`. Mover código entre módulos se verifica igual que un refactor: consola en silencio, las pruebas, el informe y el A/B contra
 `main` sobre los nueve dominios.
@@ -204,12 +208,22 @@ python scripts/check_module_version.py
 
 ### Todo el código se pide de golpe
 
-`index.html` lleva un `<link rel="modulepreload">` por cada módulo que carga `app.js` y un
-`<link rel="preload">` para los tres JSON del arranque. Firebase no: se descarga aparte, solo con
-`?scenario=` (ver abajo). Sin ellos el navegador
+`index.html` lleva un `<link rel="modulepreload">` por cada módulo que carga `app.js`, y
+`arranque.js` pide los tres JSON del arranque al llegar el HTML. Firebase no: se descarga aparte,
+solo con `?scenario=` (ver abajo). Sin ellos el navegador
 descubre los módulos por capas —baja `app.js`, lee sus imports, baja esos…— y eran cuatro viajes al
 servidor seguidos solo para tener el código, más tres para los datos. Medido con 100 ms de ida y
 vuelta, la carga bajó de 1,26 s a 0,94 s; con 200 ms, de 2,06 s a 1,33 s.
+
+**Los tres JSON no van con `<link rel="preload">`, y es a propósito.** Iban así, y dejó de servir
+en cuanto existió el service worker: con él activo —desde la segunda visita— Chrome no casa la
+precarga con el `fetch()` de la aplicación, pide cada JSON dos veces y escribe seis avisos en una
+consola que tiene que arrancar en silencio. Comprobado en Chromium 153. Ahora `arranque.js`, un
+script clásico y síncrono en `<head>` como `tema.js`, lanza las tres peticiones y las deja en
+`window.f3mDatosAdelantados`; `pedirDatosDelArranque()`, en `app/estado.js`, recoge la que toca en
+vez de hacer otra, y si la adelantada falló, la pide de nuevo. `check_module_version.py` comprueba
+que las rutas de `arranque.js` sean las que pide la aplicación, y pone el CI en rojo si vuelve un
+`<link rel="preload">` de datos.
 
 **Un módulo nuevo necesita su línea de precarga.** Sin ella no se rompe nada, solo llega más tarde,
 así que `check_module_version.py` compara la lista con el árbol de imports y pone el CI en rojo con
@@ -245,6 +259,34 @@ aplicación ya lo dice con su aviso y con el chip en rojo. Al irse la red sale u
 sigue funcionando, distinto según la página ya esté guardada —la primera visita aún no— y según se
 trabaje en local o en un escenario compartido; al volver, se va, salvo que otro aviso lo haya
 sustituido.
+
+### Si no arranca, se dice
+
+Un módulo que no llega —una red que lo bloquea, o un despliegue a medio llegar en el que un archivo
+nuevo pide algo que el viejo no tiene— deja el árbol de módulos sin ejecutar **entero**. `app.js` no
+corre, así que no puede avisar de nada, y la página se quedaba en «Cargando los datos…» para
+siempre. Por eso la red va fuera de los módulos: `init()` marca `<html data-arranque>` en su primera
+línea, y `arranque.js` mira esa marca en el evento `load`, que espera a los módulos. Si no está,
+cambia el estado de carga por un mensaje con un botón para recargar. No hay falsas alarmas por
+lentitud: cuando llega `load`, la aplicación ha arrancado o ya no va a arrancar.
+
+Y para lo que falla **después** de arrancar, `vigilarErroresInesperados()` en `app/avisos.js`: una
+excepción que se escapa o una promesa rechazada sin dueño salen en un aviso, **una vez por sesión**,
+en vez de dejar la pantalla a medias sin una palabra. Solo lo de esta web —mira de qué archivo
+viene—: una extensión del navegador que falla o el SDK de Firebase quejándose de la red no son la
+herramienta rompiéndose.
+
+### Recargar deja donde se estaba
+
+F5 conserva la pestaña (va en la URL), y ahora también **el dominio y la altura**. Antes dejaba en
+el dominio del último cambio *guardado*, que es el que viaja en el escenario: quien repasaba Fiscal
+sin tocar nada volvía a FP&A, y en un escenario compartido, al dominio en el que hubiera puntuado un
+compañero. `setActiveDomain()` apunta el dominio en `sessionStorage` (`f3m-dominio-abierto`) y
+`volverAlDominioDeEstaPestana()` lo recupera después de aplicar el escenario, solo si sigue cargado
+y aplica al cliente. Es `sessionStorage` y no `localStorage` a propósito: es de la pestaña —dos
+pestañas en dominios distintos no se pisan— y se va al cerrarla, así que abrir la herramienta mañana
+empieza donde dice el escenario. La altura (`f3m-posicion`) solo se recupera al recargar o al volver
+con «Atrás», y solo si la vista y el dominio son los mismos.
 
 ### El tema y la densidad se deciden antes de pintar
 
@@ -287,6 +329,12 @@ contraste mal puesto no es un problema estético, es un dato que no se lee.
 
 La vista de arranque es **Overview**: `vistaDesdeLaUrl()` cae ahí cuando la URL no trae ancla.
 
+Cambiar de pestaña **apunta una entrada en el historial** (`pushState`), así que «Atrás» vuelve a la
+pestaña anterior en vez de salir de la herramienta. Y **cada pestaña recuerda dónde estaba** mientras
+no se cambie de dominio: volver al Assessment deja en la tarjeta en la que se estaba. Volver a pulsar
+la pestaña abierta sigue llevando arriba. Desde el Overview y la IA, pulsar un dominio en el
+conmutador abre su Dashboard: ahí el dominio no cambia nada de lo que se ve.
+
 Los encabezados siguen un solo patrón: el nombre de la pestaña encima y lo que enseña debajo, en
 español («Heatmap · Madurez por capacidad», «Assessment · Puntuación por subcapacidad»). Antes
 mezclaban «Workspace», «Vista visual» y «Scoring», y no se sabía qué pestaña era cada página.
@@ -315,6 +363,24 @@ resumen, radares, heatmap, roadmap, CSV y PDF. Antes convivían dos ámbitos y e
 prioridad alta" mientras el roadmap enseñaba 2.
 
 No añadir una vista que lea `state.items` directamente.
+
+**«Exportar CSV» es un menú con dos archivos**, como «Exportar PDF». **El del dominio** lleva el
+ámbito de siempre, con los filtros, y lo dice: su nota cuenta las subcapacidades que van, un aviso
+lo repite al descargar y, si los filtros no dejan ninguna, el botón se apaga en vez de bajar un
+archivo vacío. **El de todo el proyecto** (`filasDelProyecto()` en `core/exportacion.js`) lleva
+los dominios que aplican al cliente, **sin filtros** y por el mismo motivo que el informe de todo
+el proyecto: una fila por dominio, después las de capacidad y después las de subcapacidad, con
+la columna «Tipo» para filtrar en Excel. Las cifras de dominio salen de `agregarPorDominio()` y
+las de capacidad de `agregarPorCapacidad()`, las mismas del Overview y del Dashboard. Los títulos
+de columna son para quien abre el archivo («Objetivo Procesos», «Score medio», «Responsable»):
+se traducen al escribir (`TITULOS`), y las filas siguen llevando las claves de siempre, que son
+las que leen los radares.
+
+**Lo que se puntúa con el filtro de prioridad puesto se queda en el ámbito** hasta que cambia algún
+filtro (`retenerMientrasDureElFiltro()` en `app/filtros.js`), con un aviso en su tarjeta. Es el único
+filtro que depende de las puntuaciones: con «Alta», la primera nota podía sacar la tarjeta de la
+lista, la de debajo subía y el siguiente clic la puntuaba a ella. Se retiene en el ámbito y no solo
+en la lista para que KPIs, roadmap, CSV y PDF sigan contando lo mismo que las tarjetas.
 
 **El Overview es la excepción, y es deliberada.** Su pregunta es otra —no "cómo está este dominio"
 sino "cómo está la función financiera"—, así que lee `state.domains` entero vía
@@ -475,9 +541,35 @@ los tres informes: la preparación, el acta y el texto del correo. Son de uso in
 abierto delante del cliente lo que se ve son los informes. Estuvo un tiempo en «Presentación», con
 botones gemelos que pulsaban los de «Exportar PDF»; aquí son los botones de siempre, sin copias.
 
+Los tres menús de la cabecera **se recorren con las flechas** (`setupMenuDeCabecera()`): flecha
+abajo sobre el botón abre y entra, Inicio y Fin van a los extremos, y salir con el tabulador cierra
+el menú. Y **abrir un modal no mueve la página**: al quitarse la barra de desplazamiento todo saltaba
+15 px a la derecha, así que `updateModalOpenState()` mide lo que ocupa antes de quitarla y el CSS
+reserva ese hueco (`--hueco-de-la-barra`).
+
 «Volver arriba» flota abajo a la derecha, en un círculo, y sube por encima del chip de guardado
 mientras este se ve (`apartarDelChip()` en `app/indicador.js`). A la izquierda tapaba la primera
 columna del Roadmap y del Heatmap.
+
+### Ctrl+P imprime la vista abierta, no la pantalla
+
+El entregable es el informe. Pero en una reunión alguien pulsa Ctrl+P para llevarse el Heatmap o el
+Roadmap, y salía la pantalla tal cual: cabecera, conmutador y pestañas en cada hoja, «Saltar al
+contenido» arriba y las tablas cortadas por la derecha. El bloque `@media print`, al final de
+`styles.css`, deja solo la vista abierta, en **A4 apaisado** y encogida (`zoom`) para que quepan las
+tablas, con el color que es un dato —celdas del Heatmap, barras, etiquetas— impreso aunque
+«Gráficos de fondo» esté apagado.
+
+`app/impresion.js` hace lo que el CSS no puede: en `beforeprint` pone el **tema claro y la letra
+normal** —en oscuro salía texto gris sobre blanco, y los radares de Chart.js llevan sus colores
+fijos— y rellena una línea con el cliente, el dominio y la fecha; en `afterprint` lo devuelve todo.
+
+El bloque de pantallas estrechas es `@media screen and (max-width: 1100px)`, con el `screen`, por
+esto mismo: una hoja apaisada mide unos 1030 px y caía en él, con los radares uno debajo de otro.
+
+Lo que **no** se ha podido quitar es el pie que añade el navegador, que lleva la dirección: en un
+escenario compartido, la dirección es la credencial. Se quita en el diálogo de impresión,
+desmarcando «Encabezados y pies de página».
 
 ### El movimiento: corto, solo lo que cambia y nada con «reducir movimiento»
 
@@ -603,6 +695,14 @@ como el modo taller —un taller de una sola capacidad tiene su preparación—,
 menú y el aviso dicen cuántas quedan fuera. La rúbrica es una copia de la del modal «Criterios F3M»
 de `index.html`, y `tests/casos-preparacion.js` compara las dos.
 
+**El título de la preparación y del acta va en dos líneas** —el documento, y debajo su dominio—
+con `tituloDelDocumentoHtml()`. Iba todo seguido, y junto al logo del cliente se partía en tres:
+con eso, el índice «Qué veremos» se iba a la segunda página en cinco de los nueve dominios y dos
+de ellos gastaban una hoja más. Ahora el logo (15 mm de alto) acaba donde acaba el título y el
+índice cabe en la primera página en los nueve, con logo y sin él; a Controlling le sobran menos
+de 7 mm, así que **al tocar los márgenes de esa cabecera o la tabla de la escala hay que volver a
+mirarlo**, con el logo puesto.
+
 **El acta del taller** (`informe/acta.js`) es el después: lo que se envía al cliente al terminar la
 sesión. Una portada con una frase de lo que salió, las cuatro cifras del Dashboard, la media de
 cada palanca frente a su objetivo y las cinco subcapacidades más lejos de él; después lo acordado,
@@ -644,6 +744,17 @@ cliente, así que la red es que nada llegue a recortarse nunca:
 
 - Las secciones largas se **reparten** en varias diapositivas con `paginar()`, no se truncan.
   Cuántas filas caben está en `POR_DIAPOSITIVA`, en `informe/secciones.js`.
+- **Lo que escribe la gente no tiene largo fijo, así que no se reparte por cuántas filas son sino
+  por lo que ocupan.** «Comentarios y hallazgos» iba de seis en seis: con notas de una línea eran
+  diapositivas con dos tercios en blanco, y con dos notas largas en la misma el texto se salía por
+  abajo y se recortaba sin avisar (hasta 312 px). `repartirComentarios()` estima las líneas de
+  cada nota (`lineasDe()`, que tira por lo alto y cuenta de más las mayúsculas) y llena cada
+  diapositiva hasta lo que cabe, con las tandas parejas (`paginarEquilibrado()`); una nota de más
+  de diez líneas va **a lo ancho**, en tres columnas (`.tarjeta-ancha`). El roadmap sigue yendo de
+  cinco en cinco, pero `repartirRoadmap()` pone menos filas cuando un responsable muy largo las
+  hace más altas. Los números de `CARACTERES_POR_LINEA` salen de medir en el navegador: **si se
+  toca el ancho de esas tarjetas, de la columna «Responsable» o su letra, hay que volver a
+  medirlos**, con textos largos y con `?comprobar=desbordes`.
 - `informe/desbordes.js` mide cada diapositiva en el navegador y dice lo que sobra. Se dispara
   abriendo la herramienta con **`?comprobar=desbordes`** y exportando el informe: la medida sale en
   el aviso de la aplicación, y la tabla completa en la consola. **Al tocar `informe/estilos.js`, el
@@ -742,6 +853,11 @@ recalcula. No hay que acordarse de vaciar nada al tocar el estado.
   pantalla cuando la lectura remota del segundo fallaba. El nombre de quien edita va aparte, en
   `f3m-nombre-editor`.
 
+  Con la herramienta abierta en **dos pestañas**, en local, cada una se pone al día con lo que guarda
+  la otra (`escucharOtrasPestanas()` en `app/persistencia.js`, con el evento `storage`): cada
+  guardado escribe la copia entera, y sin eso lo guardado en una borraba lo de la otra. **Ctrl+S**
+  descarga una copia, como «Sesión → Guardar una copia».
+
   En modo local el trabajo solo vive en ese navegador, así que `app/copias.js` lleva la cuenta de
   si tiene copia fuera: `f3m-ultima-copia` (cuándo se guardó o se abrió la última) y
   `f3m-cambios-sin-copia-desde` (el primer cambio después). «Guardar una copia» dice cuándo fue la
@@ -781,6 +897,11 @@ Al tocar el flujo de guardado, tener en cuenta:
   pero se guarda ya dibujado en PNG**, porque un SVG puede llevar código y lo que se guarda lo puede
   escribir cualquiera con el enlace. Se lee con `FileReader` y no con `URL.createObjectURL()`: la
   CSP solo admite imágenes de la propia web y `data:`, y un `blob:` se bloquea.
+- **Ctrl+Z deshace la última puntuación** (`deshacerUltimaPuntuacion()` en
+  `app/vistas/assessment.js`). Se apunta en `aplicarScore()`, por donde pasan la tarjeta, el modo
+  taller y las teclas, y se guarda como cualquier otra puntuación. No deshace en un dominio que no
+  está abierto ni pisa un cambio posterior —de otra persona o de una copia abierta después—: en los
+  dos casos lo dice y no toca nada. En un campo de texto la tecla sigue siendo del campo.
 - El indicador de guardado tiene un estado `error` real. **Ningún `catch` puede terminar en un
   mensaje de éxito**: es el fallo que más caro sale en una sesión con cliente.
 
@@ -983,7 +1104,8 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 
 1. `python -m http.server 8000` → `http://localhost:8000/`.
 2. Consola del navegador **en silencio**. Un arranque correcto no imprime nada: lo que aparezca
-   ahí es un `warn` o un `error` de verdad, y hay que mirarlo.
+   ahí es un `warn` o un `error` de verdad, y hay que mirarlo. **Recargar y mirarla otra vez**: la
+   segunda visita va con el service worker activo, y es donde salían los avisos de las precargas.
 3. **Los dos temas y las dos densidades.** La luna (el sol en oscuro), a la derecha de «Sesión», y «Presentación → Letra grande» son
    independientes y se combinan: probar las cuatro combinaciones al menos en Overview y Heatmap,
    que son las que codifican datos en color y en tamaño. Sin elección guardada, cambiar el tema del
@@ -1001,7 +1123,8 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      de casos de IA trae de 2 a 4 fichas, cada una con sus dos etiquetas y su frase: un título
      suelto, sin etiquetas, es un cruce roto. Puntuar también con teclado: Tab llega a cada
      palanca, las teclas 1 a 5 y las flechas puntúan, y Suprimir la deja sin puntuar; pulsar
-     otra vez el número elegido también. Las «Notas del taller» del detalle son el mismo
+     otra vez el número elegido también. **Ctrl+Z** deshace la última puntuación y lo dice en un
+     aviso; con el foco en las notas deshace lo escrito y no la nota. Las «Notas del taller» del detalle son el mismo
      comentario que el Roadmap: lo escrito en uno aparece en el otro y en el informe. «Siguiente
      sin puntuar», en la barra de pestañas junto al dominio, lleva desde cualquier vista del
      dominio a la próxima tarjeta sin ninguna palanca puntuada, con el foco en su primer score, y
@@ -1040,7 +1163,9 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      plegar. Pulsar una abre su tarjeta en el Assessment, resaltada y con el foco en su
      primer score.
    - **Roadmap**: comprobar que respeta los filtros activos y que la cifra de iniciativas cuadra.
-     Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final.
+     Va agrupado por oleada, con una fila de cabecera por oleada y las pendientes al final, y por
+     eso no hay columna «Oleada». «Último cambio» solo sale si alguna fila tiene autoría, es decir,
+     en un escenario compartido: sin ella, la tabla cabe a 1280 px.
      Cuando cabe a lo ancho, la tabla crece con la página y su encabezado se queda bajo las
      pestañas; cuando no cabe —Presentación, o menos de 1366 px— vuelve a su caja con desplazamiento
      propio. Lo decide `setupCajaDelRoadmap()`. Al tocar los anchos de sus columnas, medir con la
@@ -1052,7 +1177,11 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
      modal. Cambiar de dominio no cambia nada en esta pestaña, salvo con el orden «Prioridad del
      cliente», que sigue las puntuaciones y no el dominio abierto.
 5. Con un filtro puesto, comprobar que **KPIs, tabla, radares, heatmap, roadmap, CSV y PDF dan el
-   mismo recuento** — y que el **Overview no cambia**, que es lo suyo.
+   mismo recuento** — y que el **Overview no cambia**, que es lo suyo. **«Exportar CSV»** es un
+   menú: «Datos de {dominio}» lleva lo que dejan los filtros, lo dice en su nota y en un aviso, y
+   se apaga si no dejan nada; «Datos de todo el proyecto» lleva los dominios que aplican, sin
+   filtros, con una fila por dominio, por capacidad y por subcapacidad. Abierto en Excel, los
+   títulos se leen («Objetivo Procesos», «Score medio») y las tildes salen bien.
 6. Ir y volver entre Overview y Dashboard: los radares de los dos siguen correctos (5 ejes de
    capacidad y 9 de dominio).
 7. **El informe.** Exportar desde **cada una de las seis vistas**, incluidos el Roadmap y la IA
@@ -1069,8 +1198,11 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    oscuro y con letra grande, con las mismas cuatro cifras que el panorama del informe y un radar
    en el que se leen los nueve dominios. Con `?comprobar=desbordes`, también cuando los pasos y sus
    responsables son largos. Sin nada puntuado en ningún dominio, el botón está apagado.
+   Con **una nota del taller muy larga** (dos mil caracteres) y un responsable de cien, la nota
+   sale entera, a lo ancho, y la medida de desbordes sigue en verde.
    **La preparación del taller**, del mismo menú: vertical, sin una puntuación, cada subcapacidad
-   entera en su página y el índice entero en la primera. Con un filtro de capacidad, el menú y el
+   entera en su página y el índice entero en la primera, **también con el logo del cliente
+   puesto**. Con un filtro de capacidad, el menú y el
    aviso dicen cuántas lleva, y el número de su capacidad es el suyo («3», no «1»).
    **El acta del taller**, del mismo menú: sus cuatro cifras son las del Dashboard, las notas del
    taller salen debajo de su subcapacidad y lo sin puntuar va a «Quedó pendiente» con sus casillas.
@@ -1087,7 +1219,8 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
 10. Cambiar de dominio y confirmar que los datos se recargan. Con **Ctrl+K**, escribir
    «conciliacion» sin tilde: salen las de varios dominios, las flechas mueven la selección e Intro
    abre su tarjeta en su dominio, con el foco en su primer score. Escape cierra y devuelve el foco.
-11. Recargar la página y confirmar que el escenario persiste. En modo local, «Sesión → Guardar
+11. Recargar la página y confirmar que el escenario persiste, y que se vuelve **al mismo dominio
+   y a la misma altura** aunque no se haya guardado nada en él. En modo local, «Sesión → Guardar
    una copia» dice cuándo fue la última; para ver el punto ámbar sin esperar un día, poner
    `f3m-cambios-sin-copia-desde` a una fecha de anteayer en `localStorage` y recargar. Guardar
    una copia lo quita.
@@ -1115,7 +1248,16 @@ pruebas no ven porque no cargan el navegador. No hay linter, y el resto se compr
    aparecen suaves, el aviso baja y se va fundiéndose, y el chip dibuja su check. «Ver detalle» se
    despliega y se pliega sin saltos. Exportar el informe justo al entrar en el Dashboard da los
    radares enteros. Con «reducir movimiento» en el sistema, nada de esto se mueve.
-14. **Sin conexión.** Abrir la herramienta una vez con red y esperar unos segundos; en las
+14. **Los menús y los modales.** Con el foco en «Sesión», flecha abajo abre el menú y entra; las
+   flechas lo recorren y Tab, al salir, lo cierra. Abrir «Ver criterios F3M» o cualquier diálogo no
+   mueve la página de detrás ni un píxel: mirar el botón del tema, arriba a la derecha.
+15. **Imprimir.** Ctrl+P desde el Heatmap y desde el Roadmap, también en oscuro y con letra
+   grande: sale solo la vista, apaisada, en claro, con las tablas enteras y una línea arriba con el
+   cliente, el dominio y la fecha. Al cerrar el diálogo, la pantalla vuelve a como estaba.
+16. **Si no arranca.** En las herramientas de desarrollo, bloquear `app/taller.js` (Network →
+   clic derecho → Block request URL) y recargar: en vez de «Cargando los datos…» sale «La
+   herramienta no ha terminado de cargar», con su botón.
+17. **Sin conexión.** Abrir la herramienta una vez con red y esperar unos segundos; en las
    herramientas de desarrollo, Application → Service workers lo enseña activo. Cortar la red
    (Network → Offline): sale el aviso de que sigue funcionando. Recargar: se abre igual, con lo
    puntuado, cambia de dominio y «Más información» abre su documento. Al volver la red, el aviso se

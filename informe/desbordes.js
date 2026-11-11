@@ -105,8 +105,11 @@ export function resumenDeDesbordes(medidas) {
   return {
     hayDesbordes: false,
     tono: "exito",
-    mensaje:
-      `Las ${medidas.length} diapositivas caben. La más justa es «${masJusta.titulo}», ` +
-      `con ${Math.abs(masJusta.sobra)} px de margen.`,
+    // El resumen de una pagina es una sola: «Las 1 diapositivas caben» se leia
+    // como un fallo de la propia medida.
+    mensaje: medidas.length === 1
+      ? `La diapositiva cabe: «${masJusta.titulo}», con ${Math.abs(masJusta.sobra)} px de margen.`
+      : `Las ${medidas.length} diapositivas caben. La más justa es «${masJusta.titulo}», ` +
+        `con ${Math.abs(masJusta.sobra)} px de margen.`,
   };
 }

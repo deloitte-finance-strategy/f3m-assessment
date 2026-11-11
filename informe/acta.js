@@ -26,22 +26,23 @@ import {
   normalizeTargetValue,
   ordenarPorPrioridadYGap,
   resumenGlobal,
-} from "../core/calculo.js?v=36";
+} from "../core/calculo.js?v=37";
 import {
   COLOR_DE_PALANCA,
   escapeHtml,
   formatMedia,
   formatNumber,
   priorityColor,
-} from "../core/presentacion.js?v=36";
-import { CALOR_SIN_DATO, PALETA, colorDeCalor } from "./estilos.js?v=36";
+} from "../core/presentacion.js?v=37";
+import { CALOR_SIN_DATO, PALETA, colorDeCalor } from "./estilos.js?v=37";
 import {
   NIVELES_DE_LA_RUBRICA,
   capacidadesDePreparacion,
   estilosDelDocumento,
   logoDelDocumento,
   tituloDelDocumento,
-} from "./preparacion.js?v=36";
+  tituloDelDocumentoHtml,
+} from "./preparacion.js?v=37";
 
 
 /** Cuantas subcapacidades lleva la portada en «Dónde está la mayor distancia». */
@@ -62,9 +63,9 @@ const PASOS_EN_BLANCO_COMO_MINIMO = 2;
 const COLUMNAS_DEL_DETALLE = `
   <colgroup>
     <col style="width:27%">
-    <col style="width:14%"><col style="width:14%"><col style="width:14%">
-    <col style="width:12%">
-    <col style="width:7%">
+    <col style="width:13%"><col style="width:13%"><col style="width:13%">
+    <col style="width:14%">
+    <col style="width:8%">
     <col style="width:12%">
   </colgroup>
 `;
@@ -139,7 +140,7 @@ export function documentoDeActa(datos) {
         </div>
 
         ${logoDelDocumento(datos)}
-        <h1>Acta del taller de ${escapeHtml(datos.domainTitle || datos.domainLabel || "")}</h1>
+        ${tituloDelDocumentoHtml("Acta del taller", datos)}
         <p class="bajada">Diagnóstico de madurez de la función financiera · Deloitte Finance Strategy</p>
 
         <div class="huecos">

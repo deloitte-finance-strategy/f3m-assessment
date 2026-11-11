@@ -16,8 +16,8 @@ import {
   documentoDelResumen,
   madurez,
   tituloDelResumen,
-} from "../informe/resumen.js?v=36";
-import { kpisDeLaFuncionFinanciera, panoramaGlobal, rejillaDeKpis } from "../informe/secciones.js?v=36";
+} from "../informe/resumen.js?v=37";
+import { kpisDeLaFuncionFinanciera, panoramaGlobal, rejillaDeKpis } from "../informe/secciones.js?v=37";
 
 
 const GLOBAL = {

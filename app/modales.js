@@ -6,13 +6,13 @@
  * recorrer la pagina entera para volver a donde estaba.
  */
 
-import { getMaturityLevelNumber } from "../core/calculo.js?v=36";
-import { escapeHtml } from "../core/presentacion.js?v=36";
-import { atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=36";
-import { els, state } from "./estado.js?v=36";
-import { calculate } from "./metricas.js?v=36";
-import { getAiDataForItem } from "./subcapacidad.js?v=36";
-import { aiCaseCards, pintarContadorDeCasos } from "./celdas.js?v=36";
+import { getMaturityLevelNumber } from "../core/calculo.js?v=37";
+import { escapeHtml } from "../core/presentacion.js?v=37";
+import { atraparFoco, showNotice, updateModalOpenState } from "./avisos.js?v=37";
+import { els, state } from "./estado.js?v=37";
+import { calculate } from "./metricas.js?v=37";
+import { getAiDataForItem } from "./subcapacidad.js?v=37";
+import { aiCaseCards, pintarContadorDeCasos } from "./celdas.js?v=37";
 
 
 let scoringCriteriaTrigger = null;
@@ -231,7 +231,6 @@ function openAiInitiativeModal(itemId) {
   els.aiModalCases.innerHTML = aiCaseCards(aiData.casos);
   pintarContadorDeCasos(els.aiModalCasesCount, aiData.casos);
   els.aiModalAdvanced.textContent = aiData.advanced || "Sin aplicación avanzada informada.";
-  els.aiModalSource.textContent = aiData.source ? `Fuente: ${aiData.source}` : "";
 
   els.aiInitiativeModal.hidden = false;
   els.closeAiInitiativeModalButton?.focus();

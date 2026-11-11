@@ -15,12 +15,12 @@
  * Solo pinta. Que pantalla toca y que pasa al pulsar lo decide app/taller.js.
  */
 
-import { BRECHAS_EN_EL_CORREO, fraseDelActa, resumenDelActa } from "../informe/acta.js?v=36";
-import { NIVELES_DE_LA_RUBRICA } from "../informe/preparacion.js?v=36";
-import { getMaturityLevelNumber } from "../core/calculo.js?v=36";
-import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=36";
-import { priorityBadge } from "./celdas.js?v=36";
-import { aCero, contarTextos, entrar, sinMovimiento, textoConNumero } from "./movimiento.js?v=36";
+import { BRECHAS_EN_EL_CORREO, fraseDelActa, resumenDelActa } from "../informe/acta.js?v=37";
+import { NIVELES_DE_LA_RUBRICA } from "../informe/preparacion.js?v=37";
+import { getMaturityLevelNumber } from "../core/calculo.js?v=37";
+import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=37";
+import { priorityBadge } from "./celdas.js?v=37";
+import { aCero, contarTextos, entrar, sinMovimiento, textoConNumero } from "./movimiento.js?v=37";
 
 
 /** Cuantas pendientes se nombran; del resto se dice cuantas son. */
@@ -61,18 +61,18 @@ export function htmlDelCierre(datos, { cambiadasHoy = 0 } = {}) {
 
     <div class="modo-taller-cierre-columnas">
       <section>
-        <h4>Más lejos del objetivo</h4>
+        <h3>Más lejos del objetivo</h3>
         ${brechas(cifras.brechas.slice(0, BRECHAS_EN_EL_CORREO), hayPuntuadas)}
       </section>
 
       <section>
-        <h4>Por palanca</h4>
+        <h3>Por palanca</h3>
         ${palancas(cifras.palancas)}
         <p class="modo-taller-cierre-nota">La barra es la media de lo puntuado; la línea, el objetivo.</p>
       </section>
 
       <section>
-        <h4>Para la próxima sesión</h4>
+        <h3>Para la próxima sesión</h3>
         ${pendientes(cifras.pendientes)}
       </section>
     </div>

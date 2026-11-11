@@ -24,15 +24,15 @@ import {
   normalizarBiblioteca,
   ubicacionDeFuente,
   urlDeDocumento,
-} from "../core/biblioteca.js?v=36";
-import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=36";
+} from "../core/biblioteca.js?v=37";
+import { escapeAttr, escapeHtml } from "../core/presentacion.js?v=37";
 import {
   SELECTOR_DE_MODAL_ABIERTO,
   atraparFoco,
   showNotice,
   updateModalOpenState,
-} from "./avisos.js?v=36";
-import { BIBLIOTECA, BIBLIOTECA_URL, CASOS_DE_IA, els } from "./estado.js?v=36";
+} from "./avisos.js?v=37";
+import { BIBLIOTECA, BIBLIOTECA_URL, CASOS_DE_IA, els, pedirDatosDelArranque } from "./estado.js?v=37";
 
 
 /**
@@ -42,7 +42,7 @@ import { BIBLIOTECA, BIBLIOTECA_URL, CASOS_DE_IA, els } from "./estado.js?v=36";
  * sin biblioteca la herramienta arranca igual.
  */
 export async function cargarBiblioteca() {
-  const response = await fetch(BIBLIOTECA_URL);
+  const response = await pedirDatosDelArranque(BIBLIOTECA_URL);
 
   if (!response.ok) {
     throw new Error(`No se ha podido leer ${BIBLIOTECA_URL}: ${response.status}`);

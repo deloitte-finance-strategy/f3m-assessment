@@ -66,13 +66,14 @@ RAIZ = Path(__file__).resolve().parent.parent
 # nada, pero es la clase de detalle que deja de ser inocente en cuanto alguien
 # guarde estado en un modulo.
 CARPETAS = ["core", "informe", "tests", "app"]
-SUELTOS = ["app.js", "tema.js"]
+SUELTOS = ["app.js", "tema.js", "arranque.js"]
 
 IMPORT = re.compile(r"""from\s+["'](\.\.?/[^"']+)["']""")
 DINAMICO = re.compile(r"""import\s*\(\s*["'](\.\.?/[^"']+)["']\s*\)""")
 EXTERNO = re.compile(r"""from\s+["'](https://[^"']+)["']""")
 PRECARGA = re.compile(r"""<link\s+rel="modulepreload"\s+href="([^"]+)"\s*>""")
 DATOS_PRECARGADOS = re.compile(r"""<link\s+rel="preload"\s+href="([^"]+)"\s+as="fetch"[^>]*>""")
+DATOS_ADELANTADOS = re.compile(r'"(data/[^"]+\.json)"')
 
 
 def html_de_index():
@@ -231,26 +232,42 @@ def main():
 
     print("OK    index.html precarga todos los modulos, y solo esos.")
 
-    # Los JSON precargados, al reves: lo que no puede pasar es precargar uno
-    # que ya no se pide. Ademas de la peticion de mas, el navegador escribe un
-    # aviso en la consola a los pocos segundos, y la consola tiene que arrancar
-    # en silencio.
-    codigo = "".join(
-        ruta.read_text(encoding="utf-8") for ruta in archivos() if "tests" not in ruta.parts
-    )
-    huerfanos = [
-        href for href in DATOS_PRECARGADOS.findall(html_de_index())
-        if f'"{href}"' not in codigo
-    ]
+    # Los tres JSON del arranque los pide arranque.js por adelantado y la
+    # aplicacion recoge esa misma peticion. Tienen que ser los mismos: uno que
+    # ya no pida nadie es una peticion de mas en cada visita, y uno que se pida
+    # con otra ruta no se adelanta y nadie lo nota.
+    #
+    # Y no pueden volver como <link rel="preload">: con el service worker
+    # activo Chrome no los casa con el fetch() de la aplicacion, los pide dos
+    # veces y escribe un aviso por cada uno en una consola que tiene que
+    # arrancar en silencio.
+    precargados = DATOS_PRECARGADOS.findall(html_de_index())
 
-    if huerfanos:
+    if precargados:
         print("")
-        print("FALLA  index.html precarga datos que ningun modulo pide:")
-        for href in huerfanos:
-            print(f"  - {href}: quitar su <link rel=\"preload\"> o volver a pedirlo")
+        print("FALLA  index.html precarga datos con <link rel=\"preload\">:")
+        for href in precargados:
+            print(f"  - {href}: quitar la linea y anadir la ruta a RUTAS, en arranque.js")
         sys.exit(1)
 
-    print("OK    los datos precargados son los que pide el arranque.")
+    codigo = "".join(
+        ruta.read_text(encoding="utf-8")
+        for ruta in archivos()
+        if "tests" not in ruta.parts and ruta.name != "arranque.js"
+    )
+    adelantados = DATOS_ADELANTADOS.findall((RAIZ / "arranque.js").read_text(encoding="utf-8"))
+    huerfanos = [ruta for ruta in adelantados if f'"{ruta}"' not in codigo]
+
+    if not adelantados or huerfanos:
+        print("")
+        print("FALLA  arranque.js no adelanta los datos que pide el arranque:")
+        for ruta in huerfanos:
+            print(f"  - {ruta}: ningun modulo la pide. Quitarla de RUTAS o volver a pedirla")
+        if not adelantados:
+            print("  - no se ha encontrado ninguna ruta en RUTAS")
+        sys.exit(1)
+
+    print("OK    los datos que adelanta arranque.js son los que pide el arranque.")
 
     del_service_worker = re.search(
         r"""^const VERSION = ["']([^"']+)["'];""",

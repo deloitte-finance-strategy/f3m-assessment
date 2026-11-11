@@ -13,11 +13,12 @@
  * Pinta y guarda. Cuando se enseña lo decide app/taller.js.
  */
 
-import { LIMITES_DE_PASO, MAXIMO_DE_PASOS, normalizarPaso } from "../core/escenario.js?v=36";
-import { escapeAttr, escapeHtml, formatNumber } from "../core/presentacion.js?v=36";
-import { guardarYaLoPendienteDe, programarGuardadoDe } from "./edicion.js?v=36";
-import { state } from "./estado.js?v=36";
-import { persistProximosPasos } from "./persistencia.js?v=36";
+import { LIMITES_DE_PASO, MAXIMO_DE_PASOS, normalizarPaso } from "../core/escenario.js?v=37";
+import { escapeAttr, escapeHtml, formatNumber } from "../core/presentacion.js?v=37";
+import { pintarResponsablesConocidos } from "./celdas.js?v=37";
+import { guardarYaLoPendienteDe, programarGuardadoDe } from "./edicion.js?v=37";
+import { state } from "./estado.js?v=37";
+import { persistProximosPasos } from "./persistencia.js?v=37";
 
 
 const CAMPOS = [
@@ -87,6 +88,7 @@ function fila(paso = {}, posicion = 0) {
             placeholder="${escapeAttr(ejemplo)}"
             aria-label="${escapeAttr(`Paso ${numero}: ${nombre}`)}"
             value="${escapeAttr(paso[campo] || "")}"
+            ${campo === "responsable" ? 'list="responsablesConocidos"' : ""}
             autocomplete="off"
           >
         `,
@@ -113,6 +115,7 @@ export function conectarLosPasos(contenedor, domainId) {
 
   dominioDeLaPantalla = domainId;
   pintarElTope(bloque);
+  pintarResponsablesConocidos();
 
   bloque.addEventListener("input", (event) => {
     if (event.target.matches("[data-campo]") && leerLaPantalla(bloque, domainId)) {

@@ -14,8 +14,8 @@
  * Solo pinta. Cuando se enseña y que pasa al pulsar lo decide app/taller.js.
  */
 
-import { capacidadesDePreparacion, NIVELES_DE_LA_RUBRICA, QUE_MIDE, RUBRICA_GENERAL } from "../informe/preparacion.js?v=36";
-import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=36";
+import { capacidadesDePreparacion, NIVELES_DE_LA_RUBRICA, QUE_MIDE, RUBRICA_GENERAL } from "../informe/preparacion.js?v=37";
+import { escapeAttr, escapeHtml, formatMedia, formatNumber } from "../core/presentacion.js?v=37";
 
 
 /**
@@ -39,21 +39,21 @@ export function htmlDeLaApertura({ cliente = "", dominio = "", logo = "", items 
 
     <div class="modo-taller-cierre-columnas modo-taller-apertura-columnas">
       <section>
-        <h4>Lo que vamos a ver</h4>
+        <h3>Lo que vamos a ver</h3>
         <ol class="modo-taller-apertura-capacidades">
           ${capacidades.map(capacidad).join("")}
         </ol>
       </section>
 
       <section>
-        <h4>Cómo puntuamos</h4>
+        <h3>Cómo puntuamos</h3>
         <ol class="modo-taller-apertura-escala">
           ${NIVELES_DE_LA_RUBRICA.map((nombre, posicion) => nivel(nombre, posicion, objetivos)).join("")}
         </ol>
       </section>
 
       <section>
-        <h4>Las tres palancas</h4>
+        <h3>Las tres palancas</h3>
         <div class="modo-taller-apertura-palancas">
           ${palancas.map((palanca) => filaDePalanca(palanca, objetivos[palanca.key])).join("")}
         </div>

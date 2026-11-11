@@ -360,6 +360,45 @@ body {
 
 body.modal-open {
   overflow: hidden;
+  /* El sitio de la barra de desplazamiento que se acaba de ir: sin el, la
+     pagina de detras salta a la derecha. Lo mide updateModalOpenState(). */
+  padding-right: var(--hueco-de-la-barra, 0px);
+}
+
+/* La cabecera llega hasta el borde: su banda negra cubre tambien el hueco. */
+body.modal-open .app-header {
+  margin-right: calc(-1 * var(--hueco-de-la-barra, 0px));
+  padding-right: var(--hueco-de-la-barra, 0px);
+}
+
+/* Lo que va fijo a la derecha se mide contra la ventana, no contra el body. */
+body.modal-open .save-status,
+body.modal-open .back-to-top-button {
+  margin-right: var(--hueco-de-la-barra, 0px);
+}
+
+body.modal-open .notice {
+  left: calc(50% - var(--hueco-de-la-barra, 0px) / 2);
+}
+
+
+/*
+  Titulos repartidos y parrafos sin palabra suelta.
+
+  Un titulo de dos lineas partia donde se acababa el ancho: «Lo más urgente de
+  la función / financiera». `balance` reparte las lineas, y `pretty` evita que
+  un parrafo termine en una palabra sola. Ninguno de los dos anade lineas, y
+  un navegador que no los conozca los ignora.
+
+  El modo taller queda fuera: sus pantallas estan medidas para caber sin
+  desplazarse a 1366×768, y ahi no se toca por donde parte un texto.
+*/
+:where(h1, h2, h3, h4):not(.modo-taller *) {
+  text-wrap: balance;
+}
+
+:where(p, li, figcaption, summary, .small-note):not(.modo-taller *) {
+  text-wrap: pretty;
 }
 
 
@@ -1225,6 +1264,25 @@ transform: translateY(-1px);
   }
 }
 
+/* Con «Letra grande» pasa lo mismo mucho antes: a 1.280 y 1.366 px la barra
+   iba en dos pisos, y al quedarse fija arriba se comia 50 px de cada pantalla
+   y la primera tarjeta del Assessment no se veia. */
+@media (max-width: 1500px) {
+  :root[data-densidad="presentacion"] .tabs-siguiente-largo,
+  :root[data-densidad="presentacion"] .tabs-buscar-texto,
+  :root[data-densidad="presentacion"] .tabs-buscar-atajo {
+    display: none;
+  }
+
+  :root[data-densidad="presentacion"] .tabs-siguiente-corto {
+    display: inline;
+  }
+
+  :root[data-densidad="presentacion"] .tabs-buscar {
+    padding: 0 12px;
+  }
+}
+
 /*
   El cuadro del buscador: arriba y no en el centro, donde los resultados
   crecen hacia abajo sin mover el campo en el que se esta escribiendo.
@@ -1627,6 +1685,23 @@ background: var(--surface);
 box-shadow: var(--shadow);
 }
 
+/*
+  Cuando la aplicacion no llega a arrancar (arranque.js). El borde es el rojo
+  de los avisos de error: tiene que distinguirse de un «cargando» de un vistazo
+  desde el fondo de la sala.
+*/
+.loading-state-fallo {
+border-left: 4px solid var(--red);
+}
+
+.loading-state-fallo .small-note {
+max-width: 68ch;
+}
+
+.loading-state-fallo .primary-button {
+margin-top: 12px;
+}
+
 .loading-spinner {
 width: 34px;
 height: 34px;
@@ -1865,9 +1940,18 @@ display: none;
 }
 
 
+/*
+  El aviso de filtros va debajo de los desplegables, alineado con ellos. Iba en
+  absoluto a su izquierda y se montaba encima del titulo de la seccion en todos
+  los anchos. Va antes en el HTML por el orden de lectura y de tabulacion: lo
+  que se esta filtrando se dice antes de los controles.
+*/
 .assessment-controls {
-  position: relative;
+  display: flex;
   flex: 0 0 auto;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -1882,9 +1966,6 @@ display: none;
 }
 
 .active-filters {
-  position: absolute;
-  right: calc(100% + 10px);
-  bottom: 0;
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
@@ -1901,7 +1982,6 @@ display: none;
 
 /* En Heatmap y Roadmap no hay barra de filtros al lado: el bloque va en linea. */
 .active-filters-block {
-  position: static;
   width: 100%;
   margin-bottom: 12px;
   padding: 8px 10px;
@@ -2067,6 +2147,20 @@ display: none;
   margin: 0;
   color: var(--muted);
   font-size: var(--fs-xs);
+}
+
+/*
+  La tarjeta puntuada que ya no cumple el filtro de prioridad y se queda en la
+  lista hasta que se cambie. Comparte la pareja de color de los demas avisos.
+*/
+.card-title-block .aviso-de-filtro {
+  width: fit-content;
+  margin: 8px 0 0;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--aviso-panel);
+  color: var(--aviso-fg);
+  font-weight: 600;
 }
 
 .capability-chip,
@@ -3287,7 +3381,8 @@ border-color: var(--line-tenue);
   Iniciativa no lleva ancho: se queda con lo que sobra, y es la unica columna
   que de verdad tiene texto que leer.
 
-  Suman 1.286 px, lo que deja sin desplazamiento un portatil de 1.366, que es
+  Con «Oleada» y «Último cambio», que ya no salen en local, sumaban 1.286 px
+  (ahora 1.214, y caben a 1.280). Eso dejaba sin desplazamiento un portatil de 1.366, que es
   la pantalla mas comun en las salas: con 1.370, la ultima columna salia
   cortada justo ahi. Y con 1.310 tambien, en Windows: su barra de
   desplazamiento ocupa 17 px de la ventana, y la medida se habia hecho en un
@@ -3309,11 +3404,10 @@ border-color: var(--line-tenue);
   --rm-prioridad: 96px;
   --rm-iniciativa-min: 196px;
   --rm-ia: 56px;
-  --rm-oleada: 74px;
-  --rm-responsable: 130px;
+  --rm-responsable: 170px;
   --rm-estado: 146px;
-  --rm-comentarios: 132px;
-  --rm-ultimo: 96px;
+  --rm-comentarios: 190px;
+  --rm-ultimo: 0px;
 }
 
 :root[data-densidad="presentacion"] .roadmap-table {
@@ -3324,9 +3418,25 @@ border-color: var(--line-tenue);
   --rm-prioridad: 122px;
   --rm-iniciativa-min: 280px;
   --rm-ia: 62px;
-  --rm-oleada: 98px;
-  --rm-responsable: 162px;
+  --rm-responsable: 200px;
   --rm-estado: 174px;
+  --rm-comentarios: 200px;
+  --rm-ultimo: 0px;
+}
+
+/*
+  Con «Último cambio», que solo sale en un escenario compartido con algo
+  editado, Responsable y Comentarios le devuelven su sitio: con los tres, la
+  tabla suma 1.286 px, lo que cabia antes a 1.366.
+*/
+.roadmap-table.roadmap-con-autoria {
+  --rm-responsable: 130px;
+  --rm-comentarios: 132px;
+  --rm-ultimo: 96px;
+}
+
+:root[data-densidad="presentacion"] .roadmap-table.roadmap-con-autoria {
+  --rm-responsable: 162px;
   --rm-comentarios: 150px;
   --rm-ultimo: 108px;
 }
@@ -3339,7 +3449,7 @@ border-color: var(--line-tenue);
   min-width: calc(
     var(--rm-capacidad) + var(--rm-subcapacidad) + var(--rm-gap) +
     var(--rm-prioridad) + var(--rm-iniciativa-min) + var(--rm-ia) +
-    var(--rm-oleada) + var(--rm-responsable) + var(--rm-estado) +
+    var(--rm-responsable) + var(--rm-estado) +
     var(--rm-comentarios) + var(--rm-ultimo)
   );
 }
@@ -3379,56 +3489,34 @@ border-color: var(--line-tenue);
   text-align: center;
 }
 
-/* Oleada */
-.roadmap-table th:nth-child(7),
-.roadmap-table td:nth-child(7) {
-  width: var(--rm-oleada);
-  text-align: center;
-}
+/*
+  No hay columna «Oleada»: repetia lo que dice la cabecera de cada grupo
+  («Oleada 1 · prioridad alta»), y su sitio lo aprovechan Responsable y
+  Comentarios.
+*/
 
 /* Responsable: el ancho que necesita un nombre y un apellido sin recortarse. */
-.roadmap-table th:nth-child(8),
-.roadmap-table td:nth-child(8) {
+.roadmap-table th:nth-child(7),
+.roadmap-table td:nth-child(7) {
   width: var(--rm-responsable);
 }
 
 /* Estado: antes el desplegable se leia "No ini" y "En cur". */
-.roadmap-table th:nth-child(9),
-.roadmap-table td:nth-child(9) {
+.roadmap-table th:nth-child(8),
+.roadmap-table td:nth-child(8) {
   width: var(--rm-estado);
 }
 
 /* Comentarios */
-.roadmap-table th:nth-child(10),
-.roadmap-table td:nth-child(10) {
+.roadmap-table th:nth-child(9),
+.roadmap-table td:nth-child(9) {
   width: var(--rm-comentarios);
 }
 
-/* Ultimo cambio */
-.roadmap-table th:nth-child(11),
-.roadmap-table td:nth-child(11) {
+/* Ultimo cambio, cuando sale */
+.roadmap-table th:nth-child(10),
+.roadmap-table td:nth-child(10) {
   width: var(--rm-ultimo);
-}
-
-.roadmap-wave-cell {
-  text-align: center;
-}
-
-/* La oleada no es una palanca: en azul competia con Organizacion, y encima sin
-   etiqueta que lo aclarase. En grafito ya no se confunde con nada. */
-.status-chip.roadmap-wave {
-  justify-content: center;
-  min-width: 32px;
-  min-height: 32px;
-  padding: 0 8px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-  background: var(--surface-muted);
-  color: var(--graphite);
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-heavy);
-  line-height: 1;
-  white-space: nowrap;
 }
 
 /* Owner */
@@ -3448,11 +3536,35 @@ border-color: var(--line-tenue);
   white-space: nowrap;
 }
 
-/* Comentarios */
+/*
+  El estado, con color. Los cuatro se veian iguales y una iniciativa bloqueada
+  no destacaba en una tabla de cuarenta. Una raya en el borde y no un punto
+  delante: la columna va justa y un punto recortaba «No iniciado». El color
+  acompana al texto, no lo sustituye. «No iniciado» se queda como estaba: es
+  el estado por defecto y marcarlo seria pintar la tabla entera.
+*/
+.roadmap-status[data-estado="En curso"] {
+  box-shadow: inset 3px 0 0 var(--blue);
+}
+
+.roadmap-status[data-estado="Completado"] {
+  box-shadow: inset 3px 0 0 var(--green-dark);
+}
+
+.roadmap-status[data-estado="Bloqueado"] {
+  box-shadow: inset 3px 0 0 var(--red);
+  color: var(--red);
+  font-weight: 700;
+}
+
+/* Comentarios. Crecen con lo que se escribe, como las notas del taller, que
+   son el mismo campo: en una caja de 55 px se leian dos lineas. */
 .roadmap-table textarea {
   width: 100%;
   min-width: 0;
   min-height: 54px;
+  max-height: calc(8 * 1.35em + 20px);
+  field-sizing: content;
   padding: 9px;
   resize: vertical;
   border: 1px solid var(--line);
@@ -3624,20 +3736,6 @@ border-color: var(--line-tenue);
   line-height: 1.58;
 }
 
-/* Fuente del contenido */
-.ai-modal-source {
-  padding: 10px 14px;
-  border-style: dashed;
-  background: var(--surface-hundida);
-}
-
-.ai-modal-source .small-note {
-  display: block;
-  color: var(--graphite);
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-normal);
-  line-height: 1.5;
-}
 
 
 /* ==================================================
@@ -3790,11 +3888,17 @@ border-color: var(--line-tenue);
   border-left: 3px solid rgba(79, 89, 82, 0.75);
 }
 
-/* Dos lineas y no mas: es para apuntar el porque mientras se habla, no para
-   redactar, y el detalle ya es largo. Quien necesite mas lo estira. */
+/* Empieza en dos lineas: es para apuntar el porque mientras se habla, no para
+   redactar, y el detalle ya es largo. Pero crece con lo que se escribe, hasta
+   ocho: con dos fijas, a la tercera salia una barra por dentro y lo escrito
+   dejaba de verse mientras se seguia escribiendo. field-sizing es de Chrome y
+   Edge; en Firefox se queda en dos lineas, que se pueden estirar. */
 .notas-detail-block textarea {
   display: block;
   width: 100%;
+  min-height: calc(2 * 1.45em + 16px);
+  max-height: calc(8 * 1.45em + 16px);
+  field-sizing: content;
   padding: 7px 10px;
   resize: vertical;
   border: 1px solid var(--line);
@@ -4903,6 +5007,9 @@ border-color: var(--line-tenue);
 
 .criteria-item-levels .current-level-label {
   grid-column: 2;
+  /* Es una etiqueta, no una fila: sin esto se estiraba a todo el ancho de la
+     columna y parecia una barra de progreso llena. */
+  justify-self: start;
   font-style: normal;
 }
 
@@ -5713,7 +5820,12 @@ height: 100% !important;
    RESPONSIVE: PORTATIL Y TABLET
    ======================================== */
 
-@media (max-width: 1100px) {
+/*
+  «screen and»: en papel no. Una hoja apaisada mide unos 1030 px y caia en este
+  bloque: las vistas se imprimian con el reparto de una tablet, los radares uno
+  debajo de otro. Ver el bloque de impresion, al final.
+*/
+@media screen and (max-width: 1100px) {
   /* Titulo arriba y botones debajo. En una fila cabrian los botones, pero el
      nombre del cliente se quedaba en tres letras y unos puntos suspensivos, y
      es lo que mas se lee cuando se proyecta. */
@@ -5744,12 +5856,7 @@ height: 100% !important;
 
   .assessment-controls {
     width: 100%;
-  }
-
-  .active-filters {
-    position: static;
-    width: fit-content;
-    margin-bottom: 10px;
+    align-items: flex-start;
   }
 
   .filters {
@@ -7458,7 +7565,9 @@ height: 100% !important;
   background: var(--surface);
 }
 
-.modo-taller-cierre-columnas h4 {
+/* Son h3: van justo debajo del h2 de la pantalla, y un h4 ahi se saltaba un
+   nivel para quien navega por encabezados con un lector de pantalla. */
+.modo-taller-cierre-columnas h3 {
   margin: 0 0 0.6em;
   color: var(--muted);
   font-size: 0.72em;
@@ -7947,5 +8056,170 @@ height: 100% !important;
 
   .modo-taller-pasos-accion {
     grid-column: 2 / 4;
+  }
+}
+
+
+
+/* ============================================================================
+   IMPRIMIR LA PANTALLA (Ctrl+P)
+
+   El entregable es el informe en PDF, que tiene su propia hoja. Esto es para
+   quien imprime una vista para llevarla a la reunion: sale solo la vista
+   abierta, entera y sin nada que en papel no sirva. El tema claro, la letra
+   normal y la linea de arriba los pone app/impresion.js.
+   ========================================================================= */
+
+/* En pantalla no existe. */
+.cabecera-de-impresion {
+  display: none;
+}
+
+@media print {
+  /*
+    Apaisado: las tablas son anchas. El numero de pagina no se pone aqui: lo
+    anade el navegador con su encabezado y su pie, y dos numeros se pisarian.
+  */
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  /*
+    La hoja apaisada da para unos 1030 px y las tablas estan hechas para 1280:
+    el Heatmap perdia «Score medio», «Gap» y «Prioridad» por la derecha. Se
+    encoge todo a la vez en vez de recolocar tabla a tabla.
+  */
+  body {
+    zoom: 0.78;
+    background: #fff;
+  }
+
+  /* Lo que es para manejar la herramienta, no para leerla. */
+  .skip-link,
+  .app-header,
+  .domain-switcher,
+  .tabs,
+  .filters,
+  .loading-state,
+  .notice,
+  .save-status,
+  .back-to-top-button,
+  .modal-backdrop,
+  dialog,
+  .scoring-criteria-button,
+  .targets-panel-acciones,
+  .esqueleto {
+    display: none !important;
+  }
+
+  .cabecera-de-impresion {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #86bc25;
+    color: #1d2420;
+    font-size: var(--fs-sm);
+  }
+
+  .app-shell {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Sin sombras ni fundidos: en papel una sombra es una mancha gris. */
+  *,
+  *::before,
+  *::after {
+    box-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /*
+    El color que es un dato se imprime aunque «Gráficos de fondo» este apagado,
+    que es como viene: las celdas del Heatmap, las barras y las etiquetas de
+    prioridad y de nivel. Sin esto el Heatmap salia como una tabla de numeros.
+  */
+  .heatmap-table td,
+  .heatmap-table th,
+  .heat-cell,
+  .bar-fill,
+  .bar-track,
+  .priority-badge,
+  .level-badge,
+  .badge,
+  .score-opcion,
+  .ia-etiqueta,
+  .roadmap-status,
+  .roadmap-oleada th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Las tablas, enteras: sin caja con desplazamiento y sin nada pegado arriba. */
+  .table-wrap {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  .data-table thead th,
+  .data-table td:first-child,
+  .roadmap-table thead th {
+    position: static !important;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  /* Lo pequeno no se parte entre dos hojas. Lo grande —la caja de una tabla,
+     un panel entero— si: obligarlo a ir junto lo mandaba a la hoja siguiente
+     y dejaba la primera en blanco. */
+  tr,
+  .assessment-card,
+  .kpi-card,
+  .radar-mini-card,
+  .ai-case,
+  .biblioteca-documento,
+  .urgente {
+    break-inside: avoid;
+  }
+
+  h2,
+  h3,
+  h4,
+  .section-heading {
+    break-after: avoid;
+  }
+
+  /* Un radar es una imagen ya pintada: si su tarjeta mide en papel otra cosa
+     que en pantalla, que quepa entero y sin deformarse, no que se estire. */
+  canvas {
+    object-fit: contain;
+  }
+
+  /* Los campos se leen como texto: sin caja, sin flecha y sin el texto de ayuda. */
+  .inline-input,
+  .roadmap-table textarea,
+  .notas-taller {
+    -webkit-appearance: none;
+    appearance: none;
+    border-color: transparent !important;
+    background: transparent !important;
+    resize: none;
+  }
+
+  ::placeholder {
+    color: transparent !important;
   }
 }

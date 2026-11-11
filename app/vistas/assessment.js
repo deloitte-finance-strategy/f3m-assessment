@@ -17,17 +17,17 @@ import {
   normalizeTargetValue,
   toScore,
   unique,
-} from "../../core/calculo.js?v=36";
-import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=36";
-import { createDefaultTargets } from "../../core/objetivos.js?v=36";
-import { escapeAttr, escapeHtml, formatMedia, losDominios } from "../../core/presentacion.js?v=36";
-import { abrirDialogo, showNotice } from "../avisos.js?v=36";
+} from "../../core/calculo.js?v=37";
+import { LIMITES_DE_TEXTO } from "../../core/escenario.js?v=37";
+import { createDefaultTargets } from "../../core/objetivos.js?v=37";
+import { escapeAttr, escapeHtml, formatMedia, losDominios } from "../../core/presentacion.js?v=37";
+import { abrirDialogo, showNotice } from "../avisos.js?v=37";
 import {
   aiCaseCards,
   buildFilteredEmptyState,
   pintarContadorDeCasos,
   priorityBadge,
-} from "../celdas.js?v=36";
+} from "../celdas.js?v=37";
 import {
   DOMAINS,
   LEVERS,
@@ -37,28 +37,33 @@ import {
   state,
   syncActiveDomainState,
   tarjetasConDetalleAbierto,
-} from "../estado.js?v=36";
+} from "../estado.js?v=37";
 import {
   actualizarContadorDeComentario,
   guardarCampoAhora,
   programarGuardado,
-} from "../edicion.js?v=36";
-import { describirObjetivos, getVisibleItems } from "../filtros.js?v=36";
-import { calculate, getCapabilityTargets } from "../metricas.js?v=36";
+} from "../edicion.js?v=37";
+import {
+  describirObjetivos,
+  getVisibleItems,
+  prioridadQueYaNoCumple,
+  retenerMientrasDureElFiltro,
+} from "../filtros.js?v=37";
+import { calculate, getCapabilityTargets } from "../metricas.js?v=37";
 import {
   persistItemChange,
   persistTargetsDeDominios,
   persistTargetsDelDominioActivo,
-} from "../persistencia.js?v=36";
-import { comportamientoDeDesplazamiento } from "../preferencias.js?v=36";
-import { repintarTodo } from "../repintado.js?v=36";
-import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=36";
+} from "../persistencia.js?v=37";
+import { comportamientoDeDesplazamiento } from "../preferencias.js?v=37";
+import { repintarTodo } from "../repintado.js?v=37";
+import { entrar, repintarConMovimiento, sinMovimiento } from "../movimiento.js?v=37";
 import {
   getAiDataForItem,
   getItemEvidenceText,
   getItemObjective,
   getItemQuestions,
-} from "../subcapacidad.js?v=36";
+} from "../subcapacidad.js?v=37";
 
 
 export function renderCapabilityTargets() {
@@ -668,6 +673,7 @@ export function renderAssessments() {
     ).join("");
 
     fragment.querySelector(".score-result").innerHTML = scoreResult(metrics);
+    pintarAvisoDeFiltro(card, item);
 
 
     const currentMaturityLevel = getMaturityLevelNumber(metrics.scoreMedio);
@@ -1194,15 +1200,22 @@ function handleScoreKeydown(event) {
 }
 
 
-function aplicarScore(itemId, leverKey, score) {
+function aplicarScore(itemId, leverKey, score, { deshaciendo = false } = {}) {
   const item = state.items.find((entry) => entry.id === itemId);
 
   if (!item || item.scores[leverKey] === score) {
     return;
   }
 
-  // Con un filtro de prioridad puesto, puntuar puede sacar la subcapacidad de
-  // la lista. Solo en ese caso hay que reconstruirla.
+  if (!deshaciendo) {
+    apuntarParaDeshacer(item, leverKey, score);
+  }
+
+  // Con un filtro de prioridad puesto, la que se puntua se queda en la lista
+  // aunque deje de cumplirlo. Lo que si puede cambiarla es un cambio que llegue
+  // a la vez del escenario compartido, y solo entonces hay que reconstruirla.
+  retenerMientrasDureElFiltro(item);
+
   const visiblesAntes = getVisibleItems().map((entry) => entry.id).join("|");
 
   item.scores[leverKey] = score;
@@ -1210,7 +1223,10 @@ function aplicarScore(itemId, leverKey, score) {
   syncActiveDomainState();
 
   const visiblesDespues = getVisibleItems().map((entry) => entry.id).join("|");
-  const mismaLista = visiblesAntes === visiblesDespues;
+
+  // Al deshacer se reconstruyen las tarjetas: quien puntua ya ha movido el
+  // radio con su clic, pero aqui no lo ha tocado nadie y hay que pintarlo.
+  const mismaLista = !deshaciendo && visiblesAntes === visiblesDespues;
 
   repintarTodo({ saltarAssessments: mismaLista });
 
@@ -1219,6 +1235,91 @@ function aplicarScore(itemId, leverKey, score) {
   }
 
   persistItemChange(item.id, `scores/${leverKey}`, score);
+}
+
+
+/**
+ * Deshacer la ultima puntuacion (Ctrl+Z).
+ *
+ * En un taller se puntua deprisa y un clic se va a la fila de al lado. Sin
+ * esto habia que acordarse de que valor tenia —si es que tenia alguno— y
+ * volver a ponerlo a mano, delante de la sala.
+ *
+ * Todas las formas de puntuar pasan por aplicarScore() —la tarjeta, el modo
+ * taller, las teclas—, asi que se apunta ahi y vale para todas.
+ *
+ * Tres cosas que no hace, a proposito:
+ *
+ * - **No deshace en otro dominio.** Lo ultimo puntuado puede ser de un dominio
+ *   que ya no esta abierto, y cambiar una nota que no se ve es justo el fallo
+ *   silencioso que se quiere evitar: lo dice y no toca nada.
+ * - **No pisa un cambio posterior.** Si esa palanca ya no vale lo que se le
+ *   puso —la cambio otra persona en el escenario compartido, o se abrio una
+ *   copia—, deshacer borraria ese cambio y no el propio.
+ * - **No guarda mas de MAXIMO_QUE_SE_DESHACE.** Es para el clic de hace un
+ *   momento, no un historial de la sesion.
+ */
+const MAXIMO_QUE_SE_DESHACE = 50;
+
+const puntuacionesRecientes = [];
+
+
+function apuntarParaDeshacer(item, leverKey, despues) {
+  puntuacionesRecientes.push({
+    domainId: state.activeDomainId,
+    itemId: item.id,
+    leverKey,
+    antes: item.scores[leverKey] ?? null,
+    despues,
+  });
+
+  if (puntuacionesRecientes.length > MAXIMO_QUE_SE_DESHACE) {
+    puntuacionesRecientes.shift();
+  }
+}
+
+
+/** Devuelve false si no habia nada que deshacer, para dejarle la tecla al navegador. */
+export function deshacerUltimaPuntuacion() {
+  const ultima = puntuacionesRecientes[puntuacionesRecientes.length - 1];
+
+  if (!ultima) {
+    return false;
+  }
+
+  if (ultima.domainId !== state.activeDomainId) {
+    showNotice(
+      `Lo último que se puntuó fue en ${DOMAINS[ultima.domainId]?.label || "otro dominio"}. `
+        + "Abre ese dominio para deshacerlo.",
+      "info",
+    );
+
+    return true;
+  }
+
+  puntuacionesRecientes.pop();
+
+  const item = state.items.find((entry) => entry.id === ultima.itemId);
+  const palanca = LEVERS.find((lever) => lever.key === ultima.leverKey)?.label || ultima.leverKey;
+
+  if (!item || (item.scores[ultima.leverKey] ?? null) !== ultima.despues) {
+    showNotice(
+      "Esa puntuación ha cambiado después de ponerla y ya no se puede deshacer desde aquí.",
+      "info",
+    );
+
+    return true;
+  }
+
+  aplicarScore(item.id, ultima.leverKey, ultima.antes, { deshaciendo: true });
+
+  showNotice(
+    `Deshecho: ${palanca} de «${item.subcapacidad}» `
+      + (ultima.antes === null ? "vuelve a estar sin puntuar." : `vuelve a ${ultima.antes}.`),
+    "info",
+  );
+
+  return true;
 }
 
 
@@ -1270,6 +1371,34 @@ function moverElResultado(card, resultado, metrics, palanca) {
 
 
 /**
+ * Una tarjeta que ya no cumple el filtro de prioridad y sigue en la lista por
+ * haberla puntuado lo dice. Sin el aviso, una «Media» con el filtro «Alta»
+ * puesto parecia un fallo del filtro.
+ */
+function pintarAvisoDeFiltro(card, item) {
+  const prioridad = prioridadQueYaNoCumple(item);
+  let aviso = card.querySelector(".aviso-de-filtro");
+
+  if (!prioridad) {
+    aviso?.remove();
+    return;
+  }
+
+  if (!aviso) {
+    aviso = document.createElement("p");
+    aviso.className = "aviso-de-filtro";
+    card.querySelector(".card-title-block")?.appendChild(aviso);
+  }
+
+  const yaNo = prioridad === "Pendiente"
+    ? "Ya no está pendiente."
+    : `Ya no es de prioridad ${prioridad.toLowerCase()}.`;
+
+  aviso.textContent = `${yaNo} Se queda aquí hasta que cambies el filtro.`;
+}
+
+
+/**
  * Refresca una sola tarjeta en su sitio.
  *
  * Reconstruir la lista entera cerraba todos los detalles abiertos y mandaba el
@@ -1293,6 +1422,8 @@ function actualizarTarjetaDeAssessment(item, { animar = false, palanca = null } 
   } else {
     moverElResultado(card, resultado, metrics, palanca);
   }
+
+  pintarAvisoDeFiltro(card, item);
 
   // El nivel de madurez resaltado cambia con el score medio.
   const nivelActual = getMaturityLevelNumber(metrics.scoreMedio);

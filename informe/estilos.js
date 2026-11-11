@@ -10,7 +10,7 @@
  * todavia, asi que escribe los suyos literales y tienen que ser los mismos.
  */
 
-import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=36";
+import { COLOR_DE_MARCA, COLOR_DE_MARCA_LEGIBLE } from "../core/presentacion.js?v=37";
 
 
 /**
@@ -744,6 +744,23 @@ function estilosDeTablas() {
       font-style: normal;
     }
 
+    /* En el ranking, el dominio del que trata el informe. Era un punto suelto
+       detras del nombre («FP&A ·»), que parecia una errata. */
+    .marca-de-este-informe {
+      display: inline-block;
+      margin-left: 1.6mm;
+      padding: 0.5mm 1.8mm;
+      border-radius: 1mm;
+      background: ${PALETA.marca};
+      color: ${PALETA.tinta};
+      font-size: 6.4pt;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      vertical-align: 0.2mm;
+    }
+
     .chip-oleada {
       display: inline-block;
       padding: 0.8mm 2.2mm;
@@ -824,6 +841,24 @@ function estilosDeFichas() {
       font-size: 8.2pt;
       line-height: 1.34;
       color: ${PALETA.tintaSuave};
+      /* Una direccion web o una ruta pegada en una nota no tiene donde
+         partirse, y se salia de la tarjeta por la derecha. */
+      overflow-wrap: anywhere;
+    }
+
+    /*
+     * Una nota larga va a lo ancho de la diapositiva, con el texto en tres
+     * columnas: en una tarjeta de un tercio ocupaba la diapositiva entera de
+     * alto y se recortaba. Que nota es larga lo decide repartirComentarios()
+     * en informe/secciones.js, que es quien cuenta lo que cabe.
+     */
+    .tarjeta-ancha {
+      grid-column: 1 / -1;
+    }
+
+    .tarjeta-ancha p {
+      column-count: 3;
+      column-gap: 6mm;
     }
 
     .tarjeta-origen {

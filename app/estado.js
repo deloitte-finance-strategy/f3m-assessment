@@ -13,9 +13,9 @@
  * una funcion de lectura.
  */
 
-import { PALANCAS } from "../core/calculo.js?v=36";
-import { ESTADOS_VALIDOS } from "../core/escenario.js?v=36";
-import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=36";
+import { PALANCAS } from "../core/calculo.js?v=37";
+import { ESTADOS_VALIDOS } from "../core/escenario.js?v=37";
+import { COLOR_DE_PALANCA } from "../core/presentacion.js?v=37";
 
 
 export const DEFAULT_DOMAIN_ID = "fpa";
@@ -23,6 +23,33 @@ export const DEFAULT_DOMAIN_ID = "fpa";
 export const CATALOGO_URL = "data/domains.json";
 export const CASOS_DE_IA_URL = "data/casos-ia.json";
 export const BIBLIOTECA_URL = "data/biblioteca.json";
+
+
+/**
+ * Pide uno de los tres JSON del arranque, que arranque.js ya ha pedido.
+ *
+ * arranque.js corre al llegar el HTML, mucho antes que este modulo, y deja
+ * sus tres peticiones en marcha: aqui se recoge la que toca en vez de hacer
+ * otra. Cada una se entrega una sola vez —el cuerpo de una respuesta solo se
+ * lee una vez—, y si la adelantada fallo o no existe, se pide de nuevo: el
+ * error, si lo hay, le llega a quien llama igual que antes.
+ */
+export async function pedirDatosDelArranque(url) {
+  const adelantados = window.f3mDatosAdelantados;
+  const adelantada = adelantados?.[url];
+
+  if (adelantada) {
+    delete adelantados[url];
+
+    const respuesta = await adelantada;
+
+    if (respuesta) {
+      return respuesta;
+    }
+  }
+
+  return fetch(url);
+}
 
 
 /**
