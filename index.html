@@ -283,14 +283,37 @@
             </div>
           </div>
 
-          <button
-            class="header-secondary-action"
-            id="exportCsvButton"
-            type="button"
-            title="Las subcapacidades del dominio abierto, con los filtros activos, en un archivo para Excel"
-          >
-            Exportar CSV
-          </button>
+          <!--
+            Los datos en un archivo para Excel: los del dominio abierto o los de
+            todo el proyecto, como el informe. Era un boton suelto que solo
+            sacaba el dominio abierto.
+          -->
+          <div class="header-menu">
+            <button
+              class="header-menu-button"
+              id="exportCsvButton"
+              type="button"
+              aria-expanded="false"
+              aria-controls="csvMenu"
+            >
+              Exportar CSV
+              <span class="header-menu-caret" aria-hidden="true"></span>
+            </button>
+
+            <div class="header-menu-panel header-menu-panel-izquierda" id="csvMenu" hidden>
+              <p class="header-menu-title">Datos para Excel</p>
+
+              <button class="header-menu-item" id="csvDominioButton" type="button">
+                <span id="csvDominioLabel">Datos del dominio</span>
+                <span id="csvDominioNota">Sus capacidades y subcapacidades, con los filtros activos</span>
+              </button>
+
+              <button class="header-menu-item" id="csvProyectoButton" type="button">
+                Datos de todo el proyecto
+                <span id="csvProyectoNota">Todos los dominios en un solo archivo, sin filtros</span>
+              </button>
+            </div>
+          </div>
 
           <!--
             «Presentacion» agrupa las dos formas de proyectar: el modo taller,

@@ -8,7 +8,10 @@
 
 import {
   CSV_BOM,
+  TIPO_DE_FILA,
   csvEscape,
+  filasDeDominio,
+  filasDelProyecto,
   filasDeResumen,
   filasDeRoadmap,
   toCsv,
@@ -26,7 +29,53 @@ const capacidad = (extra = {}) => ({
   gap: 1,
   prioridad: "Media",
   objetivos: { procesos: 4, tecnologia: 4, organizacion: 4 },
+  evaluadas: 3,
+  total: 4,
   ...extra,
+});
+
+
+/** Un dominio agregado, en la forma que devuelve agregarPorDominio(). */
+const dominio = (extra = {}) => ({
+  id: "fiscal",
+  label: "Fiscal",
+  procesos: 3,
+  tecnologia: 2,
+  organizacion: 3.5,
+  objetivoProcesos: 4,
+  objetivoTecnologia: 4.2,
+  objetivoOrganizacion: 4,
+  scoreMedio: 2.83,
+  targetMedio: 4.07,
+  gap: 1.24,
+  prioridad: "Media",
+  evaluadas: 12,
+  total: 16,
+  ...extra,
+});
+
+
+/** Una subcapacidad con sus metricas, en la forma [{ item, metrics }]. */
+const entrada = (extra = {}) => ({
+  item: {
+    capacidad: "Cumplimiento",
+    subcapacidad: "2.1 Calendario",
+    scores: { procesos: 3, tecnologia: 2, organizacion: 4 },
+    iniciativaSugerida: "Definir calendario",
+    owner: "Ana",
+    status: "En curso",
+    comentario: "",
+    ...extra,
+  },
+  metrics: {
+    targets: { procesos: 4, tecnologia: 4, organizacion: 4 },
+    scoreMedio: 3,
+    targetMedio: 4,
+    nivel: "3 - Estandarizado",
+    gap: 1,
+    prioridad: "Media",
+    oleada: "Oleada 2",
+  },
 });
 
 
@@ -172,7 +221,7 @@ export const casos = [
     ejecutar: (t) => {
       const fila = filasDeResumen([capacidad()])[0];
 
-      t.igual(fila.Tipo, "Resumen");
+      t.igual(fila.Tipo, "Capacidad", "la fila dice lo que es");
       t.igual(fila.Subcapacidad, "");
       t.igual(fila.Oleada, "");
       t.igual(fila.Owner, "");
@@ -235,6 +284,157 @@ export const casos = [
       t.igual(fila.ObjetivoTecnologia, 3);
       t.igual(fila.ObjetivoOrganizacion, 5);
       t.igual(fila.Procesos, "", "sin puntuar, vacio");
+    },
+  },
+
+  // ------------------------------------------------- lo que lee el cliente
+  {
+    grupo: "Lo que lee el cliente",
+    nombre: "la cabecera sale con tildes y espacios, no con nombres de codigo",
+    ejecutar: (t) => {
+      // Salia «Tecnologia», «ObjetivoOrganizacion», «ScoreMedio» y «Owner», y
+      // ese archivo se le envia al cliente.
+      const cabecera = toCsv(filasDeResumen([capacidad()], "Fiscal")).slice(1).split("\r\n")[0];
+
+      t.igual(
+        cabecera,
+        "Tipo;Dominio;Capacidad;Subcapacidad;Puntuadas;Subcapacidades;"
+          + "Procesos;Objetivo Procesos;Tecnología;Objetivo Tecnología;Organización;Objetivo Organización;"
+          + "Score medio;Objetivo medio;Nivel;Gap;Prioridad;Oleada;Iniciativa sugerida;Responsable;Estado;Comentarios",
+      );
+    },
+  },
+  {
+    grupo: "Lo que lee el cliente",
+    nombre: "las claves de las filas no cambian: los radares las leen",
+    ejecutar: (t) => {
+      const fila = filasDeResumen([capacidad()])[0];
+
+      t.igual(fila.Tecnologia, 2);
+      t.igual(fila.ObjetivoTecnologia, 4);
+      t.igual(fila.Capacidad, "Cumplimiento");
+    },
+  },
+  {
+    grupo: "Lo que lee el cliente",
+    nombre: "cada fila dice de que dominio es, y sin dominio queda en blanco",
+    ejecutar: (t) => {
+      // Antes solo lo decia el nombre del archivo: al juntar dos en una hoja
+      // ya no se sabia de cual era cada fila.
+      t.igual(filasDeResumen([capacidad()], "Fiscal")[0].Dominio, "Fiscal");
+      t.igual(filasDeRoadmap([entrada()], "Fiscal")[0].Dominio, "Fiscal");
+      t.igual(filasDeResumen([capacidad()])[0].Dominio, "");
+    },
+  },
+  {
+    grupo: "Lo que lee el cliente",
+    nombre: "el resumen dice cuantas subcapacidades hay puntuadas, como la tabla",
+    ejecutar: (t) => {
+      const resumen = filasDeResumen([capacidad()])[0];
+
+      t.igual(resumen.Puntuadas, 3);
+      t.igual(resumen.TotalDeSubcapacidades, 4);
+      t.igual(filasDeRoadmap([entrada()])[0].Puntuadas, "", "en una subcapacidad no aplica");
+    },
+  },
+  {
+    grupo: "Lo que lee el cliente",
+    nombre: "una capacidad sin nada puntuado dice 0 puntuadas, no un vacio",
+    ejecutar: (t) => {
+      const fila = filasDeResumen([capacidad({ evaluadas: 0 })])[0];
+
+      t.igual(fila.Puntuadas, 0);
+      t.igual(toCsv([fila]).split("\r\n")[1].split(";")[4], "0");
+    },
+  },
+
+  // --------------------------------------------------- todo el proyecto
+  {
+    grupo: "El archivo de todo el proyecto",
+    nombre: "la fila de dominio lleva las cifras del Overview",
+    ejecutar: (t) => {
+      const fila = filasDeDominio([dominio()])[0];
+
+      t.igual(fila.Tipo, TIPO_DE_FILA.dominio);
+      t.igual(fila.Dominio, "Fiscal");
+      t.igual(fila.Capacidad, "");
+      t.igual(fila.Puntuadas, 12);
+      t.igual(fila.TotalDeSubcapacidades, 16);
+      t.igual(fila.ObjetivoTecnologia, 4.2, "el objetivo medio de la palanca, aunque no sea entero");
+      t.igual(fila.Nivel, "3 - Estandarizado");
+      t.igual(fila.Gap, 1.24);
+      t.igual(fila.Prioridad, "Media");
+    },
+  },
+  {
+    grupo: "El archivo de todo el proyecto",
+    nombre: "un dominio sin empezar sale vacio y pendiente, no a cero",
+    ejecutar: (t) => {
+      const fila = filasDeDominio([
+        dominio({
+          procesos: null,
+          tecnologia: null,
+          organizacion: null,
+          scoreMedio: null,
+          targetMedio: null,
+          gap: null,
+          prioridad: "Pendiente",
+          evaluadas: 0,
+        }),
+      ])[0];
+
+      t.igual(fila.ScoreMedio, "");
+      t.igual(fila.Nivel, "");
+      t.igual(fila.Gap, "");
+      t.igual(fila.Puntuadas, 0);
+      t.igual(fila.Prioridad, "Pendiente");
+      t.igual(fila.ObjetivoProcesos, 4, "el objetivo es configuracion: sale aunque no haya nada puntuado");
+    },
+  },
+  {
+    grupo: "El archivo de todo el proyecto",
+    nombre: "primero los dominios, despues las capacidades y despues las subcapacidades",
+    ejecutar: (t) => {
+      const filas = filasDelProyecto([
+        {
+          label: "Fiscal",
+          resumen: dominio(),
+          capacidades: [capacidad(), capacidad({ capacidad: "Precios de transferencia" })],
+          entradas: [entrada()],
+        },
+        {
+          label: "Tesorería",
+          resumen: dominio({ id: "tesoreria", label: "Tesorería" }),
+          capacidades: [capacidad({ capacidad: "Liquidez" })],
+          entradas: [entrada({ capacidad: "Liquidez", subcapacidad: "1.1 Posición" }), entrada({ capacidad: "Liquidez", subcapacidad: "1.2 Previsión" })],
+        },
+      ]);
+
+      t.igual(
+        filas.map((fila) => `${fila.Tipo[0]}:${fila.Dominio}`).join(" "),
+        "D:Fiscal D:Tesorería C:Fiscal C:Fiscal C:Tesorería S:Fiscal S:Tesorería S:Tesorería",
+      );
+    },
+  },
+  {
+    grupo: "El archivo de todo el proyecto",
+    nombre: "todas sus filas tienen las mismas columnas, o Excel las desplazaria",
+    ejecutar: (t) => {
+      const filas = filasDelProyecto([
+        { label: "Fiscal", resumen: dominio(), capacidades: [capacidad()], entradas: [entrada()] },
+      ]);
+
+      const columnas = filas.map((fila) => Object.keys(fila).join("|"));
+
+      t.igual(new Set(columnas).size, 1);
+      t.igual(toCsv(filas).split("\r\n").every((linea) => linea.split(";").length === 22), true);
+    },
+  },
+  {
+    grupo: "El archivo de todo el proyecto",
+    nombre: "sin dominios no hay filas",
+    ejecutar: (t) => {
+      t.igual(filasDelProyecto([]).length, 0);
     },
   },
 ];

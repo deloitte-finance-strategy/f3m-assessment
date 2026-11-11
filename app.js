@@ -33,6 +33,7 @@ import {
 
 // El CSV que se abre en Excel y se le envia al cliente.
 import {
+  filasDelProyecto,
   filasDeResumen,
   filasDeRoadmap,
   toCsv,
@@ -62,6 +63,7 @@ import {
   escapeHtml,
   fechaParaArchivo,
   formatNumber,
+  losDominios,
   priorityColor,
 } from "./core/presentacion.js?v=37";
 
@@ -251,7 +253,7 @@ import { handleHeatmapExpandToggleAll, renderHeatmap } from "./app/vistas/heatma
 import { getDominiosDelOverview, renderOverview } from "./app/vistas/overview.js?v=37";
 
 // El Dashboard: el dominio abierto, con sus KPIs y su tabla resumen.
-import { buildSummaryRows, renderDashboard } from "./app/vistas/dashboard.js?v=37";
+import { renderDashboard } from "./app/vistas/dashboard.js?v=37";
 
 // El Assessment: puntuar cada subcapacidad en las tres palancas.
 import {
@@ -630,6 +632,12 @@ function cacheElements() {
     "importJsonButton",
     "exportJsonButton",
     "exportCsvButton",
+    "csvMenu",
+    "csvDominioButton",
+    "csvDominioLabel",
+    "csvDominioNota",
+    "csvProyectoButton",
+    "csvProyectoNota",
     "exportPdfButton", // NUEVO: botón de exportación PDF
     "informeMenu",
     "informeDominioButton",
@@ -771,7 +779,8 @@ function bindGlobalEvents() {
   enganchar("importJsonButton", "click", () => els.scenarioFileInput?.click());
   enganchar("scenarioFileInput", "change", importScenario);
   enganchar("exportJsonButton", "click", exportScenarioJson);
-  enganchar("exportCsvButton", "click", exportCsv);
+  enganchar("csvDominioButton", "click", exportCsv);
+  enganchar("csvProyectoButton", "click", exportarCsvDelProyecto);
   enganchar("informeDominioButton", "click", () => exportPdfReport());
   enganchar("informeProyectoButton", "click", () => exportPdfReport({ proyecto: true }));
   enganchar("informeResumenButton", "click", () => exportarResumen());
@@ -800,6 +809,7 @@ function bindGlobalEvents() {
   setupMenuDeCabecera(els.presentacionMenuButton, els.presentacionMenu);
   setupMenuDeCabecera(els.scenarioMenuButton, els.scenarioMenu, pintarAvisoDeCopia);
   setupMenuDeCabecera(els.exportPdfButton, els.informeMenu, pintarMenuDeInforme);
+  setupMenuDeCabecera(els.exportCsvButton, els.csvMenu, pintarMenuDeCsv);
   setupVistas();
   setupScoringCriteriaModal(); // NUEVO: configura modal de criterios F3M
   setupAiInitiativeModal();
@@ -2036,16 +2046,121 @@ function exportScenarioJson() {
 }
 
 
-function exportCsv() {
-  const roadmapRows = filasDeRoadmap(
-    getScopedItems().map((item) => ({ item, metrics: calculate(item) })),
-  );
+/**
+ * Lo que dice el menu de «Exportar CSV» al abrirlo: de que dominio es el
+ * primer archivo y cuantas subcapacidades lleva cada uno.
+ *
+ * El del dominio lleva lo que dejan los filtros, como todo lo del dominio
+ * abierto, y este archivo se envia: el menu lo dice antes de descargarlo.
+ */
+function pintarMenuDeCsv() {
+  const dominio = getActiveDomainConfig();
+  const alcance = getScopeSummary();
+  const dominios = getDominiosDelOverview();
+  const delProyecto = dominios.reduce((suma, uno) => suma + uno.items.length, 0);
 
+  if (els.csvDominioLabel) {
+    els.csvDominioLabel.textContent = `Datos de ${dominio.label || "este dominio"}`;
+  }
+
+  if (els.csvDominioButton) {
+    els.csvDominioButton.disabled = !alcance.visibles;
+  }
+
+  if (els.csvDominioNota) {
+    els.csvDominioNota.textContent = !alcance.visibles
+      ? "Los filtros no dejan ninguna subcapacidad"
+      : alcance.hayFiltros
+        ? `Solo ${alcance.visibles === 1 ? "la subcapacidad que dejan" : `las ${alcance.visibles} subcapacidades que dejan`} los filtros`
+        : `Sus ${alcance.total} subcapacidades y el resumen por capacidad`;
+  }
+
+  if (els.csvProyectoButton) {
+    els.csvProyectoButton.disabled = !delProyecto;
+  }
+
+  if (els.csvProyectoNota) {
+    els.csvProyectoNota.textContent = dominios.length === 1
+      ? "Solo aplica un dominio: es el mismo archivo, sin filtros"
+      : `${capitalizar(losDominios(dominios.length))} en un solo archivo, sin filtros`;
+  }
+}
+
+
+/** «los seis dominios» → «Los seis dominios», para empezar una frase. */
+function capitalizar(texto) {
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+
+/**
+ * El CSV del dominio abierto: el resumen por capacidad y una fila por
+ * subcapacidad, con los filtros activos.
+ */
+function exportCsv() {
   const activeDomain = getActiveDomainConfig();
+  const dominio = activeDomain.label || activeDomain.id;
+  const items = getScopedItems();
+
+  // Con los filtros sin dejar nada se descargaba un archivo vacio, de cero
+  // bytes, que Excel abre en blanco sin decir por que.
+  if (!items.length) {
+    showNotice("Los filtros no dejan ninguna subcapacidad: no hay nada que exportar. Quita algún filtro y vuelve a pedirlo.", "warning");
+    return;
+  }
 
   downloadFile(
-    nombreDelCsv(activeDomain.label || activeDomain.id, new Date()),
-    toCsv([...buildSummaryRows(), ...roadmapRows]),
+    nombreDelCsv(dominio, new Date()),
+    toCsv([
+      ...filasDeResumen(agregarPorCapacidad(items), dominio),
+      ...filasDeRoadmap(items.map((item) => ({ item, metrics: calculate(item) })), dominio),
+    ]),
+    "text/csv;charset=utf-8",
+  );
+
+  // El archivo se envia, y dentro no dice que le faltan filas.
+  const alcance = getScopeSummary();
+
+  if (alcance.hayFiltros) {
+    showNotice(
+      `El CSV de ${dominio} lleva ${alcance.visibles === 1 ? "la subcapacidad que dejan" : `las ${alcance.visibles} subcapacidades que dejan`} los filtros, de ${alcance.total}.`,
+      "info",
+    );
+  }
+}
+
+
+/**
+ * El CSV de todo el proyecto: todos los dominios que aplican al cliente en un
+ * solo archivo, sin filtros.
+ *
+ * Sin filtros por lo mismo que el informe de todo el proyecto: son del dominio
+ * abierto, y aplicar solo los que existen en los demas daria unos dominios
+ * filtrados y otros enteros sin que se notara. A diferencia del informe,
+ * lleva tambien los dominios sin empezar: en una hoja de calculo no estorban
+ * —se filtran— y lo pendiente tambien es un dato del proyecto.
+ */
+function exportarCsvDelProyecto() {
+  const dominios = getDominiosDelOverview();
+  const resumenes = agregarPorDominio(dominios);
+
+  const filas = filasDelProyecto(
+    dominios.map((dominio, indice) => ({
+      label: dominio.label || dominio.id,
+      resumen: resumenes[indice],
+      capacidades: agregarPorCapacidad(dominio.items, dominio.id),
+      entradas: dominio.items.map((item) => ({ item, metrics: calculate(item, dominio.id) })),
+    })),
+  );
+
+  if (!filas.length) {
+    showNotice("Todavía no hay datos que exportar.", "warning");
+    return;
+  }
+
+  downloadFile(
+    nombreDelCsv("Proyecto", new Date()),
+    toCsv(filas),
     "text/csv;charset=utf-8",
   );
 }
